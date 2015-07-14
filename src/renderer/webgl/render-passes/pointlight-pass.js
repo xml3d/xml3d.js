@@ -1,5 +1,6 @@
 var SceneRenderPass = require("./scene-pass.js");
 var ObjectSorter = require("../../renderer/tools/objectsorter.js");
+var mat4 = require("gl-matrix").mat4;
 
 /**
  * @param {GLRenderInterface} renderInterface
@@ -27,8 +28,8 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
     },
 
     render: (function () {
-        var c_viewMat_tmp = new XML3D.Mat4();
-        var c_projMat_tmp = new XML3D.Mat4();
+        var c_viewMat_tmp = mat4.create();
+        var c_projMat_tmp = mat4.create();
         var c_programSystemUniforms = ["viewMatrix", "projectionMatrix"];
 
         return function (scene) {
@@ -114,7 +115,7 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
 
                 this.light.model.getLightViewMatrix(c_viewMat_tmp);
                 //rotate for the apropriate side of the cubemap
-                XML3D.math.mat4.mul(c_viewMat_tmp.data, mat_rot.data, c_viewMat_tmp.data);
+                XML3D.math.mat4.mul(c_viewMat_tmp, mat_rot.data, c_viewMat_tmp);
 
                 frustum.getProjectionMatrix(c_projMat_tmp, aspect);
 
@@ -122,8 +123,8 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
                 var objects = this.sorter.sortScene(scene);
 
                 var parameters = {};
-                parameters["viewMatrix"] = c_viewMat_tmp.data;
-                parameters["projectionMatrix"] = c_projMat_tmp.data;
+                parameters["viewMatrix"] = c_viewMat_tmp;
+                parameters["projectionMatrix"] = c_projMat_tmp;
 
                 //Render opaque objects
                 for (var shader in objects.opaque) {

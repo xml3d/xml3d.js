@@ -1,4 +1,6 @@
 var BaseRenderPass = require("./base.js");
+var mat4 = require("gl-matrix").mat4;
+var vec3 = require("gl-matrix").vec3;
 
 var PickPositionRenderPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
@@ -7,8 +9,8 @@ var PickPositionRenderPass = function (renderInterface, output, opt) {
 XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
     render: (function () {
 
-        var c_modelMatrix = new XML3D.Mat4();
-        var c_modelViewProjectionMatrix = new XML3D.Mat4(), c_uniformCollection = {
+        var c_modelMatrix = mat4.create();
+        var c_modelViewProjectionMatrix = mat4.create(), c_uniformCollection = {
                 envBase: {},
                 envOverride: null,
                 sysBase: {}
@@ -37,8 +39,8 @@ XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
             obj.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 
             c_uniformCollection.sysBase["bbox"] = this.objectBoundingBox.data;
-            c_uniformCollection.sysBase["modelMatrix"] = c_modelMatrix.data;
-            c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix.data;
+            c_uniformCollection.sysBase["modelMatrix"] = c_modelMatrix;
+            c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
 
             program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
             obj.mesh.draw(program);
@@ -50,18 +52,19 @@ XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
 
     readPositionFromPickingBuffer: (function () {
 
-        var c_vec3 = new XML3D.Vec3();
+        var c_vec3 = vec3.create();
 
         return function (x, y) {
             var data = this.readPixelDataFromBuffer(x, y, this.output);
             if (data) {
 
-                c_vec3.x = data[0] / 255;
-                c_vec3.y = data[1] / 255;
-                c_vec3.z = data[2] / 255;
+                c_vec3[0] = data[0] / 255;
+                c_vec3[1] = data[1] / 255;
+                c_vec3[2] = data[2] / 255;
 
                 var size = this.objectBoundingBox.size();
-                return size.mul(c_vec3).add(this.objectBoundingBox.min);
+                vec3.mul(c_vec3, c_vec3, size.data);
+                return vec3.add(vec3.create(), c_vec3, this.objectBoundingBox.min.data);
             } else {
                 return null;
             }

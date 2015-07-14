@@ -2,12 +2,14 @@ var Vec3 = require("./vec3.js");
 var vec3 = require("gl-matrix").vec3;
 
 var Box = function(box) {
-    this.data = new Float32Array(6);
-    if (box) {
-        this.copy(box);
-    } else {
-        this.setEmpty();
-    }
+    if (this instanceof Box) {
+        this.data = new Float32Array(6);
+        if (box) {
+            this.data.set(box.data ? box.data : box);
+        } else {
+            this.setEmpty();
+        }
+    } else return new Box(box);
 };
 
 Object.defineProperty(Box.prototype, "min", {
@@ -18,7 +20,7 @@ Object.defineProperty(Box.prototype, "min", {
         this.data[2] = val[2];
     },
     get: function(){
-        return new Vec3(this.data.subarray(0,3));
+        return Vec3.wrap(this.data.subarray(0,3));
     }
 });
 
@@ -30,12 +32,12 @@ Object.defineProperty(Box.prototype, "max", {
         this.data[5] = val[2];
     },
     get: function(){
-        return new Vec3(this.data.subarray(3,6));
+        return Vec3.wrap(this.data.subarray(3,6));
     }
 });
 
 Box.prototype.clone = function() {
-    return new Box().copy(this);
+    return new Box(this);
 };
 
 Box.prototype.copy = function(other) {
@@ -124,7 +126,7 @@ Box.prototype.transformAxisAligned = function(mat) {
                 }
             }
         }
-        this.data = out;
+        this.data.set(out);
         return this;
     }
     throw new Error("Matrix is not affine");
@@ -134,9 +136,8 @@ Box.prototype.transform = function(mat) {
     if (this.isEmpty()) {
         return this;
     }
-
-    this.min.transformMat4(mat);
-    this.max.transformMat4(mat);
+    vec3.transformMat4(this.min.data, this.min.data, mat.data ? mat.data : mat);
+    vec3.transformMat4(this.max.data, this.max.data, mat.data ? mat.data : mat);
     return this;
 };
 

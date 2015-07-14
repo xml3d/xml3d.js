@@ -1,11 +1,12 @@
 var mat3 = require("gl-matrix").mat3;
 
 var Mat3 = function(mat) {
-    if (mat) {
-        this.data = mat.data ? mat.data : mat;
-    } else {
+    if (this instanceof Mat3) {
         this.data = mat3.create();
-    }
+        if (mat) {
+            this.data.set(mat.data ? mat.data : mat);
+        }
+    } else return new Mat3(mat);
 };
 
 Object.defineProperty(Mat3.prototype, "m11", {
@@ -47,80 +48,87 @@ Object.defineProperty(Mat3.prototype, "m33", {
 
 
 Mat3.prototype.adjoint = function() {
-    mat3.adjoint(this.data, this.data);
-    return this;
+    var out = new Mat3();
+    mat3.adjoint(out.data, this.data);
+    return out;
 };
 
 Mat3.prototype.clone = function() {
-   return new Mat3().copy(this);
-};
-
-Mat3.prototype.copy = function(b) {
-    mat3.copy(this.data, b.data ? b.data : b);
-    return this;
+   return new Mat3(this);
 };
 
 Mat3.prototype.determinant = function() {
     return mat3.determinant(this.data);
 };
 
-Mat3.prototype.fromMat4 = function(m) {
-    mat3.fromMat4(this.data, m.data ? m.data : m);
-    return this;
+Mat3.fromMat4 = function(m) {
+    var out = new Mat3();
+    mat3.fromMat4(out.data, m.data ? m.data : m);
+    return out;
 };
 
-Mat3.prototype.fromQuat = function(q) {
-    mat3.fromQuat(this.data, q.data ? q.data : q);
-    return this;
-};
-
-Mat3.prototype.identity = function() {
-    mat3.identity(this.data);
-    return this;
+Mat3.fromQuat = function(q) {
+    var out = new Mat3();
+    mat3.fromQuat(out.data, q.data ? q.data : q);
+    return out;
 };
 
 Mat3.prototype.invert = function() {
-    mat3.invert(this.data, this.data);
-    return this;
+    var out = new Mat3();
+    mat3.invert(out.data, this.data);
+    return out;
 };
 
 Mat3.prototype.mul = Mat3.prototype.multiply = function(b) {
-    mat3.multiply(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Mat3();
+    mat3.multiply(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
-Mat3.prototype.normalFromMat4 = function(m) {
-    mat3.normalFromMat4(this.data, m.data ? m.data : m);
-    return this;
+Mat3.normalFromMat4 = function(m) {
+    var out = new Mat3();
+    mat3.normalFromMat4(out.data, m.data ? m.data : m);
+    return out;
 };
 
 Mat3.prototype.rotate = function(rad) {
-    mat3.rotate(this.data, this.data, rad);
-    return this;
+    var out = new Mat3();
+    mat3.rotate(out.data, this.data, rad);
+    return out;
 };
 
 Mat3.prototype.scale = function(vec) {
-    mat3.scale(this.data, this.data, vec.data ? vec.data : vec);
-    return this;
+    var out = new Mat3();
+    mat3.scale(out.data, this.data, vec.data ? vec.data : vec);
+    return out;
 };
 
 Mat3.prototype.transpose = function() {
-    mat3.transpose(this.data, this.data);
-    return this;
+    var out = new Mat3();
+    mat3.transpose(out.data, this.data);
+    return out;
 };
 
 Mat3.prototype.translate = function(vec) {
-    mat3.translate(this.data, this.data, vec.data ? vec.data : vec);
-    return this;
+    var out = new Mat3();
+    mat3.translate(out.data, this.data, vec.data ? vec.data : vec);
+    return out;
 };
 
 Mat3.prototype.toDOMString = function() {
     return mat3.toDOMString(this.data);
 };
 
-Mat3.prototype.setFromDOMString = function(str) {
-    this.data = mat3.fromDOMString(str);
-    return this;
+Mat3.fromDOMString = function(str) {
+    var out = new Mat3();
+    out.data.set( mat3.fromDOMString(str) );
+    return out;
+};
+
+Mat3.wrap = function(mat) {
+    var m = Mat3();
+    m.data = mat.data ? mat.data : mat;
+    return m;
 };
 
 module.exports = Mat3;

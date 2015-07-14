@@ -1,6 +1,7 @@
 var ComputeRequest = require("../xflow/interface/request.js").ComputeRequest;
 var Events = require("../interface/notification.js");
 var CSS = require("../utils/css.js");
+var mat4 = require("gl-matrix").mat4;
 
 var DOMTransformFetcher = function (owner, attrName, dataName, onlyDataTransform) {
     this.owner = owner;
@@ -34,13 +35,13 @@ DOMTransformFetcher.prototype.updateMatrix = function () {
 };
 
 DOMTransformFetcher.prototype.getMatrix = ( function () {
-    var IDENTITY = new XML3D.Mat4();
+    var IDENTITY = mat4.create();
 
     return function () {
         if (!this.onlyDataTransform) {
             var cssMatrix = CSS.getCSSMatrix(this.node);
             if (cssMatrix) {
-                return CSS.convertCssToMat4(cssMatrix);
+                return CSS.convertCssToMat4(cssMatrix).data;
             }
         }
         var adapter;
@@ -51,7 +52,7 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
                 var dataResult = this.xflowRequest.getResult();
                 var transformData = (dataResult.getOutputData(this.dataName) && dataResult.getOutputData(this.dataName).getValue());
                 if (transformData)
-                    return new XML3D.Mat4(transformData);
+                    return transformData;
             }
             if (adapter.getMatrix) {
                 return adapter.getMatrix();

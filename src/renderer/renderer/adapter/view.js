@@ -1,21 +1,25 @@
 var TransformableAdapter = require("./transformable.js");
 var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
 var Events = require("../../../interface/notification.js");
+var mat4 = require("gl-matrix").mat4;
 
 var ViewRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, false);
     this.projectionFetcher = new DOMTransformFetcher(this, "projection", "projection", true);
     this.createRenderNode();
 };
+
+var c_tmp_mat = mat4.create();
+
 XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
 
     createRenderNode: function () {
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
-        var rot = new XML3D.Quat().setFromAxisAngle(this.node.orientation);
-        var m = new XML3D.Mat4().setFromQuat(rot);
+        var rot = XML3D.math.quat.fromAxisAngle(this.node.orientation.data);
+        var m = mat4.fromQuat(c_tmp_mat, rot);
         this.renderNode = this.factory.renderer.scene.createRenderView({
-            position: this.node.position,
+            position: this.node.position.data,
             orientation: m,
             fieldOfView: this.node.fieldOfView,
             parent: parentNode
@@ -26,7 +30,7 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
     /* Interface method */
     getViewMatrix: function () {
         var m = new XML3D.Mat4();
-        this.renderNode.getWorldToViewMatrix(m);
+        this.renderNode.getWorldToViewMatrix(m.data);
         return m;
     },
 
@@ -36,7 +40,7 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
      */
     getWorldMatrix: function () {
         var m = new XML3D.Mat4();
-        this.renderNode.getViewToWorldMatrix(m);
+        this.renderNode.getViewToWorldMatrix(m.data);
         return m;
     },
 
@@ -44,12 +48,12 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
         TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
         switch (name) {
             case "orientation":
-                var rot = new XML3D.Quat().setFromAxisAngle(this.node.orientation);
-                var m = new XML3D.Mat4().setFromQuat(rot);
+                var rot = XML3D.math.quat.fromAxisAngle(this.node.orientation.data);
+                var m = mat4.fromQuat(c_tmp_mat, rot);
                 this.renderNode.updateOrientation(m);
                 break;
             case "position":
-                this.renderNode.updatePosition(this.node.position);
+                this.renderNode.updatePosition(this.node.position.data);
                 break;
             case "projection":
                 this.projectionFetcher.update();

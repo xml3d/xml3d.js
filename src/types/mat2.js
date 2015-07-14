@@ -1,11 +1,12 @@
 var mat2 = require("gl-matrix").mat2;
 
 var Mat2 = function(mat) {
-    if (mat) {
-        this.data = mat.data ? mat.data : mat;
-    } else {
+    if (this instanceof Mat2) {
         this.data = mat2.create();
-    }
+        if (mat) {
+            this.data.set(mat.data ? mat.data : mat);
+        }
+    } else return new Mat2(mat);
 };
 
 Object.defineProperty(Mat2.prototype, "m11", {
@@ -26,60 +27,63 @@ Object.defineProperty(Mat2.prototype, "m22", {
 });
 
 Mat2.prototype.adjoint = function() {
-    mat2.adjoint(this.data, this.data);
-    return this;
+    var out = new Mat2();
+    mat2.adjoint(out.data, this.data);
+    return out;
 };
 
 Mat2.prototype.clone = function() {
-   return new Mat2().copy(this);
-};
-
-Mat2.prototype.copy = function(b) {
-    mat2.copy(this.data, b.data ? b.data : b);
-    return this;
+   return new Mat2(this);
 };
 
 Mat2.prototype.determinant = function() {
     return mat2.determinant(this.data);
 };
 
-Mat2.prototype.identity = function() {
-    mat2.identity(this.data);
-    return this;
-};
-
 Mat2.prototype.invert = function() {
-    mat2.invert(this.data, this.data);
-    return this;
+    var out = new Mat2();
+    mat2.invert(out.data, this.data);
+    return out;
 };
 
 Mat2.prototype.mul = Mat2.prototype.multiply = function(b) {
-    mat2.multiply(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Mat2();
+    mat2.multiply(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Mat2.prototype.rotate = function(rad) {
-    mat2.rotate(this.data, this.data, rad);
-    return this;
+    var out = new Mat2();
+    mat2.rotate(out.data, this.data, rad);
+    return out;
 };
 
 Mat2.prototype.scale = function(vec) {
-    mat2.scale(this.data, this.data, vec.data ? vec.data : vec);
-    return this;
+    var out = new Mat2();
+    mat2.scale(out.data, this.data, vec.data ? vec.data : vec);
+    return out;
 };
 
 Mat2.prototype.transpose = function() {
-    mat2.transpose(this.data, this.data);
-    return this;
+    var out = new Mat2();
+    mat2.transpose(out.data, this.data);
+    return out;
 };
 
 Mat2.prototype.toDOMString = function() {
     return mat2.toDOMString(this.data);
 };
 
-Mat2.prototype.setFromDOMString = function(str) {
-    this.data = mat2.fromDOMString(str);
-    return this;
+Mat2.fromDOMString = function(str) {
+    var out = new Mat2();
+    out.data.set( mat2.fromDOMString(str) );
+    return out;
+};
+
+Mat2.wrap = function(mat) {
+    var m = Mat2();
+    m.data = mat.data ? mat.data : mat;
+    return m;
 };
 
 module.exports = Mat2;

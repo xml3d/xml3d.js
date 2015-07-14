@@ -3,6 +3,7 @@ var ComputeRequest = require("../../../xflow/interface/request.js").ComputeReque
 var Events = require("../../../interface/notification.js");
 var Resource = require("../../../base/resourcemanager.js").Resource;
 var AdapterHandle = require("../../../base/adapterhandle.js");
+var mat4 = require("gl-matrix").mat4;
 
 var ModelRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, true);
@@ -15,7 +16,7 @@ var ModelRenderAdapter = function (factory, node) {
     this.transformFetcher.update();
 };
 
-var c_IDENTITY = new XML3D.Mat4();
+var c_IDENTITY = mat4.create();
 
 XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
 
@@ -271,7 +272,7 @@ XML3D.extend(ModelRenderAdapter.prototype, {
     getWorldMatrix: function () {
         var m = new XML3D.Mat4(), obj = this.renderNode;
         if (obj) {
-            obj.getWorldMatrix(m);
+            obj.getWorldMatrix(m.data);
         }
         return m;
     }

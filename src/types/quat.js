@@ -1,11 +1,12 @@
 var quat = require("gl-matrix").quat;
 
 var Quat = function(vec) {
-    if (vec) {
-        this.data = vec.data ? vec.data : vec;
-    } else {
+    if (this instanceof Quat) {
         this.data = quat.create();
-    }
+        if (vec) {
+            this.data.set(vec.data ? vec.data : vec);
+        }
+    } else return new Quat(vec);
 };
 
 Object.defineProperty(Quat.prototype, "x", {
@@ -34,41 +35,35 @@ Object.defineProperty(Quat.prototype, "w", {
 });
 
 Quat.prototype.add = function(b) {
-    quat.add(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Quat();
+    quat.add(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Quat.prototype.calculateW = function() {
-    quat.calculateW(this.data, this.data);
-    return this;
+    var out = new Quat();
+    quat.calculateW(out.data, this.data);
+    return out;
 };
 
 Quat.prototype.clone = function() {
-   return new Quat().copy(this);
+   return new Quat(this);
 };
 
 Quat.prototype.conjugate = function() {
-    quat.conjugate(this.data, this.data);
-    return this;
-};
-
-Quat.prototype.copy = function(b) {
-    quat.copy(this.data, b.data ? b.data : b);
-    return this;
+    var out = new Quat();
+    quat.conjugate(out.data, this.data);
+    return out;
 };
 
 Quat.prototype.dot = function(b) {
     return quat.dot(this.data, b.data ? b.data : b);
 };
 
-Quat.prototype.identity = function() {
-    quat.identity(this.data);
-    return this;
-};
-
 Quat.prototype.invert = function() {
-    quat.invert(this.data, this.data);
-    return this;
+    var out = new Quat();
+    quat.invert(out.data, this.data);
+    return out;
 };
 
 Quat.prototype.len = Quat.prototype.length = function() {
@@ -76,77 +71,85 @@ Quat.prototype.len = Quat.prototype.length = function() {
 };
 
 Quat.prototype.lerp = function(b, t) {
-    quat.lerp(this.data, this.data, b.data ? b.data : b, t);
-    return this;
+    var out = new Quat();
+    quat.lerp(out.data, this.data, b.data ? b.data : b, t);
+    return out;
 };
 
 Quat.prototype.mul = Quat.prototype.multiply = function(b) {
-    quat.mul(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Quat();
+    quat.mul(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Quat.prototype.negate = function() {
-    quat.negate(this.data, this.data);
-    return this;
+    var out = new Quat();
+    quat.negate(out.data, this.data);
+    return out;
 };
 
 Quat.prototype.normalize = function() {
-    quat.normalize(this.data, this.data);
-    return this;
+    var out = new Quat();
+    quat.normalize(out.data, this.data);
+    return out;
 };
 
 Quat.prototype.rotateX = function(rad) {
-    quat.rotateX(this.data, this.data, rad);
-    return this;
+    var out = new Quat();
+    quat.rotateX(out.data, this.data, rad);
+    return out;
 };
 
 Quat.prototype.rotateY = function(rad) {
-    quat.rotateY(this.data, this.data, rad);
-    return this;
+    var out = new Quat();
+    quat.rotateY(out.data, this.data, rad);
+    return out;
 };
 
 Quat.prototype.rotateZ = function(rad) {
-    quat.rotateZ(this.data, this.data, rad);
-    return this;
+    var out = new Quat();
+    quat.rotateZ(out.data, this.data, rad);
+    return out;
 };
 
 Quat.prototype.scale = function(s) {
-    quat.scale(this.data, this.data, s);
-    return this;
+    var out = new Quat();
+    quat.scale(out.data, this.data, s);
+    return out;
 };
 
-Quat.prototype.set = function(x, y, z, w) {
-    quat.set(this.data, x, y, z, w);
-    return this;
-};
-
-Quat.prototype.setFromAxisAngle = function(axis, rad) {
+Quat.fromAxisAngle = function(axis, rad) {
+    var out = new Quat();
     if (rad === undefined) {
-        quat.setAxisAngle(this.data, axis.data ? axis.data : axis, axis.data ? axis.data[3] : axis[3]);
+        quat.setAxisAngle(out.data, axis.data ? axis.data : axis, axis.data ? axis.data[3] : axis[3]);
     } else {
-        quat.setAxisAngle(this.data, axis.data ? axis.data : axis, rad);
+        quat.setAxisAngle(out.data, axis.data ? axis.data : axis, rad);
     }
-    return this;
+    return out;
 };
 
-Quat.prototype.setFromBasis = function(x, y, z) {
-    XML3D.math.quat.setFromBasis(this.data, x.data ? x.data : x, y.data ? y.data : y, z.data ? z.data : z);
-    return this;
+Quat.fromBasis = function(x, y, z) {
+    var out = new Quat();
+    XML3D.math.quat.setFromBasis(out.data, x.data ? x.data : x, y.data ? y.data : y, z.data ? z.data : z);
+    return out;
 };
 
-Quat.prototype.setFromMat3 = function(m) {
-    quat.fromMat3(this.data, m.data ? m.data : m);
-    return this;
+Quat.fromMat3 = function(m) {
+    var out = new Quat();
+    quat.fromMat3(out.data, m.data ? m.data : m);
+    return out;
 };
 
-Quat.prototype.setFromRotationTo = function(from, to) {
-    quat.rotationTo(this.data, from.data ? from.data : from, to.data ? to.data : to);
-    return this;
+Quat.fromRotationTo = function(from, to) {
+    var out = new Quat();
+    quat.rotationTo(out.data, from.data ? from.data : from, to.data ? to.data : to);
+    return out;
 };
 
 Quat.prototype.slerp = function(b, t) {
-    quat.slerp(this.data, this.data, b.data ? b.data : b, t);
-    return this;
+    var out = new Quat();
+    quat.slerp(out.data, this.data, b.data ? b.data : b, t);
+    return out;
 };
 
 Quat.prototype.sqrLen = Quat.prototype.squaredLength = function() {
@@ -157,8 +160,16 @@ Quat.prototype.toDOMString = function() {
     return quat.toDOMString(this.data);
 };
 
-Quat.prototype.setFromDOMString = function(str) {
-    this.data = quat.fromDOMString(str);
+Quat.fromDOMString = function(str) {
+    var out = new Quat();
+    out.data.set( quat.fromDOMString(str) );
+    return out;
+};
+
+Quat.wrap = function(vec) {
+    var v = Quat();
+    v.data = vec.data ? vec.data : vec;
+    return v;
 };
 
 module.exports = Quat;

@@ -1,5 +1,6 @@
 var TransformableAdapter = require("./transformable.js");
 var Events = require("../../../interface/notification.js");
+var mat4 = require("gl-matrix").mat4;
 
 var GroupRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, true, true);
@@ -78,7 +79,7 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
     },
 
     getLocalBoundingBox: (function () {
-        var localMat = new XML3D.Mat4();
+        var localMat = mat4.create();
         var childBB = new XML3D.Box();
 
         return function () {
@@ -97,13 +98,13 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
 
     getLocalMatrix: function () {
         var m = new XML3D.Mat4();
-        this.renderNode.getLocalMatrix(m);
+        this.renderNode.getLocalMatrix(m.data);
         return m;
     },
 
     getWorldMatrix: function () {
         var m = new XML3D.Mat4();
-        this.renderNode.getWorldMatrix(m);
+        this.renderNode.getWorldMatrix(m.data);
         return m;
     }
 });

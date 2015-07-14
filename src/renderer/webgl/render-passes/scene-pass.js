@@ -1,5 +1,7 @@
 var BaseRenderPass = require("./base.js");
 var Options = require("../../../utils/options.js");
+var mat4 = require("gl-matrix").mat4;
+var mat3 = require("gl-matrix").mat3;
 
 var OPTION_FACECULLING = "renderer-faceculling";
 var OPTION_FRONTFACE = "renderer-frontface";
@@ -41,11 +43,11 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
      * @param Array
      */
     renderObjectsToActiveBuffer: (function () {
-        var tmpModelMatrix = new XML3D.Mat4();
-        var tmpModelMatrixN = new XML3D.Mat3();
-        var tmpModelView = new XML3D.Mat4();
-        var tmpModelViewProjection = new XML3D.Mat4();
-        var tmpModelViewN = new XML3D.Mat3();
+        var tmpModelMatrix = mat4.create();
+        var tmpModelMatrixN = mat3.create();
+        var tmpModelView = mat4.create();
+        var tmpModelViewProjection = mat4.create();
+        var tmpModelViewN = mat3.create();
         var c_objectSystemUniforms = ["modelMatrix", "modelMatrixN", "modelViewMatrix", "modelViewProjectionMatrix", "modelViewMatrixN"];
 
         return function (objectArray, scene, target, systemUniforms, sceneParameterFilter, opt) {
@@ -82,19 +84,19 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 XML3D.debug.assert(mesh, "We need a mesh at this point.");
 
                 obj.getWorldMatrix(tmpModelMatrix);
-                systemUniforms["modelMatrix"] = tmpModelMatrix.data;
+                systemUniforms["modelMatrix"] = tmpModelMatrix;
 
                 obj.getModelMatrixN(tmpModelMatrixN);
-                systemUniforms["modelMatrixN"] = tmpModelMatrixN.data;
+                systemUniforms["modelMatrixN"] = tmpModelMatrixN;
 
                 obj.getModelViewMatrix(tmpModelView);
-                systemUniforms["modelViewMatrix"] = tmpModelView.data;
+                systemUniforms["modelViewMatrix"] = tmpModelView;
 
                 obj.getModelViewProjectionMatrix(tmpModelViewProjection);
-                systemUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection.data;
+                systemUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection;
 
                 obj.getModelViewMatrixN(tmpModelViewN);
-                systemUniforms["modelViewMatrixN"] = tmpModelViewN.data;
+                systemUniforms["modelViewMatrixN"] = tmpModelViewN;
 
                 program.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
 

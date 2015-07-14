@@ -310,7 +310,7 @@ Object.defineProperties(TexelSource.prototype, {
  * @extends {DataEntry}
  * @param {HTMLImageElement|HTMLVideoElement|HTMLCanvasElement} source //TODO: Which kinds are supported?
  */
-TextureEntry = function(source){
+var TextureEntry = function(source){
     DataEntry.call(this, C.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
     this._loading = false;

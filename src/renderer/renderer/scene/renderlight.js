@@ -5,7 +5,7 @@ var LightModels = require("../lights/light-models.js");
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
 
-var tmp_worldMatrix = new XML3D.Mat4();
+var tmp_worldMatrix = XML3D.math.mat4.create();
 
 var SHADOWMAP_OFFSET_MATRIX = new Float32Array([0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0]);
 

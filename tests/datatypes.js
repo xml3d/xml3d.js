@@ -18,11 +18,10 @@ test("Default Constructor", function() {
     QUnit.closeArray(this.ident.data, [0, 0, 0, 0, 0, -1], EPSILON, "default origin and direction");
 });
 
-test("Wrapper Constructor", function() {
-    var data = new Float32Array(6);
+test("Copy Constructor", function() {
+    var data = new Float32Array([0,1,0,0,1,0]);
     var ray = new XML3D.Ray(data);
-    ray.data[0] = 1;
-    QUnit.closeArray(data, [1,0,0,0,0,0], EPSILON, "Ray properly wrapped the given Float32Array");
+    QUnit.closeArray(data, [0,1,0,0,1,0], EPSILON, "Ray properly copied the given Float32Array");
 });
 
 test("Ray::accessors", function()  {
@@ -36,7 +35,7 @@ test("Ray::accessors", function()  {
     QUnit.closeArray(ray.data, [1,5,0,0,-5,0], EPSILON, "Changing the returned vectors also changes the ray's data");
 
     ray.origin = [5,5,5];
-    ray.direction = new XML3D.Vec3().set(1,0,0);
+    ray.direction = XML3D.Vec3.fromValues(1,0,0);
     QUnit.closeArray(ray.data, [5,5,5,1,0,0], EPSILON, "Setters work with arrays and Vec3 objects");
 });
 
@@ -90,7 +89,7 @@ test("Default Constructor", function() {
     ok(this.ident.data[2] > this.ident.data[5], "[z] box' min greater than max");
 });
 
-test("Wrapper constructor", function() {
+test("Copy constructor", function() {
     var b = new XML3D.Box(this.box1);
     notStrictEqual(b.data, this.box1.data);
     QUnit.closeArray(b.data, this.box1.data, EPSILON);
@@ -107,7 +106,7 @@ test("Box::accessors", function() {
     QUnit.closeArray(box.data, [-15, 10, 3, 15, 11, 15], EPSILON, "Changing the returned vectors also changes the box's data");
 
     box.min = [0,0,0];
-    box.max = new XML3D.Vec3().set(10,10,10);
+    box.max = XML3D.Vec3.fromValues(10,10,10);
     QUnit.closeArray(box.data, [0,0,0,10,10,10], EPSILON, "Setters work with arrays and Vec3 objects");
 });
 
@@ -185,8 +184,7 @@ test("Box::isEmpty", function() {
 });
 
 test("Box::transformAxisAligned", function() {
-    var mat = new XML3D.Mat4();
-    mat.rotateX(1.57);
+    var mat = new XML3D.Mat4().rotateX(1.57);
 
     var actual = new XML3D.Box(this.incValueBox);
     actual.transformAxisAligned(mat);

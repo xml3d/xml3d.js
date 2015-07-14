@@ -2,11 +2,12 @@ var vec4 = require("gl-matrix").vec4;
 var Vec3 = require("./vec3.js");
 
 var Vec4 = function(vec) {
-    if (vec) {
-        this.data = vec.data ? vec.data : vec;
-    } else {
+    if (this instanceof Vec4) {
         this.data = vec4.create();
-    }
+        if (vec) {
+            this.data.set(vec.data ? vec.data : vec);
+        }
+    } else return new Vec4(vec);
 };
 
 Object.defineProperty(Vec4.prototype, "x", {
@@ -33,6 +34,7 @@ Object.defineProperty(Vec4.prototype, "w", {
     },
     get: function(){ return this.data[3]; }
 });
+/*
 Object.defineProperty(Vec4.prototype, "axis", {
     set: function(vec){
         this.data[0] = vec.data ? vec.data[0] : vec[0];
@@ -47,19 +49,15 @@ Object.defineProperty(Vec4.prototype, "angle", {
     },
     get: function(){ return this.data[3]; }
 });
-
+*/
 Vec4.prototype.add = function(b) {
-    vec4.add(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Vec4();
+    vec4.add(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Vec4.prototype.clone = function() {
-   return new Vec4().copy(this);
-};
-
-Vec4.prototype.copy = function(b) {
-    vec4.copy(this.data, b.data ? b.data : b);
-    return this;
+   return new Vec4(this);
 };
 
 Vec4.prototype.dist = Vec4.prototype.distance = function() {
@@ -67,15 +65,16 @@ Vec4.prototype.dist = Vec4.prototype.distance = function() {
 };
 
 Vec4.prototype.divide = function(b) {
-    vec4.divide(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Vec4();
+    vec4.divide(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Vec4.prototype.dot = function(b) {
     return vec4.dot(this.data, b.data ? b.data : b);
 };
 
-Vec4.prototype.fromValues = function(x, y, z, w) {
+Vec4.fromValues = function(x, y, z, w) {
     return new Vec4(vec4.fromValues(x,y,z,w));
 };
 
@@ -84,8 +83,9 @@ Vec4.prototype.len = Vec4.prototype.length = function() {
 };
 
 Vec4.prototype.lerp = function(b, t) {
-    vec4.lerp(this.data, this.data, b.data ? b.data : b, t);
-    return this;
+    var out = new Vec4();
+    vec4.lerp(out.data, this.data, b.data ? b.data : b, t);
+    return out;
 };
 
 Vec4.prototype.max = function(b) {
@@ -101,18 +101,21 @@ Vec4.prototype.min = function(b) {
 };
 
 Vec4.prototype.mul = Vec4.prototype.multiply = function(b) {
-    vec4.mul(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Vec4();
+    vec4.mul(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Vec4.prototype.negate = function() {
-    vec4.negate(this.data, this.data);
-    return this;
+    var out = new Vec4();
+    vec4.negate(out.data, this.data);
+    return out;
 };
 
 Vec4.prototype.normalize = function() {
-    vec4.normalize(this.data, this.data);
-    return this;
+    var out = new Vec4();
+    vec4.normalize(out.data, this.data);
+    return out;
 };
 
 Vec4.prototype.random = function(scale) {
@@ -122,23 +125,21 @@ Vec4.prototype.random = function(scale) {
 };
 
 Vec4.prototype.scale = function(s) {
-    vec4.scale(this.data, this.data, s);
-    return this;
+    var out = new Vec4();
+    vec4.scale(out.data, this.data, s);
+    return out;
 };
 
 Vec4.prototype.scaleAndAdd = function(b, scale) {
-    vec4.scaleAndAdd(this.data, this.data, b.data ? b.data : b, scale);
-    return this;
+    var out = new Vec4();
+    vec4.scaleAndAdd(out.data, this.data, b.data ? b.data : b, scale);
+    return out;
 };
 
-Vec4.prototype.set = function(x, y, z, w) {
-    vec4.set(this.data, x, y, z, w);
-    return this;
-};
-
-Vec4.prototype.setFromQuat = function(q) {
-    this.data = XML3D.math.vec4.fromQuat(q.data ? q.data : q);
-    return this;
+Vec4.fromQuat = function(q) {
+    var out = new Vec4();
+    out.data.set(XML3D.math.vec4.fromQuat(q.data ? q.data : q));
+    return out;
 };
 
 Vec4.prototype.sqrDist = Vec4.prototype.squaredDistance = function(b) {
@@ -150,27 +151,37 @@ Vec4.prototype.sqrLen = Vec4.prototype.squaredLength = function() {
 };
 
 Vec4.prototype.sub = Vec4.prototype.subtract = function(b) {
-    vec4.sub(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Vec4();
+    vec4.sub(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Vec4.prototype.transformMat4 = function(m) {
-    vec4.transformMat4(this.data, this.data, m.data ? m.data : m);
-    return this;
+    var out = new Vec4();
+    vec4.transformMat4(out.data, this.data, m.data ? m.data : m);
+    return out;
 };
 
 Vec4.prototype.transformQuat = function(q) {
-    vec4.transformQuat(this.data, this.data, q.data ? q.data : q);
-    return this;
+    var out = new Vec4();
+    vec4.transformQuat(out.data, this.data, q.data ? q.data : q);
+    return out;
 };
 
 Vec4.prototype.toDOMString = function() {
     return vec4.toDOMString(this.data);
 };
 
-Vec4.prototype.setFromDOMString = function(str) {
-    this.data = vec4.fromDOMString(str);
-    return this;
+Vec4.fromDOMString = function(str) {
+    var out = new Vec4();
+    out.data.set( vec4.fromDOMString(str) );
+    return out;
+};
+
+Vec4.wrap = function(vec) {
+    var v = Vec4();
+    v.data = vec.data ? vec.data : vec;
+    return v;
 };
 
 module.exports = Vec4;

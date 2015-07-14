@@ -1,5 +1,6 @@
 var SceneRenderPass = require("./scene-pass.js");
 var ObjectSorter = require("../../renderer/tools/objectsorter.js");
+var mat4 = require("gl-matrix").mat4;
 
 /**
  * @param {GLRenderInterface} renderInterface
@@ -27,8 +28,8 @@ XML3D.createClass(LightPass, SceneRenderPass, {
     },
 
     render: (function () {
-        var c_viewMat_tmp = new XML3D.Mat4();
-        var c_projMat_tmp = new XML3D.Mat4();
+        var c_viewMat_tmp = mat4.create();
+        var c_projMat_tmp = mat4.create();
         var c_programSystemUniforms = ["viewMatrix", "projectionMatrix"];
 
         return function (scene) {
@@ -47,8 +48,8 @@ XML3D.createClass(LightPass, SceneRenderPass, {
             var objects = this.sorter.sortScene(scene);
 
             var parameters = {};
-            parameters["viewMatrix"] = c_viewMat_tmp.data;
-            parameters["projectionMatrix"] = c_projMat_tmp.data;
+            parameters["viewMatrix"] = c_viewMat_tmp;
+            parameters["projectionMatrix"] = c_projMat_tmp;
 
             //Render opaque objects
             for (var shader in objects.opaque) {

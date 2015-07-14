@@ -35,11 +35,8 @@ RenderGroup.ENTRY_SIZE = ENTRY_SIZE;
 XML3D.createClass(RenderGroup, RenderNode);
 
 XML3D.extend(RenderGroup.prototype, {
-    getLocalMatrix: function (destMat4) {
-        var o = this.offset + LOCAL_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            destMat4.data[i] = this.page[o];
-        }
+    getLocalMatrix: function (dest) {
+        this.getMat4FromPage(dest, LOCAL_MATRIX_OFFSET);
     },
 
     setLocalMatrix: function (sourceMat4) {
@@ -109,7 +106,7 @@ XML3D.extend(RenderGroup.prototype, {
     updateWorldMatrix: function (sourceMat4) {
         var page = this.page;
         var offset = this.offset;
-        XML3D.math.mat4.multiplyOffset(page, offset + WORLD_MATRIX_OFFSET, page, offset + LOCAL_MATRIX_OFFSET, sourceMat4.data, 0);
+        XML3D.math.mat4.multiplyOffset(page, offset + WORLD_MATRIX_OFFSET, page, offset + LOCAL_MATRIX_OFFSET, sourceMat4, 0);
         this.transformDirty = false;
     },
 

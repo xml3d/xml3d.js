@@ -1,6 +1,6 @@
 var vec3 = require("gl-matrix").vec3;
-var tmp1 = new XML3D.Vec3();
-var tmp2 = new XML3D.Vec3();
+var tmp1 = vec3.create();
+var tmp2 = vec3.create();
 
 
 /**
@@ -123,32 +123,32 @@ XML3D.extend(Frustum.prototype, {
 
     getPlanes: (function () {
 
-        var c_a = new XML3D.Vec3();
-        var c_b = new XML3D.Vec3();
-        var c_c = new XML3D.Vec3();
-        var c_d = new XML3D.Vec3();
+        var c_a = vec3.create();
+        var c_b = vec3.create();
+        var c_c = vec3.create();
+        var c_d = vec3.create();
 
-        var c_e = new XML3D.Vec3();
-        var c_f = new XML3D.Vec3();
-        var c_g = new XML3D.Vec3();
-        var c_o = new XML3D.Vec3();
+        var c_e = vec3.create();
+        var c_f = vec3.create();
+        var c_g = vec3.create();
+        var c_o = vec3.create();
 
 
         return function (planes, M) {
-            vec3.transformMat4(c_a.data, [this.left, this.bottom, -this.nearPlane], M.data);
-            vec3.transformMat4(c_b.data, [this.left, this.top, -this.nearPlane], M.data);
-            vec3.transformMat4(c_c.data, [this.right, this.top, -this.nearPlane], M.data);
-            vec3.transformMat4(c_d.data, [this.right, this.bottom, -this.nearPlane], M.data);
+            vec3.transformMat4(c_a, [this.left, this.bottom, -this.nearPlane], M);
+            vec3.transformMat4(c_b, [this.left, this.top, -this.nearPlane], M);
+            vec3.transformMat4(c_c, [this.right, this.top, -this.nearPlane], M);
+            vec3.transformMat4(c_d, [this.right, this.bottom, -this.nearPlane], M);
             if (!this.orthographic) {
                 var s = this.farPlane / this.nearPlane;
                 var farLeft = s * this.left;
                 var farRight = s * this.right;
                 var farTop = s * this.top;
                 var farBottom = s * this.bottom;
-                vec3.transformMat4(c_e.data, [farLeft, farBottom, -this.farPlane], M.data);
-                vec3.transformMat4(c_f.data, [farLeft, farTop, -this.farPlane], M.data);
-                vec3.transformMat4(c_g.data, [farRight, farTop, -this.farPlane], M.data);
-                vec3.transformMat4(c_o.data, [0, 0, 0], M.data);
+                vec3.transformMat4(c_e, [farLeft, farBottom, -this.farPlane], M);
+                vec3.transformMat4(c_f, [farLeft, farTop, -this.farPlane], M);
+                vec3.transformMat4(c_g, [farRight, farTop, -this.farPlane], M);
+                vec3.transformMat4(c_o, [0, 0, 0], M);
                 planes[0].setFromPoints(c_o, c_c, c_b);
                 planes[1].setFromPoints(c_o, c_d, c_c);
                 planes[2].setFromPoints(c_o, c_a, c_d);
@@ -156,10 +156,10 @@ XML3D.extend(Frustum.prototype, {
                 planes[4].setFromPoints(c_a, c_d, c_c);
                 planes[5].setFromPoints(c_e, c_f, c_g);
             } else {
-                vec3.transformMat4(c_e.data, [this.left, this.bottom, -this.farPlane], M.data);
-                vec3.transformMat4(c_f.data, [this.left, this.top, -this.farPlane], M.data);
-                vec3.transformMat4(c_g.data, [this.right, this.top, -this.farPlane], M.data);
-                vec3.transformMat4(c_o.data, [this.right, this.bottom, -this.farPlane], M.data);
+                vec3.transformMat4(c_e, [this.left, this.bottom, -this.farPlane], M);
+                vec3.transformMat4(c_f, [this.left, this.top, -this.farPlane], M);
+                vec3.transformMat4(c_g, [this.right, this.top, -this.farPlane], M);
+                vec3.transformMat4(c_o, [this.right, this.bottom, -this.farPlane], M);
                 planes[0].setFromPoints(c_c, c_g, c_f);
                 planes[1].setFromPoints(c_d, c_o, c_g);
                 planes[2].setFromPoints(c_a, c_e, c_o);
@@ -176,18 +176,19 @@ XML3D.extend(Frustum.prototype, {
 
 var Plane = function () {
     this.distance = 0;
-    this.normal = new XML3D.Vec3();
+    this.normal = vec3.create();
 };
 
 XML3D.extend(Plane.prototype, {
     setFromPoints: function (point1, point2, point3) {
-        vec3.cross(this.normal.data, vec3.sub(tmp2.data, point3.data, point1.data), vec3.sub(tmp1.data, point2.data, point1.data));
-        this.normal.normalize();
-        this.distance = -this.normal.dot(point1);
+        vec3.cross(this.normal, vec3.sub(tmp2, point3, point1), vec3.sub(tmp1, point2, point1));
+        vec3.normalize(this.normal, this.normal);
+        this.distance = -vec3.dot(this.normal, point1);
     },
 
     set: function (x, y, z, distance) {
-        this.normal.set(x, y, z).normalize();
+        vec3.set(this.normal, x, y, z);
+        vec3.normalize(this.normal, this.normal);
         this.distance = distance;
     }
 });

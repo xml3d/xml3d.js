@@ -12,6 +12,7 @@ var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
 var XC = require("../../../xflow/interface/constants.js");
 var URI = require("../../../utils/uri.js").URI;
 var EventEmitter = require('events').EventEmitter;
+var mat4 = require("gl-matrix").mat4;
 
 /**
  * @extends {EventEmitter}
@@ -82,8 +83,8 @@ XML3D.createClass(Scene, EventEmitter, {
         var root = new RenderGroup(this, pageEntry, {
             material: this.getDefaultMaterial(), name: "@scene"
         });
-        root.setWorldMatrix(new XML3D.Mat4());
-        root.setLocalMatrix(new XML3D.Mat4());
+        root.setWorldMatrix(mat4.create());
+        root.setLocalMatrix(mat4.create());
         root.transformDirty = false;
         return root;
     },

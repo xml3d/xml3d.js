@@ -1,11 +1,13 @@
 var vec2 = require("gl-matrix").vec2;
 
 var Vec2 = function(vec) {
-    if (vec) {
-        this.data = vec.data ? vec.data : vec;
-    } else {
+    if (this instanceof Vec2) {
         this.data = vec2.create();
-    }
+        if (vec) {
+            this.data.set(vec.data ? vec.data : vec);
+        }
+        Object.freeze(this);
+    } else return new Vec2(vec);
 };
 
 Object.defineProperty(Vec2.prototype, "x", {
@@ -22,23 +24,13 @@ Object.defineProperty(Vec2.prototype, "y", {
 });
 
 Vec2.prototype.add = function(b) {
-    vec2.add(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Vec2();
+    vec2.add(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Vec2.prototype.clone = function() {
-   return new Vec2().copy();
-};
-
-Vec2.prototype.copy = function(b) {
-    vec2.copy(this.data, b.data ? b.data : b);
-    return this;
-};
-
-Vec2.prototype.cross = function(b) {
-    var r = new Vec3();
-    vec3.cross(r.data, this.data, b.data ? b.data : b);
-    return r;
+    return new Vec2(this);
 };
 
 Vec2.prototype.dist = Vec2.prototype.distance = function() {
@@ -46,15 +38,16 @@ Vec2.prototype.dist = Vec2.prototype.distance = function() {
 };
 
 Vec2.prototype.divide = function(b) {
-    vec2.divide(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Vec2();
+    vec2.divide(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Vec2.prototype.dot = function(b) {
     return vec2.dot(this.data, b.data ? b.data : b);
 };
 
-Vec2.prototype.fromValues = function(x, y) {
+Vec2.fromValues = function(x, y) {
     return new Vec2(vec2.fromValues(x,y));
 };
 
@@ -63,8 +56,9 @@ Vec2.prototype.len = Vec2.prototype.length = function() {
 };
 
 Vec2.prototype.lerp = function(b, t) {
-    vec2.lerp(this.data, this.data, b.data ? b.data : b, t);
-    return this;
+    var out = new Vec2();
+    vec2.lerp(out.data, this.data, b.data ? b.data : b, t);
+    return out;
 };
 
 Vec2.prototype.max = function(b) {
@@ -80,18 +74,21 @@ Vec2.prototype.min = function(b) {
 };
 
 Vec2.prototype.mul = Vec2.prototype.multiply = function(b) {
-    vec2.mul(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Vec2();
+    vec2.mul(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Vec2.prototype.negate = function() {
-    vec2.negate(this.data, this.data);
-    return this;
+    var out = new Vec2();
+    vec2.negate(out.data, this.data);
+    return out;
 };
 
 Vec2.prototype.normalize = function() {
-    vec2.normalize(this.data, this.data);
-    return this;
+    var out = new Vec2();
+    vec2.normalize(out.data, this.data);
+    return out;
 };
 
 Vec2.prototype.random = function(scale) {
@@ -101,18 +98,15 @@ Vec2.prototype.random = function(scale) {
 };
 
 Vec2.prototype.scale = function(s) {
-    vec2.scale(this.data, this.data, s);
-    return this;
+    var out = new Vec2();
+    vec2.scale(out.data, this.data, s);
+    return out;
 };
 
 Vec2.prototype.scaleAndAdd = function(b, scale) {
-    vec2.scaleAndAdd(this.data, this.data, b.data ? b.data : b, scale);
-    return this;
-};
-
-Vec2.prototype.set = function(x, y) {
-    vec2.set(this.data, x, y);
-    return this;
+    var out = new Vec2();
+    vec2.scaleAndAdd(out.data, this.data, b.data ? b.data : b, scale);
+    return out;
 };
 
 Vec2.prototype.sqrDist = Vec2.prototype.squaredDistance = function(b) {
@@ -124,37 +118,49 @@ Vec2.prototype.sqrLen = Vec2.prototype.squaredLength = function() {
 };
 
 Vec2.prototype.sub = Vec2.prototype.subtract = function(b) {
-    vec2.sub(this.data, this.data, b.data ? b.data : b);
-    return this;
+    var out = new Vec2();
+    vec2.sub(out.data, this.data, b.data ? b.data : b);
+    return out;
 };
 
 Vec2.prototype.transformMat2 = function(m) {
-    vec2.transformMat2(this.data, this.data, m.data ? m.data : m);
-    return this;
+    var out = new Vec2();
+    vec2.transformMat2(out.data, this.data, m.data ? m.data : m);
+    return out;
 };
 
 Vec2.prototype.transformMat3 = function(m) {
-    vec2.transformMat3(this.data, this.data, m.data ? m.data : m);
-    return this;
+    var out = new Vec2();
+    vec2.transformMat3(out.data, this.data, m.data ? m.data : m);
+    return out;
 };
 
 Vec2.prototype.transformMat4 = function(m) {
-    vec2.transformMat4(this.data, this.data, m.data ? m.data : m);
-    return this;
+    var out = new Vec2();
+    vec2.transformMat4(out.data, this.data, m.data ? m.data : m);
+    return out;
 };
 
 Vec2.prototype.transformQuat = function(q) {
-    vec2.transformQuat(this.data, this.data, q.data ? q.data : q);
-    return this;
+    var out = new Vec2();
+    vec2.transformQuat(out.data, this.data, q.data ? q.data : q);
+    return out;
 };
 
 Vec2.prototype.toDOMString = function() {
     return vec2.toDOMString(this.data);
 };
 
-Vec2.prototype.setFromDOMString = function(str) {
-    this.data = vec2.fromDOMString(str);
-    return this;
+Vec2.fromDOMString = function(str) {
+    var out = new Vec2();
+    out.data.set( vec2.fromDOMString(str) );
+    return out;
+};
+
+Vec2.wrap = function(vec) {
+    var v = Vec2();
+    v.data = vec.data ? vec.data : vec;
+    return v;
 };
 
 module.exports = Vec2;

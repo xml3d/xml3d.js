@@ -83,7 +83,7 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
      */
     getWorldMatrix: function () {
         var m = new XML3D.Mat4();
-        this.renderNode.getWorldMatrix(m);
+        this.renderNode.getWorldMatrix(m.data);
         return m;
     }
 });

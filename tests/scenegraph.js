@@ -45,7 +45,7 @@ test("View Transformation local", function() {
 
     // Turn around
     var axis = XML3D.math.vec3.fromValues(1, 0, 0);
-    view.orientation = new XML3D.Vec4().set(1,0,0,Math.PI/2.0);
+    view.orientation = XML3D.Vec4.fromValues(1,0,0,Math.PI/2.0);
     var q = XML3D.math.vec4.create();
     m = XML3D.math.mat4.create();
     XML3D.math.quat.setAxisAngle(q, axis, Math.PI /2);
@@ -118,14 +118,14 @@ test("Hierarchy", function() {
     parent.transform = "#t_rotation3";
     mat = new XML3D.Mat4();
     QUnit.closeMatrix(parent.getLocalMatrix(), mat.rotateZ(Math.PI/2.0), EPSILON, "New parent local matrix");
-    mat.identity();
+    mat = new XML3D.Mat4();
     QUnit.closeMatrix(child1.getWorldMatrix(), mat.rotateZ(Math.PI/2.0).rotateY(Math.PI/2.0), EPSILON, "New child1 global matrix");
     // Failed in 361f96c because of reference copies in transformation propagation
     QUnit.closeMatrix(child2.getWorldMatrix(), parent.getWorldMatrix(), EPSILON, "New child2 global matrix");
 
     var t = this.doc.getElementById("t_rotation3");
-    t.translation = XML3D.math.vec3.fromValues(1,2,3);
-    mat.identity();
+    t.translation = XML3D.Vec3.fromValues(1,2,3);
+    mat = new XML3D.Mat4();
     QUnit.closeMatrix(parent.getLocalMatrix(), mat.translate([1,2,3]).rotateZ(Math.PI/2.0), EPSILON, "New parent local matrix");
     mat = parent.getLocalMatrix();
     QUnit.closeMatrix(child1.getWorldMatrix(), mat.rotateY(Math.PI/2.0), EPSILON, "New child1 global matrix");

@@ -1,3 +1,5 @@
+var vec3 = require("gl-matrix").vec3;
+
 /**
  *
  * @constructor
@@ -7,7 +9,7 @@ var ObjectSorter = function () {
 };
 
 var c_bbox = new XML3D.Box();
-var c_center = new XML3D.Vec3();
+var c_center = vec3.create();
 
 XML3D.extend(ObjectSorter.prototype, {
     /**
@@ -41,7 +43,7 @@ XML3D.extend(ObjectSorter.prototype, {
                 obj = withinShader[i];
                 obj.getWorldSpaceBoundingBox(c_bbox);
                 c_bbox.center(c_center);
-                viewMatrix && c_center.transformMat4(viewMatrix);
+                viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
                 sortedArray[i] = {
                     obj: obj, depth: c_center.z
                 };
@@ -59,7 +61,7 @@ XML3D.extend(ObjectSorter.prototype, {
                 obj = transparentArray[i];
                 obj.getWorldSpaceBoundingBox(c_bbox);
                 c_bbox.center(c_center);
-                viewMatrix && c_center.transformMat4(viewMatrix);
+                viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
                 transparentArray[i] = [obj, c_center.z];
             }
 

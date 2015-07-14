@@ -72,7 +72,7 @@ XML3D.extend(RenderNode.prototype, {
     setMat4InPage: function(source, offset) {
         var o = this.offset + offset;
         for(var i = 0; i < 16; i++, o++) {
-            this.page[o] = source.data[i];
+            this.page[o] = source[i];
         }
     },
 
@@ -83,7 +83,7 @@ XML3D.extend(RenderNode.prototype, {
     getMat4FromPage: function(dest, offset) {
         var o = this.offset + offset;
         for(var i = 0; i < 16; i++, o++) {
-            dest.data[i] = this.page[o];
+            dest[i] = this.page[o];
         }
     },
 
@@ -92,10 +92,7 @@ XML3D.extend(RenderNode.prototype, {
             this.parent.getWorldMatrix(dest);
             this.updateWorldMatrix(dest);
         }
-        var o = this.offset + WORLD_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            dest.data[i] = this.page[o];
-        }
+        this.getMat4FromPage(dest, WORLD_MATRIX_OFFSET);
     },
 
     setWorldMatrix: function (source) {

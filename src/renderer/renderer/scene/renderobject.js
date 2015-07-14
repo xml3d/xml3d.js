@@ -4,6 +4,7 @@ var DrawableClosure= require("./drawableclosure.js");
 var C = require("./constants.js");
 var Scene= require("./scene.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
+var mat4 = require("gl-matrix").mat4;
 
 // Entry:
 /** @const */
@@ -92,14 +93,13 @@ var RenderObject = function (scene, pageEntry, opt) {
 };
 RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
-RenderObject.IDENTITY_MATRIX = new XML3D.Mat4();
+RenderObject.IDENTITY_MATRIX = mat4.create();
 
 XML3D.createClass(RenderObject, RenderNode, {
     createTransformRequest: function () {
         if (!this.object.data)
             return null;
-        var request = new ComputeRequest(this.object.data, ["meshTransform"], this.onTransformDataChange.bind(this));
-        return request;
+        return new ComputeRequest(this.object.data, ["meshTransform"], this.onTransformDataChange.bind(this));
     },
 
     createDrawable: function () {
@@ -160,28 +160,28 @@ XML3D.createClass(RenderObject, RenderNode, {
 
     getModelMatrixN: function (dest) {
         var o = this.offset + MODEL_MATRIX_N_OFFSET;
-        dest.data[0] = this.page[o];
-        dest.data[1] = this.page[o + 1];
-        dest.data[2] = this.page[o + 2];
-        dest.data[3] = this.page[o + 4];
-        dest.data[4] = this.page[o + 5];
-        dest.data[5] = this.page[o + 6];
-        dest.data[6] = this.page[o + 8];
-        dest.data[7] = this.page[o + 9];
-        dest.data[8] = this.page[o + 10];
+        dest[0] = this.page[o];
+        dest[1] = this.page[o + 1];
+        dest[2] = this.page[o + 2];
+        dest[3] = this.page[o + 4];
+        dest[4] = this.page[o + 5];
+        dest[5] = this.page[o + 6];
+        dest[6] = this.page[o + 8];
+        dest[7] = this.page[o + 9];
+        dest[8] = this.page[o + 10];
     },
 
     getModelViewMatrixN: function (dest) {
         var o = this.offset + MODELVIEW_MATRIX_N_OFFSET;
-        dest.data[0] = this.page[o];
-        dest.data[1] = this.page[o + 1];
-        dest.data[2] = this.page[o + 2];
-        dest.data[3] = this.page[o + 4];
-        dest.data[4] = this.page[o + 5];
-        dest.data[5] = this.page[o + 6];
-        dest.data[6] = this.page[o + 8];
-        dest.data[7] = this.page[o + 9];
-        dest.data[8] = this.page[o + 10];
+        dest[0] = this.page[o];
+        dest[1] = this.page[o + 1];
+        dest[2] = this.page[o + 2];
+        dest[3] = this.page[o + 4];
+        dest[4] = this.page[o + 5];
+        dest[5] = this.page[o + 6];
+        dest[6] = this.page[o + 8];
+        dest[7] = this.page[o + 9];
+        dest[8] = this.page[o + 10];
     },
 
 
@@ -200,17 +200,17 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     updateWorldMatrix: (function () {
-        var tmp_mat = new XML3D.Mat4();
+        var tmp_mat = mat4.create();
         return function () {
             this.parent.getWorldMatrix(tmp_mat);
             var page = this.page;
             var offset = this.offset;
-            XML3D.math.mat4.multiplyOffset(tmp_mat.data, 0, page, offset + LOCAL_MATRIX_OFFSET, tmp_mat.data, 0);
+            XML3D.math.mat4.multiplyOffset(tmp_mat, 0, page, offset + LOCAL_MATRIX_OFFSET, tmp_mat, 0);
             if (this.transformDataRequest) {
                 var result = this.transformDataRequest.getResult();
                 var transformData = result.getOutputData("meshTransform");
                 if (transformData && transformData.getValue()) {
-                    XML3D.math.mat4.multiply(tmp_mat.data, tmp_mat.data, transformData.getValue());
+                    XML3D.math.mat4.multiply(tmp_mat, tmp_mat, transformData.getValue());
                 }
             }
             this.setWorldMatrix(tmp_mat);
@@ -226,26 +226,26 @@ XML3D.createClass(RenderObject, RenderNode, {
         }
         var page = this.page;
         var offset = this.offset;
-        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEW_MATRIX_OFFSET, page, offset + WORLD_MATRIX_OFFSET, view.data, 0);
+        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEW_MATRIX_OFFSET, page, offset + WORLD_MATRIX_OFFSET, view, 0);
     },
 
     updateModelMatrixN: (function () {
-        var c_tmpMatrix = new XML3D.Mat4();
+        var c_tmpMatrix = mat4.create();
         return function () {
             this.getWorldMatrix(c_tmpMatrix);
-            var normalMatrix = c_tmpMatrix.invert();
-            normalMatrix = normalMatrix ? normalMatrix.transpose() : RenderObject.IDENTITY_MATRIX;
+            mat4.invert(c_tmpMatrix, c_tmpMatrix);
+            var normalMatrix = c_tmpMatrix ? mat4.transpose(c_tmpMatrix, c_tmpMatrix) : RenderObject.IDENTITY_MATRIX;
             this.setMat4InPage(normalMatrix, MODEL_MATRIX_N_OFFSET);
         }
     })(),
 
     /** Relies on an up-to-date view matrix **/
     updateModelViewMatrixN: (function () {
-        var c_tmpMatrix = new XML3D.Mat4();
+        var c_tmpMatrix = mat4.create();
         return function () {
             this.getModelViewMatrix(c_tmpMatrix);
-            var normalMatrix = c_tmpMatrix.invert();
-            normalMatrix = normalMatrix ? normalMatrix.transpose() : RenderObject.IDENTITY_MATRIX;
+            mat4.invert(c_tmpMatrix, c_tmpMatrix);
+            var normalMatrix = c_tmpMatrix ? mat4.transpose(c_tmpMatrix, c_tmpMatrix) : RenderObject.IDENTITY_MATRIX;
             this.setMat4InPage(normalMatrix, MODELVIEW_MATRIX_N_OFFSET);
         }
     })(),
@@ -255,7 +255,7 @@ XML3D.createClass(RenderObject, RenderNode, {
     updateModelViewProjectionMatrix: function (projection) {
         var page = this.page;
         var offset = this.offset;
-        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEWPROJECTION_MATRIX_OFFSET, page, offset + MODELVIEW_MATRIX_OFFSET, projection.data, 0);
+        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEWPROJECTION_MATRIX_OFFSET, page, offset + MODELVIEW_MATRIX_OFFSET, projection, 0);
     },
 
     setTransformDirty: function () {
@@ -317,7 +317,7 @@ XML3D.createClass(RenderObject, RenderNode, {
 
     updateWorldSpaceBoundingBox: (function () {
         var c_box = new XML3D.Box();
-        var c_trans = new XML3D.Mat4();
+        var c_trans = mat4.create();
 
         return function () {
             if(!this.visible) {

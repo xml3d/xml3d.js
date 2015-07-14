@@ -1,8 +1,8 @@
 var RenderNode = require("./rendernode.js");
 var Constants = require("./constants.js");
 var Frustum = require("../tools/frustum.js").Frustum;
-var Vec3 = require("../../../types/vec3.js");
-var Mat4 = require("../../../types/mat4.js");
+var vec3 = require("gl-matrix").vec3;
+var mat4 = require("gl-matrix").mat4;
 
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
@@ -30,10 +30,10 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
     var RenderView = function(scene, pageEntry, opt) {
         RenderNode.call(this, NODE_TYPE.VIEW, scene, pageEntry, opt);
         opt = opt || {};
-        this.position = opt.position || new Vec3();
-        this.orientation = opt.orientation || new Mat4();
+        this.position = opt.position || vec3.create();
+        this.orientation = opt.orientation || mat4.create();
         this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : DEFAULT_FIELDOFVIEW;
-        this.worldSpacePosition = new Vec3();
+        this.worldSpacePosition = vec3.create();
         this.projectionOverride = opt.projectionOverride;
         this.viewDirty = true;
         this.projectionDirty = true;
@@ -50,28 +50,28 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         },
 
         updateViewMatrix: (function() {
-            var tmp_mat4 = new Mat4();
-            var tmp_parent = new Mat4();
+            var tmp_mat4 = mat4.create();
+            var tmp_parent = mat4.create();
 
             return function () {
-                tmp_mat4.identity();
-                tmp_mat4.m41 = this.position.x;
-                tmp_mat4.m42 = this.position.y;
-                tmp_mat4.m43 = this.position.z;
+                mat4.identity(tmp_mat4);
+                tmp_mat4[12] = this.position[0];
+                tmp_mat4[13] = this.position[1];
+                tmp_mat4[14] = this.position[2];
                 // tmp = T * O
-                tmp_mat4.multiply(this.orientation);
+                mat4.multiply(tmp_mat4, tmp_mat4, this.orientation);
                 this.parent.getWorldMatrix(tmp_parent);
-                XML3D.math.mat4.multiply(tmp_mat4.data, tmp_parent.data, tmp_mat4.data);
-                this.worldSpacePosition.set(tmp_mat4.m41, tmp_mat4.m42, tmp_mat4.m43);
+                mat4.multiply(tmp_mat4, tmp_parent, tmp_mat4);
+                vec3.set(this.worldSpacePosition, tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
                 this.setViewToWorldMatrix(tmp_mat4);
-                tmp_mat4.invert();
+                mat4.invert(tmp_mat4, tmp_mat4);
                 this.setWorldToViewMatrix(tmp_mat4);
                 this.viewDirty = false;
             }
         })(),
 
         updateProjectionMatrix: (function() {
-            var tmp = new Mat4();
+            var tmp = mat4.create();
 
             return function(aspect) {
                 if (this.projectionOverride) {
@@ -87,7 +87,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
                     fovy = this.fieldOfView;
 
                 // Calculate perspective projectionMatrix
-                tmp.perspective(fovy, aspect, near, far);
+                mat4.perspective(tmp, fovy, aspect, near, far);
                 // Set projectionMatrix
                 this.setProjectionMatrix(tmp);
                 // Update Frustum
@@ -98,7 +98,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         })(),
 
         getClippingPlanes: (function() {
-            var t_mat = new XML3D.Mat4();
+            var t_mat = mat4.create();
             var bb = new XML3D.Box();
 
             return function() {
@@ -152,12 +152,12 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
 
         updatePosition: function(newPos) {
             this.setTransformDirty();
-            this.position.copy(newPos);
+            vec3.copy(this.position, newPos);
         },
 
         updateOrientation: function(newOrientation) {
             this.setTransformDirty();
-            this.orientation.copy(newOrientation);
+            mat4.copy(this.orientation, newOrientation);
         },
 
         updateFieldOfView: function(newFov) {

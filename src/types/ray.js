@@ -2,10 +2,14 @@ var Vec3 = require("./vec3.js");
 var vec3 = require("gl-matrix").vec3;
 
 var Ray = function(ray) {
-    this.data = new Float32Array(6);
-    this.data[5] = -1;
-    if (ray) {
-        this.data = ray.data ? ray.data : ray;
+    if (this instanceof Ray) {
+        this.data = new Float32Array(6);
+        this.data[5] = -1;
+        if (ray) {
+            this.data.set( ray.data ? ray.data : ray );
+        }
+    } else {
+        return new Ray(ray);
     }
 };
 
@@ -17,7 +21,7 @@ Object.defineProperty(Ray.prototype, "origin", {
         this.data[2] = val[2];
     },
     get: function(){
-        return new Vec3(this.data.subarray(0,3));
+        return Vec3.wrap(this.data.subarray(0,3));
     }
 });
 
@@ -30,7 +34,7 @@ Object.defineProperty(Ray.prototype, "direction", {
         this.data[5] = val[2];
     },
     get: function(){
-        return new Vec3(this.data.subarray(3,6));
+        return Vec3.wrap(this.data.subarray(3,6));
     }
 });
 

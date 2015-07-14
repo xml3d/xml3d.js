@@ -97,7 +97,7 @@ XML3DRenderAdapter.prototype.getComplete = function () {
 };
 
 XML3DRenderAdapter.prototype.getWorldBoundingBox = function () {
-    var bbox = new XML3D.Box()
+    var bbox = new XML3D.Box();
     Array.prototype.forEach.call(this.node.childNodes, function (c) {
         if (c.getWorldBoundingBox) {
             bbox.extend(c.getWorldBoundingBox());
@@ -108,6 +108,14 @@ XML3DRenderAdapter.prototype.getWorldBoundingBox = function () {
 //XML3D element is the root with no transform of its own so by definition it's always in world space
 XML3DRenderAdapter.prototype.getLocalBoundingBox = XML3DRenderAdapter.prototype.getWorldBoundingBox;
 
+/**
+ *
+ * @param x number x coordinate in screen space
+ * @param y number y coordinate in screen space
+ * @param hitPoint? XML3D.Vec3
+ * @param hitNormal? XML3D.Vec3
+ * @returns {*}
+ */
 XML3DRenderAdapter.prototype.getElementByPoint = function (x, y, hitPoint, hitNormal) {
     var relativeMousePos = Utils.convertPageCoords(this.node, x, y);
 
@@ -119,18 +127,22 @@ XML3DRenderAdapter.prototype.getElementByPoint = function (x, y, hitPoint, hitNo
     if (object) {
         if (hitPoint) {
             var vec = renderer.getWorldSpacePositionByPoint(relX, relY, object);
-            hitPoint.copy(vec);
+            XML3D.math.vec3.copy(hitPoint.data, vec);
         }
         if (hitNormal) {
             var vec = renderer.getWorldSpaceNormalByPoint(relX, relY, object);
-            hitNormal.copy(vec);
+            XML3D.math.vec3.copy(hitNormal.data, vec);
         }
     } else {
         if (hitPoint) {
-            hitPoint.set(NaN, NaN, NaN);
+            hitPoint.x = NaN;
+            hitPoint.y = NaN;
+            hitPoint.z = NaN;
         }
         if (hitNormal) {
-            hitNormal.set(NaN, NaN, NaN);
+            hitNormal.x = NaN;
+            hitNormal.y = NaN;
+            hitNormal.z = NaN;
         }
     }
     return object ? object.node : null;
@@ -146,8 +158,8 @@ XML3DRenderAdapter.prototype.generateRay = function (x, y) {
 };
 
 XML3DRenderAdapter.prototype.getElementByRay = (function () {
-    var c_viewMat = new XML3D.Mat4();
-    var c_projMat = new XML3D.Mat4();
+    var c_viewMat = XML3D.math.mat4.create();
+    var c_projMat = XML3D.math.mat4.create();
 
     return function (xml3dRay, hitPoint, hitNormal) {
         var renderer = this.factory.getRenderer();
@@ -156,18 +168,22 @@ XML3DRenderAdapter.prototype.getElementByRay = (function () {
         if (hitObject !== null && (hitPoint || hitNormal)) {
             if (hitPoint) {
                 var vec = renderer.getWorldSpacePositionByRay(xml3dRay, hitObject, c_viewMat, c_projMat);
-                hitPoint.copy(vec);
+                XML3D.math.vec3.copy(hitPoint.data, vec);
             }
             if (hitNormal) {
                 var vec = renderer.getWorldSpaceNormalByRay(xml3dRay, hitObject, c_viewMat, c_projMat);
-                hitNormal.copy(vec);
+                XML3D.math.vec3.copy(hitNormal.data, vec);
             }
         } else {
             if (hitPoint) {
-                hitPoint.set(NaN, NaN, NaN);
+                hitPoint.x = NaN;
+                hitPoint.y = NaN;
+                hitPoint.z = NaN;
             }
             if (hitNormal) {
-                hitNormal.set(NaN, NaN, NaN);
+                hitNormal.x = NaN;
+                hitNormal.y = NaN;
+                hitNormal.z = NaN;
             }
         }
         return hitObject !== null ? hitObject.node : null;

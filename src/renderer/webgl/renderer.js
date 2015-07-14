@@ -11,6 +11,9 @@ var GLU = require("../../contrib/glu.js");
 var Options = require("../../utils/options.js");
 var xml3dFormatHandler = require("../../base/formathandler.js").xml3dFormatHandler;
 var MAX_PICK_BUFFER_DIMENSION = 512;
+var vec3 = require("gl-matrix").vec3;
+var quat = require("gl-matrix").quat;
+var mat4 = require("gl-matrix").mat4;
 
 var OPTION_SSAO = "renderer-ssao";
 var FLAGS = {};
@@ -225,24 +228,24 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     calculateOrientationForRayDirection: (function () {
-        var tmpX = new XML3D.Vec3();
-        var tmpY = new XML3D.Vec3();
-        var tmpZ = new XML3D.Vec3();
-        var up = new XML3D.Vec3();
-        var q = new XML3D.Quat();
-        var m = new XML3D.Mat4();
+        var tmpX = vec3.create();
+        var tmpY = vec3.create();
+        var tmpZ = vec3.create();
+        var up = vec3.create();
+        var q = quat.create();
+        var m = mat4.create();
 
         return function (ray) {
-            up.set(0, 1, 0);
-            XML3D.math.vec3.cross(tmpX.data, ray.direction.data, up.data);
-            if (!tmpX.length()) {
-                tmpX.set(1, 0, 0);
+            vec3.set(up, 0, 1, 0);
+            vec3.cross(tmpX, ray.direction.data, up);
+            if (!vec3.length(tmpX)) {
+                vec3.set(tmpX, 1, 0, 0);
             }
-            XML3D.math.vec3.cross(tmpY.data, tmpX.data, ray.direction.data);
-            XML3D.math.vec3.negate(tmpZ.data, ray.direction.data);
+            vec3.cross(tmpY, tmpX, ray.direction.data);
+            vec3.negate(tmpZ, ray.direction.data);
 
-            q.setFromBasis(tmpX, tmpY, tmpZ);
-            m.setFromRotationTranslation(q, [0,0,0]);
+            XML3D.math.quat.setFromBasis(q, tmpX, tmpY, tmpZ);
+            mat4.fromRotationTranslation(m, q, [0,0,0]);
             return m;
         }
     })(),
@@ -286,8 +289,8 @@ XML3D.extend(GLRenderer.prototype, {
      */
     generateRay: (function () {
 
-        var c_viewMatrix = new XML3D.Mat4();
-        var c_projectionMatrix = new XML3D.Mat4();
+        var c_viewMatrix = mat4.create();
+        var c_projectionMatrix = mat4.create();
 
         return function (canvasX, canvasY) {
 
@@ -311,18 +314,18 @@ XML3D.extend(GLRenderer.prototype, {
             var farHit = new Float32Array(3);
 
             // do unprojections
-            if (false === GLU.unProject(canvasX, glY, 0, c_viewMatrix.data, c_projectionMatrix.data, viewport, nearHit)) {
+            if (false === GLU.unProject(canvasX, glY, 0, c_viewMatrix, c_projectionMatrix, viewport, nearHit)) {
                 return ray;
             }
 
-            if (false === GLU.unProject(canvasX, glY, 1, c_viewMatrix.data, c_projectionMatrix.data, viewport, farHit)) {
+            if (false === GLU.unProject(canvasX, glY, 1, c_viewMatrix, c_projectionMatrix, viewport, farHit)) {
                 return ray;
             }
 
             // calculate ray
-            c_viewMatrix.invert();
-            ray.origin = XML3D.math.vec3.fromValues(c_viewMatrix.m41, c_viewMatrix.m42, c_viewMatrix.m43);
-            ray.direction = XML3D.math.vec3.fromValues(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
+            mat4.invert(c_viewMatrix, c_viewMatrix);
+            ray.origin = vec3.fromValues(c_viewMatrix[12], c_viewMatrix[13], c_viewMatrix[14]);
+            ray.direction = vec3.fromValues(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
 
             return ray;
         }

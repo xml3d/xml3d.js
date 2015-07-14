@@ -1,5 +1,6 @@
 var SceneRenderPass = require("./scene-pass.js");
 var ObjectSorter = require("../../renderer/tools/objectsorter.js");
+var mat4 = require("gl-matrix").mat4;
 
 var ForwardRenderPass = function (renderInterface, output, opt) {
     SceneRenderPass.call(this, renderInterface, output, opt);
@@ -14,11 +15,11 @@ XML3D.extend(ForwardRenderPass.prototype, {
 
     render: (function () {
         /**
-         * @type XML3D.Mat4
+         * @type mat4
          */
-        var c_worldToViewMatrix = new XML3D.Mat4();
-        var c_viewToWorldMatrix = new XML3D.Mat4();
-        var c_projectionMatrix = new XML3D.Mat4();
+        var c_worldToViewMatrix = mat4.create();
+        var c_viewToWorldMatrix = mat4.create();
+        var c_projectionMatrix = mat4.create();
         var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "cameraPosition", "coords", "ssaoMap", "width"];
 
         return function (scene) {
@@ -37,10 +38,10 @@ XML3D.extend(ForwardRenderPass.prototype, {
 
             var sorted = this.sorter.sortScene(scene, c_worldToViewMatrix);
 
-            systemUniforms["viewMatrix"] = c_worldToViewMatrix.data;
-            systemUniforms["viewInverseMatrix"] = c_viewToWorldMatrix.data;
-            systemUniforms["projectionMatrix"] = c_projectionMatrix.data;
-            systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition().data;
+            systemUniforms["viewMatrix"] = c_worldToViewMatrix;
+            systemUniforms["viewInverseMatrix"] = c_viewToWorldMatrix;
+            systemUniforms["projectionMatrix"] = c_projectionMatrix;
+            systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
             systemUniforms["coords"] = [target.width, target.height, 1];
 
             if (this.inputs.ssaoMap)

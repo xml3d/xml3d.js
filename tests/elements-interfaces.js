@@ -244,7 +244,7 @@ test("Vec4 interface tests", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "transform");
 
     // Set via interface
-        QUnit.closeArray(e.rotation.data, [0,0,0,1], EPSILON, "rotation is '0 0 0 1' initially.");
+        QUnit.closeArray(e.rotation.data, [0,0,1,0], EPSILON, "rotation is '0 0 1 0' initially.");
 
         e.rotation = [0,1,0,0];
         QUnit.closeArray(e.rotation.data, [0,1,0,0], EPSILON, "rotation changed after set");
@@ -257,7 +257,7 @@ test("Vec4 interface tests", function() {
         QUnit.closeArray(e.rotation.data,[1,0,0,3.14], EPSILON, "Value set via setAttribute to '1 0 0 3.14'.");
 
         e.setAttribute("rotation", "asdf");
-        QUnit.closeArray(e.rotation.data, [0,0,0,1], EPSILON, "Invalid value set via setAttribute. Back to default.");
+        QUnit.closeArray(e.rotation.data, [0,0,1,0], EPSILON, "Invalid value set via setAttribute. Back to default.");
     });
 
 test("Enumeration interface tests", function() {

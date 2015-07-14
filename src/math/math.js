@@ -268,11 +268,11 @@ module.exports = function (math) {
         var s = Math.sqrt(1-q[3]*q[3]);
         var angle = 2*Math.acos(q[3]);
         if (s < 0.0001) {
-            // Axis is practically 0 so we return the identity quaternion
+            // Axis is practically 0 so we return the identity axis angle
             dest[0] = 0;
             dest[1] = 0;
-            dest[2] = 0;
-            dest[3] = 1;
+            dest[2] = 1;
+            dest[3] = 0;
         } else {
             dest[0] = q[0] / s;
             dest[1] = q[1] / s;

@@ -84,9 +84,9 @@ test("view::lookAt tests", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
     ok(node);
     QUnit.closeVector(node.position, XML3D.math.vec3.create(), EPSILON, "Default position");
-    QUnit.closeRotation(node.orientation.data, [0,0,0,1], EPSILON, "Default orientation");
+    QUnit.closeRotation(node.orientation.data, [0,0,1,0], EPSILON, "Default orientation");
     node.lookAt(XML3D.Vec3.fromValues(0,0,-10));
-    QUnit.closeRotation(node.orientation.data, [0,0,0,1], EPSILON, "Look along default direction");
+    QUnit.closeRotation(node.orientation.data, [0,0,1,0], EPSILON, "Look along default direction");
     node.lookAt(XML3D.Vec3.fromValues(10,0,0));
     QUnit.closeRotation(node.orientation.data, [0,-1,0, Math.PI/2.0], EPSILON, "Look to the right");
     node.lookAt(XML3D.Vec3.fromValues(0,0,10));
@@ -99,7 +99,7 @@ test("view::setUpVector tests", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
     ok(node);
     QUnit.closeVector(node.position, XML3D.math.vec3.create(), EPSILON, "Default position");
-    QUnit.closeRotation(node.orientation.data, XML3D.math.vec4.fromValues(0,0,0,1), EPSILON, "Default orientation");
+    QUnit.closeRotation(node.orientation.data, XML3D.math.vec4.fromValues(0,0,1,0), EPSILON, "Default orientation");
     node.setUpVector(XML3D.Vec3.fromValues(0,0,1));
     QUnit.closeRotation(node.orientation, [1,0,0, Math.PI/2.0], EPSILON, "Up vector is +z");
     node.orientation = new XML3D.Vec4();
@@ -111,7 +111,7 @@ test("view::setDirection tests", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
     ok(node);
     QUnit.closeVector(node.position, XML3D.math.vec3.create(), EPSILON, "Default position");
-    QUnit.closeRotation(node.orientation, [0,0,0,1], EPSILON, "Default orientation");
+    QUnit.closeRotation(node.orientation, [0,0,1,0], EPSILON, "Default orientation");
     node.setDirection(XML3D.Vec3.fromValues(0,1,0));
     QUnit.closeRotation(node.orientation, [1,0,0, Math.PI/2.0], EPSILON, "Up vector is +z");
 });

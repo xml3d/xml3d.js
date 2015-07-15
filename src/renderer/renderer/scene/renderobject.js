@@ -4,6 +4,7 @@ var DrawableClosure= require("./drawableclosure.js");
 var C = require("./constants.js");
 var Scene= require("./scene.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
+var mat4 = require("gl-matrix").mat4;
 
 // Entry:
 /** @const */
@@ -92,14 +93,13 @@ var RenderObject = function (scene, pageEntry, opt) {
 };
 RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
-RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
+RenderObject.IDENTITY_MATRIX = mat4.create();
 
 XML3D.createClass(RenderObject, RenderNode, {
     createTransformRequest: function () {
         if (!this.object.data)
             return null;
-        var request = new ComputeRequest(this.object.data, ["meshTransform"], this.onTransformDataChange.bind(this));
-        return request;
+        return new ComputeRequest(this.object.data, ["meshTransform"], this.onTransformDataChange.bind(this));
     },
 
     createDrawable: function () {
@@ -136,17 +136,11 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     getLocalMatrix: function (dest) {
-        var o = this.offset + LOCAL_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            dest[i] = this.page[o];
-        }
+        this.getMat4FromPage(dest, LOCAL_MATRIX_OFFSET);
     },
 
     setLocalMatrix: function (source) {
-        var o = this.offset + LOCAL_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            this.page[o] = source[i];
-        }
+        this.setMat4InPage(source, LOCAL_MATRIX_OFFSET);
         this.setTransformDirty();
         this.setBoundingBoxDirty();
     },
@@ -154,49 +148,45 @@ XML3D.createClass(RenderObject, RenderNode, {
     dispose: function () {
         this.transformDataRequest && this.transformDataRequest.clear();
         this.scene.remove(this);
-    }, onTransformDataChange: function () {
+    },
+
+    onTransformDataChange: function () {
         this.setTransformDirty();
     },
 
-    getModelViewMatrix: function (target) {
-        var o = this.offset + MODELVIEW_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            target[i] = this.page[o];
-        }
+    getModelViewMatrix: function (dest) {
+        this.getMat4FromPage(dest, MODELVIEW_MATRIX_OFFSET);
     },
 
-    getModelMatrixN: function (target) {
+    getModelMatrixN: function (dest) {
         var o = this.offset + MODEL_MATRIX_N_OFFSET;
-        target[0] = this.page[o];
-        target[1] = this.page[o + 1];
-        target[2] = this.page[o + 2];
-        target[3] = this.page[o + 4];
-        target[4] = this.page[o + 5];
-        target[5] = this.page[o + 6];
-        target[6] = this.page[o + 8];
-        target[7] = this.page[o + 9];
-        target[8] = this.page[o + 10];
+        dest[0] = this.page[o];
+        dest[1] = this.page[o + 1];
+        dest[2] = this.page[o + 2];
+        dest[3] = this.page[o + 4];
+        dest[4] = this.page[o + 5];
+        dest[5] = this.page[o + 6];
+        dest[6] = this.page[o + 8];
+        dest[7] = this.page[o + 9];
+        dest[8] = this.page[o + 10];
     },
 
-    getModelViewMatrixN: function (target) {
+    getModelViewMatrixN: function (dest) {
         var o = this.offset + MODELVIEW_MATRIX_N_OFFSET;
-        target[0] = this.page[o];
-        target[1] = this.page[o + 1];
-        target[2] = this.page[o + 2];
-        target[3] = this.page[o + 4];
-        target[4] = this.page[o + 5];
-        target[5] = this.page[o + 6];
-        target[6] = this.page[o + 8];
-        target[7] = this.page[o + 9];
-        target[8] = this.page[o + 10];
+        dest[0] = this.page[o];
+        dest[1] = this.page[o + 1];
+        dest[2] = this.page[o + 2];
+        dest[3] = this.page[o + 4];
+        dest[4] = this.page[o + 5];
+        dest[5] = this.page[o + 6];
+        dest[6] = this.page[o + 8];
+        dest[7] = this.page[o + 9];
+        dest[8] = this.page[o + 10];
     },
 
 
     getModelViewProjectionMatrix: function (dest) {
-        var o = this.offset + MODELVIEWPROJECTION_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            dest[i] = this.page[o];
-        }
+        this.getMat4FromPage(dest, MODELVIEWPROJECTION_MATRIX_OFFSET);
     },
 
     updateWorldSpaceMatrices: function (view, projection) {
@@ -210,7 +200,7 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     updateWorldMatrix: (function () {
-        var tmp_mat = XML3D.math.mat4.create();
+        var tmp_mat = mat4.create();
         return function () {
             this.parent.getWorldMatrix(tmp_mat);
             var page = this.page;
@@ -240,29 +230,23 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     updateModelMatrixN: (function () {
-        var c_tmpMatrix = XML3D.math.mat4.create();
+        var c_tmpMatrix = mat4.create();
         return function () {
             this.getWorldMatrix(c_tmpMatrix);
-            var normalMatrix = XML3D.math.mat4.invert(c_tmpMatrix, c_tmpMatrix);
-            normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : RenderObject.IDENTITY_MATRIX;
-            var o = this.offset + MODEL_MATRIX_N_OFFSET;
-            for (var i = 0; i < 16; i++, o++) {
-                this.page[o] = normalMatrix[i];
-            }
+            mat4.invert(c_tmpMatrix, c_tmpMatrix);
+            var normalMatrix = c_tmpMatrix ? mat4.transpose(c_tmpMatrix, c_tmpMatrix) : RenderObject.IDENTITY_MATRIX;
+            this.setMat4InPage(normalMatrix, MODEL_MATRIX_N_OFFSET);
         }
     })(),
 
     /** Relies on an up-to-date view matrix **/
     updateModelViewMatrixN: (function () {
-        var c_tmpMatrix = XML3D.math.mat4.create();
+        var c_tmpMatrix = mat4.create();
         return function () {
             this.getModelViewMatrix(c_tmpMatrix);
-            var normalMatrix = XML3D.math.mat4.invert(c_tmpMatrix, c_tmpMatrix);
-            normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : RenderObject.IDENTITY_MATRIX;
-            var o = this.offset + MODELVIEW_MATRIX_N_OFFSET;
-            for (var i = 0; i < 16; i++, o++) {
-                this.page[o] = normalMatrix[i];
-            }
+            mat4.invert(c_tmpMatrix, c_tmpMatrix);
+            var normalMatrix = c_tmpMatrix ? mat4.transpose(c_tmpMatrix, c_tmpMatrix) : RenderObject.IDENTITY_MATRIX;
+            this.setMat4InPage(normalMatrix, MODELVIEW_MATRIX_N_OFFSET);
         }
     })(),
 
@@ -283,23 +267,23 @@ XML3D.createClass(RenderObject, RenderNode, {
 
     setObjectSpaceBoundingBox: function (box) {
         var o = this.offset + OBJECT_BB_OFFSET;
-        this.page[o] = box[0];
-        this.page[o + 1] = box[1];
-        this.page[o + 2] = box[2];
-        this.page[o + 3] = box[3];
-        this.page[o + 4] = box[4];
-        this.page[o + 5] = box[5];
+        this.page[o] = box.data[0];
+        this.page[o + 1] = box.data[1];
+        this.page[o + 2] = box.data[2];
+        this.page[o + 3] = box.data[3];
+        this.page[o + 4] = box.data[4];
+        this.page[o + 5] = box.data[5];
         this.setBoundingBoxDirty();
     },
 
     getObjectSpaceBoundingBox: function (box) {
         var o = this.offset + OBJECT_BB_OFFSET;
-        box[0] = this.page[o];
-        box[1] = this.page[o + 1];
-        box[2] = this.page[o + 2];
-        box[3] = this.page[o + 3];
-        box[4] = this.page[o + 4];
-        box[5] = this.page[o + 5];
+        box.data[0] = this.page[o];
+        box.data[1] = this.page[o + 1];
+        box.data[2] = this.page[o + 2];
+        box.data[3] = this.page[o + 3];
+        box.data[4] = this.page[o + 4];
+        box.data[5] = this.page[o + 5];
     },
 
     setBoundingBoxDirty: function () {
@@ -309,12 +293,12 @@ XML3D.createClass(RenderObject, RenderNode, {
 
     setWorldSpaceBoundingBox: function (bbox) {
         var o = this.offset + WORLD_BB_OFFSET;
-        this.page[o] = bbox[0];
-        this.page[o + 1] = bbox[1];
-        this.page[o + 2] = bbox[2];
-        this.page[o + 3] = bbox[3];
-        this.page[o + 4] = bbox[4];
-        this.page[o + 5] = bbox[5];
+        this.page[o] = bbox.data[0];
+        this.page[o + 1] = bbox.data[1];
+        this.page[o + 2] = bbox.data[2];
+        this.page[o + 3] = bbox.data[3];
+        this.page[o + 4] = bbox.data[4];
+        this.page[o + 5] = bbox.data[5];
     },
 
     getWorldSpaceBoundingBox: function (bbox) {
@@ -322,26 +306,26 @@ XML3D.createClass(RenderObject, RenderNode, {
             this.updateWorldSpaceBoundingBox();
         }
         var o = this.offset + WORLD_BB_OFFSET;
-        bbox[0] = this.page[o];
-        bbox[1] = this.page[o + 1];
-        bbox[2] = this.page[o + 2];
-        bbox[3] = this.page[o + 3];
-        bbox[4] = this.page[o + 4];
-        bbox[5] = this.page[o + 5];
+        bbox.data[0] = this.page[o];
+        bbox.data[1] = this.page[o + 1];
+        bbox.data[2] = this.page[o + 2];
+        bbox.data[3] = this.page[o + 3];
+        bbox.data[4] = this.page[o + 4];
+        bbox.data[5] = this.page[o + 5];
 
     },
 
     updateWorldSpaceBoundingBox: (function () {
-        var c_box = new XML3D.math.bbox.create();
-        var c_trans = new XML3D.math.mat4.create();
+        var c_box = new XML3D.Box();
+        var c_trans = mat4.create();
 
         return function () {
             if(!this.visible) {
-                XML3D.math.bbox.empty(c_box);
+                c_box.setEmpty();
             } else {
                 this.getObjectSpaceBoundingBox(c_box);
                 this.getWorldMatrix(c_trans);
-                XML3D.math.bbox.transformAxisAligned(c_box, c_trans, c_box);
+                c_box.transformAxisAligned(c_trans);
             }
             this.setWorldSpaceBoundingBox(c_box);
             this.boundingBoxDirty = false;
@@ -379,12 +363,12 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     findRayIntersections: (function () {
-        var bbox = XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
         var opt = {dist: 0};
 
         return function (ray, intersections) {
             this.getWorldSpaceBoundingBox(bbox);
-            if (XML3D.math.bbox.intersects(bbox, ray, opt)) {
+            if (ray.intersects(bbox, opt)) {
                 intersections.push(this);
             }
         }

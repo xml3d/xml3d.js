@@ -12,6 +12,7 @@ var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
 var XC = require("../../../xflow/interface/constants.js");
 var URI = require("../../../utils/uri.js").URI;
 var EventEmitter = require('events').EventEmitter;
+var mat4 = require("gl-matrix").mat4;
 
 /**
  * @extends {EventEmitter}
@@ -19,7 +20,7 @@ var EventEmitter = require('events').EventEmitter;
  */
 var Scene = function () {
     EventEmitter.call(this);
-    this.boundingBox = new XML3D.math.bbox.create();
+    this.boundingBox = new XML3D.Box();
     this.lights = new LightManager();
     this.pager = new Pager();
 
@@ -82,8 +83,8 @@ XML3D.createClass(Scene, EventEmitter, {
         var root = new RenderGroup(this, pageEntry, {
             material: this.getDefaultMaterial(), name: "@scene"
         });
-        root.setWorldMatrix(XML3D.math.mat4.create());
-        root.setLocalMatrix(XML3D.math.mat4.create());
+        root.setWorldMatrix(mat4.create());
+        root.setLocalMatrix(mat4.create());
         root.transformDirty = false;
         return root;
     },
@@ -98,7 +99,7 @@ XML3D.createClass(Scene, EventEmitter, {
 
     getBoundingBox: function (bb) {
         this.updateBoundingBox();
-        XML3D.math.bbox.copy(bb, this.boundingBox);
+        bb.copy(this.boundingBox);
     },
 
     createDrawable: function (/*obj*/) {

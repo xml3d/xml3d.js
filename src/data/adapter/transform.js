@@ -1,5 +1,7 @@
 var Events = require("../../interface/notification.js");
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
+var mat4 = require("gl-matrix").mat4;
+var vec3 = require("gl-matrix").vec3;
 
 var TransformDataAdapter = function (factory, node) {
     NodeAdapter.call(this, factory, node);
@@ -9,19 +11,19 @@ var TransformDataAdapter = function (factory, node) {
 
 XML3D.createClass(TransformDataAdapter, NodeAdapter);
 
-var IDENT_MAT = XML3D.math.mat4.identity(XML3D.math.mat4.create());
+var IDENT_MAT = mat4.create();
 
 TransformDataAdapter.prototype.init = function () {
     // Create all matrices, no valid values yet
-    this.matrix = XML3D.math.mat4.create();
+    this.matrix = mat4.create();
     this.transform = {
-        translate: XML3D.math.mat4.create(),
-        scale: XML3D.math.mat4.create(),
-        scaleOrientation: XML3D.math.mat4.create(),
-        scaleOrientationInv: XML3D.math.mat4.create(),
-        center: XML3D.math.mat4.create(),
-        centerInverse: XML3D.math.mat4.create(),
-        rotation: XML3D.math.mat4.create()
+        translate: mat4.create(),
+        scale: mat4.create(),
+        scaleOrientation: mat4.create(),
+        scaleOrientationInv: mat4.create(),
+        center: mat4.create(),
+        centerInverse: mat4.create(),
+        rotation: mat4.create()
     };
     this.needsUpdate = true;
     this.checkForImproperNesting();
@@ -30,18 +32,18 @@ TransformDataAdapter.prototype.init = function () {
 TransformDataAdapter.prototype.updateMatrix = function () {
     var n = this.node;
     var transform = this.transform;
-    var centerVec = n.center;
-    var so = n.scaleOrientation;
-    var ro = n.rotation;
+    var centerVec = n.center.data;
+    var so = n.scaleOrientation.data;
+    var ro = n.rotation.data;
 
-    XML3D.math.mat4.fromRotation(transform.scaleOrientation, so[3], so);
-    XML3D.math.mat4.fromRotation(transform.rotation, ro[3], ro);
+    mat4.fromRotation(transform.scaleOrientation, so[3], so);
+    mat4.fromRotation(transform.rotation, ro[3], ro);
 
-    XML3D.math.mat4.translate(transform.translate, IDENT_MAT, n.translation);
-    XML3D.math.mat4.translate(transform.center, IDENT_MAT, centerVec);
-    XML3D.math.mat4.translate(transform.centerInverse, IDENT_MAT, XML3D.math.vec3.negate(centerVec, centerVec));
-    XML3D.math.mat4.scale(transform.scale, IDENT_MAT, n.scale);
-    XML3D.math.mat4.invert(transform.scaleOrientationInv, transform.scaleOrientation);
+    mat4.translate(transform.translate, IDENT_MAT, n.translation.data);
+    mat4.translate(transform.center, IDENT_MAT, centerVec);
+    mat4.translate(transform.centerInverse, IDENT_MAT, vec3.negate(centerVec, centerVec));
+    mat4.scale(transform.scale, IDENT_MAT, n.scale.data);
+    mat4.invert(transform.scaleOrientationInv, transform.scaleOrientation);
 
     multiplyComponents(transform, this.matrix);
     this.needsUpdate = false;
@@ -49,17 +51,17 @@ TransformDataAdapter.prototype.updateMatrix = function () {
 
 function multiplyComponents(transform, matrix) {
     // M = T * C
-    XML3D.math.mat4.multiply(matrix, transform.translate, transform.center);
+    mat4.multiply(matrix, transform.translate, transform.center);
     // M = T * C * R
-    XML3D.math.mat4.multiply(matrix, matrix, transform.rotation);
+    mat4.multiply(matrix, matrix, transform.rotation);
     // M = T * C * R * SO
-    XML3D.math.mat4.multiply(matrix, matrix, transform.scaleOrientation);
+    mat4.multiply(matrix, matrix, transform.scaleOrientation);
     // M = T * C * R * SO * S
-    XML3D.math.mat4.multiply(matrix, matrix, transform.scale);
+    mat4.multiply(matrix, matrix, transform.scale);
     // M = T * C * R * SO * S * -SO
-    XML3D.math.mat4.multiply(matrix, matrix, transform.scaleOrientationInv);
+    mat4.multiply(matrix, matrix, transform.scaleOrientationInv);
     // M = T * C * R * SO * S * -SO * -C
-    XML3D.math.mat4.multiply(matrix, matrix, transform.centerInverse);
+    mat4.multiply(matrix, matrix, transform.centerInverse);
 }
 
 TransformDataAdapter.prototype.getMatrix = function () {

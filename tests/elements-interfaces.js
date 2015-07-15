@@ -224,40 +224,40 @@ test("Vec3 interface tests", function() {
     equal(e.getAttribute("scale"), null, "Attribute has not been set yet.");
 
     // Set via interface
-        QUnit.closeArray(e.scale, [1,1,1], EPSILON, "transform.scale is '1 1 1' initially.");
+        QUnit.closeArray(e.scale.data, [1,1,1], EPSILON, "transform.scale is '1 1 1' initially.");
 
-        e.scale = XML3D.math.vec3.fromValues(1,0,0);
-        QUnit.closeArray(e.scale, [1,0,0], EPSILON, "transform.scale changed after set");
+        e.scale = XML3D.Vec3.fromValues(1,0,0);
+        QUnit.closeArray(e.scale.data, [1,0,0], EPSILON, "transform.scale changed after set");
 
         // Attribute is synced
         equal(e.getAttribute("scale"), "1 0 0", "getAttribute = '1 0 0'.");
 
         // Set via attribute
         e.setAttribute("scale", "1 2 3");
-        QUnit.closeArray(e.scale, [1,2,3], EPSILON, "Value set via setAttribute to '1 2 3'.");
+        QUnit.closeArray(e.scale.data, [1,2,3], EPSILON, "Value set via setAttribute to '1 2 3'.");
 
         e.setAttribute("scale", "asdf");
-        QUnit.closeArray(e.scale, [1,1,1], EPSILON, "Invalid value set via setAttribute. Back to default: 1 1 1.");
+        QUnit.closeArray(e.scale.data, [1,1,1], EPSILON, "Invalid value set via setAttribute. Back to default: 1 1 1.");
     });
 
 test("Vec4 interface tests", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "transform");
 
     // Set via interface
-        QUnit.closeArray(e.rotation, [0,0,0,1], EPSILON, "rotation is '0 0 0 1' initially.");
+        QUnit.closeArray(e.rotation.data, [0,0,1,0], EPSILON, "rotation is '0 0 1 0' initially.");
 
         e.rotation = [0,1,0,0];
-        QUnit.closeArray(e.rotation, [0,1,0,0], EPSILON, "rotation changed after set");
+        QUnit.closeArray(e.rotation.data, [0,1,0,0], EPSILON, "rotation changed after set");
 
         // Attribute is synced
         equal(e.getAttribute("rotation"), "0 1 0 0", "getAttribute = '0 1 0 0'.");
 
         // Set via attribute
         e.setAttribute("rotation", "1 0 0 3.14");
-        QUnit.closeArray(e.rotation,[1,0,0,3.14], EPSILON, "Value set via setAttribute to '1 0 0 3.14'.");
+        QUnit.closeArray(e.rotation.data,[1,0,0,3.14], EPSILON, "Value set via setAttribute to '1 0 0 3.14'.");
 
         e.setAttribute("rotation", "asdf");
-        QUnit.closeArray(e.rotation, [0,0,0,1], EPSILON, "Invalid value set via setAttribute. Back to default.");
+        QUnit.closeArray(e.rotation.data, [0,0,1,0], EPSILON, "Invalid value set via setAttribute. Back to default.");
     });
 
 test("Enumeration interface tests", function() {
@@ -334,8 +334,8 @@ test("Interface initialization", function() {
     var m = this.doc.getElementById("myMesh01");
     var g = this.doc.getElementById("myGroup");
 
-    QUnit.closeArray(t.translation, [1,2,3], EPSILON, "XML3DVec3 (transform::translation) initialized.");
-    QUnit.closeArray(t.rotation, [1,0,0,1.5708], EPSILON, "XML3DRotation (transform::rotation) initialized.");
+    QUnit.closeArray(t.translation.data, [1,2,3], EPSILON, "XML3D.Vec3 (transform::translation) initialized.");
+    QUnit.closeArray(t.rotation.data, [1,0,0,1.5708], EPSILON, "XML3D.Vec4 (transform::rotation) initialized.");
     QUnit.close(v.fieldOfView, 0.5, EPSILON, "Float (view::rotation) initialized.");
     equal(x.width, 1000, "Int (xml3d::width) initialized.");
     equal(m.type, "lines", "Enumeration (mesh::type) initialized.");

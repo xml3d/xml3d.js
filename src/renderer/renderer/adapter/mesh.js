@@ -9,7 +9,6 @@ var MeshRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, true, true);
     this.style = window.getComputedStyle(node);
     this.createRenderNode();
-
 };
 
 XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
@@ -79,10 +78,10 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
     // Interface methods
 
     /**
-     * @return {XML3D.math.bbox}
+     * @return {XML3D.Box}
      */
     getLocalBoundingBox: function () {
-        var bbox = new XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
         if (this.renderNode && this.renderNode.visible) {
             this.renderNode.getObjectSpaceBoundingBox(bbox);
         }
@@ -90,10 +89,10 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
     },
 
     /**
-     * @return {XML3D.math.bbox}
+     * @return {XML3D.Box}
      */
     getWorldBoundingBox: function () {
-        var bbox = new XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
         if (this.renderNode && this.renderNode.visible) {
             this.renderNode.getWorldSpaceBoundingBox(bbox);
         }
@@ -104,9 +103,9 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
      * @return {mat4}
      */
     getWorldMatrix: function () {
-        var m = XML3D.math.mat4.create(), obj = this.renderNode;
+        var m = new XML3D.Mat4(), obj = this.renderNode;
         if (obj) {
-            obj.getWorldMatrix(m);
+            obj.getWorldMatrix(m.data);
         }
         return m;
     }

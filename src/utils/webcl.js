@@ -8,8 +8,6 @@
 
 (function (namespace, undefined) {
 
-    "use strict";
-
     var platforms = [],
         devices = [],
         ctx = null,

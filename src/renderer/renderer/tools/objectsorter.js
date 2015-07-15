@@ -1,3 +1,5 @@
+var vec3 = require("gl-matrix").vec3;
+
 /**
  *
  * @constructor
@@ -6,13 +8,13 @@ var ObjectSorter = function () {
 
 };
 
-var c_bbox = XML3D.math.bbox.create();
-var c_center = XML3D.math.vec3.create();
+var c_bbox = new XML3D.Box();
+var c_center = vec3.create();
 
 XML3D.extend(ObjectSorter.prototype, {
     /**
      * @param {GLScene} scene
-     * @param {Float32Array?} viewMatrix Matrix to apply to objects world space extend before sorting
+     * @param {XML3D.Mat4?} viewMatrix Matrix to apply to objects world space extend before sorting
      */
     sortScene: function (scene, viewMatrix) {
         var sourceObjectArray = scene.ready, opaque = {}, transparent = [];
@@ -40,10 +42,10 @@ XML3D.extend(ObjectSorter.prototype, {
             for (i = 0; i < withinShader.length; i++) {
                 obj = withinShader[i];
                 obj.getWorldSpaceBoundingBox(c_bbox);
-                XML3D.math.bbox.center(c_center, c_bbox);
-                viewMatrix && XML3D.math.vec3.transformMat4(c_center, c_center, viewMatrix);
+                c_bbox.center(c_center);
+                viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
                 sortedArray[i] = {
-                    obj: obj, depth: c_center[2]
+                    obj: obj, depth: c_center.z
                 };
             }
             sortedArray.sort(function (a, b) {
@@ -58,9 +60,9 @@ XML3D.extend(ObjectSorter.prototype, {
             for (i = 0; i < tlength; i++) {
                 obj = transparentArray[i];
                 obj.getWorldSpaceBoundingBox(c_bbox);
-                XML3D.math.bbox.center(c_center, c_bbox);
-                viewMatrix && XML3D.math.vec3.transformMat4(c_center, c_center, viewMatrix);
-                transparentArray[i] = [obj, c_center[2]];
+                c_bbox.center(c_center);
+                viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
+                transparentArray[i] = [obj, c_center.z];
             }
 
             transparentArray.sort(function (a, b) {

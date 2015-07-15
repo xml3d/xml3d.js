@@ -29,31 +29,31 @@ test("Defaults", function() {
         QUnit.closeMatrix(elems[elem].getWorldMatrix(), a, EPSILON, "Untransformed " + elems[elem].nodeName
                 + " delivers indentity world matrix");
 
-    QUnit.closeMatrix(elems.view.getViewMatrix(), a, EPSILON, "Untransformed view matrix");
+    QUnit.closeMatrix(elems.view.getViewMatrix().data, a, EPSILON, "Untransformed view matrix");
 });
 
 test("View Transformation local", function() {
     var view = this.doc.getElementById("myView");
 
-    var axis = XML3D.math.vec3.fromValues(1, 0, 0);
     var m = XML3D.math.mat4.create();
     XML3D.math.mat4.translate(m,m,[0,0,10]);
     XML3D.math.mat4.invert(m, m);
 
-    view.position = [view.position[0], view.position[1], 10.0];
+    view.position = [view.position.data[0], view.position.data[1], 10.0];
     QUnit.closeMatrix(view.getViewMatrix(), m, EPSILON, "View translated to 0,0,10.");
-    QUnit.close(view.getViewMatrix()[14], -10, EPSILON, "Checked entry in matrix");
+    QUnit.close(view.getViewMatrix().data[14], -10, EPSILON, "Checked entry in matrix");
 
     // Turn around
-    view.orientation = [axis[0], axis[1], axis[2], Math.PI / 2];
+    var axis = XML3D.math.vec3.fromValues(1, 0, 0);
+    view.orientation = XML3D.AxisAngle.fromValues(1,0,0,Math.PI/2.0);
     var q = XML3D.math.vec4.create();
     m = XML3D.math.mat4.create();
     XML3D.math.quat.setAxisAngle(q, axis, Math.PI /2);
     XML3D.math.mat4.fromRotationTranslation(m, q, [0,0,10]);
     XML3D.math.mat4.invert(m,m);
     QUnit.closeMatrix(view.getViewMatrix(), m, EPSILON, "View oriented around x-Axis.");
-    QUnit.close(view.getViewMatrix()[13], -10, EPSILON, "Checked entry in matrix");
-    QUnit.close(view.getViewMatrix()[6], -1, EPSILON, "Checked entry in matrix");
+    QUnit.close(view.getViewMatrix().data[13], -10, EPSILON, "Checked entry in matrix");
+    QUnit.close(view.getViewMatrix().data[6], -1, EPSILON, "Checked entry in matrix");
 
     view.setAttribute("orientation", "0 1 0 " + Math.PI / 4);
     view.setAttribute("position", "1 2 3");
@@ -63,10 +63,10 @@ test("View Transformation local", function() {
     XML3D.math.mat4.invert(m, m);
     QUnit.closeMatrix(view.getViewMatrix(), m, EPSILON, "View set with attributes.");
     var halfSqrt = Math.sqrt(0.5);
-    QUnit.close(view.getViewMatrix()[0], halfSqrt, EPSILON, "Checked entry in matrix");
-    QUnit.close(view.getViewMatrix()[2], halfSqrt, EPSILON, "Checked entry in matrix");
-    QUnit.close(view.getViewMatrix()[8], -halfSqrt, EPSILON, "Checked entry in matrix");
-    QUnit.close(view.getViewMatrix()[10], halfSqrt, EPSILON, "Checked entry in matrix");
+    QUnit.close(view.getViewMatrix().data[0], halfSqrt, EPSILON, "Checked entry in matrix");
+    QUnit.close(view.getViewMatrix().data[2], halfSqrt, EPSILON, "Checked entry in matrix");
+    QUnit.close(view.getViewMatrix().data[8], -halfSqrt, EPSILON, "Checked entry in matrix");
+    QUnit.close(view.getViewMatrix().data[10], halfSqrt, EPSILON, "Checked entry in matrix");
 });
 
 test("Group Transformation local", function() {
@@ -108,27 +108,27 @@ test("Hierarchy", function() {
     QUnit.closeMatrix(child1.getWorldMatrix(), parent.getWorldMatrix(), EPSILON, "World Matrix of child");
     QUnit.closeMatrix(child1.getWorldMatrix(), child2.getWorldMatrix(), EPSILON, "World Matrix of child");
     child1.transform = "#t_rotation2";
-    var mat = XML3D.math.mat4.create();
-    QUnit.closeMatrix(child1.getLocalMatrix(), XML3D.math.mat4.rotateY(mat, mat, Math.PI/2.0), EPSILON, "Child1 matrix is now a rotation matrix.");
+    var mat = new XML3D.Mat4();
+    QUnit.closeMatrix(child1.getLocalMatrix(),mat.rotateY(Math.PI/2.0), EPSILON, "Child1 matrix is now a rotation matrix.");
     mat = parent.getWorldMatrix();
-    QUnit.closeMatrix(child1.getWorldMatrix(), XML3D.math.mat4.rotateY(mat, mat, Math.PI/2.0), EPSILON, "World Matrix of child not changed through local matrix change.");
+    QUnit.closeMatrix(child1.getWorldMatrix(), mat.rotateY(Math.PI/2.0), EPSILON, "World Matrix of child not changed through local matrix change.");
     QUnit.closeMatrix(child2.getLocalMatrix(), XML3D.math.mat4.create(), EPSILON, "Child2 matrix is still identity");
 
     //Change parent transformation
     parent.transform = "#t_rotation3";
-    mat = XML3D.math.mat4.create();
-    QUnit.closeMatrix(parent.getLocalMatrix(), XML3D.math.mat4.rotateZ(mat, mat, Math.PI/2.0), EPSILON, "New parent local matrix");
-    mat = XML3D.math.mat4.create();
-    QUnit.closeMatrix(child1.getWorldMatrix(), XML3D.math.mat4.rotateY(mat, XML3D.math.mat4.rotateZ(mat, mat, Math.PI/2.0), Math.PI/2.0), EPSILON, "New child1 global matrix");
+    mat = new XML3D.Mat4();
+    QUnit.closeMatrix(parent.getLocalMatrix(), mat.rotateZ(Math.PI/2.0), EPSILON, "New parent local matrix");
+    mat = new XML3D.Mat4();
+    QUnit.closeMatrix(child1.getWorldMatrix(), mat.rotateZ(Math.PI/2.0).rotateY(Math.PI/2.0), EPSILON, "New child1 global matrix");
     // Failed in 361f96c because of reference copies in transformation propagation
     QUnit.closeMatrix(child2.getWorldMatrix(), parent.getWorldMatrix(), EPSILON, "New child2 global matrix");
 
     var t = this.doc.getElementById("t_rotation3");
-    t.translation = XML3D.math.vec3.fromValues(1,2,3);
-    mat = XML3D.math.mat4.create();
-    QUnit.closeMatrix(parent.getLocalMatrix(), XML3D.math.mat4.rotateZ(mat, XML3D.math.mat4.translate(mat, mat, [1,2,3]), Math.PI/2.0), EPSILON, "New parent local matrix");
+    t.translation = XML3D.Vec3.fromValues(1,2,3);
+    mat = new XML3D.Mat4();
+    QUnit.closeMatrix(parent.getLocalMatrix(), mat.translate([1,2,3]).rotateZ(Math.PI/2.0), EPSILON, "New parent local matrix");
     mat = parent.getLocalMatrix();
-    QUnit.closeMatrix(child1.getWorldMatrix(), XML3D.math.mat4.rotateY(mat, mat, Math.PI/2.0), EPSILON, "New child1 global matrix");
+    QUnit.closeMatrix(child1.getWorldMatrix(), mat.rotateY(Math.PI/2.0), EPSILON, "New child1 global matrix");
     // Failed in 361f96c because of reference copies in transformation propagation
     QUnit.closeMatrix(child2.getWorldMatrix(), parent.getLocalMatrix(), EPSILON, "New child2 global matrix");
 });
@@ -184,24 +184,24 @@ test("Groups and Meshes, Local space", 18, function() {
     var hierarchy = this.doc.getElementById("hierarchy").getLocalBoundingBox();
     var hierarchyScaled = this.doc.getElementById("hierarchy-scaled").getLocalBoundingBox();
     var hierarchy2Scaled = this.doc.getElementById("hierarchy2-scaled").getLocalBoundingBox();
-    ok(XML3D.math.bbox.isEmpty(emptyBox), "Empty group delivers empty BoundingBox");
+    ok(emptyBox.isEmpty(), "Empty group delivers empty BoundingBox");
 
-    QUnit.closeArray(frontTopMeshBox, [-1,-1,0,1,1,0], EPSILON, "Front rectangle of top cube: (-1 -1 0) to (1 1 0)");
-    QUnit.closeArray(frontBotMeshBox,[-1,-1,0,1,1,0], EPSILON, "Front rectangle of bottom cube: (-1 -1 0) to (1 1 0)");
-    QUnit.closeArray(topCubeBox, [-1,1.5,-1,1,3.5,1], EPSILON, "Top cube: (-1 1.5 -1) to (1 3.5 1)");
-    QUnit.closeArray(botCubeBox, [-1,-3.5,-1,1,-1.5,1], EPSILON, "Bottom cube: (-1 -3.5 -1) to (1 -1.5 1)");
-    QUnit.closeArray(cubeMeshBox, [-1,-1,-1,1,1,1], EPSILON, "Unity cube mesh: (-1 -1 -1) to (1 1 1)");
-    QUnit.closeArray(cubeGroupBox, cubeMeshBox, EPSILON, "No transformation: mesh and group equal.");
-    QUnit.closeArray(scaled_group, [-20,-5,-20,20,5,20], EPSILON, "Scaled group.");
-    QUnit.closeArray(translated_group, [0,-2,4,2,0,6], EPSILON, "Translated group.");
+    QUnit.closeArray(frontTopMeshBox.data, [-1,-1,0,1,1,0], EPSILON, "Front rectangle of top cube: (-1 -1 0) to (1 1 0)");
+    QUnit.closeArray(frontBotMeshBox.data,[-1,-1,0,1,1,0], EPSILON, "Front rectangle of bottom cube: (-1 -1 0) to (1 1 0)");
+    QUnit.closeArray(topCubeBox.data, [-1,1.5,-1,1,3.5,1], EPSILON, "Top cube: (-1 1.5 -1) to (1 3.5 1)");
+    QUnit.closeArray(botCubeBox.data, [-1,-3.5,-1,1,-1.5,1], EPSILON, "Bottom cube: (-1 -3.5 -1) to (1 -1.5 1)");
+    QUnit.closeArray(cubeMeshBox.data, [-1,-1,-1,1,1,1], EPSILON, "Unity cube mesh: (-1 -1 -1) to (1 1 1)");
+    QUnit.closeArray(cubeGroupBox.data, cubeMeshBox.data, EPSILON, "No transformation: mesh and group equal.");
+    QUnit.closeArray(scaled_group.data, [-20,-5,-20,20,5,20], EPSILON, "Scaled group.");
+    QUnit.closeArray(translated_group.data, [0,-2,4,2,0,6], EPSILON, "Translated group.");
     var sq2 = 1.4098814725875854;
-    QUnit.closeArray(rotated_group, [-1, -sq2, -sq2,1, sq2, sq2], EPSILON, "Rotated group.");
-    QUnit.closeArray(hierarchy, [-20, -16.79395294189453, -18.45308494567871,20, 16.79395294189453, 18.45308494567871], EPSILON, "Hierarchy.");
-    QUnit.closeArray(hierarchyScaled, [-20, -5, -20,20, 5, 20], EPSILON, "Hierarchy scale only");
-    QUnit.closeArray(hierarchy2Scaled, [-20, -5, -20,20, 5, 20], EPSILON, "Hierarchy2 scale only");
-    QUnit.closeArray(rootBox, scaled_group, EPSILON, "Overall");
-    QUnit.closeArray(splitCubeBox1,[0, -1, -1,1, 1, 1], EPSILON, "Split part 1");
-    QUnit.closeArray(splitCubeBox2, [-1, -1, -1,0, 1, 1], EPSILON, "Split part 2");
+    QUnit.closeArray(rotated_group.data, [-1, -sq2, -sq2,1, sq2, sq2], EPSILON, "Rotated group.");
+    QUnit.closeArray(hierarchy.data, [-20, -16.79395294189453, -18.45308494567871,20, 16.79395294189453, 18.45308494567871], EPSILON, "Hierarchy.");
+    QUnit.closeArray(hierarchyScaled.data, [-20, -5, -20,20, 5, 20], EPSILON, "Hierarchy scale only");
+    QUnit.closeArray(hierarchy2Scaled.data, [-20, -5, -20,20, 5, 20], EPSILON, "Hierarchy2 scale only");
+    QUnit.closeArray(rootBox.data, scaled_group.data, EPSILON, "Overall");
+    QUnit.closeArray(splitCubeBox1.data,[0, -1, -1,1, 1, 1], EPSILON, "Split part 1");
+    QUnit.closeArray(splitCubeBox2.data, [-1, -1, -1,0, 1, 1], EPSILON, "Split part 2");
 });
 
 test("Groups and Meshes, World space", 11, function() {
@@ -215,15 +215,15 @@ test("Groups and Meshes, World space", 11, function() {
     var hierarchyMesh = this.doc.getElementById("hierarchy-mesh").getWorldBoundingBox();
     var wholeScene = this.doc.getElementById("myXml3d").getWorldBoundingBox();
 
-    QUnit.closeArray(frontTopMeshBox, [-1,1.5,1,1,3.5,1], EPSILON, "Front rectangle of top cube: (-1 1.5 1) to (1 3.5 1)");
-    QUnit.closeArray(frontBotMeshBox, [-1,-3.5,1,1,-1.5,1], EPSILON, "Front rectangle of bottom cube: (-1 -3.5 1) to (1 -1.5 1)");
-    QUnit.closeArray(topCubeBox, [-1,1.5,-1,1,3.5,1], EPSILON, "Top cube: (-1 1.5 -1) to (1 3.5 1)");
-    QUnit.closeArray(botCubeBox, [-1,-3.5,-1,1,-1.5,1], EPSILON, "Bottom cube: (-1 -3.5 -1) to (1 -1.5 1)");
-    QUnit.closeArray(cubeMeshBox, [-1,-1,-1,1,1,1], EPSILON, "Unity cube mesh: (-1 -1 -1) to (1 1 1)");
-    QUnit.closeArray(cubeGroupBox, cubeMeshBox, EPSILON, "No transformation: mesh and group equal.");
-    QUnit.closeArray(hierarchyScaled, [-20, -16.79395294189453, -18.45308494567871,20, 16.79395294189453, 18.45308494567871], EPSILON, "Hierarchy 2nd level");
-    QUnit.closeArray(hierarchyMesh, [-20, -16.79395294189453, -18.45308494567871,20, 16.79395294189453, 18.45308494567871], EPSILON, "Hierarchy mesh");
-    QUnit.closeArray(wholeScene, [-20, -16.79395294189453, -20,21, 16.79395294189453, 25], EPSILON, "Whole scene");
+    QUnit.closeArray(frontTopMeshBox.data, [-1,1.5,1,1,3.5,1], EPSILON, "Front rectangle of top cube: (-1 1.5 1) to (1 3.5 1)");
+    QUnit.closeArray(frontBotMeshBox.data, [-1,-3.5,1,1,-1.5,1], EPSILON, "Front rectangle of bottom cube: (-1 -3.5 1) to (1 -1.5 1)");
+    QUnit.closeArray(topCubeBox.data, [-1,1.5,-1,1,3.5,1], EPSILON, "Top cube: (-1 1.5 -1) to (1 3.5 1)");
+    QUnit.closeArray(botCubeBox.data, [-1,-3.5,-1,1,-1.5,1], EPSILON, "Bottom cube: (-1 -3.5 -1) to (1 -1.5 1)");
+    QUnit.closeArray(cubeMeshBox.data, [-1,-1,-1,1,1,1], EPSILON, "Unity cube mesh: (-1 -1 -1) to (1 1 1)");
+    QUnit.closeArray(cubeGroupBox.data, cubeMeshBox.data, EPSILON, "No transformation: mesh and group equal.");
+    QUnit.closeArray(hierarchyScaled.data, [-20, -16.79395294189453, -18.45308494567871,20, 16.79395294189453, 18.45308494567871], EPSILON, "Hierarchy 2nd level");
+    QUnit.closeArray(hierarchyMesh.data, [-20, -16.79395294189453, -18.45308494567871,20, 16.79395294189453, 18.45308494567871], EPSILON, "Hierarchy mesh");
+    QUnit.closeArray(wholeScene.data, [-20, -16.79395294189453, -20,21, 16.79395294189453, 25], EPSILON, "Whole scene");
 });
 
 test("Hidden groups", 5, function() {
@@ -234,20 +234,20 @@ test("Hidden groups", 5, function() {
     this.win.XML3D.flushDOMChanges();
 
     var boundingBox = group.getWorldBoundingBox();
-    QUnit.closeArray(boundingBox, [2,1.5,-1,4,3.5,1], EPSILON, "Hidden child group: (2 1.5 -1) to (4 3.5 1)");
+    QUnit.closeArray(boundingBox.data, [2,1.5,-1,4,3.5,1], EPSILON, "Hidden child group: (2 1.5 -1) to (4 3.5 1)");
     this.doc.getElementById("invisible_cube").style.display = 'inherit';
     boundingBox = group.getWorldBoundingBox();
-    QUnit.closeArray(boundingBox, [-4,1.5,-1,4,3.5,1], EPSILON, "Visible child group: (-4 1.5 -1) to (4 3.5 1)");
+    QUnit.closeArray(boundingBox.data, [-4,1.5,-1,4,3.5,1], EPSILON, "Visible child group: (-4 1.5 -1) to (4 3.5 1)");
     this.doc.getElementById("invisible_mesh").style.display = 'none';
     boundingBox = group.getWorldBoundingBox();
-    QUnit.closeArray(boundingBox, [2,1.5,-1,4,3.5,1], EPSILON, "Hidden child mesh: (2 1.5 -1) to (4 3.5 1)");
+    QUnit.closeArray(boundingBox.data, [2,1.5,-1,4,3.5,1], EPSILON, "Hidden child mesh: (2 1.5 -1) to (4 3.5 1)");
 });
 
 test("Dynamically added mesh", function() {
 
     var mesh = this.win.XML3D.createElement("mesh");
 
-    ok(XML3D.math.bbox.isEmpty(mesh.getLocalBoundingBox()), "Newly created mesh delivers empty bounding box");
+    ok(mesh.getLocalBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
 
     mesh.setAttribute("type", "triangles");
     mesh.setAttribute("src", "#mySimpleMesh");
@@ -256,14 +256,14 @@ test("Dynamically added mesh", function() {
 
     // renderadapter is initialized but mesh data is still not initialized
     //ok(mesh.getBoundingBox().isEmpty(), "Appended mesh delivers empty bounding box");
-    QUnit.closeArray(mesh.getLocalBoundingBox(), [-1, -1, 0,1,1,0], EPSILON,
+    QUnit.closeArray(mesh.getLocalBoundingBox().data, [-1, -1, 0,1,1,0], EPSILON,
         "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
 
     //Mesh changes are not applied until frame renders
     var h = getHandler(this.xml3dElement);
     h.draw();
 
-    QUnit.closeArray(mesh.getLocalBoundingBox(), [-1, -1, 0,1,1,0], EPSILON,
+    QUnit.closeArray(mesh.getLocalBoundingBox().data, [-1, -1, 0,1,1,0], EPSILON,
             "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
 });
 
@@ -271,7 +271,7 @@ test("Dynamically added group", function() {
 
     var mesh = this.win.XML3D.createElement("mesh");
 
-    ok(XML3D.math.bbox.isEmpty(mesh.getLocalBoundingBox()), "Newly created mesh delivers empty bounding box");
+    ok(mesh.getLocalBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
 
     mesh.setAttribute("type", "triangles");
     mesh.setAttribute("src", "#mySimpleMesh");
@@ -282,10 +282,10 @@ test("Dynamically added group", function() {
 
     // renderadapter is initialized but mesh data is still not initialized
     //ok(mesh.getBoundingBox().isEmpty(), "Appended mesh delivers empty bounding box");
-    QUnit.closeArray(mesh.getLocalBoundingBox(), [-1, -1, 0,1,1,0], EPSILON,
+    QUnit.closeArray(mesh.getLocalBoundingBox().data, [-1, -1, 0,1,1,0], EPSILON,
         "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
 
-    QUnit.closeArray(group.getLocalBoundingBox(), [-1, -1, 0,1,1,0], EPSILON,
+    QUnit.closeArray(group.getLocalBoundingBox().data, [-1, -1, 0,1,1,0], EPSILON,
         "simple group bounding box: (-1 -1 0) to (1 1 0)");
 
 });

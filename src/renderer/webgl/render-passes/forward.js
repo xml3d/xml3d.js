@@ -1,5 +1,6 @@
 var SceneRenderPass = require("./scene-pass.js");
 var ObjectSorter = require("../../renderer/tools/objectsorter.js");
+var mat4 = require("gl-matrix").mat4;
 
 var ForwardRenderPass = function (renderInterface, output, opt) {
     SceneRenderPass.call(this, renderInterface, output, opt);
@@ -14,11 +15,11 @@ XML3D.extend(ForwardRenderPass.prototype, {
 
     render: (function () {
         /**
-         * @type Float32Array
+         * @type mat4
          */
-        var c_worldToViewMatrix = XML3D.math.mat4.create();
-        var c_viewToWorldMatrix = XML3D.math.mat4.create();
-        var c_projectionMatrix = XML3D.math.mat4.create();
+        var c_worldToViewMatrix = mat4.create();
+        var c_viewToWorldMatrix = mat4.create();
+        var c_projectionMatrix = mat4.create();
         var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "cameraPosition", "coords", "ssaoMap", "width"];
 
         return function (scene) {

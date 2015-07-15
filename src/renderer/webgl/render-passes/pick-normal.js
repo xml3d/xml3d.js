@@ -1,4 +1,7 @@
 var BaseRenderPass = require("./base.js");
+var vec3 = require("gl-matrix").vec3;
+var mat4 = require("gl-matrix").mat4;
+var mat3 = require("gl-matrix").mat3;
 
 var PickNormalRenderPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
@@ -6,9 +9,9 @@ var PickNormalRenderPass = function (renderInterface, output, opt) {
 
 XML3D.createClass(PickNormalRenderPass, BaseRenderPass, {
     render: (function () {
-        var c_modelViewProjectionMatrix = XML3D.math.mat4.create();
-        var c_worldMatrix = XML3D.math.mat4.create();
-        var c_normalMatrix3 = XML3D.math.mat3.create();
+        var c_modelViewProjectionMatrix = mat4.create();
+        var c_worldMatrix = mat4.create();
+        var c_normalMatrix3 = mat3.create();
         var c_uniformCollection = {
                 envBase: {},
                 envOverride: null,
@@ -33,9 +36,8 @@ XML3D.createClass(PickNormalRenderPass, BaseRenderPass, {
 
             object.getWorldMatrix(c_worldMatrix);
             if (!XML3D.math.mat3.normalFromMat4(c_normalMatrix3, c_worldMatrix)) {
-                XML3D.math.mat3.identity(c_normalMatrix3);
+                mat3.identity(c_normalMatrix3);
             }
-            ;
 
             var program = this.renderInterface.context.programFactory.getPickingNormalProgram();
             program.bind();
@@ -56,8 +58,8 @@ XML3D.createClass(PickNormalRenderPass, BaseRenderPass, {
      * @returns {Object} Vector with normal data
      */
     readNormalFromPickingBuffer: (function () {
-        var c_pickVector = XML3D.math.vec3.create();
-        var c_one = XML3D.math.vec3.fromValues(1, 1, 1);
+        var c_pickVector = vec3.create();
+        var c_one = vec3.fromValues(1, 1, 1);
 
         return function (glX, glY) {
             var data = this.readPixelDataFromBuffer(glX, glY, this.output);
@@ -68,8 +70,8 @@ XML3D.createClass(PickNormalRenderPass, BaseRenderPass, {
             c_pickVector[1] = data[1] / 254;
             c_pickVector[2] = data[2] / 254;
 
-            // TODO: Optimize (2 Float arrays created)
-            return XML3D.math.vec3.subtract(XML3D.math.vec3.create(), XML3D.math.vec3.scale(XML3D.math.vec3.create(), c_pickVector, 2.0), c_one);
+            vec3.scale(c_pickVector, c_pickVector, 2);
+            return vec3.subtract(vec3.create(), c_pickVector, c_one);
         }
     }())
 });

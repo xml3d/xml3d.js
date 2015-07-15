@@ -4,19 +4,24 @@ QUnit.extend( QUnit, {
      *  all the time.
      */
     __passesVector : function(actual, expected, maxDifference) {
-
+        if (actual.data) actual = actual.data;
+        if (expected.data) expected = expected.data;
         return (Math.abs(actual[0] - expected[0]) <= maxDifference &&
                 Math.abs(actual[1] - expected[1]) <= maxDifference &&
                 Math.abs(actual[2] - expected[2]) <= maxDifference);
     },
 
     closeVector : function(actual, expected, maxDifference, message) {
+        if (actual.data) actual = actual.data;
+        if (expected.data) expected = expected.data;
         var passes = (actual === expected) ||
             QUnit.__passesVector(actual, expected, maxDifference);
         QUnit.push(passes, actual, expected, message);
     },
 
     closeRotation : function(actual, expected, maxDifference, message) {
+        if (actual.data) actual = actual.data;
+        if (expected.data) expected = expected.data;
         var passes = (actual === expected) ||
             QUnit.__passesVector(actual, expected, maxDifference) &&
             (Math.abs((actual[3] % Math.PI) - (expected[3] % Math.PI)) <= maxDifference);
@@ -27,6 +32,14 @@ QUnit.extend( QUnit, {
         if(!actual || !expected) {
             QUnit.push(actual === expected, actual, expected, message);
             return;
+        }
+
+        if (actual.data) {
+            actual = actual.data;
+        }
+
+        if (expected.data) {
+            expected = expected.data;
         }
 
         var passes =
@@ -58,10 +71,9 @@ QUnit.extend( QUnit, {
     },
 
     closeBox : function(actual, expected, maxDifference, message) {
-        var bbox = XML3D.math.bbox;
-        var passes = bbox.isEmpty(actual) ? bbox.isEmpty(expected) :
-            QUnit.__passesVector(bbox.min(actual), bbox.min(expected), maxDifference) &&
-            QUnit.__passesVector(bbox.max(actual), bbox.max(expected), maxDifference);
+        var passes = actual.isEmpty() ? expected.isEmpty() :
+            QUnit.__passesVector(actual.min, expected.min, maxDifference) &&
+            QUnit.__passesVector(actual.max, expected.max, maxDifference);
         QUnit.push(passes, actual, expected, message);
     },
 
@@ -101,7 +113,7 @@ new (function() {
 
     function isVec3(arg) { return arg.length === 3;}
     function isRotation(arg) { return arg.length === 4}
-    function isBox(arg) { return arg.length === 6}
+    function isBox(arg) { return arg.data && arg.data.length === 6}
     function isMatrix(arg) {
         if (arg.length === 16)
             return true;
@@ -130,7 +142,7 @@ new (function() {
             a[8] + ", " +  a[9] + ", " +  a[10] + ", " +  a[11] + "\n" +
             a[12] + ", " +  a[13] + ", " +  a[14] + ", " +  a[15] + ")";
         if(isBox(a))
-            return XML3D.math.bbox.isEmpty(a) ? "bbox(empty)" : "bbox(("+a[0]+", "+a[1]+", "+a[2]+"),("+a[3]+", "+a[4]+", "+a[5]+"))";
+            return a.isEmpty() ? "bbox(empty)" : "bbox(("+a[0]+", "+a[1]+", "+a[2]+"),("+a[3]+", "+a[4]+", "+a[5]+"))";
         if(isFloatArray(a)) {
             var str = "Float32Array[";
             for (var i=0; i < a.length; i++)

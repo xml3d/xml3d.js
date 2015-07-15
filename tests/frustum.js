@@ -7,9 +7,9 @@ module("Frustum", {
 
 test("Projection Matrix", 1, function() {
     var frustum = new XML3DTestLib.Frustum.Frustum(1, 10, 0, 0.78, 3/4);
-    var mat = XML3D.math.mat4.create();
+    var mat = new XML3D.Mat4();
     frustum.getProjectionMatrix(mat);
-    QUnit.closeArray(mat, XML3D.math.mat4.perspective(XML3D.math.mat4.create(), 0.78, 3/4, 1, 10), EPSILON, "Perspective matrix is correct." )
+    QUnit.closeArray(mat, new XML3D.Mat4.perspective(0.78, 3/4, 1, 10), EPSILON, "Perspective matrix is correct." )
 });
 
 test("Planes", function() {
@@ -47,20 +47,20 @@ test("Planes", function() {
 
 test("Culling", function() {
     var frustum = new XML3DTestLib.Frustum.Frustum(1, 12, 0, 0.78, 1);
-    var test = new XML3DTestLib.Frustum.FrustumTest(frustum, XML3D.math.mat4.create());
-    var bbox = XML3D.math.bbox.create();
+    var test = new XML3DTestLib.Frustum.FrustumTest(frustum, new XML3D.Mat4());
+    var bbox = new XML3D.Box();
     ok(!test.isBoxVisible(bbox), "Empty box is not visible.");
 
 
-    bbox = [-10, -10, -10, 10, 10, 10];
+    bbox.data.set([-10, -10, -10, 10, 10, 10]);
     ok(test.isBoxVisible(bbox), "Box is visible.");
 
     // Box behind far
-    bbox = [15, 15, -15, 30, 30, -30];
+    bbox.data.set([15, 15, -15, 30, 30, -30]);
     ok(!test.isBoxVisible(bbox), "Box behind far is not visible.");
 
     // Box before near
-    bbox = [-30, -30, 5, 30, 30, -1];
+    bbox.data.set([-30, -30, 5, 30, 30, -1]);
     ok(!test.isBoxVisible(bbox), "Box before near is not visible.");
 
 });

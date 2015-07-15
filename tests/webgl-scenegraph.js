@@ -81,7 +81,7 @@ test("Test mesh.getLocalBoundingBox", 3, function() {
     var mesh = this.doc.getElementById("myTransformedMesh");
     x.addEventListener("framedrawn", function(n) {
         var bb = mesh.getLocalBoundingBox();
-        QUnit.closeArray(bb, [1,1,0,-1,-1,0], "Local box is has max [1, 1, 0] and min [-1, -1, 0]");
+        QUnit.closeArray(bb.data, [1,1,0,-1,-1,0], "Local box is has max [1, 1, 0] and min [-1, -1, 0]");
         start();
     });
     stop();
@@ -98,7 +98,7 @@ test("Test mesh.getWorldBoundingBox", 3, function() {
     var mesh = this.doc.getElementById("myTransformedMesh");
     x.addEventListener("framedrawn", function(n) {
         var bb = mesh.getWorldBoundingBox();
-        QUnit.closeArray(bb, [1,1,-3,-1,-1,-3], "World box has max [1, 1, -3] and min [-1, -1, -3]");
+        QUnit.closeArray(bb.data, [1,1,-3,-1,-1,-3], "World box has max [1, 1, -3] and min [-1, -1, -3]");
 
         start();
     });
@@ -564,15 +564,15 @@ test("Camera setDirection/upVector", 4, function () {
         QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "Camera looking down z axis, transparent");
         return s;
     }).then(function (s) {
-        view.setDirection(XML3D.math.vec3.fromValues(1, 0, 0));
+        view.setDirection(XML3D.Vec3.fromValues(1, 0, 0));
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
         QUnit.closeArray(pick, [255, 0, 0, 255], PIXEL_EPSILON, "Camera looking to the right, red");
         return s;
     }).then(function (s) {
-        view.setUpVector(XML3D.math.vec3.fromValues(0, -1, 0));
-        view.setDirection(XML3D.math.vec3.fromValues(-1, 0, 0));
+        view.setUpVector(XML3D.Vec3.fromValues(0, -1, 0));
+        view.setDirection(XML3D.Vec3.fromValues(-1, 0, 0));
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);

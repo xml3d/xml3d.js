@@ -58,6 +58,17 @@ XML3D.math.bbox = require("./math/bbox.js");
 XML3D.math.ray = require("./math/ray.js");
 require("./math/math.js")(XML3D.math);
 
+XML3D.Mat2 = require("./types/mat2.js");
+XML3D.Mat3 = require("./types/mat3.js");
+XML3D.Mat4 = require("./types/mat4.js");
+XML3D.Vec2 = require("./types/vec2.js");
+XML3D.Vec3 = require("./types/vec3.js");
+XML3D.Vec4 = require("./types/vec4.js");
+XML3D.AxisAngle = require("./types/axisangle.js");
+XML3D.Quat = require("./types/quat.js");
+XML3D.Ray = require("./types/ray.js");
+XML3D.Box = require("./types/box.js");
+
 XML3D.extend(window, require("./types/data-observer.js"));
 
 Xflow.registerOperator = require("./xflow/operator/operator.js").registerOperator;

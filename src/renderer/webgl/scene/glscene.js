@@ -5,6 +5,7 @@ var FrustumTest = require("./../../renderer/tools/frustum.js").FrustumTest;
 var ShaderComposerFactory = require("../materials/shadercomposerfactory.js");
 var Options = require("../../../utils/options.js");
 var ShadowMapService = require("../materials/shadowmap-service");
+var mat4 = require("gl-matrix").mat4;
 
 var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
 var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
@@ -143,10 +144,10 @@ XML3D.extend(GLScene.prototype, {
     },
 
     updateReadyObjectsFromActiveView: (function () {
-        var c_worldToViewMatrix = XML3D.math.mat4.create();
-        var c_viewToWorldMatrix = XML3D.math.mat4.create();
-        var c_projMat_tmp = XML3D.math.mat4.create();
-        var c_bbox = XML3D.math.bbox.create();
+        var c_worldToViewMatrix = mat4.create();
+        var c_viewToWorldMatrix = mat4.create();
+        var c_projMat_tmp = mat4.create();
+        var c_bbox = new XML3D.Box();
         var c_frustumTest = new FrustumTest();
 
         return function (aspectRatio) {
@@ -162,7 +163,6 @@ XML3D.extend(GLScene.prototype, {
                 obj.updateModelViewMatrixN();
             }
             this.updateBoundingBox();
-
 
             activeView.getProjectionMatrix(c_projMat_tmp, aspectRatio);
             activeView.getViewToWorldMatrix(c_viewToWorldMatrix);

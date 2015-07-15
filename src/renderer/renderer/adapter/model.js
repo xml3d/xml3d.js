@@ -3,6 +3,7 @@ var ComputeRequest = require("../../../xflow/interface/request.js").ComputeReque
 var Events = require("../../../interface/notification.js");
 var Resource = require("../../../base/resourcemanager.js").Resource;
 var AdapterHandle = require("../../../base/adapterhandle.js");
+var mat4 = require("gl-matrix").mat4;
 
 var ModelRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, true);
@@ -15,7 +16,7 @@ var ModelRenderAdapter = function (factory, node) {
     this.transformFetcher.update();
 };
 
-var c_IDENTITY = XML3D.math.mat4.create();
+var c_IDENTITY = mat4.create();
 
 XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
 
@@ -163,7 +164,9 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         if (index != -1) {
             this.updatePostTransform(this.postTransformRenderGroups[index], request);
         }
-    }, updatePostTransform: function (renderNode, xflowRequest) {
+    },
+
+    updatePostTransform: function (renderNode, xflowRequest) {
         var dataResult = xflowRequest.getResult();
         var transformData = (dataResult.getOutputData("transform") && dataResult.getOutputData("transform").getValue());
         if (!transformData) {
@@ -172,7 +175,9 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
             return;
         }
         renderNode.setLocalMatrix(transformData);
-    }, dispose: function () {
+    },
+
+    dispose: function () {
         this.asset.removeChangeListener(this);
         this.clearModelRenderNodes();
         this.getRenderNode().remove();
@@ -240,10 +245,10 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
 
 XML3D.extend(ModelRenderAdapter.prototype, {
     /**
-     * @return {Window.XML3DBox}
+     * @return {XML3D.Box}
      */
     getLocalBoundingBox: function () {
-        var bbox = new XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
         if (this.renderNode) {
             this.renderNode.getObjectSpaceBoundingBox(bbox);
         }
@@ -251,10 +256,10 @@ XML3D.extend(ModelRenderAdapter.prototype, {
     },
 
     /**
-     * @return {Window.XML3DBox}
+     * @return {XML3D.Box}
      */
     getWorldBoundingBox: function () {
-        var bbox = new XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
         if (this.renderNode) {
             this.renderNode.getWorldSpaceBoundingBox(bbox);
         }
@@ -265,9 +270,9 @@ XML3D.extend(ModelRenderAdapter.prototype, {
      * @return {mat4}
      */
     getWorldMatrix: function () {
-        var m = XML3D.math.mat4.create(), obj = this.renderNode;
+        var m = new XML3D.Mat4(), obj = this.renderNode;
         if (obj) {
-            obj.getWorldMatrix(m);
+            obj.getWorldMatrix(m.data);
         }
         return m;
     }

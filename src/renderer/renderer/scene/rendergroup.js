@@ -28,7 +28,7 @@ var RenderGroup = function (scene, pageEntry, opt) {
      */
     this._material = opt.material || null;
     this.boundingBoxDirty = false;
-    this.setWorldSpaceBoundingBox(XML3D.math.bbox.EMPTY_BOX);
+    this.setWorldSpaceBoundingBox(XML3D.Box.EMPTY_BOX);
 };
 RenderGroup.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -36,17 +36,11 @@ XML3D.createClass(RenderGroup, RenderNode);
 
 XML3D.extend(RenderGroup.prototype, {
     getLocalMatrix: function (dest) {
-        var o = this.offset + LOCAL_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            dest[i] = this.page[o];
-        }
+        this.getMat4FromPage(dest, LOCAL_MATRIX_OFFSET);
     },
 
-    setLocalMatrix: function (source) {
-        var o = this.offset + LOCAL_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            this.page[o] = source[i];
-        }
+    setLocalMatrix: function (sourceMat4) {
+        this.setMat4InPage(sourceMat4, LOCAL_MATRIX_OFFSET);
         this.setTransformDirty();
         this.setBoundingBoxDirty();
     },
@@ -56,35 +50,35 @@ XML3D.extend(RenderGroup.prototype, {
             this.updateWorldSpaceBoundingBox();
         }
         var o = this.offset + WORLD_BB_OFFSET;
-        bbox[0] = this.page[o];
-        bbox[1] = this.page[o + 1];
-        bbox[2] = this.page[o + 2];
-        bbox[3] = this.page[o + 3];
-        bbox[4] = this.page[o + 4];
-        bbox[5] = this.page[o + 5];
+        bbox.data[0] = this.page[o];
+        bbox.data[1] = this.page[o + 1];
+        bbox.data[2] = this.page[o + 2];
+        bbox.data[3] = this.page[o + 3];
+        bbox.data[4] = this.page[o + 4];
+        bbox.data[5] = this.page[o + 5];
     },
 
     setWorldSpaceBoundingBox: function (bbox) {
         var o = this.offset + WORLD_BB_OFFSET;
-        this.page[o] = bbox[0];
-        this.page[o + 1] = bbox[1];
-        this.page[o + 2] = bbox[2];
-        this.page[o + 3] = bbox[3];
-        this.page[o + 4] = bbox[4];
-        this.page[o + 5] = bbox[5];
+        this.page[o] = bbox.data[0];
+        this.page[o + 1] = bbox.data[1];
+        this.page[o + 2] = bbox.data[2];
+        this.page[o + 3] = bbox.data[3];
+        this.page[o + 4] = bbox.data[4];
+        this.page[o + 5] = bbox.data[5];
     },
 
 
     updateWorldSpaceBoundingBox: (function () {
-        var childBB = XML3D.math.bbox.create();
+        var childBB = new XML3D.Box();
 
         return function () {
-            var localBB = XML3D.math.bbox.create();
+            var localBB = new XML3D.Box();
 
             for (var i = 0, j = this.children.length; i < j; i++) {
                 var obj = this.children[i];
                 obj.getWorldSpaceBoundingBox(childBB);
-                XML3D.math.bbox.extendWithBox(localBB, childBB);
+                localBB.extend(childBB);
             }
             this.setWorldSpaceBoundingBox(localBB);
             this.boundingBoxDirty = false;
@@ -109,10 +103,10 @@ XML3D.extend(RenderGroup.prototype, {
         return this.children;
     },
 
-    updateWorldMatrix: function (source) {
+    updateWorldMatrix: function (sourceMat4) {
         var page = this.page;
         var offset = this.offset;
-        XML3D.math.mat4.multiplyOffset(page, offset + WORLD_MATRIX_OFFSET, page, offset + LOCAL_MATRIX_OFFSET, source, 0);
+        XML3D.math.mat4.multiplyOffset(page, offset + WORLD_MATRIX_OFFSET, page, offset + LOCAL_MATRIX_OFFSET, sourceMat4, 0);
         this.transformDirty = false;
     },
 
@@ -177,11 +171,11 @@ XML3D.extend(RenderGroup.prototype, {
     },
 
     findRayIntersections: (function () {
-        var bbox = XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
 
         return function (ray, intersections) {
             this.getWorldSpaceBoundingBox(bbox);
-            if (XML3D.math.bbox.intersects(bbox, ray)) {
+            if (ray.intersects(bbox)) {
                 for (var i = 0; i < this.children.length; i++) {
                     this.children[i].findRayIntersections(ray, intersections);
                 }

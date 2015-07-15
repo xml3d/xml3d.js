@@ -126,43 +126,43 @@ test("Bounding Boxes", 7, function () {
     group.setLocalMatrix(XML3D.math.mat4.create());
     var obj = this.scene.createRenderObject();
     obj.setLocalMatrix(XML3D.math.mat4.create());
-    obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
+    obj.setObjectSpaceBoundingBox(new XML3D.Box(new Float32Array([-2, -2, -2, 2, 2, 2])));
     obj.setParent(group);
 
-    var actualBB = XML3D.math.bbox.create();
+    var actualBB = new XML3D.Box();
     group.getWorldSpaceBoundingBox(actualBB);
-    QUnit.closeArray(actualBB, new Float32Array([-2, -2, -2, 2, 2, 2]), EPSILON, "Group BB matches object BB");
+    QUnit.closeArray(actualBB.data, new Float32Array([-2, -2, -2, 2, 2, 2]), EPSILON, "Group BB matches object BB");
 
     var trans = XML3D.math.mat4.create();
-    XML3D.math.mat4.translate(trans, trans, [4, 0, 0]);
+    XML3D.math.mat4.translate(trans, trans, [4,0,0]);
     group.setLocalMatrix(trans);
     group.getWorldSpaceBoundingBox(actualBB);
-    QUnit.closeArray(actualBB, new Float32Array([2, -2, -2,6, 2, 2]), EPSILON, "Group BB was translated correctly");
+    QUnit.closeArray(actualBB.data, new Float32Array([2, -2, -2,6, 2, 2]), EPSILON, "Group BB was translated correctly");
 
     var group2 = this.scene.createRenderGroup();
     var trans2 = XML3D.math.mat4.create();
-    XML3D.math.mat4.translate(trans2, trans2, [0, 4, 0]);
+    XML3D.math.mat4.translate(trans2, trans2, [0,4,0]);
     group2.setLocalMatrix(trans2);
 
     var obj2 = this.scene.createRenderObject();
     obj2.setLocalMatrix(XML3D.math.mat4.create());
-    obj2.setObjectSpaceBoundingBox([-1, -1, -1, 1, 1, 1]);
+    obj2.setObjectSpaceBoundingBox(new XML3D.Box(new Float32Array([-1, -1, -1, 1, 1, 1])));
     obj2.setParent(group2);
     group2.setParent(group);
     group2.getWorldSpaceBoundingBox(actualBB);
-    QUnit.closeArray(actualBB, new Float32Array([3, 3, -1, 5, 5, 1]), EPSILON, "New group's transform was applied correctly");
+    QUnit.closeArray(actualBB.data, new Float32Array([3, 3, -1, 5, 5, 1]), EPSILON, "New group's transform was applied correctly");
     group.getWorldSpaceBoundingBox(actualBB);
-    QUnit.closeArray(actualBB, new Float32Array([2, -2, -2, 6, 5, 2]), EPSILON, "Original group's BB was expanded correctly");
+    QUnit.closeArray(actualBB.data, new Float32Array([2, -2, -2, 6, 5, 2]), EPSILON, "Original group's BB was expanded correctly");
     obj2.setLocalVisible(false);
     group.getWorldSpaceBoundingBox(actualBB);
-    QUnit.closeArray(actualBB, new Float32Array([2, -2, -2,6, 2, 2]), EPSILON, "Making new object invisible reverts original group's BB");
+    QUnit.closeArray(actualBB.data, new Float32Array([2, -2, -2,6, 2, 2]), EPSILON, "Making new object invisible reverts original group's BB");
 
     obj2.setLocalVisible(true);
     group.getWorldSpaceBoundingBox(actualBB);
-    QUnit.closeArray(actualBB, new Float32Array([2, -2, -2,6, 5, 2]), EPSILON, "Object is visible again");
+    QUnit.closeArray(actualBB.data, new Float32Array([2, -2, -2,6, 5, 2]), EPSILON, "Object is visible again");
     group.setLocalMatrix(XML3D.math.mat4.create());
     group.getWorldSpaceBoundingBox(actualBB);
-    QUnit.closeArray(actualBB, new Float32Array([-2, -2, -2,2, 5, 2]), EPSILON, "Original group's transformation removed");
+    QUnit.closeArray(actualBB.data, new Float32Array([-2, -2, -2,2, 5, 2]), EPSILON, "Original group's transformation removed");
 });
 
 test("Clipping Planes", function() {
@@ -176,23 +176,22 @@ test("Clipping Planes", function() {
 
     var obj = this.scene.createRenderObject();
     obj.setLocalMatrix(XML3D.math.mat4.create());
-    obj.setObjectSpaceBoundingBox([-1, -1, -1, 1, 1, 1]);
+    obj.setObjectSpaceBoundingBox(new XML3D.Box(new Float32Array([-1, -1, -1, 1, 1, 1])));
     deepEqual(view.getClippingPlanes(), { near: 0.05, far: 1.05 }, "Unit box");
     obj.remove();
 
     var obj = this.scene.createRenderObject();
     obj.setLocalMatrix(XML3D.math.mat4.create());
-    obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
+    obj.setObjectSpaceBoundingBox(new XML3D.Box(new Float32Array([-2, -2, -2, 2, 2, 2])));
     deepEqual(view.getClippingPlanes(), { near: 0.05, far: 2.05 }, "Larger values");
 
-    var mat = XML3D.math.mat4.create();
-    XML3D.math.mat4.fromRotation(mat, Math.PI/2.0, [0,1,0]);
+    var mat = XML3D.math.mat4.rotate(XML3D.math.mat4.create(), XML3D.math.mat4.create(), Math.PI/2.0, [0,1,0]);
     view.updateOrientation(mat);
     var planes = view.getClippingPlanes();
     QUnit.close(planes.near, 0.05, EPSILON, "Rotated 180: near");
     QUnit.close(planes.far, 2.05, EPSILON, "Rotated 180: far");
 
-    XML3D.math.mat4.fromRotation(mat, Math.PI/3.0, [0,0.707,0.707]);
+    mat = XML3D.math.mat4.rotate(XML3D.math.mat4.create(), XML3D.math.mat4.create(),Math.PI/3.0, [0,0.707,0.707]);
     view.updateOrientation(mat);
 
     planes = view.getClippingPlanes();
@@ -201,14 +200,14 @@ test("Clipping Planes", function() {
 
     var group2 = this.scene.createRenderGroup();
     var trans2 = XML3D.math.mat4.create();
-    XML3D.math.mat4.translate(trans2, trans2, [0, 4, 0]);
+    XML3D.math.mat4.translate(trans2, trans2, [0,4,0]);
     group2.setLocalMatrix(trans2);
 
     obj.remove();
 
     obj = this.scene.createRenderObject({parent: group2});
     obj.setLocalMatrix(XML3D.math.mat4.create());
-    obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
+    obj.setObjectSpaceBoundingBox(new XML3D.Box(new Float32Array([-2, -2, -2, 2, 2, 2])));
 
     view.updateOrientation(XML3D.math.mat4.create());
     deepEqual(view.getClippingPlanes(), { near: 0.05, far: 2.05 }, "Translated group");
@@ -220,7 +219,7 @@ test("Clipping Planes", function() {
 
     var trans = 80;
     XML3D.math.mat4.identity(trans2);
-    XML3D.math.mat4.translate(trans2, trans2, [0, 0, -trans]);
+    XML3D.math.mat4.translate(trans2, trans2, [0,0,-trans]);
     group2.setLocalMatrix(trans2);
 
     deepEqual(view.getClippingPlanes(), { near: trans - 2.05, far: trans+2.05 }, "Translated to exceed minimum of near");
@@ -239,12 +238,12 @@ test("View projection matrix", function() {
 
     view.getProjectionMatrix(projectionMatrixActual, 0.5 );
     var cp = view.getClippingPlanes();
-    XML3D.math.mat4.perspective(projectionMatrixExpected,  45 / 180 * Math.PI, 0.5, cp.near, cp.far);
+    XML3D.math.mat4.perspective(projectionMatrixExpected, 45 / 180 * Math.PI, 0.5, cp.near, cp.far);
     QUnit.closeArray(projectionMatrixActual, projectionMatrixExpected, EPSILON, "Projection, aspect ration 0.5");
 
     view.getProjectionMatrix(projectionMatrixActual, 0.6 );
     var cp = view.getClippingPlanes();
-    XML3D.math.mat4.perspective(projectionMatrixExpected,  45 / 180 * Math.PI, 0.6, cp.near, cp.far);
+    XML3D.math.mat4.perspective(projectionMatrixExpected, 45 / 180 * Math.PI, 0.6, cp.near, cp.far);
     QUnit.closeArray(projectionMatrixActual, projectionMatrixExpected, EPSILON, "Projection, aspect ration 0.6");
 
 });

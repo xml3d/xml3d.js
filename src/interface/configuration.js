@@ -262,9 +262,9 @@ classInfo['transform'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     translation: {a: handlers.Vec3AttributeHandler, params: [0, 0, 0]},
     scale: {a: handlers.Vec3AttributeHandler, params: [1, 1, 1]},
-    rotation: {a: handlers.Vec4AttributeHandler, params: [0, 0, 0, 1]},
+    rotation: {a: handlers.AxisAngleAttributeHandler, params: [0, 0, 1, 0]},
     center: {a: handlers.Vec3AttributeHandler, params: [0, 0, 0]},
-    scaleOrientation: {a: handlers.Vec4AttributeHandler, params: [0, 0, 0, 1]}
+    scaleOrientation: {a: handlers.AxisAngleAttributeHandler, params: [0, 0, 1, 0]}
     };
 /**
  * Properties and methods for <material>
@@ -538,7 +538,7 @@ classInfo['view'] = {
     onkeydown: {a: handlers.EventAttributeHandler},
     onkeyup: {a: handlers.EventAttributeHandler},
     position: {a: handlers.Vec3AttributeHandler, params: [0, 0, 0]},
-    orientation: {a: handlers.Vec4AttributeHandler, params: [0, 0, 0, 1]},
+    orientation: {a: handlers.AxisAngleAttributeHandler, params: [0, 0, 1, 0]},
     fieldOfView: {a: handlers.FloatAttributeHandler, params: 0.785398},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
     setDirection: {m: methods.viewSetDirection},

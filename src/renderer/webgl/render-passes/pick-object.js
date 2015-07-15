@@ -1,4 +1,5 @@
 var BaseRenderPass = require("./base.js");
+var mat4 = require("gl-matrix").mat4;
 
 var PickObjectRenderPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
@@ -7,7 +8,7 @@ XML3D.createClass(PickObjectRenderPass, BaseRenderPass);
 
 XML3D.extend(PickObjectRenderPass.prototype, {
     render: (function () {
-        var c_mvp = XML3D.math.mat4.create(), c_uniformCollection = {
+        var c_mvp = mat4.create(), c_uniformCollection = {
                 envBase: {},
                 envOverride: null,
                 sysBase: {}

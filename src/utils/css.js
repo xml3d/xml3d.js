@@ -71,23 +71,23 @@ css.getCSSMatrix = function (node) {
 
 
 css.convertCssToMat4 = function (cssMatrix, m) {
-    var matrix = m || XML3D.math.mat4.create();
-    matrix[0] = cssMatrix.m11;
-    matrix[1] = cssMatrix.m12;
-    matrix[2] = cssMatrix.m13;
-    matrix[3] = cssMatrix.m14;
-    matrix[4] = cssMatrix.m21;
-    matrix[5] = cssMatrix.m22;
-    matrix[6] = cssMatrix.m23;
-    matrix[7] = cssMatrix.m24;
-    matrix[8] = cssMatrix.m31;
-    matrix[9] = cssMatrix.m32;
-    matrix[10] = cssMatrix.m33;
-    matrix[11] = cssMatrix.m34;
-    matrix[12] = cssMatrix.m41;
-    matrix[13] = cssMatrix.m42;
-    matrix[14] = cssMatrix.m43;
-    matrix[15] = cssMatrix.m44;
+    var matrix = m || new XML3D.Mat4();
+    matrix.m11 = cssMatrix.m11;
+    matrix.m12 = cssMatrix.m12;
+    matrix.m13 = cssMatrix.m13;
+    matrix.m14 = cssMatrix.m14;
+    matrix.m21 = cssMatrix.m21;
+    matrix.m22 = cssMatrix.m22;
+    matrix.m23 = cssMatrix.m23;
+    matrix.m24 = cssMatrix.m24;
+    matrix.m31 = cssMatrix.m31;
+    matrix.m32 = cssMatrix.m32;
+    matrix.m33 = cssMatrix.m33;
+    matrix.m34 = cssMatrix.m34;
+    matrix.m41 = cssMatrix.m41;
+    matrix.m42 = cssMatrix.m42;
+    matrix.m43 = cssMatrix.m43;
+    matrix.m44 = cssMatrix.m44;
     return matrix;
 };
 

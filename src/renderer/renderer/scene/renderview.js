@@ -1,6 +1,8 @@
 var RenderNode = require("./rendernode.js");
 var Constants = require("./constants.js");
 var Frustum = require("../tools/frustum.js").Frustum;
+var vec3 = require("gl-matrix").vec3;
+var mat4 = require("gl-matrix").mat4;
 
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
@@ -28,10 +30,10 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
     var RenderView = function(scene, pageEntry, opt) {
         RenderNode.call(this, NODE_TYPE.VIEW, scene, pageEntry, opt);
         opt = opt || {};
-        this.position = opt.position || XML3D.math.vec3.create();
-        this.orientation = opt.orientation || XML3D.math.mat4.create();
+        this.position = opt.position || vec3.create();
+        this.orientation = opt.orientation || mat4.create();
         this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : DEFAULT_FIELDOFVIEW;
-        this.worldSpacePosition = XML3D.math.vec3.create();
+        this.worldSpacePosition = vec3.create();
         this.projectionOverride = opt.projectionOverride;
         this.viewDirty = true;
         this.projectionDirty = true;
@@ -48,28 +50,28 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         },
 
         updateViewMatrix: (function() {
-            var tmp_mat4 = XML3D.math.mat4.create();
-            var tmp_parent = XML3D.math.mat4.create();
+            var tmp_mat4 = mat4.create();
+            var tmp_parent = mat4.create();
 
             return function () {
-                XML3D.math.mat4.identity(tmp_mat4);
+                mat4.identity(tmp_mat4);
                 tmp_mat4[12] = this.position[0];
                 tmp_mat4[13] = this.position[1];
                 tmp_mat4[14] = this.position[2];
                 // tmp = T * O
-                XML3D.math.mat4.multiply(tmp_mat4, tmp_mat4, this.orientation);
+                mat4.multiply(tmp_mat4, tmp_mat4, this.orientation);
                 this.parent.getWorldMatrix(tmp_parent);
-                XML3D.math.mat4.multiply(tmp_mat4, tmp_parent, tmp_mat4);
-                XML3D.math.vec3.set(this.worldSpacePosition, tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
+                mat4.multiply(tmp_mat4, tmp_parent, tmp_mat4);
+                vec3.set(this.worldSpacePosition, tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
                 this.setViewToWorldMatrix(tmp_mat4);
-                XML3D.math.mat4.invert(tmp_mat4, tmp_mat4);
+                mat4.invert(tmp_mat4, tmp_mat4);
                 this.setWorldToViewMatrix(tmp_mat4);
                 this.viewDirty = false;
             }
         })(),
 
         updateProjectionMatrix: (function() {
-            var tmp = XML3D.math.mat4.create();
+            var tmp = mat4.create();
 
             return function(aspect) {
                 if (this.projectionOverride) {
@@ -85,7 +87,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
                     fovy = this.fieldOfView;
 
                 // Calculate perspective projectionMatrix
-                XML3D.math.mat4.perspective(tmp, fovy, aspect, near, far);
+                mat4.perspective(tmp, fovy, aspect, near, far);
                 // Set projectionMatrix
                 this.setProjectionMatrix(tmp);
                 // Update Frustum
@@ -96,19 +98,19 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         })(),
 
         getClippingPlanes: (function() {
-            var t_mat = XML3D.math.mat4.create();
-            var bb = new XML3D.math.bbox.create();
+            var t_mat = mat4.create();
+            var bb = new XML3D.Box();
 
             return function() {
                 this.scene.getBoundingBox(bb);
-                if (XML3D.math.bbox.isEmpty(bb)) {
+                if (bb.isEmpty()) {
                     return { near: 1, far: 10 };
                 }
                 this.getWorldToViewMatrix(t_mat);
-                XML3D.math.bbox.transformAxisAligned(bb, t_mat, bb);
+                bb.transformAxisAligned(t_mat);
 
-                var near = -bb[5],
-                    far = -bb[2],
+                var near = -bb.max.z,
+                    far = -bb.min.z,
                     expand = Math.max((far - near) * 0.005, 0.05);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
@@ -119,30 +121,16 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
             }
         })(),
 
-        /**
-         * @param {Float32Array} source
-         * @param {number} offset
-         */
-        setMatrix: function(source, offset) {
-            var o = this.offset + offset;
-            for(var i = 0; i < 16; i++, o++) {
-                this.page[o] = source[i];
-            }
-        },
-
         setWorldToViewMatrix: function(source) {
-            this.setMatrix(source, WORLD_TO_VIEW_MATRIX_OFFSET);
+            this.setMat4InPage(source, WORLD_TO_VIEW_MATRIX_OFFSET);
         },
 
         setViewToWorldMatrix: function(source) {
-            this.setMatrix(source, VIEW_TO_WORLD_MATRIX_OFFSET);
+            this.setMat4InPage(source, VIEW_TO_WORLD_MATRIX_OFFSET);
         },
 
         setProjectionMatrix: function(source) {
-            var o = this.offset + PROJECTION_MATRIX_OFFSET;
-            for(var i = 0; i < 16; i++, o++) {
-                this.page[o] = source[i];
-            }
+            this.setMat4InPage(source, PROJECTION_MATRIX_OFFSET);
             this.projectionDirty = false;
         },
 
@@ -164,16 +152,12 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
 
         updatePosition: function(newPos) {
             this.setTransformDirty();
-            this.position[0] = newPos[0];
-            this.position[1] = newPos[1];
-            this.position[2] = newPos[2];
+            vec3.copy(this.position, newPos);
         },
 
         updateOrientation: function(newOrientation) {
             this.setTransformDirty();
-            for (var i = 0; i < 16; i++) {
-                this.orientation[i] = newOrientation[i];
-            }
+            mat4.copy(this.orientation, newOrientation);
         },
 
         updateFieldOfView: function(newFov) {
@@ -185,30 +169,21 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
             if (this.viewDirty) {
                 this.updateViewMatrix();
             }
-            var o = this.offset + VIEW_TO_WORLD_MATRIX_OFFSET;
-            for (var i = 0; i < 16; i++, o++) {
-                dest[i] = this.page[o];
-            }
+            this.getMat4FromPage(dest, VIEW_TO_WORLD_MATRIX_OFFSET);
         },
 
         getWorldToViewMatrix: function (dest) {
             if (this.viewDirty) {
                 this.updateViewMatrix();
             }
-            var o = this.offset + WORLD_TO_VIEW_MATRIX_OFFSET;
-            for (var i = 0; i < 16; i++, o++) {
-                dest[i] = this.page[o];
-            }
+            this.getMat4FromPage(dest, WORLD_TO_VIEW_MATRIX_OFFSET);
         },
 
         getProjectionMatrix: function(dest, aspect) {
-                if (this.projectionDirty || aspect != this.lastAspectRatio) {
-                    this.updateProjectionMatrix(aspect);
-                }
-                var o = this.offset + PROJECTION_MATRIX_OFFSET;
-                for(var i = 0; i < 16; i++, o++) {
-                    dest[i] = this.page[o];
-                }
+            if (this.projectionDirty || aspect != this.lastAspectRatio) {
+                this.updateProjectionMatrix(aspect);
+            }
+            this.getMat4FromPage(dest, PROJECTION_MATRIX_OFFSET);
         },
 
         getWorldSpacePosition: function() {
@@ -216,7 +191,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         },
 
         getWorldSpaceBoundingBox: function(bbox) {
-            XML3D.math.bbox.empty(bbox);
+            bbox.setEmpty();
         }
     });
 

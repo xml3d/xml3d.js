@@ -11,6 +11,9 @@ var GLU = require("../../contrib/glu.js");
 var Options = require("../../utils/options.js");
 var xml3dFormatHandler = require("../../base/formathandler.js").xml3dFormatHandler;
 var MAX_PICK_BUFFER_DIMENSION = 512;
+var vec3 = require("gl-matrix").vec3;
+var quat = require("gl-matrix").quat;
+var mat4 = require("gl-matrix").mat4;
 
 var OPTION_SSAO = "renderer-ssao";
 var FLAGS = {};
@@ -217,7 +220,7 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     calculateMatricesForRay: function (ray, viewMat, projMat) {
-        this.rayCamera.updatePosition(XML3D.math.ray.origin(ray));
+        this.rayCamera.updatePosition(ray.origin.data);
         this.rayCamera.updateOrientation(this.calculateOrientationForRayDirection(ray));
         this.rayCamera.getWorldToViewMatrix(viewMat);
         var aspect = this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight();
@@ -225,24 +228,24 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     calculateOrientationForRayDirection: (function () {
-        var tmpX = XML3D.math.vec3.create();
-        var tmpY = XML3D.math.vec3.create();
-        var tmpZ = XML3D.math.vec3.create();
-        var up = XML3D.math.vec3.create();
-        var q = XML3D.math.quat.create();
-        var m = XML3D.math.mat4.create();
+        var tmpX = vec3.create();
+        var tmpY = vec3.create();
+        var tmpZ = vec3.create();
+        var up = vec3.create();
+        var q = quat.create();
+        var m = mat4.create();
 
         return function (ray) {
-            XML3D.math.vec3.set(up, 0, 1, 0);
-            XML3D.math.vec3.cross(tmpX, XML3D.math.ray.direction(ray), up);
-            if (!XML3D.math.vec3.length(tmpX)) {
-                XML3D.math.vec3.set(tmpX, 1, 0, 0);
+            vec3.set(up, 0, 1, 0);
+            vec3.cross(tmpX, ray.direction.data, up);
+            if (!vec3.length(tmpX)) {
+                vec3.set(tmpX, 1, 0, 0);
             }
-            XML3D.math.vec3.cross(tmpY, tmpX, XML3D.math.ray.direction(ray));
-            XML3D.math.vec3.negate(tmpZ, XML3D.math.ray.direction(ray));
+            vec3.cross(tmpY, tmpX, ray.direction.data);
+            vec3.negate(tmpZ, ray.direction.data);
 
             XML3D.math.quat.setFromBasis(q, tmpX, tmpY, tmpZ);
-            XML3D.math.mat4.fromRotationTranslation(m, q, [0, 0, 0]);
+            mat4.fromRotationTranslation(m, q, [0,0,0]);
             return m;
         }
     })(),
@@ -286,15 +289,15 @@ XML3D.extend(GLRenderer.prototype, {
      */
     generateRay: (function () {
 
-        var c_viewMatrix = XML3D.math.mat4.create();
-        var c_projectionMatrix = XML3D.math.mat4.create();
+        var c_viewMatrix = mat4.create();
+        var c_projectionMatrix = mat4.create();
 
         return function (canvasX, canvasY) {
 
             var glY = canvasToGlY(this._canvasHandler.getCanvas(), canvasY);
 
             // setup input to unproject
-            var viewport = new Array();
+            var viewport = new Float32Array(4);
             viewport[0] = 0;
             viewport[1] = 0;
             viewport[2] = this.width;
@@ -305,10 +308,10 @@ XML3D.extend(GLRenderer.prototype, {
             view.getWorldToViewMatrix(c_viewMatrix);
             view.getProjectionMatrix(c_projectionMatrix, viewport[2] / viewport[3]);
 
-            var ray = XML3D.math.ray.create();
+            var ray = new XML3D.Ray();
 
-            var nearHit = new Array();
-            var farHit = new Array();
+            var nearHit = new Float32Array(3);
+            var farHit = new Float32Array(3);
 
             // do unprojections
             if (false === GLU.unProject(canvasX, glY, 0, c_viewMatrix, c_projectionMatrix, viewport, nearHit)) {
@@ -320,10 +323,9 @@ XML3D.extend(GLRenderer.prototype, {
             }
 
             // calculate ray
-            XML3D.math.mat4.invert(c_viewMatrix, c_viewMatrix);
-
-            XML3D.math.ray.setOrigin(ray, XML3D.math.vec3.fromValues(c_viewMatrix[12], c_viewMatrix[13], c_viewMatrix[14]));
-            XML3D.math.ray.setDirection(ray, XML3D.math.vec3.fromValues(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]));
+            mat4.invert(c_viewMatrix, c_viewMatrix);
+            ray.origin = vec3.fromValues(c_viewMatrix[12], c_viewMatrix[13], c_viewMatrix[14]);
+            ray.direction = vec3.fromValues(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
 
             return ray;
         }

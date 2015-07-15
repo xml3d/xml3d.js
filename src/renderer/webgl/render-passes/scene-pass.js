@@ -1,5 +1,7 @@
 var BaseRenderPass = require("./base.js");
 var Options = require("../../../utils/options.js");
+var mat4 = require("gl-matrix").mat4;
+var mat3 = require("gl-matrix").mat3;
 
 var OPTION_FACECULLING = "renderer-faceculling";
 var OPTION_FRONTFACE = "renderer-frontface";
@@ -41,11 +43,11 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
      * @param Array
      */
     renderObjectsToActiveBuffer: (function () {
-        var tmpModelMatrix = XML3D.math.mat4.create();
-        var tmpModelMatrixN = XML3D.math.mat3.create();
-        var tmpModelView = XML3D.math.mat4.create();
-        var tmpModelViewProjection = XML3D.math.mat4.create();
-        var tmpModelViewN = XML3D.math.mat3.create();
+        var tmpModelMatrix = mat4.create();
+        var tmpModelMatrixN = mat3.create();
+        var tmpModelView = mat4.create();
+        var tmpModelViewProjection = mat4.create();
+        var tmpModelViewN = mat3.create();
         var c_objectSystemUniforms = ["modelMatrix", "modelMatrixN", "modelViewMatrix", "modelViewProjectionMatrix", "modelViewMatrixN"];
 
         return function (objectArray, scene, target, systemUniforms, sceneParameterFilter, opt) {

@@ -121,7 +121,7 @@ MouseEventHandler.prototype =  {
      * @param {Event} event
      * @param {number} x
      * @param {number} y
-     * @return {XML3D.math.vec3}
+     * @return {XML3D.Vec3}
      */
     initExtendedMouseEvent: function (event, x, y) {
         var handler = this._canvasHandler;

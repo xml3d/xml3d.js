@@ -1,4 +1,4 @@
-var vec3 = XML3D.math.vec3;
+var vec3 = require("gl-matrix").vec3;
 var tmp1 = vec3.create();
 var tmp2 = vec3.create();
 
@@ -47,7 +47,9 @@ XML3D.extend(Frustum.prototype, {
             this.orthographic = false; else
             this.orthographic = orthographic;
 
-    }, getProjectionMatrix: function (matrix) {
+    },
+
+    getProjectionMatrix: function (matrix) {
         var limitMax = Number.MAX_VALUE;
         var rightPlusLeft = this.right + this.left;
         var rightMinusLeft = this.right - this.left;
@@ -63,6 +65,7 @@ XML3D.extend(Frustum.prototype, {
         }
 
         var A, B, C, D, E, F;
+        var m = matrix.data ? matrix.data : matrix;
 
         if (this.orthographic) {
             var tx = -rightPlusLeft / rightMinusLeft;
@@ -77,14 +80,14 @@ XML3D.extend(Frustum.prototype, {
             B = 2 / topMinusBottom;
             C = -2 / farMinusNear;
 
-            XML3D.math.mat4.identity(matrix);
-            matrix[0] = A;
-            matrix[5] = B;
-            matrix[10] = C;
-            matrix[12] = tx;
-            matrix[13] = ty;
-            matrix[14] = tz;
-            matrix[15] = 1.0;
+            XML3D.math.mat4.identity(m);
+            m[0] = A;
+            m[5] = B;
+            m[10] = C;
+            m[12] = tx;
+            m[13] = ty;
+            m[14] = tz;
+            m[15] = 1.0;
         } else {
             A = rightPlusLeft / rightMinusLeft;
             B = topPlusBottom / topMinusBottom;
@@ -106,15 +109,15 @@ XML3D.extend(Frustum.prototype, {
             E = twoTimesNear / rightMinusLeft;
             F = twoTimesNear / topMinusBottom;
 
-            XML3D.math.mat4.identity(matrix);
-            matrix[0] = E;
-            matrix[5] = F;
-            matrix[8] = A;
-            matrix[9] = B;
-            matrix[10] = C;
-            matrix[11] = -1;
-            matrix[14] = D;
-            matrix[15] = 0;
+            XML3D.math.mat4.identity(m);
+            m[0] = E;
+            m[5] = F;
+            m[8] = A;
+            m[9] = B;
+            m[10] = C;
+            m[11] = -1;
+            m[14] = D;
+            m[15] = 0;
         }
     },
 
@@ -131,39 +134,38 @@ XML3D.extend(Frustum.prototype, {
         var c_o = vec3.create();
 
 
-        return function (p, M) {
-            var a = vec3.transformMat4(c_a, [this.left, this.bottom, -this.nearPlane], M);
-            var b = vec3.transformMat4(c_b, [this.left, this.top, -this.nearPlane], M);
-            var c = vec3.transformMat4(c_c, [this.right, this.top, -this.nearPlane], M);
-            var d = vec3.transformMat4(c_d, [this.right, this.bottom, -this.nearPlane], M);
-            var e, f, g, h, o;
+        return function (planes, M) {
+            vec3.transformMat4(c_a, [this.left, this.bottom, -this.nearPlane], M);
+            vec3.transformMat4(c_b, [this.left, this.top, -this.nearPlane], M);
+            vec3.transformMat4(c_c, [this.right, this.top, -this.nearPlane], M);
+            vec3.transformMat4(c_d, [this.right, this.bottom, -this.nearPlane], M);
             if (!this.orthographic) {
                 var s = this.farPlane / this.nearPlane;
                 var farLeft = s * this.left;
                 var farRight = s * this.right;
                 var farTop = s * this.top;
                 var farBottom = s * this.bottom;
-                e = vec3.transformMat4(c_e, [farLeft, farBottom, -this.farPlane], M);
-                f = vec3.transformMat4(c_f, [farLeft, farTop, -this.farPlane], M);
-                g = vec3.transformMat4(c_g, [farRight, farTop, -this.farPlane], M);
-                o = vec3.transformMat4(c_o, [0, 0, 0], M);
-                p[0].setFromPoints(o, c, b);
-                p[1].setFromPoints(o, d, c);
-                p[2].setFromPoints(o, a, d);
-                p[3].setFromPoints(o, b, a);
-                p[4].setFromPoints(a, d, c);
-                p[5].setFromPoints(e, f, g);
+                vec3.transformMat4(c_e, [farLeft, farBottom, -this.farPlane], M);
+                vec3.transformMat4(c_f, [farLeft, farTop, -this.farPlane], M);
+                vec3.transformMat4(c_g, [farRight, farTop, -this.farPlane], M);
+                vec3.transformMat4(c_o, [0, 0, 0], M);
+                planes[0].setFromPoints(c_o, c_c, c_b);
+                planes[1].setFromPoints(c_o, c_d, c_c);
+                planes[2].setFromPoints(c_o, c_a, c_d);
+                planes[3].setFromPoints(c_o, c_b, c_a);
+                planes[4].setFromPoints(c_a, c_d, c_c);
+                planes[5].setFromPoints(c_e, c_f, c_g);
             } else {
-                e = vec3.transformMat4(c_e, [this.left, this.bottom, -this.farPlane], M);
-                f = vec3.transformMat4(c_f, [this.left, this.top, -this.farPlane], M);
-                g = vec3.transformMat4(c_g, [this.right, this.top, -this.farPlane], M);
-                h = vec3.transformMat4(c_o, [this.right, this.bottom, -this.farPlane], M);
-                p[0].setFromPoints(c, g, f);
-                p[1].setFromPoints(d, h, g);
-                p[2].setFromPoints(a, e, h);
-                p[3].setFromPoints(b, f, e);
-                p[4].setFromPoints(a, d, c);
-                p[5].setFromPoints(e, f, g);
+                vec3.transformMat4(c_e, [this.left, this.bottom, -this.farPlane], M);
+                vec3.transformMat4(c_f, [this.left, this.top, -this.farPlane], M);
+                vec3.transformMat4(c_g, [this.right, this.top, -this.farPlane], M);
+                vec3.transformMat4(c_o, [this.right, this.bottom, -this.farPlane], M);
+                planes[0].setFromPoints(c_c, c_g, c_f);
+                planes[1].setFromPoints(c_d, c_o, c_g);
+                planes[2].setFromPoints(c_a, c_e, c_o);
+                planes[3].setFromPoints(c_b, c_f, c_e);
+                planes[4].setFromPoints(c_a, c_d, c_c);
+                planes[5].setFromPoints(c_e, c_f, c_g);
             }
         };
     }())
@@ -182,7 +184,9 @@ XML3D.extend(Plane.prototype, {
         vec3.cross(this.normal, vec3.sub(tmp2, point3, point1), vec3.sub(tmp1, point2, point1));
         vec3.normalize(this.normal, this.normal);
         this.distance = -vec3.dot(this.normal, point1);
-    }, set: function (x, y, z, distance) {
+    },
+
+    set: function (x, y, z, distance) {
         vec3.set(this.normal, x, y, z);
         vec3.normalize(this.normal, this.normal);
         this.distance = distance;
@@ -213,19 +217,19 @@ XML3D.extend(FrustumTest.prototype, {
     isBoxVisible: (function () {
 
         return function (bbox) {
-            if (XML3D.math.bbox.isEmpty(bbox))
+            if (bbox.isEmpty())
                 return false;
 
 
             for (var i = 0; i < this.frustumPlanes.length; i++) {
                 var plane = this.frustumPlanes[i];
                 var normal = plane.normal;
-                var bbx = normal[0] >= 0.0 ? bbox[3] : bbox[0];
-                var bby = normal[1] >= 0.0 ? bbox[4] : bbox[1];
-                var bbz = normal[2] >= 0.0 ? bbox[5] : bbox[2];
+                var bbx = normal.x >= 0.0 ? bbox.max.x : bbox.min.x;
+                var bby = normal.y >= 0.0 ? bbox.max.y : bbox.min.y;
+                var bbz = normal.z >= 0.0 ? bbox.max.z : bbox.min.z;
 
                 // Compute the distance
-                var distance = bbx * normal[0] + bby * normal[1] + bbz * normal[2] + plane.distance;
+                var distance = bbx * normal.x + bby * normal.y + bbz * normal.z + plane.distance;
 
                 // if highest point is below plane then all below.
                 if (distance < 0.0) {

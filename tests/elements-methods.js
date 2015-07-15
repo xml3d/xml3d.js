@@ -102,7 +102,7 @@ test("view::setUpVector tests", function() {
     QUnit.closeRotation(node.orientation.data, XML3D.math.vec4.fromValues(0,0,1,0), EPSILON, "Default orientation");
     node.setUpVector(XML3D.Vec3.fromValues(0,0,1));
     QUnit.closeRotation(node.orientation, [1,0,0, Math.PI/2.0], EPSILON, "Up vector is +z");
-    node.orientation = new XML3D.Vec4();
+    node.orientation = new XML3D.AxisAngle();
     node.setUpVector(XML3D.Vec3.fromValues(0,-1,0));
     QUnit.closeRotation(node.orientation, [0,0,1, Math.PI], EPSILON, "Up vector is -y");
 });

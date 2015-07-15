@@ -34,22 +34,7 @@ Object.defineProperty(Vec4.prototype, "w", {
     },
     get: function(){ return this.data[3]; }
 });
-/*
-Object.defineProperty(Vec4.prototype, "axis", {
-    set: function(vec){
-        this.data[0] = vec.data ? vec.data[0] : vec[0];
-        this.data[1] = vec.data ? vec.data[1] : vec[1];
-        this.data[2] = vec.data ? vec.data[2] : vec[2];
-    },
-    get: function(){ return new Vec3(this.data) }
-});
-Object.defineProperty(Vec4.prototype, "angle", {
-    set: function(a){
-        this.data[3] = a;
-    },
-    get: function(){ return this.data[3]; }
-});
-*/
+
 Vec4.prototype.add = function(b) {
     var out = new Vec4();
     vec4.add(out.data, this.data, b.data ? b.data : b);
@@ -133,12 +118,6 @@ Vec4.prototype.scale = function(s) {
 Vec4.prototype.scaleAndAdd = function(b, scale) {
     var out = new Vec4();
     vec4.scaleAndAdd(out.data, this.data, b.data ? b.data : b, scale);
-    return out;
-};
-
-Vec4.fromQuat = function(q) {
-    var out = new Vec4();
-    out.data.set(XML3D.math.vec4.fromQuat(q.data ? q.data : q));
     return out;
 };
 

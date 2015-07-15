@@ -296,7 +296,7 @@ handlers.Vec3AttributeHandler = function(id, defaultValue) {
 };
 
 // Note: All vec4 attributes are considered to be axis-angle, NOT quaternions!
-handlers.Vec4AttributeHandler = function(id, defaultValue) {
+handlers.AxisAngleAttributeHandler = function(id, defaultValue) {
     var that = this;
     id = id.toLowerCase();
 
@@ -326,7 +326,7 @@ handlers.Vec4AttributeHandler = function(id, defaultValue) {
             if (!storage[id]) {
                 that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
-            return new XML3D.Vec4(storage[id]);
+            return new XML3D.AxisAngle(storage[id]);
         },
         set : function(value) {
             var storage = getStorage(this);

@@ -45,7 +45,7 @@ test("View Transformation local", function() {
 
     // Turn around
     var axis = XML3D.math.vec3.fromValues(1, 0, 0);
-    view.orientation = XML3D.Vec4.fromValues(1,0,0,Math.PI/2.0);
+    view.orientation = XML3D.AxisAngle.fromValues(1,0,0,Math.PI/2.0);
     var q = XML3D.math.vec4.create();
     m = XML3D.math.mat4.create();
     XML3D.math.quat.setAxisAngle(q, axis, Math.PI /2);

@@ -38,6 +38,8 @@
       // only "name" is required
       editors: [{
         name: "Kristian Sons"
+      }, {
+        name: "Christian Schlinkmann"
       }],
 
       // authors, add as many as you like.
@@ -50,7 +52,9 @@
         companyURL: "http://www.intel-vci.uni-saarland.de/"
       }, {
         name: "Kristian Sons", company: "DFKI", companyURL: "http://www.dfki.de/"
-      }],
+      }, {
+        name: "Christian Schlinkmann", company: "DFKI", companyURL: "http://www.dfki.de/"}
+      ],
 
       // name of the WG
       wg: "Declarative 3D Community Group",
@@ -623,9 +627,9 @@
                 <dd>The x coordinate relative to the top left of the browser window</dd>
                 <dt>unsigned long y</dt>
                 <dd>The y coordinate relative to the top left of the browser window</dd>
-                <dt>optional vec3 hitPoint</dt>
+                <dt>optional Vec3 hitPoint</dt>
                 <dd>If provided this vector will be filled with the position of the hit point in world space.</dd>
-                <dt>optional vec3 hitNormal</dt>
+                <dt>optional Vec3 hitNormal</dt>
                 <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
             </dl>
         </dd>
@@ -636,17 +640,17 @@
             <dl class='parameters'>
                 <dt>ray ray</dt>
                 <dd></dd>
-                <dt>optional vec3 hitPoint</dt>
+                <dt>optional Vec3 hitPoint</dt>
                 <dd>If provided this vector will be filled with the position of the hit point in world space.</dd>
-                <dt>optional vec3 hitNormal</dt>
+                <dt>optional Vec3 hitNormal</dt>
                 <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
             </dl>
         </dd>
 
-        <dt>bbox getLocalBoundingBox()</dt>
+        <dt>Box getLocalBoundingBox()</dt>
         <dd>Returns the bounding box of the scene. Because the XML3D element is the root element the bounding box will be in world space by definition.</dd>
 
-        <dt>bbox getWorldBoundingBox()</dt>
+        <dt>Box getWorldBoundingBox()</dt>
         <dd>Returns the bounding box of the scene in world space.</dd>
 
         <dt>ray generateRay()</dt>
@@ -736,17 +740,17 @@
             <dt>attribute boolean visible</dt>
             <dd>A value of "false" will prevent this group being drawn to the canvas. Visibility is inherited from the parent group
             if this attribute is not present. </dd>
-            <dt>mat4 getWorldMatrix()</dt>
+            <dt>Mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this group element in world space (includes parent transformations).
             </dd>
-            <dt>mat4 getLocalMatrix()</dt>
+            <dt>Mat4 getLocalMatrix()</dt>
             <dd>Returns the local transformation matrix of this group element (does not include parent transformations).
             </dd>
-            <dt>bbox getLocalBoundingBox()</dt>
+            <dt>Box getLocalBoundingBox()</dt>
             <dd>Returns the bounding box of this group in its local transformation space. This is calculated as the smallest volume containing the
                 bounding boxes of all child elements.</dd>
 
-            <dt>bbox getWorldBoundingBox()</dt>
+            <dt>Box getWorldBoundingBox()</dt>
             <dd>Returns the bounding box of this group in world space. This is calculated as the smallest volume containing the
             bounding boxes of all child elements.</dd>
         </dl>
@@ -761,10 +765,10 @@
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
         <dl title='interface XML3DViewElement : HTMLElement' class='idl'>
-            <dt>attribute vec3 position</dt>
+            <dt>attribute Vec3 position</dt>
             <dd>The position of the camera in world space</dd>
 
-            <dt>attribute vec4 orientation</dt>
+            <dt>attribute AxisAngle orientation</dt>
             <dd>The orientation (rotation) of the camera in axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
 
             <dt>attribute float fieldofview</dt>
@@ -775,32 +779,32 @@
             <dd>Overrides the camera's internal projection matrix. The attribute should contain a URI to a data element
                 supplying a float4x4 matrix named "projection". This can be used to, for example, create an orthographic camera. </dd>
 
-            <dt>mat4 getWorldMatrix()</dt>
+            <dt>Mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this view element in world space.
             </dd>
 
-            <dt>void setUpVector(vec3 direction)</dt>
+            <dt>void setUpVector(Vec3 direction)</dt>
             <dd>Change the up vector of the camera. This method changes the current orientation. The up vector will be
                 lost if the orientation is explicitly set at a later time.
             </dd>
 
-            <dt>void setDirection(vec3 direction)</dt>
+            <dt>void setDirection(Vec3 direction)</dt>
             <dd>Change the orientation of the camera to look along the given direction vector.
             </dd>
 
-            <dt>vec3 getDirection()</dt>
+            <dt>Vec3 getDirection()</dt>
             <dd>Returns the current direction of the camera, which is extracted from the orientation.
             </dd>
 
-            <dt>vec3 getUpVector()</dt>
+            <dt>Vec3 getUpVector()</dt>
             <dd>Returns the current up vector of the camera, which is extracted from the orientation.
             </dd>
 
-            <dt>mat4 getViewMatrix()</dt>
+            <dt>Mat4 getViewMatrix()</dt>
             <dd>Returns the view matrix of the camera (the matrix used to transform from world to view space).
             </dd>
 
-            <dt>void lookAt(vec3 point)</dt>
+            <dt>void lookAt(Vec3 point)</dt>
             <dd>Change the orientation of the camera to look at the given point.
             </dd>
         </dl>
@@ -923,16 +927,16 @@
             <dt>Array getOutputNames()</dt>
             <dd>Returns the names of the data fields available to this mesh node. </dd>
 
-            <dt>mat4 getWorldMatrix()</dt>
+            <dt>Mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this mesh element in world space (includes parent transformations).
             </dd>
-            <dt>mat4 getLocalMatrix()</dt>
+            <dt>Mat4 getLocalMatrix()</dt>
             <dd>Returns the local transformation matrix of this mesh element (does not include parent transformations).
             </dd>
-            <dt>bbox getLocalBoundingBox()</dt>
+            <dt>Box getLocalBoundingBox()</dt>
             <dd>Returns the bounding box of this mesh in object space, without any transformations applied. </dd>
 
-            <dt>bbox getWorldBoundingBox()</dt>
+            <dt>Box getWorldBoundingBox()</dt>
             <dd>Returns the bounding box of this mesh in world space.</dd>
         </dl>
     </section>
@@ -994,14 +998,14 @@
             <dt>attribute DOMString transform</dt>
             <dd>URI reference to a <a href="#the-transform-element"><code>transform</code></a> element.</dd>
 
-            <dt>mat4 getWorldMatrix()</dt>
+            <dt>Mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this model in world space, including parent transformations.
             </dd>
 
-            <dt>bbox getLocalBoundingBox()</dt>
+            <dt>Box getLocalBoundingBox()</dt>
             <dd>Returns the bounding box of this model without any parent transformations applied.</dd>
 
-            <dt>bbox getWorldBoundingBox()</dt>
+            <dt>Box getWorldBoundingBox()</dt>
             <dd>Returns the bounding box of this model in world space, including parent transformations.</dd>
         </dl>
     </section>
@@ -1089,7 +1093,7 @@
     <section>
       <h4>The <code>transform</code> element</h4>
         <dl title='interface XML3DTransformElement : HTMLElement' class='idl'>
-            <dt>attribute vec4 scaleorientation</dt>
+            <dt>attribute AxisAngle scaleorientation</dt>
             <dd>The orientation on which to apply the scaling factor supplied by the IDL attribute <i>scale</i>. In axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
         </dl>
     </section>
@@ -2012,7 +2016,7 @@
       <dt>Box copyMax(Box other)</dt>
       <dd>Copies only the maximum point from the given Box.</dd>
       <dt>Box extend(Box other)</dt>
-      <dd>Expands this box to also enclose the given box.</dd>
+      <dd>Expands this box to also enclose the given box. This method respects axis alignment if both boxes are axis aligned.</dd>
       <dt>Box setEmpty()</dt>
       <dd>Resets this box to the empty state.</dd>
       <dt>boolean isEmpty()</dt>

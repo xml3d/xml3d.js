@@ -82,12 +82,6 @@ Quat.prototype.mul = Quat.prototype.multiply = function(b) {
     return out;
 };
 
-Quat.prototype.negate = function() {
-    var out = new Quat();
-    quat.negate(out.data, this.data);
-    return out;
-};
-
 Quat.prototype.normalize = function() {
     var out = new Quat();
     quat.normalize(out.data, this.data);
@@ -150,10 +144,6 @@ Quat.prototype.slerp = function(b, t) {
     var out = new Quat();
     quat.slerp(out.data, this.data, b.data ? b.data : b, t);
     return out;
-};
-
-Quat.prototype.sqrLen = Quat.prototype.squaredLength = function() {
-    return quat.sqrLen(this.data);
 };
 
 Quat.prototype.toDOMString = function() {

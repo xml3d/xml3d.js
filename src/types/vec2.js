@@ -91,7 +91,7 @@ Vec2.prototype.normalize = function() {
     return out;
 };
 
-Vec2.prototype.random = function(scale) {
+Vec2.random = function(scale) {
     var m = new Vec2();
     vec2.random(m.data, scale);
     return m;
@@ -101,20 +101,6 @@ Vec2.prototype.scale = function(s) {
     var out = new Vec2();
     vec2.scale(out.data, this.data, s);
     return out;
-};
-
-Vec2.prototype.scaleAndAdd = function(b, scale) {
-    var out = new Vec2();
-    vec2.scaleAndAdd(out.data, this.data, b.data ? b.data : b, scale);
-    return out;
-};
-
-Vec2.prototype.sqrDist = Vec2.prototype.squaredDistance = function(b) {
-    return vec2.sqrDist(this.data, b.data ? b.data : b);
-};
-
-Vec2.prototype.sqrLen = Vec2.prototype.squaredLength = function() {
-    return vec2.sqrLen(this.data);
 };
 
 Vec2.prototype.sub = Vec2.prototype.subtract = function(b) {
@@ -138,12 +124,6 @@ Vec2.prototype.transformMat3 = function(m) {
 Vec2.prototype.transformMat4 = function(m) {
     var out = new Vec2();
     vec2.transformMat4(out.data, this.data, m.data ? m.data : m);
-    return out;
-};
-
-Vec2.prototype.transformQuat = function(q) {
-    var out = new Vec2();
-    vec2.transformQuat(out.data, this.data, q.data ? q.data : q);
     return out;
 };
 

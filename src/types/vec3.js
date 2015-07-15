@@ -110,7 +110,7 @@ Vec3.prototype.random = function(scale) {
 
 Vec3.prototype.reciprocal = function() {
     var out = new Vec3();
-    XML3D.math.reciprocal(out.data, this.data);
+    XML3D.math.vec3.reciprocal(out.data, this.data);
     return out;
 };
 
@@ -120,23 +120,15 @@ Vec3.prototype.scale = function(s) {
     return out;
 };
 
-Vec3.prototype.scaleAndAdd = function(b, scale) {
-    var out = new Vec3();
-    vec3.scaleAndAdd(out.data, this.data, b.data ? b.data : b, scale);
-    return out;
-};
-
-Vec3.prototype.sqrDist = Vec3.prototype.squaredDistance = function(b) {
-    return vec3.sqrDist(this.data, b.data ? b.data : b);
-};
-
-Vec3.prototype.sqrLen = Vec3.prototype.squaredLength = function() {
-    return vec3.sqrLen(this.data);
-};
-
 Vec3.prototype.sub = Vec3.prototype.subtract = function(b) {
     var out = new Vec3();
     vec3.sub(out.data, this.data, b.data ? b.data : b);
+    return out;
+};
+
+Vec3.prototype.transformDirection = function(m) {
+    var out = new Vec3();
+    XML3D.math.vec3.transformDirection(out.data, this.data, m.data ? m.data : m);
     return out;
 };
 

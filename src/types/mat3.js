@@ -115,16 +115,6 @@ Mat3.prototype.translate = function(vec) {
     return out;
 };
 
-Mat3.prototype.toDOMString = function() {
-    return mat3.toDOMString(this.data);
-};
-
-Mat3.fromDOMString = function(str) {
-    var out = new Mat3();
-    out.data.set( mat3.fromDOMString(str) );
-    return out;
-};
-
 Mat3.wrap = function(mat) {
     var m = Mat3();
     m.data = mat.data ? mat.data : mat;

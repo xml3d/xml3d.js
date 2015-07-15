@@ -115,20 +115,6 @@ Vec4.prototype.scale = function(s) {
     return out;
 };
 
-Vec4.prototype.scaleAndAdd = function(b, scale) {
-    var out = new Vec4();
-    vec4.scaleAndAdd(out.data, this.data, b.data ? b.data : b, scale);
-    return out;
-};
-
-Vec4.prototype.sqrDist = Vec4.prototype.squaredDistance = function(b) {
-    return vec4.sqrDist(this.data, b.data ? b.data : b);
-};
-
-Vec4.prototype.sqrLen = Vec4.prototype.squaredLength = function() {
-    return vec4.sqrLen(this.data);
-};
-
 Vec4.prototype.sub = Vec4.prototype.subtract = function(b) {
     var out = new Vec4();
     vec4.sub(out.data, this.data, b.data ? b.data : b);

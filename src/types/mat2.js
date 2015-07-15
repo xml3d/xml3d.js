@@ -70,16 +70,6 @@ Mat2.prototype.transpose = function() {
     return out;
 };
 
-Mat2.prototype.toDOMString = function() {
-    return mat2.toDOMString(this.data);
-};
-
-Mat2.fromDOMString = function(str) {
-    var out = new Mat2();
-    out.data.set( mat2.fromDOMString(str) );
-    return out;
-};
-
 Mat2.wrap = function(mat) {
     var m = Mat2();
     m.data = mat.data ? mat.data : mat;

@@ -178,16 +178,6 @@ Mat4.prototype.translate = function(vec) {
     return out;
 };
 
-Mat4.prototype.toDOMString = function() {
-    return mat4.toDOMString(this.data);
-};
-
-Mat4.fromDOMString = function(str) {
-    var out = new Mat4();
-    out.data.set( mat4.fromDOMString(str) );
-    return out;
-};
-
 Mat4.wrap = function(mat) {
     var m = Mat4();
     m.data = mat.data ? mat.data : mat;

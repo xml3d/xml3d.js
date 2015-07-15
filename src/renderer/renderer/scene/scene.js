@@ -148,8 +148,8 @@ XML3D.createClass(Scene, EventEmitter, {
 
     setRendererIndependentData: function () {
     	//Set the time
-    	this.systemDataAdapter.xflowDataNode.getChildByName("_system_time").data.setValue(new Float32Array([performance.now()]));
-    	this.systemDataAdapter.xflowDataNode.getChildByName("_system_test").data.setValue(new Float32Array([10.0]));
+    	this.systemDataAdapter.xflowDataNode.getChildByName("time").data.setValue(new Float32Array([performance.now()]));
+    	this.systemDataAdapter.xflowDataNode.getChildByName("test").data.setValue(new Float32Array([10.0]));
     	
     }
 });

@@ -518,8 +518,7 @@ DataNode.prototype.removeChild = function(child){
  * @param {InputNodeI|dataNode} child
  */
 DataNode.prototype.getChildByName = function(name){
-    // TODO(ksons): Do not use for(i in obj) for arrays
-	for (var i in this._children){
+	for (var i=0; i<this._children.length; i++){
 		if (this._children[i].name == name)
 			return this._children[i];
 	}
@@ -528,7 +527,7 @@ DataNode.prototype.getChildByName = function(name){
  * @param {dataNode} child
  */
 DataNode.prototype.hasSystemDataNode = function(){
-	for (var i in this._children){
+	for (var i=0; i< this._children.length; i++){
 		if (this._children[i].systemDataAdapter != undefined)
 			return this._children[i];
 	}

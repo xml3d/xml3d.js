@@ -23,23 +23,31 @@ createClass(XML3DDataAdapter, NodeAdapter);
 XML3DDataAdapter.prototype.init = function()
 {
     // todo(ksons): Check if system attribute is set,
-    // request data adapter and use this (with appenden sysdatanode) instead if it exsits
+    // request data adapter and use this (with appenden sysdatanode) instead if it exists
+
 	this.xflowDataNode = new DataNode(false);
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
     this.xflowDataNode.systemDataAdapter = true;
 	this.setDefaultValues();
 	
+	var systemDataNodeURI = this.node.getAttribute("sys");
+	if (systemDataNodeURI){
+		var systemDataNodeHandler = this.getAdapterHandle(systemDataNodeURI);
+		//TODO(RF) : Should I add the whole data node or should iterate over the children in user defined node and add the children?
+		this.xflowDataNode.appendChild(systemDataNodeHandler.adapter.xflowDataNode._children[0]);
+	}
+	
 };
 
 XML3DDataAdapter.prototype.setDefaultValues = function(){
 	var inputNode = new InputNode();
-    inputNode.name="_system_time";
+    inputNode.name="time";
     inputNode.data = new BufferEntry(XC.DATA_TYPE.FLOAT, new Float32Array([0.0]));
     this.xflowDataNode.appendChild(inputNode);
     
     inputNode = new InputNode();
-    inputNode.name="_system_test";
+    inputNode.name="test";
     inputNode.data = new BufferEntry(XC.DATA_TYPE.FLOAT, new Float32Array([5.0]));
     this.xflowDataNode.appendChild(inputNode);
 }

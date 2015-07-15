@@ -113,9 +113,7 @@ function recursiveDataAdapterConstruction(adapter, systemDataNode) {
     	//Here we check for data nodes with sys flag set
     	if (child.sys != undefined){
     		//Check if a system parameter with this name exists
-            // todo(ksons): Remove name mangling
-        	if (systemDataNode.getChildByName("_system_" + child.name)) {
-        		//Check if the systemDataNode is already added to adapter or not
+        	if (systemDataNode.getChildByName(child.name)) {
         		filterNames.push(child.name);
             } else {
                 // TODO: Use else part to have a normal value if system parameter does not exist
@@ -144,26 +142,23 @@ function recursiveDataAdapterConstruction(adapter, systemDataNode) {
 
 	        }
     	}
-        // Passes _platform values to children nodes starting from the node
-        // where these attributes are first defined
-        if (adapter.xflowDataNode._platform !== null) {
-            recursiveDataNodeAttrInit(adapter.xflowDataNode);
-        }
     }
 
     if(filterNames.length) {
-        assert(!adapter.xflowDataNode.hasSystemDataNode());
-        //todo(ksons): Add a new DataNode that references the system data node
-        adapter.xflowDataNode.appendChild(systemDataNode);
+    	var filter = "keep("+filterNames.join(",")+")";
+    	var sysData = new DataNode(false);
+    	sysData.systemDataAdapter = true;
+    	sysData.sourceNode = systemDataNode;
+    	sysData.setFilter(filter);
+    	XML3D.debug.assert(!adapter.xflowDataNode.hasSystemDataNode());
+        adapter.xflowDataNode.appendChild(sysData);
     }
-
-    // todo(ksons): Add the filter to the new data node
-/*
-        filter = "keep({";
-        filter += child.name + ":_system_" + child.name + ",";
-        filter = filter.slice(0, -1) + "})";
-        newDataNode.setFilter(filter);
-  */
+    
+    // Passes _platform values to children nodes starting from the node
+    // where these attributes are first defined
+    if (adapter.xflowDataNode._platform !== null) {
+        recursiveDataNodeAttrInit(adapter.xflowDataNode);
+    }
 }
 
 /**

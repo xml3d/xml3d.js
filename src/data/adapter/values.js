@@ -68,8 +68,13 @@ ValueDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, 
         this.xflowInputNode.key = newValue;
     } else if (name == "param") {
         this.xflowInputNode.paramName = newValue ? this.node.name : null;
+    }else if (name == "sys"){
+    	var parentDataAdapter = this.factory.getAdapter(this.node.parentNode);
+    	var filterNames =  parentDataAdapter.xflowDataNode.hasSystemDataNode()._filterMapping._names; 
+    	var index = filterNames.indexOf(this.node.name);
+    	filterNames.splice(index, 1);
+    	//TODO: update the parent. The same question here. what would be the value of the parameter
     }
-    // TODO: sys flag removed -> Update parent data node
 };
 
 

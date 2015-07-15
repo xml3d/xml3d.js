@@ -215,13 +215,16 @@ XML3D.extend(RenderGroup.prototype, {
         XML3D.math.mat4.invert(dest, dest);
     },
 
-    setProjectionOverride: function() {
-        console.error("RenderGroup::setProjectionOverride is not implemented");
+
+    setProjectionOverride: function (projAdapter) {
+        this.projectionOverride = projAdapter;
+        this.setProjectionDirty();
+        this.scene.requestRedraw("Projection changed");
     },
 
 
-        setProjectionDirty: function() {
-        console.error("RenderGroup::setProjectionDirty is not implemented");
+    setProjectionDirty: function () {
+        this.projectionDirty = true;
     },
 
     getProjectionMatrix: function (dest, aspect) {

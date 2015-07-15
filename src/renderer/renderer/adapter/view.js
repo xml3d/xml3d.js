@@ -22,7 +22,7 @@ XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
     updateIntrinsicCameraParameters: function() {
         this.projectionFetcher.update();
         var fieldOfView = +this.node.getAttribute("fieldofview");
-        this.renderNode.fieldOfView = fieldOfView;
+        //this.renderNode.fieldOfView = fieldOfView;
     },
 
     /* Interface method */

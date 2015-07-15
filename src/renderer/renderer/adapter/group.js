@@ -16,6 +16,7 @@ XML3D.createClass(GroupRenderAdapter, SceneElementAdapter, {
         });
         this.updateLocalMatrix();
         this.updateMaterialHandler();
+        this.updateVisibility();
         this.renderNode.setWorldSpaceBoundingBox(new XML3D.Box());
     },
 

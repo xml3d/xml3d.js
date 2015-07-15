@@ -72,7 +72,6 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     getRenderNode: function () {
         if (!this.renderNode) {
             this.renderNode = this.createRenderNode ? this.createRenderNode() : null;
-            this.updateLocalMatrix();
         }
         return this.renderNode;
     },
@@ -101,7 +100,6 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
 
     onTransformChange: function (attrName, matrix) {
         if (attrName == "transform") {
-            console.log("set transform to rendernode", attrName, this.node.nodeName, this.node.id);
             this.renderNode.setLocalMatrix(matrix);
         }
 
@@ -121,14 +119,22 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     },
 
     notifyChanged: function (evt) {
-        if (evt.type == Events.ADAPTER_HANDLE_CHANGED) {
-            var key = evt.key;
-            if (key == "material") {
-                this.updateMaterialHandler();
-                this.factory.renderer.requestRedraw("Material reference changed.");
-            }
-        } else if (evt.type == Events.THIS_REMOVED) {
-            this.dispose();
+        switch (evt.type) {
+            case Events.ADAPTER_HANDLE_CHANGED:
+                var key = evt.key;
+                if (key == "material") {
+                    this.updateMaterialHandler();
+                    this.factory.renderer.requestRedraw("Material reference changed.");
+                }
+                break;
+            case Events.THIS_REMOVED:
+                this.dispose();
+                break;
+            case Events.NODE_INSERTED:
+                this.initElement(evt.mutation.target);
+                break;
+            default:
+                XML3D.debug.logDebug("Unhandled event in SceneElementAdapter:", evt);
         }
     }
 });

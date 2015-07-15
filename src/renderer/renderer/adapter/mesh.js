@@ -36,7 +36,7 @@ XML3D.createClass(MeshRenderAdapter, SceneElementAdapter, {
     attributeChangedCallback: function (name, oldValue, newValue) {
         SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
         if (name == "type") {
-            this.renderNode.setType(newValue);
+            this.renderNode.setType(this.getMeshType());
         }
     },
 
@@ -46,10 +46,6 @@ XML3D.createClass(MeshRenderAdapter, SceneElementAdapter, {
     notifyChanged: function (evt) {
         SceneElementAdapter.prototype.notifyChanged.call(this, evt);
     },
-
-    dispose: function () {
-    },
-
 
     // Interface methods
 

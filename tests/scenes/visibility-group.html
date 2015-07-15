@@ -86,6 +86,7 @@
 
        mesh = document.createElement("mesh");
        mesh.setAttribute("src", "#meshdata");
+       mesh.setAttribute("id", "visibleMesh");
        mesh.style.display = "inline";
        group.appendChild(mesh);
      };
@@ -97,6 +98,7 @@
 
        mesh = document.createElement("mesh");
        mesh.setAttribute("src", "#meshdata");
+       mesh.setAttribute("id", "invisibleMesh");
        mesh.style.display = "none";
        group.appendChild(mesh);
      }

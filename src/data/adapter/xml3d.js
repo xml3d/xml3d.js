@@ -25,6 +25,12 @@ XML3DDataAdapter.prototype.init = function()
     // todo(ksons): Check if system attribute is set,
     // request data adapter and use this (with appenden sysdatanode) instead if it exists
 
+    /**
+     <data>
+        <data src="#sys">
+        <data src="#user">
+     </data>
+     */
 	this.xflowDataNode = new DataNode(false);
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;

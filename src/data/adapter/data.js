@@ -108,6 +108,17 @@ function recursiveDataNodeAttrInit(parentNode) {
 }
 
 function recursiveDataAdapterConstruction(adapter, systemDataNode) {
+    /**
+     *
+     * <data> this is artificial and not visible
+        <data> this is the visible dom node
+            <float name="time" sys>100</float>
+        <data>
+        <data src="#sys" filter="keep(time)">
+            <float name="time"> 10 </float>
+        </data>
+      </data>
+     */
     var filterNames = [];
     for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
     	//Here we check for data nodes with sys flag set
@@ -191,6 +202,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
             sibling = sibling.nextSibling;
         } while (sibling && !(followUpAdapter = this.factory.getAdapter(sibling)));
 
+        // Make sure to use the actual dom node!
         if (followUpAdapter) {
             this.xflowDataNode.insertBefore(insertedXflowNode, followUpAdapter.getXflowNode());
         } else {

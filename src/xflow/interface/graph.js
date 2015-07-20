@@ -521,15 +521,24 @@ DataNode.prototype.getChildByName = function(name){
 	for (var i=0; i<this._children.length; i++){
 		if (this._children[i].name == name)
 			return this._children[i];
+		else{
+			if (this._children[i]._children)
+				return this._children[i].getChildByName(name);
+		}
 	}
 };
 /**
  * @param {dataNode} child
  */
 DataNode.prototype.hasSystemDataNode = function(){
-	for (var i=0; i< this._children.length; i++){
+	for (var i=0; i<this._children.length; i++){
 		if (this._children[i].systemDataAdapter != undefined)
 			return this._children[i];
+		else{
+			if (this._children[i]._children)
+				return this._children[i].hasSystemDataNode();
+			
+		}
 	}
 };
 /**

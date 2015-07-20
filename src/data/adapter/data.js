@@ -27,8 +27,6 @@ var DataAdapter = function (factory, node) {
 XML3D.createClass(DataAdapter, BaseDataAdapter);
 
 DataAdapter.prototype.init = function () {
-    // TODO(ksons): Here, every data node is composed. Add the system's data node
-    // to every data node in a first approach
 	//Going up in the DOM hierarchy to find XML3D node
 	var xml3dNode = this.node;        	
 	while(xml3dNode.localName != "xml3d"){
@@ -51,10 +49,6 @@ DataAdapter.prototype.init = function () {
         updateCompute(this);
     }
     recursiveDataAdapterConstruction(this, systemDataNode);
-
-    // FIXME: Use insertBefore to guarantee right position
-    // FIXME: Add data node with filter set
-    //append system data node to every data node
 };
 
 DataAdapter.prototype.updateAdapterHandle = function(key, url) {
@@ -119,19 +113,18 @@ function recursiveDataAdapterConstruction(adapter, systemDataNode) {
         </data>
       </data>
      */
-    var filterNames = [];
+	var filterNames = [];
+	var xflowDataNode = new DataNode(false); // Data node to keep the visible dom nodes
     for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
+    	xflowDataNode.appendChild(adapter.factory.getAdapter(child).getXflowNode());
     	//Here we check for data nodes with sys flag set
     	if (child.sys != undefined){
-    		//Check if a system parameter with this name exists
-        	if (systemDataNode.getChildByName(child.name)) {
+    	    //Check if a system parameter with this name exists
+    	    if (systemDataNode.getChildByName(child.name)) {
         		filterNames.push(child.name);
             } else {
-                // TODO: Use else part to have a normal value if system parameter does not exist
-                XML3D.debug.logInfo("Parameter "+ child.name + " doesn't exist in global parameters!");
+                XML3D.debug.logWarning("Parameter "+ child.name + " doesn't exist in global parameters!");
             }
-            // Create the adapter anyway to get events in the value adapter
-            adapter.factory.getAdapter(child);
     	}
     	else{
 	        var subadapter = adapter.factory.getAdapter(child);
@@ -160,15 +153,22 @@ function recursiveDataAdapterConstruction(adapter, systemDataNode) {
     	var sysData = new DataNode(false);
     	sysData.systemDataAdapter = true;
     	sysData.sourceNode = systemDataNode;
+    	sysData.systemDataAdapter = true;
     	sysData.setFilter(filter);
-    	XML3D.debug.assert(!adapter.xflowDataNode.hasSystemDataNode());
-        adapter.xflowDataNode.appendChild(sysData);
+    	
+    	var sysDataAndUserData = new DataNode(false);
+    	sysDataAndUserData.appendChild(xflowDataNode);
+    	sysDataAndUserData.appendChild(sysData);
+    	xflowDataNode.appendChild(sysData);
+    	
+    	XML3D.debug.assert(!adapter.getXflowNode().hasSystemDataNode());
+        adapter.xflowDataNode.appendChild(sysDataAndUserData);
     }
     
     // Passes _platform values to children nodes starting from the node
     // where these attributes are first defined
     if (adapter.xflowDataNode._platform !== null) {
-        recursiveDataNodeAttrInit(adapter.xflowDataNode);
+        recursiveDataNodeAttrInit(adapter.getXflowNode());
     }
 }
 

@@ -108,7 +108,7 @@ OrderMapping.prototype.setName = function(index, name){
 
 //noinspection JSUnusedGlobalSymbols
 OrderMapping.prototype.removeName = function(index){
-    this._names.splice(index);
+    this._names.splice(index,1);
     mappingNotifyOwner(this);
 };
 

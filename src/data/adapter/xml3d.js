@@ -31,31 +31,41 @@ XML3DDataAdapter.prototype.init = function()
         <data src="#user">
      </data>
      */
-	this.xflowDataNode = new DataNode(false);
+	this.xflowDataNode = new DataNode(false);// This is higher level data node which contains both user and system data nodes
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
-    this.xflowDataNode.systemDataAdapter = true;
 	this.setDefaultValues();
 	
 	var systemDataNodeURI = this.node.getAttribute("sys");
 	if (systemDataNodeURI){
 		var systemDataNodeHandler = this.getAdapterHandle(systemDataNodeURI);
 		//TODO(RF) : Should I add the whole data node or should iterate over the children in user defined node and add the children?
-		this.xflowDataNode.appendChild(systemDataNodeHandler.adapter.xflowDataNode._children[0]);
+		this.xflowDataNode.appendChild(systemDataNodeHandler.adapter.getXflowNode());
 	}
 	
 };
 
 XML3DDataAdapter.prototype.setDefaultValues = function(){
-	var inputNode = new InputNode();
+	var xflowDataNode = new DataNode(false); // system data node
+    xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
+    xflowDataNode.userData = this.node;
+
+    
+    var inputNode = new InputNode();
     inputNode.name="time";
     inputNode.data = new BufferEntry(XC.DATA_TYPE.FLOAT, new Float32Array([0.0]));
-    this.xflowDataNode.appendChild(inputNode);
+//    this.xflowDataNode.appendChild(inputNode);
+    xflowDataNode.appendChild(inputNode);
     
     inputNode = new InputNode();
     inputNode.name="test";
     inputNode.data = new BufferEntry(XC.DATA_TYPE.FLOAT, new Float32Array([5.0]));
-    this.xflowDataNode.appendChild(inputNode);
+//    this.xflowDataNode.appendChild(inputNode);
+    xflowDataNode.appendChild(inputNode);
+    
+    this.xflowDataNode.appendChild(xflowDataNode);
+    
+    
 }
 
 XML3DDataAdapter.prototype.onXflowLoadEvent = function(node, newLevel, oldLevel){

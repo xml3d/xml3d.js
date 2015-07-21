@@ -217,18 +217,8 @@ function resolveMutations(mutations){
     for(var i = 0; i < mutations.length; ++i){
         var mutation = mutations[i];
         if(mutation.type == 'childList'){
-            var addedNodes = mutation.addedNodes;
-            var j = addedNodes.length;
-            while(j--){
-                if(addedNodes[j].tagName == "xml3d")
-                    initXML3DElement(addedNodes[j]);
-            }
-            var removedNodes = mutation.removedNodes;
-            var j = removedNodes.length;
-            while(j--) {
-                if(removedNodes[j].tagName == "xml3d")
-                    destroyXML3DElement(removedNodes[j]);
-            }
+            mapFunctionOnXML3DElements(mutation.addedNodes, initXML3DElement);
+            mapFunctionOnXML3DElements(mutation.removedNodes, destroyXML3DElement);
 
         } else if (mutation.type == 'attributes') {
             var mutationTarget = mutation.target;
@@ -250,6 +240,23 @@ function resolveMutations(mutations){
 
         }
     }
+}
+
+function mapFunctionOnXML3DElements(elementList, fun) {
+    Array.forEach(elementList, function(element) {
+        if (!element.getElementsByTagNameNS) {
+            // These elements are leaf nodes (eg. TEXT) so we can ignore them
+            return;
+        }
+        if (element.tagName === "xml3d") {
+            fun(element);
+            // An XML3D element can't have further XML3D elements as children
+            return;
+        }
+        // For cases where an XML3D element might inside the subtree of the added node
+        var xml3dElems = element.getElementsByTagNameNS(XML3D.xml3dNS, "xml3d");
+        Array.forEach(xml3dElems, fun);
+    });
 }
 
 XML3D.flushCSSChanges = function(){

@@ -616,3 +616,23 @@ test("Add a mesh dynamically", 3, function () {
 
 });
 
+test("Add xml3d element inside a div", 3, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+
+    x.parentNode.removeChild(x);
+
+    var div = this.doc.createElement("div");
+    var xml3d = this.doc.createElementNS(XML3D.xml3dNS, "xml3d");
+    xml3d.setAttribute("style", "background-color:green; width: 200px; height: 200px;");
+    xml3d.addEventListener("framedrawn", function() {
+        start();
+        ok(true, "New XML3D element was rendered");
+    });
+    div.appendChild(xml3d);
+    this.doc.getElementById("somebody").appendChild(xml3d);
+
+    stop();
+});
+

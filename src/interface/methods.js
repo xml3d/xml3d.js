@@ -1,6 +1,8 @@
 var Resource = require("../base/resourcemanager.js").Resource;
 var sendAdapterEvent = require("../utils/misc.js").sendAdapterEvent;
 var callAdapterFunc = require("../utils/misc.js").callAdapterFunc;
+var CSS = require("../utils/css.js");
+
 var Vec3 = require("../types/vec3.js");
 var Quat = require("../types/quat.js");
 var Mat4 = require("../types/mat4.js");
@@ -21,53 +23,6 @@ methods.xml3dGetElementByRay = function(ray, hitPoint, hitNormal) {
     return null;
 };
 
-methods.viewGetDirection = function() {
-    var dir = Vec3.fromValues(0,0,-1);
-    var orientation = Quat.fromAxisAngle(this.orientation);
-    return dir.transformQuat(orientation);
-};
-
-methods.viewSetPosition = function(pos) {
-    this.position = pos;
-};
-
-methods.viewSetDirection = function(direction) {
-    direction = direction.normalize();
-    var up = Vec3.fromValues(0,1,0);
-    var orientation = Quat.fromAxisAngle(this.orientation);
-    up = up.transformQuat(orientation).normalize();
-
-    var basisX = new Vec3(direction).cross(up);
-    if (!basisX.length()) {
-        basisX = Vec3.fromValues(1,0,0).transformQuat(orientation);
-    }
-    var basisY = basisX.clone().cross(direction);
-    var basisZ = new Vec3(direction).negate();
-
-    var q = Quat.fromBasis(basisX, basisY, basisZ);
-    this.orientation = AxisAngle.fromQuat(q);
-};
-
-methods.viewSetUpVector = function(up) {
-    up = up.normalize();
-    var orientation = Quat.fromAxisAngle(this.orientation);
-    var r = Quat.fromRotationTo([0,1,0], up);
-    orientation = orientation.mul(r).normalize();
-    this.orientation = AxisAngle.fromQuat(orientation);
-};
-
-methods.viewGetUpVector = function() {
-    var up = Vec3.fromValues(0, 1, 0);
-    var orientation = Quat.fromAxisAngle(this.orientation);
-    return up.transformQuat(orientation);
-};
-
-methods.viewLookAt = function(point) {
-    var dir = new Vec3();
-    vec3.sub(dir.data, point.data, this.position.data);
-    this.setDirection(dir);
-};
-
 methods.viewGetViewMatrix = function() {
     XML3D.flushDOMChanges();
     var adapters = this._configured.adapters || {};
@@ -77,10 +32,12 @@ methods.viewGetViewMatrix = function() {
         }
     }
     // Fallback implementation
-    // todo(ksons): Compute from CSS matrix
-    var p = this.position;
-    var r = Quat.fromAxisAngle(this.orientation);
-    return Mat4.fromRotationTranslation(r,p).invert();
+    var result = new XML3D.Mat4();
+    var cssMatrix = CSS.getCSSMatrix(this);
+    if(cssMatrix) {
+        CSS.convertCssToMat4(cssMatrix, result);
+    }
+    return result.invert();
 };
 
 methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {

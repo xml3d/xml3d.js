@@ -283,7 +283,7 @@ test("&lt;video&gt; interface test", function() {
     equal(typeof e.play, "function", "play is of type 'function'");
     equal(typeof e.pause, "function", "pause is of type 'function'");
 });
-test("&lt;view&gt; interface test", function() {
+test("<view> interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "view");
     ok(e, "view exits");
     equal(typeof e.className, "string", "className is of type 'string'");
@@ -299,13 +299,6 @@ test("&lt;view&gt; interface test", function() {
     equal(typeof e.onkeypress, "object", "onkeypress is of type 'object'");
     equal(typeof e.onkeydown, "object", "onkeydown is of type 'object'");
     equal(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
-    equal(typeof e.fieldOfView, "number", "fieldOfView is of type 'number'");
     equal(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
-    equal(typeof e.setDirection, "function", "setDirection is of type 'function'");
-    equal(typeof e.setUpVector, "function", "setUpVector is of type 'function'");
-    equal(typeof e.lookAt, "function", "lookAt is of type 'function'");
-    equal(typeof e.getDirection, "function", "getDirection is of type 'function'");
-    equal(typeof e.getUpVector, "function", "getUpVector is of type 'function'");
     equal(typeof e.getViewMatrix, "function", "getViewMatrix is of type 'function'");
-    equal(typeof e.projection, "string", "projection is of type 'string'");
 });

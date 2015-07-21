@@ -48,6 +48,8 @@ test("View Transformation local", function() {
 
     var q = XML3D.math.vec4.create();
     m = XML3D.math.mat4.create();
+    var axis = XML3D.math.vec3.fromValues(1, 0, 0);
+
     XML3D.math.quat.setAxisAngle(q, axis, Math.PI /2);
     XML3D.math.mat4.fromRotationTranslation(m, q, [0,0,10]);
     XML3D.math.mat4.invert(m,m);

@@ -1,6 +1,8 @@
 var RenderNode = require("./rendernode.js");
 var Constants = require("./constants.js");
 var Frustum = require("../tools/frustum.js").Frustum;
+var vec3 = require("gl-matrix").vec3;
+var mat4 = require("gl-matrix").mat4;
 
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
@@ -36,7 +38,7 @@ var RenderGroup = function (scene, pageEntry, opt) {
     this._material = opt.material || null;
     this.boundingBoxDirty = false;
     this.projectionDirty = true;
-    this.setWorldSpaceBoundingBox(XML3D.math.bbox.EMPTY_BOX);
+    this.setWorldSpaceBoundingBox(XML3D.Box.EMPTY_BOX);
 
     // Camera related
     this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : DEFAULT_FIELDOFVIEW;
@@ -252,7 +254,7 @@ XML3D.extend(RenderGroup.prototype, {
         },
 
     updateProjectionMatrix: (function() {
-            var tmp = XML3D.math.mat4.create();
+            var tmp = mat4.create();
 
             return function(aspect) {
                 if (this.projectionOverride) {
@@ -268,7 +270,7 @@ XML3D.extend(RenderGroup.prototype, {
                     fovy = this.fieldOfView;
 
                 // Calculate perspective projectionMatrix
-                XML3D.math.mat4.perspective(tmp, fovy, aspect, near, far);
+                mat4.perspective(tmp, fovy, aspect, near, far);
                 // Set projectionMatrix
                 this.setProjectionMatrix(tmp);
                 // Update Frustum
@@ -278,20 +280,20 @@ XML3D.extend(RenderGroup.prototype, {
             }
         })(),
 
-        getClippingPlanes: (function() {
-            var t_mat = XML3D.math.mat4.create();
-            var bb = new XML3D.math.bbox.create();
+       getClippingPlanes: (function() {
+            var t_mat = mat4.create();
+            var bb = new XML3D.Box();
 
             return function() {
                 this.scene.getBoundingBox(bb);
-                if (XML3D.math.bbox.isEmpty(bb)) {
+                if (bb.isEmpty()) {
                     return { near: 1, far: 10 };
                 }
                 this.getWorldToViewMatrix(t_mat);
-                XML3D.math.bbox.transformAxisAligned(bb, t_mat, bb);
+                bb.transformAxisAligned(t_mat);
 
-                var near = -bb[5],
-                    far = -bb[2],
+                var near = -bb.max.z,
+                    far = -bb.min.z,
                     expand = Math.max((far - near) * 0.005, 0.05);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered

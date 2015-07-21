@@ -77,6 +77,7 @@ methods.viewGetViewMatrix = function() {
         }
     }
     // Fallback implementation
+    // todo(ksons): Compute from CSS matrix
     var p = this.position;
     var r = Quat.fromAxisAngle(this.orientation);
     return Mat4.fromRotationTranslation(r,p).invert();

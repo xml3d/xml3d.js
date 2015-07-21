@@ -88,13 +88,13 @@ VSConfig.prototype.getOperator = function(){
         return c_vs_operator_cache[key];
 
     var outputs = [], params = [], glslCode = "\t// VS Connector\n";
-    name = "VSConnect";
-    for(var name in this._attributes){
-        var attr = this._attributes[name];
+    var name = "VSConnect";
+    for(var attributeName in this._attributes){
+        var attr = this._attributes[attributeName];
         var type = C.getTypeName(attr.type);
-        outputs.push( { type: type, name: name} );
-        params.push( { type: type, source: name, optional: attr.optional} );
-        name += "T" + type + "N" + name + "O" + attr.optional + ".";
+        outputs.push( { type: type, name: attributeName} );
+        params.push( { type: type, source: attributeName, optional: attr.optional} );
+        name += "T" + type + "N" + attributeName + "O" + attr.optional + ".";
     }
     var operator = initAnonymousOperator(name,
     {

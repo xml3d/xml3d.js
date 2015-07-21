@@ -1,0 +1,92 @@
+<html>
+<head>
+    <title>Cannot Read Channeling of Undefined / Wrong parameter passing in Xflow for Vertex Shader requests because of buggy cache key generation</title>
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <script type="text/javascript" src="../scripts/shade.js"></script>
+    <script>
+        Xflow.registerOperator("xflow.operator1", {
+            outputs: [
+                {type: 'float3', name: 'position', customAlloc: true},
+                {type: 'float3', name: 'color' , customAlloc: true},
+                {type: 'float', name: 'same'}
+            ],
+            params:  [],
+            alloc: function (size) {
+                size["position"] = 3;
+                size["color"] = 3;
+            },
+            evaluate: function(result)
+            {
+                return true;
+            }
+        });
+        Xflow.registerOperator("xflow.operator2", {
+            outputs: [
+                {type: 'float3', name: 'position' , customAlloc: true},
+                {type: 'float3', name: 'normal' , customAlloc: true},
+                {type: 'float', name: 'same'}
+            ],
+            params:  [],
+            alloc: function (size) {
+                size["position"] = 3;
+                size["normal"] = 3;
+            },
+            evaluate: function(result, position, normal)
+            {
+                return true;
+            }
+        });
+        XML3D.debug.logError = function() {
+            window.forceTestFail = true;
+        };
+    </script>
+</head>
+
+<body>
+<xml3d>
+    <dataflow id="dataflow1" out="position, color, same">
+        <compute>
+            position, color, same = xflow.operator1();
+        </compute>
+    </dataflow>
+    <script id="shader1-script" type="text/shade-javascript">
+				function shade(env) {
+					return Shade.emissive(env.color.mul(env.same));
+				}
+			</script>
+    <shader id="shader1" script="#shader1-script">
+    </shader>
+
+
+    <dataflow id="dataflow2" out="position, normal, same">
+        <compute>
+            position, normal, same = xflow.operator2();
+        </compute>
+    </dataflow>
+    <script id="shader2-script" type="text/shade-javascript">
+				function shade(env) {
+					var x = 0;
+					if (env.normal) {
+						x = 1;
+					}
+					return Shade.emissive(new Vec3(env.same * x));
+				}
+			</script>
+
+    <shader id="shader2" script="#shader2-script">
+    </shader>
+
+    <mesh type="triangles" shader="#shader1">
+        <data name="config" compute="dataflow['#dataflow1']"></data>
+    </mesh>
+
+    <mesh type="triangles" shader="#shader2">
+        <data name="config" compute="dataflow['#dataflow2']"></data>
+    </mesh>
+
+    <!-- View with camera positioning -->
+    <view position="3 5 10" orientation="1 0 0 -0.3854"></view>
+</xml3d>
+</body>
+
+</html>

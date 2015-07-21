@@ -1077,7 +1077,7 @@
       </p>
       <p>Here is a simple example for a material based on the predefined phong material model:</p>
        <pre class='example highlight'>
-&lt;material script=&quot;urn:xml3d:shader:phong&quot;&gt;
+&lt;material script=&quot;urn:xml3d:material:phong&quot;&gt;
   &lt;float3 name=&quot;diffuseColor&quot;&gt;0 0 1&lt;/float3&gt;
   &lt;texture name=&quot;diffuseTexture&quot;&gt;
     &lt;img src=&quot;../stone.jpg&quot;/&gt;
@@ -1526,7 +1526,7 @@
         <dl class='parameters'>
           <dt>Vec2 other</dt>
           <dd></dd>
-          <dt>float t</dt>
+          <dt>float weight</dt>
           <dd>Interpolation amount between the two vectors, range of [0,1].</dd>
         </dl>
       </dd>
@@ -1597,7 +1597,7 @@
         <dl class='parameters'>
           <dt>Vec3 other</dt>
           <dd></dd>
-          <dt>float t</dt>
+          <dt>float weight</dt>
           <dd>Interpolation amount between the two vectors, range of [0,1].</dd>
         </dl>
       </dd>
@@ -1672,7 +1672,7 @@
         <dl class='parameters'>
           <dt>Vec4 other</dt>
           <dd></dd>
-          <dt>float t</dt>
+          <dt>float weight</dt>
           <dd>Interpolation amount between the two vectors, range of [0,1].</dd>
         </dl>
       </dd>
@@ -1737,7 +1737,7 @@
     <h3>Quat</h3>
     <dl class='element'>
     </dl>
-    <p>A four component vector object.</p>
+    <p>Quat represents a rotation as a quaternion of the form [x, y, z, w]. </p>
 
     <dl title='interface Quat' class='idl'>
       <dt>attribute Float32Array data</dt>
@@ -1774,7 +1774,7 @@
         <dl class='parameters'>
           <dt>Quat other</dt>
           <dd></dd>
-          <dt>float t</dt>
+          <dt>float weight</dt>
           <dd>Interpolation amount between the two quaternions, range of [0,1].</dd>
         </dl>
       </dd>
@@ -1803,7 +1803,7 @@
         <dl class='parameters'>
           <dt>Quat other</dt>
           <dd></dd>
-          <dt>float t</dt>
+          <dt>float weight</dt>
           <dd>Interpolation amount between the two quaternions, range of [0,1].</dd>
         </dl>
       </dd>

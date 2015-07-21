@@ -446,7 +446,7 @@ test("Camera with group transforms", 6, function () {
         QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Camera facing top of cube, Blue")
         return s;
     }).then(function (s) {
-        view.setAttribute("orientation", "0 1 0 0");
+        view.setAttribute("style", "transform: rotate3d(0, 1, 0, 0deg)");
         camTransform.setAttribute("translation", "0 -6 0");
         return s;
     }).then(promiseSceneRendered).then(function (s) {
@@ -454,7 +454,7 @@ test("Camera with group transforms", 6, function () {
         QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Camera facing bottom of cube, Purple")
         return s;
     }).then(function (s) {
-        view.setAttribute("orientation", "0 0 0 0");
+        view.setAttribute("style", "");
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);

@@ -299,8 +299,6 @@ test("&lt;view&gt; interface test", function() {
     equal(typeof e.onkeypress, "object", "onkeypress is of type 'object'");
     equal(typeof e.onkeydown, "object", "onkeydown is of type 'object'");
     equal(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
-    equal(typeof e.position, "object", "position is of type 'object'");
-    equal(typeof e.orientation, "object", "orientation is of type 'object'");
     equal(typeof e.fieldOfView, "number", "fieldOfView is of type 'number'");
     equal(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
     equal(typeof e.setDirection, "function", "setDirection is of type 'function'");

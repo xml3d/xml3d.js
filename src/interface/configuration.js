@@ -531,8 +531,6 @@ classInfo['view'] = {
     onkeypress: {a: handlers.EventAttributeHandler},
     onkeydown: {a: handlers.EventAttributeHandler},
     onkeyup: {a: handlers.EventAttributeHandler},
-    position: {a: handlers.Vec3AttributeHandler, params: [0, 0, 0]},
-    orientation: {a: handlers.AxisAngleAttributeHandler, params: [0, 0, 1, 0]},
     fieldOfView: {a: handlers.FloatAttributeHandler, params: 0.785398},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
     setDirection: {m: methods.viewSetDirection},

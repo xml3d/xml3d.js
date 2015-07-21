@@ -97,7 +97,7 @@ test("Canvas positioning with style", function() {
 
 test("Canvas size with css element selector (dynamic)", function() {
     var c = this.doc.getElementById("default");
-    this.doc.styleSheets[1].cssRules[1].style.cssText ="background-color: black; width: 15px; height: 15px";
+    this.doc.styleSheets[2].cssRules[1].style.cssText ="background-color: black; width: 15px; height: 15px";
     equal(c.width, 800);
     equal(c.height, 600);
     equal(c.clientWidth, 15);

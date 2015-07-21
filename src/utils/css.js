@@ -5,13 +5,6 @@ var css = {};
 css.TRANSFORM_PROPERTY = null;
 
 css.init = function () {
-    var styleElement = document.createElement("style");
-    styleElement.textContent = "xml3d * { display: inherit; }" +
-        "float,float2,float3,float4,float4x4,int,int4,bool,texture,compute { display: none; }";
-    document.head.appendChild(styleElement);
-
-
-
     if ('transform' in document.body.style) {
         css.TRANSFORM_PROPERTY = 'transform'
     } else if ('WebkitTransform' in document.body.style) {
@@ -21,7 +14,6 @@ css.init = function () {
     } else {
         XML3D.debug.logWarning("No supported transform css property found");
     }
-
 };
 
 css.getInlinePropertyValue = function (node, property) {
@@ -90,6 +82,13 @@ css.convertCssToMat4 = function (cssMatrix, m) {
     matrix.m44 = cssMatrix.m44;
     return matrix;
 };
+
+(function () {
+    var styleElement = document.createElement("style");
+    styleElement.textContent = "xml3d * { display: inherit; }" + "float,float2,float3,float4,float4x4,int,int4,bool,texture,compute { display: none; }";
+    document.head.appendChild(styleElement);
+}());
+
 
 module.exports = css;
 

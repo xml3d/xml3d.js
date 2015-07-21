@@ -1,10 +1,19 @@
 var SceneElementAdapter = require("./scene-element.js");
-var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
-var Events = require("../../../interface/notification.js");
+var Resource = require("../../../base/resourcemanager.js").Resource;
+var CameraConfiguration = require("../scene/configuration.js");
 
+var DEFAULT_CAMERA_MODEL = "urn:xml3d:camera:perspective";
+
+/**
+ * Adapter for <view>
+ * @param {RenderAdapterFactory} factory
+ * @param {Element} node
+ * @extends SceneElementAdapter
+ * @constructor
+ */
 var ViewRenderAdapter = function (factory, node) {
     SceneElementAdapter.call(this, factory, node, false, false);
-    this.projectionFetcher = new DOMTransformFetcher(this, "projection", "projection", true);
+    this.dataAdapter = Resource.getAdapter(node, "data");
     this.createRenderNode();
 };
 XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
@@ -13,17 +22,16 @@ XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
         this.renderNode = this.factory.renderer.scene.createRenderGroup({
-            parent: parentNode
+            camera: this.createCameraConfiguration(), parent: parentNode
         });
         this.updateLocalMatrix();
-        this.updateIntrinsicCameraParameters();
     },
 
-    updateIntrinsicCameraParameters: function() {
-        this.projectionFetcher.update();
-        var fieldOfView = +this.node.getAttribute("fieldofview");
-        //this.renderNode.fieldOfView = fieldOfView;
+    createCameraConfiguration: function () {
+        var model = this.node.hasAttribute("model") ? this.node.getAttribute("model") : DEFAULT_CAMERA_MODEL;
+        return new CameraConfiguration(model, this.dataAdapter.getXflowNode(), {name: this.node.id});
     },
+
 
     /* Interface method */
     getViewMatrix: function () {
@@ -45,39 +53,13 @@ XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
     attributeChangedCallback: function (name, oldValue, newValue) {
         SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
         switch (name) {
-            case "projection":
-            case "fieldofview":
-                this.updateIntrinsicCameraParameters();
+            case "model":
+                this.renderNode.remove();
+                this.createRenderNode();
                 break;
         }
-    },
-
-    notifyChanged: function (evt) {
-        SceneElementAdapter.prototype.notifyChanged.call(this, evt);
-        switch (evt.type) {
-            case Events.THIS_REMOVED:
-                this.dispose();
-                break;
-        }
-        this.factory.getRenderer().requestRedraw("View changed");
-    },
-
-    onTransformChange: function (attrName, matrix) {
-        SceneElementAdapter.prototype.onTransformChange.call(this, attrName, matrix);
-        if (attrName == "projection") {
-            this.renderNode.setProjectionOverride(matrix);
-        }
-    },
-
-    dispose: function () {
-
-
-        this.projectionFetcher.clear();
-        this.getRenderNode().remove();
-        this.clearAdapterHandles();
     }
 });
 
 // Export
 module.exports = ViewRenderAdapter;
-

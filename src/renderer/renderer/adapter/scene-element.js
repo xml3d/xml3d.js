@@ -12,6 +12,7 @@ var AdapterHandle = require("../../../base/adapterhandle.js");
  * @param {HTMLElement} node
  * @param handleMaterial
  * @constructor
+ * @extends RenderAdapter
  * @see @link http://xml3d.org/xml3d/specification/5.0/#scene-elements
  */
 var SceneElementAdapter = function (factory, node, handleMaterial) {

@@ -903,6 +903,10 @@
             &lt;/mesh&gt;
         </pre>
 
+        <p>In addition to the <code>transform</code> attribute, a transformation matrix for this mesh may also be defined in a <code>float4x4</code> element. This option is
+        described in more detail in the section on the <a href="#the-assetmesh-element"><code>assetmesh</code></a> element. This approach actually uses the same Xflow data overriding
+        mechanism described above to override the internally computed mesh transformation matrix.</p>
+
         <dl title='interface XML3DMeshElement : HTMLElement' class='idl'>
             <dt>readonly attribute boolean complete</dt>
             <dd>Returns true if all external resources required by this mesh have been loaded, false otherwise.</dd>
@@ -1459,7 +1463,8 @@
 
     <p>As with other Xflow elements most parts of the asset (eg. materials, mesh data, transformations) can be overridden inside the <code>model</code> element. However it's important
     to note that adding or removing overrides for assets has a very high performance penalty. Best practice is to define all the necessary overrides during construction of the
-    <code>model</code> element and then stick to changing the <i>values</i> of those overrides, which carries no performance penalty.</p>
+    <code>model</code> element and then stick to changing the <i>values</i> of those overrides, which carries no performance penalty. See the
+      <a href="https://github.com/xml3d/xml3d.js/wiki/Using-Assets-and-Models#overriding-parts-of-an-asset">XML3D Wiki</a> for more information on how to override asset data.</p>
 
     <p>It's important to note that unlike a <code>group</code> and <code>mesh</code> hierarchy, assets are always flattened. An asset always consists of an <code>asset</code> element
     with a list of <code>assetmesh</code> elements as children, which cannot be nested. <code>Asset</code> elements themselves, on the other hand, can be nested.</p>
@@ -1528,7 +1533,8 @@
         &lt;/assetmesh&gt;
       </pre>
 
-      <p>When a transformation matrix is provided in this way it will override any other transforms the assetmesh may have (eg. through the <code>transform</code> attribute). </p>
+      <p>When a transformation matrix is provided in this way it will override any other transforms the assetmesh may have (eg. through the <code>transform</code> or <code>style</code> attributes). </p>
+      <div class="note">Supplying a transformation matrix in this way also works for <a href="#the-mesh-element"><code>mesh</code></a> elements. </div>
 
       <dl title='interface XML3DAssetmeshElement : HTMLElement' class='idl'>
         <dt>attribute DOMString name</dt>

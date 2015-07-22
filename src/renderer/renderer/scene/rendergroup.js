@@ -37,18 +37,7 @@ var RenderGroup = function (scene, pageEntry, opt) {
      */
     this._material = opt.material || null;
     this.boundingBoxDirty = false;
-    this.projectionDirty = true;
     this.setWorldSpaceBoundingBox(XML3D.Box.EMPTY_BOX);
-
-    // Camera related
-    this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : DEFAULT_FIELDOFVIEW;
-    this.worldSpacePosition = XML3D.math.vec3.create();
-    this.projectionOverride = opt.projectionOverride;
-    this.viewDirty = true;
-    this.projectionDirty = true;
-    this.frustum = new Frustum(1, 100000, 0, this.fieldOfView, 1);
-    this.lastAspectRatio = 1;
-    this.projectionMatrix = XML3D.math.mat4.create();
 };
 RenderGroup.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -207,102 +196,7 @@ XML3D.extend(RenderGroup.prototype, {
                 }
             }
         }
-    })(),
-
-
-
-    // Camera related stuff
-    getWorldToViewMatrix: function(dest) {
-        this.getWorldMatrix(dest);
-        XML3D.math.mat4.invert(dest, dest);
-    },
-
-
-    setProjectionOverride: function (projAdapter) {
-        this.projectionOverride = projAdapter;
-        this.setProjectionDirty();
-        this.scene.requestRedraw("Projection changed");
-    },
-
-
-    setProjectionDirty: function () {
-        this.projectionDirty = true;
-    },
-
-    getProjectionMatrix: function (dest, aspect) {
-        if (this.projectionDirty || aspect != this.lastAspectRatio) {
-            this.updateProjectionMatrix(aspect);
-        }
-        XML3D.math.mat4.copy(dest, this.projectionMatrix);
-    },
-
-    setProjectionMatrix: function (value) {
-        XML3D.math.mat4.copy(this.projectionMatrix, value);
-    },
-
-    getViewToWorldMatrix: function(dest) {
-        this.getWorldMatrix(dest);
-    },
-
-    getFrustum: function() {
-        return new Frustum();
-
-    },
- getWorldSpacePosition: function() {
-            return XML3D.math.vec3.create();
-
-        },
-
-    updateProjectionMatrix: (function() {
-            var tmp = mat4.create();
-
-            return function(aspect) {
-                if (this.projectionOverride) {
-                    this.setProjectionMatrix(this.projectionOverride);
-                    // TODO: Correctly compute frustrum from projection matrix (if possible)
-                    this.frustum.setFrustum(1, 100000, 0, this.fieldOfView, 1);
-                    return;
-                }
-
-                var clipPlane = this.getClippingPlanes(),
-                    near = clipPlane.near,
-                    far = clipPlane.far,
-                    fovy = this.fieldOfView;
-
-                // Calculate perspective projectionMatrix
-                mat4.perspective(tmp, fovy, aspect, near, far);
-                // Set projectionMatrix
-                this.setProjectionMatrix(tmp);
-                // Update Frustum
-                this.frustum.setFrustum(near, far, 0, fovy, aspect);
-
-                this.lastAspectRatio = aspect;
-            }
-        })(),
-
-       getClippingPlanes: (function() {
-            var t_mat = mat4.create();
-            var bb = new XML3D.Box();
-
-            return function() {
-                this.scene.getBoundingBox(bb);
-                if (bb.isEmpty()) {
-                    return { near: 1, far: 10 };
-                }
-                this.getWorldToViewMatrix(t_mat);
-                bb.transformAxisAligned(t_mat);
-
-                var near = -bb.max.z,
-                    far = -bb.min.z,
-                    expand = Math.max((far - near) * 0.005, 0.05);
-
-                // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
-                far += expand;
-                near -= expand;
-
-                return {near: Math.max(near, expand, CLIPPLANE_NEAR_MIN), far: far};
-            }
-        })()
+    })()
 
 });
 

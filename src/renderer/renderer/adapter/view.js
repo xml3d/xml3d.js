@@ -21,7 +21,7 @@ XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
     createRenderNode: function () {
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
-        this.renderNode = this.factory.renderer.scene.createRenderGroup({
+        this.renderNode = this.factory.renderer.scene.createRenderView({
             camera: this.createCameraConfiguration(), parent: parentNode
         });
         this.updateLocalMatrix();

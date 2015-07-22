@@ -2094,7 +2094,56 @@
 
 <section>
   <h2>Xflow</h2>
+    <section>
+      <h3>Filters</h3>
+      <p>Xflow defines three filters that may be applied to data through the <code>filter</code> attribute on <a href="#the-data-element"><code>data</code></a> and
+        <a href="#the-dataflow-element"><code>dataflow</code></a> elements. </p>
 
+      <pre>
+        filter="keep|remove(field1 [, field2...])"
+        filter="rename( { field : newFieldName [, field2 : newFieldName2...] } )"
+      </pre>
+
+      <p>A filter does not change the data itself but rather influences how that data is made available to other Xflow elements. For example, using a <code>remove</code>
+      filter does not actually remove the data from the Xflow element, it simply hides it from parent elements. </p>
+
+        <p>An Xflow element may only have one filter, if multiple filters are needed they can be applied with nested Xflow elements. </p>
+
+      <pre class="example highlight">
+        &lt;data filter="keep(A,D)"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt;
+          &lt;float name="B" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+          &lt;float name="C" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+          &lt;float name="D" &gt;1&lt;/float&gt;
+        &lt;/data&gt;
+
+        &lt;data filter="remove(D)"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt;
+          &lt;float name="B" &gt;1&lt;/float&gt;
+          &lt;float name="C" &gt;1&lt;/float&gt;
+          &lt;float name="D" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+        &lt;/data&gt;
+
+        &lt;data filter="rename( {A2 : A, B2 : B} )"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt; &lt;!-- will be renamed into A2 --&gt;
+          &lt;float name="B" &gt;1&lt;/float&gt; &lt;!-- will be renamed into B2 --&gt;
+          &lt;float name="C" &gt;1&lt;/float&gt;
+          &lt;float name="D" &gt;1&lt;/float&gt;
+        &lt;/data&gt;
+
+        &lt;data filter="keep( {A2 : A, B2 : B} )"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt; &lt;!-- will be renamed into A2 --&gt;
+          &lt;float name="B" &gt;1&lt;/float&gt; &lt;!-- will be renamed into B2 --&gt;
+          &lt;float name="C" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+          &lt;float name="D" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+        &lt;/data&gt;
+
+        &lt;data filter="rename( {A1 : A, A2 : A, A3: A} )"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt; &lt;!-- will be provided under the names A1, A2 and A3 --&gt;
+        &lt;/data&gt;
+      </pre>
+
+    </section>
   <section>
     <h3>The compute operator</h3>
     <p>Compute operators can be used to change or create data inside an Xflow graph. They operate like functions, receiving a set of input arguments, doing some work
@@ -2104,6 +2153,9 @@
     <pre>
      compute="(output1 [,output2...]) = xflow.[operatorName]([argument1, ...])"
     </pre>
+
+    <p>In <a href="#the-dataflow-element"><code>dataflow</code></a> elements one or more compute operators can be invoked inside a compute block using the
+      <a href="#the-dataflow-element"><code>&lt;compute&gt;</code></a> element.</p>
 
     <p>The fields listed as outputs will be added to the list of data that this data element provides. The arguments must be available to the data element that invokes
     the operator, either as <a href="#value-elements">value elements</a> or provided by a child data element. Compute operators can be invoked in sequence by nesting data
@@ -2144,6 +2196,9 @@
         }
       });
     </pre>
+    <div class="note">As long as a custom operator appears after the <code>xml3d.js</code> script in the document flow the <code>Xflow.registerOperator</code> function can (and should)
+      be called immediately. This is typical behavior for a Javascript plugin architecture and ensures the operators have been registered before XML3D initializes the scene (during the
+    <code>document.onload</code> event).</div>
 
     <p>In essence the declaration of the compute operator must contain at least a list of input and output fields, including types, and an <code>evaluate</code> function that is called by
       Xflow during data processing. Input fields may be marked as <code>optional</code>, otherwise they will generate an error if missing.
@@ -2198,6 +2253,35 @@
 
 
   </section>
+
+  <section>
+    <h3>Sequences</h3>
+    <p>Xflow allows arbitrarily long sequences of data to be defined using the <code>key</code> attribute on <a href="#value-elements">value elements</a>. This is useful,
+      for example, to define the base data for mesh animations to be driven by Xflow <a href="#the-compute-operator">compute operators</a>.
+    </p>
+    <pre class="example highlight">
+      &lt;data id="keyFrameData"&gt;
+        &lt;float3 name="position" key="0" &gt;-5 0 5 ... &lt;/float3&gt;
+        &lt;float3 name="normal" key="0" &gt;0 -1 0 ... &lt;/float3&gt;
+
+        &lt;float3 name="position" key="0.1" &gt;-2.886751 2.113249 2.886751 ... &lt;/float3&gt;
+        &lt;float3 name="normal" key="0.1"&gt;-0.554395 -0.620718 0.554395 ... &lt;/float3&gt;
+
+        &lt;float3 name="position" key="0.2"&gt;-1.341089 4.649148 1.341089 ... &lt;/float3&gt;
+        &lt;float3 name="normal" key="0.2"&gt;-0.696886 0.169412 0.696886 ... &lt;/float3&gt;
+
+        &lt;float3 name="position" key="0.3" &gt;-6.158403 1.408833 6.158403 ... &lt;/float3&gt;
+        &lt;float3 name="normal" key="0.3"&gt;-0.141341 -0.979819 0.141341 ... &lt;/float3&gt;
+
+        ...
+      &lt;/data&gt;
+    </pre>
+    <p>The above sequence of data represents the keyframes of a mesh animation. Typically a compute operator would then be used to interpolate between keyframes, or to
+    otherwise map the sequences of data to a definite set of <code>position</code> and <code>normal</code> data to be rendered.</p>
+
+  </section>
+
+
 </section>
 
 

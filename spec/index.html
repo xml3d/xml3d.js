@@ -85,6 +85,84 @@
   </section>
   <section>
     <h3>Predefined primitive types</h3>
+    <section>
+      <h2>Triangle</h2>
+      <p>Attribute name: <code>triangles</code></p>
+      <p>WebGL primitive: <code>TRIANGLE</code></p>
+
+      <p>The triangle primitive type renders faces out of sets of 3 vertices. Triangles may be constructed with or without an array of indices. If no indices are provided
+      XML3D will construct the triangles from the array of vertex positions: the first 3 will create the first triangle, the next 3 the second and so on.</p>
+
+      <pre class="example highlight">
+        &lt;mesh type="triangles"&gt;
+          &lt;int name="index"&gt;0 1 2 1 3 2 ... &lt;/int&gt;
+          &lt;float3 name="position"&gt;-1 -1 1  1 -1 1  -1 1 1  1 1 1 ... &lt;/float3&gt;
+        &lt;/mesh&gt;
+      </pre>
+
+    </section>
+
+    <section>
+      <h2>Tristrip</h2>
+      <p>Attribute name: <code>tristrips</code></p>
+      <p>WebGL primitive: <code>TRIANGLE_STRIP</code></p>
+
+      <p>The tristrip primitive type creates triangles from a list of vertex positions and (optionally) a list of segments and/or indices. Each segment begins by building a triangle
+      out of 3 vertex positions. Each subsequent triangle in the segment is then created from the last two vertex positions and the next one in the list. Note that this
+      creates a sequence of connected triangles.</p>
+
+      <p>Segments can be used to create disconnected sets of triangles by providing a list of integers with the name <code>vertexCount</code>. Each number in the list
+      specifies the number of vertex positions to use for that segment. XML3D will then work through the list of vertex positions sequentially building a tristrip for each segment. </p>
+
+      <pre class="example highlight">
+        &lt;mesh type="tristrips"&gt;
+          &lt;int name="vertexCount"&gt;4 4 4 4 4 4&lt;/int&gt;
+          &lt;float3 name="position"&gt;-1 -1 1  1 -1 1  -1 1 1  1 1 1 ... &lt;/float3&gt;
+        &lt;/mesh&gt;
+      </pre>
+
+      <p>Note that because the first triangle in a segment requires 3 vertex positions to define, a segment with vertex count 4 will create two triangles, while vertex
+        count 5 will create 3 and so on.</p>
+    </section>
+
+    <section>
+      <h2>Line</h2>
+      <p>Attribute name: <code>lines</code></p>
+      <p>WebGL primitive: <code>LINES</code></p>
+
+      <p>Lines are drawn from pairs of vertex positions and (optionally) a list of indices. </p>
+    </section>
+
+    <section>
+      <h2>Linestrip</h2>
+      <p>Attribute name: <code>linestrips</code></p>
+      <p>WebGL primitive: <code>LINE_STRIP</code></p>
+
+      <p>A linestrip is drawn from a list of vertex positions and (optionally) a list of segments and/or indices. For each segment a line is drawn between the first vertex and
+      the second, then the second and the third and so on. This creates a continuous line.</p>
+
+      <pre class="example highlight">
+      &lt;mesh type="linestrips"&gt;
+        &lt;int name="vertexCount"&gt;4 2&lt;/int&gt;
+        &lt;int name="index"&gt;0 1 2 3 1 3&lt;/int&gt;
+        &lt;float3 name="position"&gt;-1 -1 1  1 -1 1  -1 1 1  1 1 1 ... &lt;/float3&gt;
+      &lt;/mesh&gt;
+      </pre>
+
+      <p>The above example will create two line segments, the first using vertices 0, 1, 2, 3 and the second using vertices 1 and 3. </p>
+
+    </section>
+
+    <section>
+      <h2>Point</h2>
+      <p>Attribute name: <code>points</code></p>
+      <p>WebGL primitive: <code>POINT</code></p>
+
+      <p>Points are drawn from a list of vertex positions, which each position being drawn as a single point.</p>
+      <div class="note">To change the size of the drawn points, or to draw them as textured sprites, it is necessary to define a custom material shader.</div>
+
+    </section>
+
   </section>
   <section>
     <h3>Predefined material models</h3>

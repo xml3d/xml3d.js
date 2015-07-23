@@ -515,32 +515,16 @@ DataNode.prototype.removeChild = function(child){
     Base._flushResultCallbacks();
 };
 /**
- * @param {InputNodeI|dataNode} child
+ * @param {InputNode|null} child
  */
 DataNode.prototype.getChildByName = function(name){
 	for (var i=0; i<this._children.length; i++){
 		if (this._children[i].name == name)
 			return this._children[i];
-		else{
-			if (this._children[i]._children)
-				return this._children[i].getChildByName(name);
-		}
 	}
+    return null;
 };
-/**
- * @param {dataNode} child
- */
-DataNode.prototype.hasSystemDataNode = function(){
-	for (var i=0; i<this._children.length; i++){
-		if (this._children[i].systemDataAdapter != undefined)
-			return this._children[i];
-		else{
-			if (this._children[i]._children)
-				return this._children[i].hasSystemDataNode();
-			
-		}
-	}
-};
+
 /**
  * @param {GraphNode} child
  * @param {GraphNode} beforeNode

@@ -120,6 +120,7 @@ function recursiveDataAdapterConstruction(adapter, systemDataNode) {
     	//Here we check for data nodes with sys flag set
     	if (child.sys != undefined){
     	    //Check if a system parameter with this name exists
+            // TODO(ksons): Use Xflow functionality to query output
     	    if (systemDataNode.getChildByName(child.name)) {
         		filterNames.push(child.name);
             } else {
@@ -148,7 +149,7 @@ function recursiveDataAdapterConstruction(adapter, systemDataNode) {
     	}
     }
 
-    if(filterNames.length) {
+    if(filterNames.length) {     // TODO: Do this in anyway, sync filter
     	var filter = "keep("+filterNames.join(",")+")";
     	var sysData = new DataNode(false);
     	sysData.systemDataAdapter = true;

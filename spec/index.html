@@ -159,7 +159,7 @@
       <p>WebGL primitive: <code>POINT</code></p>
 
       <p>Points are drawn from a list of vertex positions, which each position being drawn as a single point.</p>
-      <div class="note">To change the size of the drawn points, or to draw them as textured sprites, it is necessary to define a custom material shader.</div>
+      <div class="note">Currently to change the size of the drawn points, or to draw them as textured sprites, it is necessary to define a custom material shader.</div>
 
     </section>
 
@@ -593,6 +593,39 @@
       <h3>Kinds of elements</h3>
       <section>
           <h4>Transformable elements</h4>
+          <p>Transformable elements are those that are able to be transformed, either through CSS3 transforms or the <a href="#the-transform-element"><code>transform</code></a> element.
+           Not all transformable elements can be nested but when they are they build a transformation hierarchy, with the transformation matrix of each node being defined as its own
+          local transformation matrix multiplied with the transformation matrix of its parent element. </p>
+
+          <p>A third possibility for defining a transformation is to reference a <a href="#the-data-element"><code>data</code></a> element through the <code>transform</code> attribute instead of a 
+          <a href="#the-transform-element"><code>transform</code></a> element. This <code>data</code> element may either contain a single 
+            <a href="#the-float-float2-float3-float4-and-float4x4-elements"><code>float4x4</code></a> element with name <code>transform</code> or use a 
+            <a href="#the-compute-operator"><code>compute operator</code></a> to generate the transformation matrix. 
+          </p>
+
+          <pre class="example highlight">
+            &lt;!-- Using a transform element --&gt;
+            &lt;transform id="myTransformElement" translation="0 0 10"&gt;&lt;/transform&gt;
+            &lt;group transform="#myTransformElement"&gt;&lt;/group&gt;
+
+            &lt;!-- Giving the transformation matrix directly --&gt;
+            &lt;data id="myDataTransform"&gt;
+              &lt;float4x4 name="transform"&gt;1 0 0 0 0 1 0 0 0 0 1 10 0 0 0 1&lt;/float4x4&gt;
+            &lt;/data&gt;
+            &lt;group transform="#myDataTransform"&gt;&lt;/group&gt;
+
+            &lt;!-- Computing the transformation matrix with an Xflow operator --&gt;
+            &lt;data id="myComputeTransform" compute="transform = xflow.createTransform(translation)"&gt;
+              &lt;float3 name="translation"&gt;0 0 10&lt;/float3&gt;
+            &lt;/data&gt;
+            &lt;group transform="#myComputeTransform"&gt;&lt;/group&gt;
+
+            &lt;!-- Using a CSS3 transform --&gt;
+            &lt;group style="transform: translate3d(0px, 0px, 10px)"&gt;&lt;/group&gt;
+          </pre>
+
+          <p>The above example shows four different ways of defining the same transformation on a <a href="#the-group-element"><code>group</code></a> element.</p>
+
       </section>
       <section>
           <h4>Data elements</h4>
@@ -1110,7 +1143,8 @@
         whenever possible.</p>
 
         Ideally the only elements that should appear outside the <code>defs</code> section are <a href="#the-group-element"><code>group</code></a>,
-        <a href="#the-mesh-element"><code>mesh</code></a>, <a href="#the-model-element"><code>model</code></a> and <a href="#the-view-element"><code>view</code></a>.
+        <a href="#the-mesh-element"><code>mesh</code></a>, <a href="#the-model-element"><code>model</code></a>, <a href="#the-view-element"><code>view</code></a> and
+        <a href="#the-model-element"><code>light</code></a>.
         Note that these elements will be ignored if they are inside the <code>defs</code> section, since it is not considered part of the scene tree.
         <a href="#the-group-element"><code>data</code></a> elements usually belong in the <code>defs</code> section but may also be part of the
         scene tree if contained by a <a href="#the-mesh-element"><code>mesh</code></a> element.
@@ -1175,10 +1209,29 @@
     </section>
     <section>
       <h4>The <code>transform</code> element</h4>
-        <dl title='interface XML3DTransformElement : HTMLElement' class='idl'>
-            <dt>attribute AxisAngle scaleorientation</dt>
-            <dd>The orientation on which to apply the scaling factor supplied by the IDL attribute <i>scale</i>. In axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
-        </dl>
+      <dl class='element'>
+      </dl>
+
+      <p>In addition to CSS3 transformations applied through the <code>style</code> attribute, <code>transform</code> elements provide another way to define transformations for
+        <a href="#transformable-elements">transformable elements</a>. The various transformation components are combined into a transformation matrix which is then applied to the
+      element or elements referencing this transform element. </p>
+
+      <p>Transform elements are generally placed into the <a href="#the-defs-element"><code>defs</code></a> section of a scene, however it's possible to define them anywhere inside the
+      <a href="#the-xml3d-element"><code>xml3d</code></a> element. No matter where a transform element is defined it must be referenced by its <code>id</code> from the <code>transform</code> attribute
+      of a <a href="#transformable-elements">transformable element</a> to be used. A single transform element can be referenced by multiple other elements. </p>
+
+      <dl title='interface XML3DTransformElement : HTMLElement' class='idl'>
+        <dt>attribute AxisAngle scaleorientation</dt>
+        <dd>The orientation on which to apply the scaling factor supplied by the IDL attribute <i>scale</i>. In axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
+        <dt>attribute AxisAngle rotation</dt>
+        <dd>The rotation component of this transformation. In axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
+        <dt>attribute Vec3 translation</dt>
+        <dd>The translation component of this transformation.</dd>
+        <dt>attribute Vec3 scale</dt>
+        <dd>The scale component of this transformation. Note: non-uniform scaling and negative values are allowed.</dd>
+        <dt>attribute Vec3 center</dt>
+        <dd>The center point of this transformation.</dd>
+      </dl>
     </section>
   </section>
 
@@ -1329,8 +1382,8 @@
         Note the URI fragment inside the <code>dataflow[]</code> construct. This may also reference an external document containing the dataflow.
       </p>
 
-      <p>By declaring the <code>key</code> value separately (note we declare it <em>after</em> the external reference to <code>myMeshData.xml</code>) we can control the animation
-      state of this model.</p>
+      <p>By declaring the <code>key</code> value separately we can control the animation state of this model. Note also that the key is declared <em>after</em> the reference
+      to <code>myMeshData.xml</code> to ensure that it overrides the key value found in the xml file.</p>
 
 
       <dl title='interface XML3DDataflowElement : HTMLElement' class='idl'>

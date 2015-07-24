@@ -584,6 +584,50 @@
 
   </section>
 
+  <section>
+    <h3>The <code>transform</code> property</h3>
+
+    <div class="propdef">
+      <dl>
+        <dt>
+          <span class="index-def" title="'transform'"><a name="propdef-transform" class="propdef-title"><strong>'transform'</strong></a></span>
+        </dt>
+        <dd>
+          <table class="propinfo" cellspacing="0" cellpadding="0">
+            <tbody>
+            <tr valign="baseline">
+              <td><em>Values:</em>&nbsp;&nbsp;</td>
+              <td>translateX | translateY | translateZ | translate3d | rotateX | rotateY | rotateZ | rotate3d
+                | scaleX | scaleY | scaleZ | scale3d | matrix3d
+              </td>
+            </tr>
+            <tr valign="baseline">
+              <td><em>Initial:</em>&nbsp;&nbsp;</td>
+              <td>identity matrix
+              </td>
+            </tr>
+            <tr valign="baseline">
+              <td><em>Applies to:</em>&nbsp;&nbsp;</td>
+              <td><a href="#transformable-elements">Transformable elements</a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </dd>
+      </dl>
+    </div>
+
+    <p>[[CSS3-transforms]] can be used to specify 3D transformations for any transformable element. The transform property may hold any number and combination of
+    values, which will be combined from left to right.</p>
+
+    <div class="note">Some transform functions (eg. <code>translate3d</code>) require a unit of measurement to be valid. Because browsers do not yet support units that make sense
+    for a 3D scene these values should be given in 'px'. For example, <code>translate3d(10px, 5px, 0px)</code>. Internally these transformations will of course be in the units that
+    the scene uses. </div>
+
+    <div class="note">Some browsers silently ignore invalid CSS transforms. If a CSS transform is not behaving as expected double check to ensure the formatting and syntax are
+    valid.</div>
+
+  </section>
 
 </section>
 

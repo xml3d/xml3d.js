@@ -52,7 +52,7 @@ var AbstractCameraModel = function (dataNode, cb, model, defaults) {
 AbstractCameraModel.prototype = {
     cameraParametersChanged: function (request, changeType) {
         if (changeType) {
-            cb(changeType);
+            this.cb(changeType);
         }
     }
 };

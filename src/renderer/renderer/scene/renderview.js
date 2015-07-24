@@ -35,9 +35,12 @@ var RenderView = function (scene, pageEntry, opt) {
     opt = opt || {};
 
     this.lastAspectRatio = 1;
+    this.projectionDirty = true;
+
     this.camera = createCamera(opt.camera ? opt.camera : DEFAULT_CAMERA_CONFIGURATION, this.cameraValueChanged.bind(this));
     this.localMatrix = mat4.create();
     this.worldSpacePosition = vec3.create();
+    this.frustum = null;
 };
 RenderView.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -51,7 +54,7 @@ XML3D.extend(RenderView.prototype, {
     },
 
     getFrustum: function () {
-        return this.camera.getFrustum();
+        return this.frustum;
     },
 
     updateViewMatrix: (function () {
@@ -133,6 +136,7 @@ XML3D.extend(RenderView.prototype, {
         if (this.projectionDirty || Math.abs(aspect - this.lastAspectRatio) > 0.001 ) {
             // Set projectionMatrix
             this.setProjectionMatrix(this.camera.getProjectionMatrix(aspect));
+            this.frustum = this.camera.getFrustum(aspect);
             this.lastAspectRatio = aspect;
         }
         this.getMat4FromPage(dest, PROJECTION_MATRIX_OFFSET);

@@ -89,7 +89,7 @@ XML3D.createClass(ProjectiveCameraModel, AbstractCameraModel, {
  */
 var PerspectiveCameraModel = function (dataNode, cb) {
     AbstractCameraModel.call(this, dataNode, cb, "perspective", PerspectiveCameraData);
-    this.frustum = new Frustum();
+    this.frustum = new Frustum(0.01, 1000, 0, 0.78, 1);
 };
 
 XML3D.createClass(PerspectiveCameraModel, AbstractCameraModel, {

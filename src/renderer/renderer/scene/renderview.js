@@ -35,7 +35,7 @@ var RenderView = function (scene, pageEntry, opt) {
     opt = opt || {};
 
     this.lastAspectRatio = 1;
-    this.camera = createCamera(opt.camera ? opt.camera : DEFAULT_CAMERA_CONFIGURATION);
+    this.camera = createCamera(opt.camera ? opt.camera : DEFAULT_CAMERA_CONFIGURATION, this.cameraValueChanged.bind(this));
     this.localMatrix = mat4.create();
     this.worldSpacePosition = vec3.create();
 };
@@ -69,14 +69,6 @@ XML3D.extend(RenderView.prototype, {
             this.viewDirty = false;
         }
     })(),
-
-    updateProjectionMatrix:  function (aspect) {
-            // Set projectionMatrix
-            this.setProjectionMatrix(this.camera.getProjectionMatrix(aspect));
-            // Update Frustum
-            this.frustum = this.camera.getFrustum();
-            this.lastAspectRatio = aspect;
-    },
 
     getClippingPlanes: (function () {
         var t_mat = mat4.create();
@@ -115,11 +107,12 @@ XML3D.extend(RenderView.prototype, {
 
     setTransformDirty: function () {
         this.viewDirty = true;
-        this.scene.requestRedraw("Transformation changed");
+        this.scene.requestRedraw("View's pose changed");
     },
 
     setProjectionDirty: function () {
         this.projectionDirty = true;
+        this.scene.requestRedraw("View's camera changed");
     },
 
     getViewToWorldMatrix: function (dest) {
@@ -137,8 +130,10 @@ XML3D.extend(RenderView.prototype, {
     },
 
     getProjectionMatrix: function (dest, aspect) {
-        if (this.projectionDirty || aspect != this.lastAspectRatio) {
-            this.updateProjectionMatrix(aspect);
+        if (this.projectionDirty || Math.abs(aspect - this.lastAspectRatio) > 0.001 ) {
+            // Set projectionMatrix
+            this.setProjectionMatrix(this.camera.getProjectionMatrix(aspect));
+            this.lastAspectRatio = aspect;
         }
         this.getMat4FromPage(dest, PROJECTION_MATRIX_OFFSET);
     },
@@ -149,21 +144,26 @@ XML3D.extend(RenderView.prototype, {
 
     getWorldSpaceBoundingBox: function (bbox) {
         bbox.setEmpty();
+    },
+
+    cameraValueChanged: function() {
+        this.setProjectionDirty();
     }
 });
 
 /**
  * @param {Configuration} configuration
+ * @param {function} cb
  * @returns {Object}
  */
-function createCamera(configuration) {
+function createCamera(configuration, cb) {
 
     switch(configuration.model) {
         case "urn:xml3d:camera:perspective":
-            return new CameraModels.PerspectiveCameraModel(configuration.dataNode);
+            return new CameraModels.PerspectiveCameraModel(configuration.dataNode, cb);
         default:
             XML3D.debug.logWarning("Unknown camera model:", configuration.model);
-            return new CameraModels.PerspectiveCameraModel(configuration.dataNode);
+            return new CameraModels.PerspectiveCameraModel(configuration.dataNode, cb);
     }
 
 

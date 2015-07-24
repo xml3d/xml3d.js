@@ -43,10 +43,7 @@ XML3D.extend(Frustum.prototype, {
         this.nearPlane = nearPlane;
         this.farPlane = farPlane;
 
-        if (typeof(orthographic) === "undefined")
-            this.orthographic = false; else
-            this.orthographic = orthographic;
-
+        this.orthographic = orthographic == undefined ? false : orthographic;
     },
 
     getProjectionMatrix: function (matrix) {
@@ -119,6 +116,7 @@ XML3D.extend(Frustum.prototype, {
             m[14] = D;
             m[15] = 0;
         }
+        return matrix;
     },
 
     getPlanes: (function () {

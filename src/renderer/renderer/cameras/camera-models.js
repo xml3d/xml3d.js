@@ -74,7 +74,9 @@ XML3D.createClass(ProjectiveCameraModel, AbstractCameraModel, {
         var projectionMatrix = result.getOutputData("projectionMatrix").getValue()[0];
         console.log(projectionMatrix);
         return projectionMatrix;
-    }, // TODO(ksons): Compute frustum from projection matrix
+    },
+
+    // TODO(ksons): Compute frustum from projection matrix
     getFrustum: function () {
         return null;
     }
@@ -128,7 +130,6 @@ XML3D.createClass(PerspectiveCameraModel, AbstractCameraModel, {
     },
 
     getProjectionMatrix: function (aspect) {
-        //console.log("called getProjectionMatrix");
         this._updateFrustum(aspect);
         return this.frustum.getProjectionMatrix(mat4.create());
     },

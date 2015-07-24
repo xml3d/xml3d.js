@@ -8,7 +8,7 @@
 </head>
 <body>
 <div>
-  <xml3d xmlns="http://www.xml3d.org/2009/xml3d" id="myxml3d" renderer="rtpie" style="width: 500px; height: 300px; background-color: black;" activeview="#view_right">
+  <xml3d id="myxml3d" style="width: 500px; height: 300px; background-color: black;" activeview="#view_right">
     <defs>
       <material id="material_front" script="urn:xml3d:material:phong">
         <float3 name="diffuseColor">0 0 1</float3>
@@ -129,11 +129,17 @@
     <a href="#" onclick="changeView('left')">left</a> |
     <a href="#" onclick="changeView('right')">right</a> |
     <a href="#" onclick="changeView('top')">top</a> |
-    <a href="#" onclick="changeView('bottom')">bottom</a></div>
+    <a href="#" onclick="changeView('bottom')">bottom</a> |
+    <a href="#" onclick="changeView()">none</a></div>
 </div>
 <script type="text/javascript">
   function changeView(which) {
-    document.getElementById("myxml3d").activeView = "#view_" + which;
+    if(!which) {
+      document.getElementById("myxml3d").removeAttribute("activeview");
+    } else {
+      document.getElementById("myxml3d").activeView = "#view_" + which;
+    }
+
   }
 </script>
 

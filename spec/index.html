@@ -81,9 +81,6 @@
 <section>
   <h2>Concepts</h2>
   <section>
-    <h3>Generic data model</h3>
-  </section>
-  <section>
     <h3>Predefined primitive types</h3>
     <section>
       <h2>Triangle</h2>
@@ -637,6 +634,12 @@
       <h3>Kinds of elements</h3>
       <section>
           <h4>Transformable elements</h4>
+          <dl class='element'>
+            <a href="#the-assetmesh-element"><code>assetmesh</code></a>,
+            <a href="#the-group-element"><code>group</code></a>, <a href="#the-mesh-element"><code>mesh</code></a>,
+            <a href="#the-model-element"><code>model</code></a>, <a href="#the-light-element"><code>light</code></a>,
+            <a href="#the-view-element"><code>view</code></a>
+          </dl>
           <p>Transformable elements are those that are able to be transformed, either through CSS3 transforms or the <a href="#the-transform-element"><code>transform</code></a> element.
            Not all transformable elements can be nested but when they are they build a transformation hierarchy, with the transformation matrix of each node being defined as its own
           local transformation matrix multiplied with the transformation matrix of its parent element. </p>
@@ -673,6 +676,12 @@
       </section>
       <section>
           <h4>Data elements</h4>
+          <dl class='element'>
+            <a href="#the-assetdata-element"><code>assetdata</code></a>,
+            <a href="#the-data-element"><code>data</code></a>, <a href="#the-dataflow-element"><code>dataflow</code></a>,
+            <a href="#the-mesh-element"><code>mesh</code></a>, <a href="#the-material-element"><code>material</code></a>,
+            <a href="#the-model-element"><code>model</code></a>, <a href="#the-light-element"><code>light</code></a>
+          </dl>
           <p>Data elements are the non-leaf nodes of an Xflow graph. They may contain any combination of data elements and <a href="#value-elements">value elements</a>. They may also reference
           other data elements through the <code>src</code> attribute using a standard HTML URI.</p>
 
@@ -701,6 +710,12 @@
       </section>
       <section>
           <h4>Value elements</h4>
+          <dl class='element'>
+            <a href="#the-float-float2-float3-float4-and-float4x4-elements"><code>float, float2, float3, float4, float4x4</code></a>,
+            <a href="#the-int-and-int4-elements"><code>int, int4</code></a>,
+            <a href="#the-bool-element"><code>bool</code></a>,
+            <a href="#the-texture-element"><code>texture</code></a>
+          </dl>
           <p>Value elements are the leaf nodes of an Xflow graph. They may not be nested and may not contain any non-text child elements. Data should be provided as a text node
               containing a space-separated list of values. The tag name determines how this data is interpreted:</p>
           <pre class="example highlight">
@@ -725,6 +740,10 @@
       </section>
       <section>
           <h4>Interactive elements</h4>
+          <dl class='element'>
+            <a href="#the-group-element"><code>group</code></a>, <a href="#the-mesh-element"><code>mesh</code></a>,
+            <a href="#the-model-element"><code>model</code></a>, <a href="#the-xml3d-element"><code>xml3d</code></a>
+          </dl>
           <p>Interactive elements are those which are able to receive mouse event listeners. The list of available mouse event listeners is described in the
           <a href="#events">Events</a> section.</p>
 
@@ -758,6 +777,8 @@
 
       <h4>The <code>xml3d</code> element</h4>
         <dl class='element'>
+          <dt>Categories:</dt>
+          <dd><a href="#interactive-elements">Interactive element</a></dd>
         </dl>
 
       <dl title='interface XML3DXml3dElement : HTMLElement' class='idl'>

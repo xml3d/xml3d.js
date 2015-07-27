@@ -9,7 +9,7 @@ test("Projection Matrix", 1, function() {
     var frustum = new XML3DTestLib.Frustum.Frustum(1, 10, 0, 0.78, 3/4);
     var mat = new XML3D.Mat4();
     frustum.getProjectionMatrix(mat);
-    QUnit.closeArray(mat, new XML3D.Mat4.perspective(0.78, 3/4, 1, 10), EPSILON, "Perspective matrix is correct." )
+    QUnit.closeMatrix(mat, new XML3D.Mat4.perspective(0.78, 3/4, 1, 10), EPSILON, "Perspective matrix is correct." );
 });
 
 test("Planes", function() {

@@ -90,7 +90,7 @@ QUnit.extend( QUnit, {
 
         isImage = isImage == undefined ? false : true;
 
-        if(!actual || actual.length != expected.length){
+        if(!actual || actual.length !== expected.length || isNaN(actual.length)){
             QUnit.push(false, actual, expected, message);
             return;
         }
@@ -113,7 +113,7 @@ new (function() {
 
     function isVec3(arg) { return arg.length === 3;}
     function isRotation(arg) { return arg.length === 4}
-    function isBox(arg) { return arg.data && arg.data.length === 6}
+    function isBox(arg) { return arg.length === 6 }
     function isMatrix(arg) {
         if (arg.length === 16)
             return true;
@@ -131,6 +131,9 @@ new (function() {
     var original = QUnit.jsDump.parsers.object;
     QUnit.jsDump.setParser("object", function(a,b) {
         if(!a) return original(a,b);
+        if (a.data) {
+            a = a.data;
+        }
         if(isVec3(a))
             return "vec3("+a[0]+", "+a[1]+", "+a[2]+")";
         if(isRotation(a))
@@ -142,7 +145,7 @@ new (function() {
             a[8] + ", " +  a[9] + ", " +  a[10] + ", " +  a[11] + "\n" +
             a[12] + ", " +  a[13] + ", " +  a[14] + ", " +  a[15] + ")";
         if(isBox(a))
-            return a.isEmpty() ? "bbox(empty)" : "bbox(("+a[0]+", "+a[1]+", "+a[2]+"),("+a[3]+", "+a[4]+", "+a[5]+"))";
+            return "bbox(("+ a[0]+", "+ a[1]+", "+ a[2]+"),("+ a[3]+", "+ a[4]+", "+ a[5]+"))";
         if(isFloatArray(a)) {
             var str = "Float32Array[";
             for (var i=0; i < a.length; i++)

@@ -233,9 +233,6 @@ XML3D.extend(GLScene.prototype, {
         }
     },
 
-    handleResizeEvent: function (/*width, height*/) {
-        this.getActiveView().setProjectionDirty();
-    },
 
     createDrawable: function (obj) {
         return this.drawableFactory.createDrawable(obj, this.context);

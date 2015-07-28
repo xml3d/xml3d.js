@@ -8,6 +8,7 @@ var mat4 = require("gl-matrix").mat4;
 var assert = require('assert');
 
 
+
 var ProjectiveCameraData = {
     "projectionMatrix": {
         type: XC.DATA_TYPE.FLOAT4X4, 'default': mat4.perspective(mat4.create(), (45 * Math.PI / 180), 1, 0.001, 10000)
@@ -15,26 +16,31 @@ var ProjectiveCameraData = {
 };
 
 var PerspectiveCameraData = {
-    "fov-vertical": {type: XC.DATA_TYPE.FLOAT3, 'default': [(45 * Math.PI / 180)]},
-    "fov-horizontal": {type: XC.DATA_TYPE.FLOAT3, 'default': undefined},
+    "fovVertical": {type: XC.DATA_TYPE.FLOAT3, 'default': [(45 * Math.PI / 180)]},
+    "fovHorizontal": {type: XC.DATA_TYPE.FLOAT3, 'default': undefined},
     "near": {type: XC.DATA_TYPE.FLOAT3, 'default': undefined},
-    "far": {type: XC.DATA_TYPE.FLOAT3, 'default': undefined}
+    "far": {type: XC.DATA_TYPE.FLOAT3, 'default': undefined},
+    "aspect": {type: XC.DATA_TYPE.FLOAT, 'default': undefined},
+    "boundingBox": {type: XC.DATA_TYPE.FLOAT, 'default': undefined}
 };
 
 /**
  * @param {DataNode|null} dataNode
+ * @param scene
+ * @param owner
  * @param {string} model
  * @param defaults
- * @param {function} cb
  * @constructor
  */
-var AbstractCameraModel = function (dataNode, cb, model, defaults) {
-    assert.equal(typeof cb, 'function');
+var AbstractCameraModel = function (dataNode, scene, owner, model, defaults) {
+    assert.equal(typeof owner.cameraValueChanged, 'function');
     assert.equal(typeof model, 'string');
     assert(defaults);
+    assert(scene);
 
-    this.cb = cb;
+    this.owner = owner;
     this.model = model;
+    this.scene = scene;
     this.parameters = Object.keys(defaults);
 
     if (dataNode) {
@@ -45,6 +51,8 @@ var AbstractCameraModel = function (dataNode, cb, model, defaults) {
     } else {
         this.dataNode = createXflowData(defaults);
     }
+    this.dataNode.insertBefore(this.scene.data.data, null);
+
     this.cameraParameterRequest = new ComputeRequest(this.dataNode, this.parameters, this.cameraParametersChanged.bind(this));
     this.cameraParametersChanged(this.cameraParameterRequest, null);
 };
@@ -52,7 +60,7 @@ var AbstractCameraModel = function (dataNode, cb, model, defaults) {
 AbstractCameraModel.prototype = {
     cameraParametersChanged: function (request, changeType) {
         if (changeType) {
-            this.cb(changeType);
+            this.owner.cameraValueChanged(changeType);
         }
     }
 };
@@ -72,7 +80,6 @@ XML3D.createClass(ProjectiveCameraModel, AbstractCameraModel, {
     getProjectionMatrix: function (aspect) {
         var result = this.cameraParameterRequest.getResult();
         var projectionMatrix = result.getOutputData("projectionMatrix").getValue()[0];
-        console.log(projectionMatrix);
         return projectionMatrix;
     },
 
@@ -85,57 +92,60 @@ XML3D.createClass(ProjectiveCameraModel, AbstractCameraModel, {
 /**
  * Perspective Camera Model
  * @param dataNode
- * @param cb
+ * @param scene
+ * @param owner
  * @extends AbstractCameraModel
  * @constructor
  */
-var PerspectiveCameraModel = function (dataNode, cb) {
-    AbstractCameraModel.call(this, dataNode, cb, "perspective", PerspectiveCameraData);
+var PerspectiveCameraModel = function (dataNode, scene, owner) {
+    AbstractCameraModel.call(this, dataNode, scene, owner, "perspective", PerspectiveCameraData);
     this.frustum = new Frustum(0.01, 1000, 0, 0.78, 1);
 };
 
 XML3D.createClass(PerspectiveCameraModel, AbstractCameraModel, {
 
-    _updateFrustum: function (aspect) {
+    _updateFrustum: function () {
         var result = this.cameraParameterRequest.getResult();
 
         var fovv, fovh, near, far;
 
-        var fovhEntry = result.getOutputData("fov-horizontal");
+        var fovhEntry = result.getOutputData("fovHorizontal");
         if (fovhEntry) {
             fovh = fovhEntry.getValue()[0];
         } else {
-            fovv = result.getOutputData("fov-vertical").getValue()[0];
+            fovv = result.getOutputData("fovVertical").getValue()[0];
         }
 
         var nearEntry = result.getOutputData("near");
         if (nearEntry) {
             near = nearEntry.getValue()[0];
-        } else {
-            near = 0.01;
         }
 
         var farEntry = result.getOutputData("far");
         if (farEntry) {
             far = farEntry.getValue()[0];
-        } else {
-            far = 10000;
         }
 
+        var aspect = result.getOutputData("aspect").getValue()[0];
+
         if (near == undefined || far == undefined) {
-            // Compute near / far clipping planes automatically
+            var boundingBox = new XML3D.Box(result.getOutputData("boundingBox").getValue())
+            var nearFar = this.owner.getClippingPlanes(boundingBox);
+
+            near = near == undefined ? nearFar.near : near;
+            far = far == undefined ? nearFar.far : far;
         }
 
         this.frustum.setFrustum(near, far, fovh, fovv, aspect);
     },
 
-    getProjectionMatrix: function (aspect) {
-        this._updateFrustum(aspect);
+    getProjectionMatrix: function () {
+        this._updateFrustum();
         return this.frustum.getProjectionMatrix(mat4.create());
     },
 
-    getFrustum: function (aspect) {
-        this._updateFrustum(aspect);
+    getFrustum: function () {
+        this._updateFrustum();
         return this.frustum;
     }
 });
@@ -158,6 +168,8 @@ function createXflowValue(dataNode, name, type, value) {
     inputNode.name = name;
     dataNode.appendChild(inputNode);
 }
+
+
 
 
 module.exports = {

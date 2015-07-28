@@ -5,6 +5,9 @@ var Frustum = require("../tools/frustum.js").Frustum;
 var vec3 = require("gl-matrix").vec3;
 var mat4 = require("gl-matrix").mat4;
 
+/** @const */
+var CLIPPLANE_NEAR_MIN = 0.01;
+
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
 
@@ -16,9 +19,6 @@ var WORLD_TO_VIEW_MATRIX_OFFSET = 16;
 var PROJECTION_MATRIX_OFFSET = 32;
 /** @const */
 var ENTRY_SIZE = PROJECTION_MATRIX_OFFSET + 16;
-
-/** @const */
-var CLIPPLANE_NEAR_MIN = 0.01;
 
 /** @const */
 var DEFAULT_FIELDOFVIEW = 45 / 180 * Math.PI;
@@ -37,9 +37,10 @@ var RenderView = function (scene, pageEntry, opt) {
     this.lastAspectRatio = 1;
     this.projectionDirty = true;
 
-    this.camera = createCamera(opt.camera ? opt.camera : DEFAULT_CAMERA_CONFIGURATION, this.cameraValueChanged.bind(this));
+    this.camera = createCamera(opt.camera ? opt.camera : DEFAULT_CAMERA_CONFIGURATION, scene, this);
     this.localMatrix = mat4.create();
     this.worldSpacePosition = vec3.create();
+    this.viewDirty = true;
     this.frustum = null;
 };
 RenderView.ENTRY_SIZE = ENTRY_SIZE;
@@ -70,28 +71,6 @@ XML3D.extend(RenderView.prototype, {
             mat4.invert(tmp_mat4, tmp_mat4);
             this.setWorldToViewMatrix(tmp_mat4);
             this.viewDirty = false;
-        }
-    })(),
-
-    getClippingPlanes: (function () {
-        var t_mat = mat4.create();
-        var bb = new XML3D.Box();
-
-        return function () {
-            this.scene.getBoundingBox(bb);
-            if (bb.isEmpty()) {
-                return {near: 1, far: 10};
-            }
-            this.getWorldToViewMatrix(t_mat);
-            bb.transformAxisAligned(t_mat);
-
-            var near = -bb.max.z, far = -bb.min.z, expand = Math.max((far - near) * 0.005, 0.05);
-
-            // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
-            far += expand;
-            near -= expand;
-
-            return {near: Math.max(near, expand, CLIPPLANE_NEAR_MIN), far: far};
         }
     })(),
 
@@ -135,8 +114,8 @@ XML3D.extend(RenderView.prototype, {
     getProjectionMatrix: function (dest, aspect) {
         if (this.projectionDirty || Math.abs(aspect - this.lastAspectRatio) > 0.001 ) {
             // Set projectionMatrix
-            this.setProjectionMatrix(this.camera.getProjectionMatrix(aspect));
             this.frustum = this.camera.getFrustum(aspect);
+            this.setProjectionMatrix(this.frustum.getProjectionMatrix(mat4.create()));
             this.lastAspectRatio = aspect;
         }
         this.getMat4FromPage(dest, PROJECTION_MATRIX_OFFSET);
@@ -152,22 +131,44 @@ XML3D.extend(RenderView.prototype, {
 
     cameraValueChanged: function() {
         this.setProjectionDirty();
+    },
+
+    getClippingPlanes: function(bb) {
+        if(!bb) {
+            bb = new XML3D.Box();
+            this.scene.getBoundingBox(bb);
+        }
+        if (bb.isEmpty()) {
+            return {near: 1, far: 10};
+        }
+        var w2v = mat4.create();
+        this.getWorldToViewMatrix(w2v);
+        bb.transformAxisAligned(w2v);
+
+        var near = -bb.max.z, far = -bb.min.z, expand = Math.max((far - near) * 0.005, 0.05);
+
+        // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
+        far += expand;
+        near -= expand;
+
+        return {near: Math.max(near, expand, CLIPPLANE_NEAR_MIN), far: far};
     }
 });
 
 /**
  * @param {Configuration} configuration
- * @param {function} cb
+ * @param {Scene} owner
+ * @param {RenderView} owner
  * @returns {Object}
  */
-function createCamera(configuration, cb) {
+function createCamera(configuration, scene, owner) {
 
     switch(configuration.model) {
         case "urn:xml3d:camera:perspective":
-            return new CameraModels.PerspectiveCameraModel(configuration.dataNode, cb);
+            return new CameraModels.PerspectiveCameraModel(configuration.dataNode, scene, owner);
         default:
             XML3D.debug.logWarning("Unknown camera model:", configuration.model);
-            return new CameraModels.PerspectiveCameraModel(configuration.dataNode, cb);
+            return new CameraModels.PerspectiveCameraModel(configuration.dataNode, scene, owner);
     }
 
 

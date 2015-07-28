@@ -18,6 +18,15 @@ var Frustum = function (nearPlane, farPlane, fovx, fovy, aspect, orthographic) {
 };
 
 XML3D.extend(Frustum.prototype, {
+    /**
+     *
+     * @param nearPlane
+     * @param farPlane
+     * @param fovx Horizontal field of view in radians
+     * @param fovy Vertical field of view in radians
+     * @param aspect
+     * @param {bool?} orthographic
+     */
     setFrustum: function (nearPlane, farPlane, fovx, fovy, aspect , orthographic) {
         assert(nearPlane > 0 && farPlane > 0, "Near or far plane undefined or non-positive");
         assert(!(fovx && fovy), "fovx and fovy cannot both be non-zero.");

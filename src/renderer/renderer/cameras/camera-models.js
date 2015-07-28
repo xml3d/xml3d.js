@@ -136,7 +136,7 @@ XML3D.createClass(PerspectiveCameraModel, AbstractCameraModel, {
             far = far == undefined ? nearFar.far : far;
         }
 
-        this.frustum.setFrustum(near, far, fovh, fovv, aspect);
+        this.frustum.setFrustum(near, far, fovh, fovv, aspect /*, orthographic = false */);
     },
 
     getProjectionMatrix: function () {

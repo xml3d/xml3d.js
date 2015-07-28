@@ -706,6 +706,17 @@
               &lt;/mesh&gt;
           </pre>
 
+          <p>If two data elements containing fields with identical names are present in an XFlow data graph then the value nearest the top will replace any value
+            nested deeper within the graph. In this example the value of the <code>color</code> field will be <code>1.0 0.0 0.0</code> when referencing <code>#my-data</code>:</p>
+
+          <pre class='example highlight'>
+              &lt;data id="my-data"&gt;
+                  &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt; &lt;!-- Overrides the previous color --&gt;
+                  &lt;data&gt;
+                      &lt;float3 name="color"&gt;1.0 1.0 1.0&lt;/float3&gt;
+                  &lt;/data&gt;
+              &lt;/data&gt;
+         </pre>
 
       </section>
       <section>
@@ -724,18 +735,17 @@
           </pre>
 
           <p>The <code>name</code> attribute of a value element acts as an ID for the data contained in this element. It may be referenced in XFlow operators or
-              in material shaders. If two value elements with the same name are present in an XFlow data graph then the value nearest the top will replace any value
-              nested deeper within the graph.</p>
+              in material shaders.</p>
 
-          <p>In this example the value of the <code>color</code> field will be <code>1.0 0.0 0.0</code> when referencing <code>#my-data</code>.</p>
-        <pre class='example highlight'>
-            &lt;data id="my-data"&gt;
-                &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt;
-                &lt;data&gt;
-                    &lt;float3 name="color"&gt;1.0 1.0 1.0&lt;/float3&gt;
+          <p>If two value elements with the same name are present inside a <a href="#data-elements">data element</a> then the value appearing later in the DOM will be used. In this example the
+          value of the <code>color</code> field will be <code>1.0 1.0 1.0</code> when referencing <code>#my-data</code>:</p>
+
+          <pre class='example highlight'>
+                &lt;data id="my-data"&gt;
+                    &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt;
+                    &lt;float3 name="color"&gt;1.0 1.0 1.0&lt;/float3&gt; &lt;!-- Overrides the previous color --&gt;
                 &lt;/data&gt;
-            &lt;/data&gt;
-       </pre>
+          </pre>
 
       </section>
       <section>

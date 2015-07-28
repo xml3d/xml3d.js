@@ -72,14 +72,14 @@ AbstractCameraModel.prototype = {
  * @constructor
  * @extends AbstractCameraModel
  */
-var ProjectiveCameraModel = function (dataNode, cb) {
-    AbstractCameraModel.call(this, dataNode, cb, "projective", ProjectiveCameraData);
+var ProjectiveCameraModel = function (dataNode, scene, owner) {
+    AbstractCameraModel.call(this, dataNode, scene, owner, "projective", ProjectiveCameraData);
 };
 
 XML3D.createClass(ProjectiveCameraModel, AbstractCameraModel, {
     getProjectionMatrix: function (aspect) {
         var result = this.cameraParameterRequest.getResult();
-        var projectionMatrix = result.getOutputData("projectionMatrix").getValue()[0];
+        var projectionMatrix = result.getOutputData("projectionMatrix").getValue();
         return projectionMatrix;
     },
 
@@ -173,5 +173,5 @@ function createXflowValue(dataNode, name, type, value) {
 
 
 module.exports = {
-    AbstractCameraModel: AbstractCameraModel, PerspectiveCameraModel: PerspectiveCameraModel
+    AbstractCameraModel: AbstractCameraModel, PerspectiveCameraModel: PerspectiveCameraModel, ProjectiveCameraModel: ProjectiveCameraModel
 };

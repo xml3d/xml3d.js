@@ -165,16 +165,21 @@ XML3D.extend(GLScene.prototype, {
             this.updateBoundingBox();
 
             activeView.getProjectionMatrix(c_projMat_tmp, aspectRatio);
+            console.log(c_projMat_tmp);
             activeView.getViewToWorldMatrix(c_viewToWorldMatrix);
 
             var frustum = activeView.getFrustum();
-            c_frustumTest.set(frustum, c_viewToWorldMatrix);
+            var doFrustumCulling = this.doFrustumCulling && frustum;
+
+            if(doFrustumCulling) {
+                c_frustumTest.set(frustum, c_viewToWorldMatrix);
+            }
 
             for (i = 0, l = readyObjects.length; i < l; i++) {
                 obj = readyObjects[i];
                 obj.updateModelViewProjectionMatrix(c_projMat_tmp);
                 obj.getWorldSpaceBoundingBox(c_bbox);
-                obj.inFrustum = this.doFrustumCulling ? c_frustumTest.isBoxVisible(c_bbox) : true;
+                obj.inFrustum = doFrustumCulling ? c_frustumTest.isBoxVisible(c_bbox) : true;
             }
         }
     }()),

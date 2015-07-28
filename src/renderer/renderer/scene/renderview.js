@@ -115,7 +115,11 @@ XML3D.extend(RenderView.prototype, {
         if (this.projectionDirty || Math.abs(aspect - this.lastAspectRatio) > 0.001 ) {
             // Set projectionMatrix
             this.frustum = this.camera.getFrustum(aspect);
-            this.setProjectionMatrix(this.frustum.getProjectionMatrix(mat4.create()));
+            if(this.frustum) {
+                this.setProjectionMatrix(this.frustum.getProjectionMatrix(mat4.create()));
+            } else {
+                this.setProjectionMatrix(this.camera.getProjectionMatrix())
+            }
             this.lastAspectRatio = aspect;
         }
         this.getMat4FromPage(dest, PROJECTION_MATRIX_OFFSET);
@@ -165,6 +169,8 @@ function createCamera(configuration, scene, owner) {
     switch(configuration.model) {
         case "urn:xml3d:camera:perspective":
             return new CameraModels.PerspectiveCameraModel(configuration.dataNode, scene, owner);
+        case "urn:xml3d:camera:projective":
+            return new CameraModels.ProjectiveCameraModel(configuration.dataNode, scene, owner);
         default:
             XML3D.debug.logWarning("Unknown camera model:", configuration.model);
             return new CameraModels.PerspectiveCameraModel(configuration.dataNode, scene, owner);

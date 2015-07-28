@@ -90,17 +90,30 @@
       </data>
       <transform id="t_cam" translation="0 0 2" rotation="0 1 0 1.5708"></transform>
     </defs>
-    <view id="view_rear" style="transform: translate3d(0px, 0px, -10px) rotate3d(0, 1, 0, 180.0deg)"><float name="fovh">0.7854</float></view>
-    <view id="view_front" style="transform: translate3d(0px, 0px, 10px)"><float name="fovh">0.7854</float></view>
+    <view id="view_rear" style="transform: translate3d(0px, 0px, -10px) rotate3d(0, 1, 0, 180.0deg)"></view>
+    <view id="view_front" style="transform: translate3d(0px, 0px, 10px)"></view>
     <group transform="#t_cam">
 
     </group>
     <group transform="#t_cam">
     </group>
     <view id="view_right" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)"></view>
-    <view id="view_left" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)"><float name="fovh">0.7854</float></view>
-    <view id="view_top" style="transform: translate3d(0px, 10px, 0px) rotate3d(1, 0, 0, -90.0deg)"><float name="fovVertical">0.2</float></view>
-    <view id="view_bottom" style="transform: translate3d(0px, -10px, 0px) rotate3d(1, 0, 0, 90.0deg)"><float name="fovHorizontal">0.5</float></view>
+    <view id="view_right_projective" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)">
+      <float4x4 name="projectiveMatrix">1.4485281705856323, 0, 0, 0, 0, 2.4142134189605713, 0, 0, 0, 0, -9.523809432983398, -1, 0, 0, -94.18809509277344, 0</float4x4>
+    </view>
+    <view id="view_left" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)">
+      <float name="fovVertical">0.2</float>
+      <float name="near">0.2</float>
+      <float name="far">20</float>
+    </view>
+    <view id="view_left_projective" model="urn:xml3d:camera:projective" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)">
+    </view>
+    <view id="view_top" style="transform: translate3d(0px, 10px, 0px) rotate3d(1, 0, 0, -90.0deg)">
+      <float name="fovVertical">0.2</float>
+    </view>
+    <view id="view_bottom" style="transform: translate3d(0px, -10px, 0px) rotate3d(1, 0, 0, 90.0deg)">
+      <float name="fovHorizontal">0.5</float>
+    </view>
     <group id="root">
       <group>
         <group id="shape_d2e23" material="#material_front">
@@ -130,7 +143,9 @@
     <a href="#" onclick="changeView('right')">right</a> |
     <a href="#" onclick="changeView('top')">top</a> |
     <a href="#" onclick="changeView('bottom')">bottom</a> |
-    <a href="#" onclick="changeView()">none</a></div>
+    <a href="#" onclick="changeView()">none</a> |
+    <a href="#" onclick="changeView('left_projective')">left projective</a> |
+  <a href="#" onclick="changeView('right_projective')">right projective</a></div>
 </div>
 <script type="text/javascript">
   function changeView(which) {

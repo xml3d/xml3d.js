@@ -39,7 +39,7 @@ test("Change view", 5, function() {
 });
 
 
-test("Projection Matrix (default)", 4, function() {
+test("urn:xml3d:camera:projection", 5, function() {
      stop();
 
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/view.html");
@@ -50,8 +50,6 @@ test("Projection Matrix (default)", 4, function() {
             return scene;
         }
     };
-
-
 
     var defaultView = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
         var view = s.querySelector(s.activeView);
@@ -75,8 +73,46 @@ test("Projection Matrix (default)", 4, function() {
         return s;
     });
 
+    var customNearFar = customFOVHorizontal.then(changeFunction("changeView", ["left"])).then(promiseSceneRendered).then(function (s) {
+        var view = s.querySelector(s.activeView);
 
+        var frustum = new XML3DTestLib.Frustum.Frustum(0.2, 20, 0, 0.2, 500 / 300);
+        var expected = new XML3D.Mat4();
+        frustum.getProjectionMatrix(expected);
+        QUnit.closeMatrix(view.getProjectionMatrix(), expected, EPSILON, "custom near/far plane");
+        return s;
+    });
 
-    customFOVHorizontal.fin(QUnit.start).done();
+    customNearFar.fin(QUnit.start).done();
+});
 
+test("urn:xml3d:camera:projective", 3, function() {
+     stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/view.html");
+
+    var changeFunction = function(f, args) {
+        return function(scene) {
+            scene.ownerDocument.defaultView[f].apply(null, args);
+            return scene;
+        }
+    };
+
+    var defaultProjective = frameLoaded.then(function(doc) {return doc.querySelector("xml3d") })
+        .then(changeFunction("changeView", ["left_projective"]))
+        .then(promiseSceneRendered).then(function (s) {
+        var view = s.querySelector(s.activeView);
+        QUnit.closeMatrix(view.getProjectionMatrix(), XML3D.Mat4.perspective((45 * Math.PI / 180), 1, 0.001, 10000), EPSILON, "Default matrix");
+        return s;
+    });
+
+    var customProjective = defaultProjective.then(changeFunction("changeView", ["right_projective"]))
+        .then(promiseSceneRendered).then(function (s) {
+        var view = s.querySelector(s.activeView);
+        var reference = s.querySelector("#view_right");
+        QUnit.closeMatrix(view.getProjectionMatrix(), reference.getProjectionMatrix(), EPSILON, "Custom projective matrix");
+        return s;
+    });
+
+    customProjective.fin(QUnit.start).done();
 });

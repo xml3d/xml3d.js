@@ -148,10 +148,9 @@ XML3D.extend(RenderView.prototype, {
         var near = -bb.max.z, far = -bb.min.z, expand = Math.max((far - near) * 0.005, 0.05);
 
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
-        far += expand;
-        near -= expand;
-
-        return {near: Math.max(near, expand, CLIPPLANE_NEAR_MIN), far: far};
+        near = Math.max(near - expand, expand, CLIPPLANE_NEAR_MIN);
+        far = Math.max(far + expand, near + expand);
+        return {near: near, far: far};
     }
 });
 

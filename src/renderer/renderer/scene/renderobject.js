@@ -88,8 +88,6 @@ var RenderObject = function (scene, pageEntry, opt) {
 
     /** {Object?} **/
     this.override = null;
-
-    this.pickable = true;
 };
 RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -335,13 +333,6 @@ XML3D.createClass(RenderObject, RenderNode, {
     visibilityChanged: function () {
         this.setBoundingBoxDirty();
     },
-
-    setPickable: function (value) {
-        if (this.pickable == value)
-            return;
-        this.pickable = value;
-    },
-
 
     getProgram: function () {
         return this.drawable.getProgram();

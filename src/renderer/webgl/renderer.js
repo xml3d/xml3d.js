@@ -254,10 +254,10 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     renderToCanvas: function () {
-        this.needsDraw = false; //Set this early to avoid endless rendering if an exception is thrown during rendering
         this.prepareRendering();
         this.renderInterface.getRenderPipeline().render(this.scene);
         var stats = this.renderInterface.getRenderPipeline().getRenderStats();
+        this.needsDraw = false; //Set this late, because redraw might be triggered during rendering (TODO: avoid that!)
         XML3D.debug.logDebug("Rendered to Canvas");
         return stats;
     },

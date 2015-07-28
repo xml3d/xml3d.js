@@ -10,7 +10,7 @@ module("Picking Tests", {
             that.xml3dEl = that.doc.getElementById("xml3DElem");
             start();
         };
-        loadDocument("scenes/picking.html", this.cb);
+        loadDocument("scenes/picking.html" + window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

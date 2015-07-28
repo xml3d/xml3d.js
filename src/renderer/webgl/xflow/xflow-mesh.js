@@ -311,7 +311,6 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         }
         // In every case, set the buffer, because other meshes might have already
         // performed one or more of the tasks above
-        //console.log("Set buffer", name, buffer.id);
         mesh.setBuffer(name, buffer);
     },
 

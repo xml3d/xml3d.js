@@ -167,6 +167,8 @@ GLCanvasHandler.prototype.draw = function () {
         this.dispatchFrameDrawnEvent(start, end, stats);
 
     } catch (e) {
+         // Avoid endless rendering due to error. Without a change, the renderer will not get back into normal operation
+        this.renderer.needsDraw = false;
         XML3D.debug.logException(e);
     }
 

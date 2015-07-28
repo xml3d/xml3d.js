@@ -29,7 +29,7 @@ XML3D.extend(PickObjectRenderPass.prototype, {
                 var obj = objects[j];
                 var mesh = obj.mesh;
 
-                if (!obj.pickable)
+                if (!obj.visible)
                     continue;
 
                 if (viewMatrix && projMatrix) {

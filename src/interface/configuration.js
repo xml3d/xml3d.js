@@ -532,6 +532,7 @@ classInfo['view'] = {
     onkeydown: {a: handlers.EventAttributeHandler},
     onkeyup: {a: handlers.EventAttributeHandler},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
+    getProjectionMatrix:{m: methods.viewGetProjectionMatrix},
     getViewMatrix: {m: methods.viewGetViewMatrix}
     };
 

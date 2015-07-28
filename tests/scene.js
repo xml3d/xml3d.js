@@ -186,13 +186,13 @@ test("Clipping Planes", function() {
     deepEqual(view.getClippingPlanes(), { near: 0.05, far: 2.05 }, "Larger values");
 
     var mat = XML3D.math.mat4.rotate(XML3D.math.mat4.create(), XML3D.math.mat4.create(), Math.PI/2.0, [0,1,0]);
-    view.updateOrientation(mat);
+    view.setLocalMatrix(mat);
     var planes = view.getClippingPlanes();
     QUnit.close(planes.near, 0.05, EPSILON, "Rotated 180: near");
     QUnit.close(planes.far, 2.05, EPSILON, "Rotated 180: far");
 
     mat = XML3D.math.mat4.rotate(XML3D.math.mat4.create(), XML3D.math.mat4.create(),Math.PI/3.0, [0,0.707,0.707]);
-    view.updateOrientation(mat);
+    view.setLocalMatrix(mat);
 
     planes = view.getClippingPlanes();
     QUnit.close(planes.near, 0.05 , EPSILON, "Rotated arbitrary: near");
@@ -209,7 +209,7 @@ test("Clipping Planes", function() {
     obj.setLocalMatrix(XML3D.math.mat4.create());
     obj.setObjectSpaceBoundingBox(new XML3D.Box(new Float32Array([-2, -2, -2, 2, 2, 2])));
 
-    view.updateOrientation(XML3D.math.mat4.create());
+    view.setLocalMatrix(XML3D.math.mat4.create());
     deepEqual(view.getClippingPlanes(), { near: 0.05, far: 2.05 }, "Translated group");
 
     XML3D.math.mat4.scale(trans2, trans2, [20,20,20]);
@@ -236,12 +236,16 @@ test("View projection matrix", function() {
 
     this.scene.setActiveView(view);
 
-    view.getProjectionMatrix(projectionMatrixActual, 0.5 );
+    this.scene.width = 250;
+    this.scene.height = 500;
+    view.getProjectionMatrix(projectionMatrixActual);
+
     var cp = view.getClippingPlanes();
     XML3D.math.mat4.perspective(projectionMatrixExpected, 45 / 180 * Math.PI, 0.5, cp.near, cp.far);
     QUnit.closeArray(projectionMatrixActual, projectionMatrixExpected, EPSILON, "Projection, aspect ration 0.5");
 
-    view.getProjectionMatrix(projectionMatrixActual, 0.6 );
+    this.scene.width = 300;
+    view.getProjectionMatrix(projectionMatrixActual);
     var cp = view.getClippingPlanes();
     XML3D.math.mat4.perspective(projectionMatrixExpected, 45 / 180 * Math.PI, 0.6, cp.near, cp.far);
     QUnit.closeArray(projectionMatrixActual, projectionMatrixExpected, EPSILON, "Projection, aspect ration 0.6");

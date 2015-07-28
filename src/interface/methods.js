@@ -40,6 +40,17 @@ methods.viewGetViewMatrix = function() {
     return result.invert();
 };
 
+methods.viewGetProjectionMatrix = function() {
+    XML3D.flushDOMChanges();
+    var adapters = this._configured.adapters || {};
+    for ( var adapter in adapters) {
+        if (adapters[adapter].getProjectionMatrix) {
+            return adapters[adapter].getProjectionMatrix();
+        }
+    }
+    return null;
+};
+
 methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
     XML3D.flushDOMChanges();
     XML3D.flushCSSChanges();

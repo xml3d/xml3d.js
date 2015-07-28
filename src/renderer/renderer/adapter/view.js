@@ -50,6 +50,12 @@ XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
         return m;
     },
 
+    getProjectionMatrix: function () {
+        var m = new XML3D.Mat4();
+        this.renderNode.getProjectionMatrix(m.data);
+        return m;
+    },
+
     attributeChangedCallback: function (name, oldValue, newValue) {
         SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
         switch (name) {

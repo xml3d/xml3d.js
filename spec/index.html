@@ -79,7 +79,18 @@
 </section>
 
 <section>
+  <h2>Introduction</h2>
+</section>
+
+<section>
   <h2>Concepts</h2>
+  <section>
+    <h3>Generic data model</h3>
+  </section>
+</section>
+
+<section>
+  <h2>Predefined models</h2>
   <section>
     <h3>Predefined primitive types</h3>
     <section>
@@ -88,7 +99,7 @@
       <p>WebGL primitive: <code>TRIANGLE</code></p>
 
       <p>The triangle primitive type renders faces out of sets of 3 vertices. Triangles may be constructed with or without an array of indices. If no indices are provided
-      XML3D will construct the triangles from the array of vertex positions: the first 3 will create the first triangle, the next 3 the second and so on.</p>
+        XML3D will construct the triangles from the array of vertex positions: the first 3 will create the first triangle, the next 3 the second and so on.</p>
 
       <pre class="example highlight">
         &lt;mesh type="triangles"&gt;
@@ -105,12 +116,12 @@
       <p>WebGL primitive: <code>TRIANGLE_STRIP</code></p>
 
       <p>The tristrip primitive type creates triangles from a list of vertex positions and (optionally) a list of segments and/or indices. Each segment begins by building a triangle
-      out of 3 vertex positions. Each subsequent triangle in the segment is then created from the last two vertex positions and the next one in the list. Note that this
-      creates a sequence of connected triangles.</p>
+        out of 3 vertex positions. Each subsequent triangle in the segment is then created from the last two vertex positions and the next one in the list. Note that this
+        creates a sequence of connected triangles.</p>
 
       <p>Segments can be used to create disconnected sets of triangles by providing a list of integers with the name <code>vertexCount</code>. Each number in the list
-      specifies the number of vertex positions to use for that segment. XML3D will then work through the list of vertex positions sequentially building a tristrip for each segment. </p>
-
+        specifies the number of vertex positions to use for that segment. XML3D will then work through the list of vertex positions sequentially building a tristrip for each segment. </p>
+      <div class="issue">Add parameter tables like in material models.</div>
       <pre class="example highlight">
         &lt;mesh type="tristrips"&gt;
           &lt;int name="vertexCount"&gt;4 4 4 4 4 4&lt;/int&gt;
@@ -136,7 +147,7 @@
       <p>WebGL primitive: <code>LINE_STRIP</code></p>
 
       <p>A linestrip is drawn from a list of vertex positions and (optionally) a list of segments and/or indices. For each segment a line is drawn between the first vertex and
-      the second, then the second and the third and so on. This creates a continuous line.</p>
+        the second, then the second and the third and so on. This creates a continuous line.</p>
 
       <pre class="example highlight">
       &lt;mesh type="linestrips"&gt;
@@ -157,7 +168,6 @@
 
       <p>Points are drawn from a list of vertex positions, which each position being drawn as a single point.</p>
       <div class="note">Currently to change the size of the drawn points, or to draw them as textured sprites, it is necessary to define a custom material shader.</div>
-
     </section>
 
   </section>
@@ -372,143 +382,152 @@
         TODO
       </p>
     </section>
-    </section>
+  </section>
 
   <section>
     <h3>Predefined light models</h3>
     <section>
-    <h2>Point Lights</h2>
-    <p>URN: <code>urn:xml3d:light:point</code></p>
-    <div class="attributes">Attributes:
-     <table>
-      <tbody><tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Default</th>
-        <th>Description</th>
-      </tr>
-      <tr>
-        <td>position</td>
-        <td>float3</td>
-        <td>0 0 0</td>
-        <td>The position of the point light in object space</td>
-      </tr>
-      <tr>
-        <td>attenuation</td>
-        <td>float3</td>
-        <td>0 0 1</td>
-        <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
-      </tr>
-      <tr>
-        <td>intensity</td>
-        <td>float3</td>
-        <td>1 1 1</td>
-        <td>The RGB intensity of the point light.</td>
-      </tr>
-      </tbody>
-    </table>
-    </div>
-    <p>
-    Point light sources emit light from a single point in space with a uniform distribution in all directions, i.e. omnidirectional.
-    The position of the point light is defined by its <i>position</i> attribute and affected by the transformation of the light element that defines
-    the occurrence of the point light. The orientation of the light element is not influencing the light.
-    </p>
+      <h2>Point Lights</h2>
+      <p>URN: <code>urn:xml3d:light:point</code></p>
+      <div class="attributes">Attributes:
+        <table>
+          <tbody><tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>position</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The position of the point light in object space</td>
+          </tr>
+          <tr>
+            <td>attenuation</td>
+            <td>float3</td>
+            <td>0 0 1</td>
+            <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
+          </tr>
+          <tr>
+            <td>intensity</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The RGB intensity of the point light.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Point light sources emit light from a single point in space with a uniform distribution in all directions, i.e. omnidirectional.
+        The position of the point light is defined by its <i>position</i> attribute and affected by the transformation of the light element that defines
+        the occurrence of the point light. The orientation of the light element is not influencing the light.
+      </p>
     </section>
 
     <section>
-    <h2>Directional Lights</h2>
-    <p>URN: <code>urn:xml3d:light:directional</code></p>
-    <div class="attributes">Attributes:
-      <table>
-        <tbody>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Default</th>
-          <th>Description</th>
-        </tr>
-        <tr>
-          <td>direction</td>
-          <td>float3</td>
-          <td>0 0 -1</td>
-          <td>The direction of the light in object space.</td>
-        </tr>
-        <tr>
-          <td>intensity</td>
-          <td>float3</td>
-          <td>1 1 1</td>
-          <td>The RGB intensity of the point light.</td>
-        </tr>
-        </tbody>
-      </table>
+      <h2>Directional Lights</h2>
+      <p>URN: <code>urn:xml3d:light:directional</code></p>
+      <div class="attributes">Attributes:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>direction</td>
+            <td>float3</td>
+            <td>0 0 -1</td>
+            <td>The direction of the light in object space.</td>
+          </tr>
+          <tr>
+            <td>intensity</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The RGB intensity of the point light.</td>
+          </tr>
+          </tbody>
+        </table>
       </div>
       <p>
-     Directional light sources, also known as distant light sources, emit light along parallel rays from an infinite distance away. The direction the light sources
+        Directional light sources, also known as distant light sources, emit light along parallel rays from an infinite distance away. The direction the light sources
         emits from is defined by its <i>direction</i> attribute and affected by the transformation of the light element that defines
-    the occurrence of the distant light. The position of the light element is not taken into account.
-    </p>
+        the occurrence of the distant light. The position of the light element is not taken into account.
+      </p>
 
-      </section>
+    </section>
 
     <section>
-    <h2>Spot Lights</h2>  <p>URN: <code>urn:xml3d:light:spot</code></p>
-    <div class="attributes">Attributes:
-      <table>
-        <tbody>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Default</th>
-          <th>Description</th>
-        </tr>
-        <tr>
-          <td>position</td>
-          <td>float3</td>
-          <td>0 0 0</td>
-          <td>The position of the point light in object space</td>
-        </tr>
-        <tr>
-          <td>direction</td>
-          <td>float3</td>
-          <td>0 0 -1</td>
-          <td>The direction of the light in object space.</td>
-        </tr>
-        <tr>
-          <td>intensity</td>
-          <td>float3</td>
-          <td>1 1 1</td>
-          <td>The <i>RGB</i> intensity of the directional light.</td>
-        </tr>
-        <tr>
-          <td>attenuation</td>
-          <td>float3</td>
-          <td>0 0 1</td>
-          <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
-        </tr>
-        <tr>
-          <td>falloffAngle</td>
-          <td>float</td>
-          <td>Math.PI/4</td>
-          <td>Spot angle in radians. Controls the size of the outer cone of a spot light, i.e. the circular area a spot
-            light covers.
-          </td>
-        </tr>
-        <tr>
-          <td>softness</td>
-          <td>float</td>
-          <td>0</td>
-          <td>Softness of the spot light in the range [0;1].</td>
-        </tr>
-        </tbody>
-      </table>
+      <h2>Spot Lights</h2>  <p>URN: <code>urn:xml3d:light:spot</code></p>
+      <div class="attributes">Attributes:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>position</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The position of the point light in object space</td>
+          </tr>
+          <tr>
+            <td>direction</td>
+            <td>float3</td>
+            <td>0 0 -1</td>
+            <td>The direction of the light in object space.</td>
+          </tr>
+          <tr>
+            <td>intensity</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The <i>RGB</i> intensity of the directional light.</td>
+          </tr>
+          <tr>
+            <td>attenuation</td>
+            <td>float3</td>
+            <td>0 0 1</td>
+            <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
+          </tr>
+          <tr>
+            <td>falloffAngle</td>
+            <td>float</td>
+            <td>Math.PI/4</td>
+            <td>Spot angle in radians. Controls the size of the outer cone of a spot light, i.e. the circular area a spot
+              light covers.
+            </td>
+          </tr>
+          <tr>
+            <td>softness</td>
+            <td>float</td>
+            <td>0</td>
+            <td>Softness of the spot light in the range [0;1].</td>
+          </tr>
+          </tbody>
+        </table>
       </div>
+      <div class="issue">Improve description of softness including figure and find a better name for falloffAngle</div>
       <p>
-      Spot light source are a variation of point lights: Instead of emitting light omnidirectional, they emit light from their position in a cone of direction.
-      The <i>fallOffAngle</i> attribute defines the size of the cone. Objects outside the cone defined by the <i>fallOffAngle</i> are not lit by the light source. The <i>softness</i>
-      attribute defines the percentage of the cone in which the illumination ramps down from full to no illumination, i.e. a softness of 0 specifies a hard transition between full to no illumination and a softness of 1.0 a linear transition along the radius of the cone.
+        Spot light source are a variation of point lights: Instead of emitting light omnidirectional, they emit light from their position in a cone of direction.
+        The <i>fallOffAngle</i> attribute defines the size of the cone. Objects outside the cone defined by the <i>fallOffAngle</i> are not lit by the light source. The <i>softness</i>
+        attribute defines the percentage of the cone in which the illumination ramps down from full to no illumination, i.e. a softness of 0 specifies a hard transition between full to no illumination and a softness of 1.0 a linear transition along the radius of the cone.
       </p>
-      </section>
+    </section>
   </section>
+  <section>
+    <h3>Predefined camera models</h3>
+    <section>
+      <h4>Perspective</h4>
+    </section>
+    <section>
+      <h4>Projective</h4>
+    </section>
   </section>
 
 </section>
@@ -856,6 +875,8 @@
                 <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
             </dl>
         </dd>
+
+
 
         <dt>Box getLocalBoundingBox()</dt>
         <dd>Returns the bounding box of the scene. Because the XML3D element is the root element the bounding box will be in world space by definition.</dd>

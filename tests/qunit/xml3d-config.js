@@ -88,7 +88,7 @@ QUnit.extend( QUnit, {
 
     closeArray : function(actual, expected, maxDifference, message, isImage) {
 
-        isImage = isImage == undefined ? false : true;
+        isImage = isImage == undefined ? false : isImage;
 
         if(!actual || actual.length !== expected.length || isNaN(actual.length)){
             QUnit.push(false, actual, expected, message);
@@ -260,7 +260,7 @@ function promiseIFrameLoaded(url) {
     };
     // TODO: Loading failed
     v.addEventListener("load", f, true);
-    v.src = url;
+    v.src = url +window.location.search;
     return deferred.promise;
 };
 

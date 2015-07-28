@@ -874,10 +874,6 @@
             </dl>
         </dd>
 
-          <dt>attribute Function onframedrawn</dt>
-          <dd>Event listener to be executed whenever a new frame has been drawn. Is passed a <a>FrameDrawn</a> event.
-          </dd>
-
 
       </dl>
     </section>
@@ -920,9 +916,9 @@
                 <td>Multiplied with parent transformation</td>
             </tr>
             <tr>
-                <td>visibility</td>
+                <td>display</td>
                 <td>Inherited from parent group</td>
-                <td><code>parent.visibility</code> equals <code>false</code> then <code>false</code> else <code>visibility</code></td>
+                <td><code>parent.style.display</code> equals <code>none</code> then <code>none</code> else <code>display</code></td>
             </tr>
             <tr>
                 <td>event listeners</td>
@@ -933,8 +929,8 @@
         </table>
         </div>
         <pre class="example highlight">
-            &lt;group visible="false" material="#blueMaterial"&gt;
-                &lt;group visible="true"&gt;
+            &lt;group style="display: none;" material="#blueMaterial"&gt;
+                &lt;group style="display: block;"&gt;
                     &lt;!-- This mesh will not be visible but will inherit #blueMaterial --&gt;
                     &lt;mesh type="triangles"&gt;&lt;/mesh&gt;
                 &lt;/group&gt;
@@ -942,14 +938,11 @@
         </pre>
         <dl title='interface XML3DGroupElement : HTMLElement' class='idl'>
             <dt>attribute DOMString transform</dt>
-            <dd>Accepts a URI fragment referencing a <a>transform</a> element. Alternatively a transformation may be defined
+            <dd>Accepts a URI fragment referencing a <a href="#the-transform-element"><code>transform</code></a> element. Alternatively a transformation may be defined
             with CSS through the style attribute.</dd>
             <dt>attribute DOMString material</dt>
-            <dd>Accepts a URI fragment referencing a <a>material</a> element. Material is inherited from the parent group if
+            <dd>Accepts a URI fragment referencing a <a href="#the-material-element"><code>material</code></a> element. Material is inherited from the parent group if
             this attribute is not present.</dd>
-            <dt>attribute boolean visible</dt>
-            <dd>A value of "false" will prevent this group being drawn to the canvas. Visibility is inherited from the parent group
-            if this attribute is not present. </dd>
             <dt>Mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this group element in world space (includes parent transformations).
             </dd>

@@ -22,7 +22,9 @@ function GLCanvasHandler(xml3dElem, canvas) {
 
     this.lastPickObj = null;
 
-    this.lastKnownDimensions = {width: canvas.width, height: canvas.height};
+    // Initialized later
+    this.lastKnownDimensions = {width: 0, height: 0};
+
     this.initialize();
 }
 
@@ -88,7 +90,7 @@ GLCanvasHandler.prototype.configureCanvas = function () {
     // Need to be set for correct canvas size
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
-
+    this.lastKnownDimensions = {width: canvas.width, height: canvas.height};
     return canvas;
 };
 

@@ -68,9 +68,6 @@ var GLRenderer = function (element, canvasHandler) {
 
     this._canvasHandler = canvasHandler;
     var canvas = this._canvasHandler.getCanvas();
-    this.width = canvas.clientWidth;
-    this.height = canvas.clientHeight;
-
     this.context = new GLContext(canvas, this._canvasHandler.id);
     this.scene = new GLScene(this.context);
 
@@ -97,7 +94,9 @@ var GLRenderer = function (element, canvasHandler) {
     this.changeListener = new DataChangeListener(this);
 
     this.renderInterface = this.createRenderInterface();
-    this.createDefaultPipelines();
+
+    this.handleResizeEvent(canvas.clientWidth, canvas.clientHeight);
+
     Options.addObserver(this.onFlagsChange.bind(this));
 };
 

@@ -228,7 +228,7 @@ XML3D.extend(FrustumTest.prototype, {
 
                 // Compute the distance
                 var distance = bbx * normal[0] + bby * normal[1] + bbz * normal[2] + plane.distance;
-                assert(!Number.isNaN(distance));
+                assert(!isNaN(distance));
 
                 // if highest point is below plane then all below.
                 if (distance < 0.0) {

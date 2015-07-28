@@ -33,7 +33,7 @@ var PerspectiveCameraData = {
  * @constructor
  */
 var AbstractCameraModel = function (dataNode, scene, owner, model, defaults) {
-    assert.equal(typeof owner.cameraValueChanged, 'function');
+    assert.equal(typeof owner.viewFrustumChanged, 'function');
     assert.equal(typeof model, 'string');
     assert(defaults);
     assert(scene);
@@ -60,7 +60,7 @@ var AbstractCameraModel = function (dataNode, scene, owner, model, defaults) {
 AbstractCameraModel.prototype = {
     cameraParametersChanged: function (request, changeType) {
         if (changeType) {
-            this.owner.cameraValueChanged(changeType);
+            this.owner.viewFrustumChanged(changeType);
         }
     }
 };

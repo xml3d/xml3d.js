@@ -20,9 +20,6 @@ var PROJECTION_MATRIX_OFFSET = 32;
 /** @const */
 var ENTRY_SIZE = PROJECTION_MATRIX_OFFSET + 16;
 
-/** @const */
-var DEFAULT_FIELDOFVIEW = 45 / 180 * Math.PI;
-
 var DEFAULT_CAMERA_CONFIGURATION = { model: "urn:xml3d:camera:perspective", dataNode: null };
 
 /**
@@ -89,12 +86,7 @@ XML3D.extend(RenderView.prototype, {
 
     setTransformDirty: function () {
         this.viewDirty = true;
-        this.scene.requestRedraw("View's pose changed");
-    },
-
-    setProjectionDirty: function () {
-        this.projectionDirty = true;
-        this.scene.requestRedraw("View's camera changed");
+        this.scene.requestRedraw("view pose changed");
     },
 
     getViewToWorldMatrix: function (dest) {
@@ -133,8 +125,9 @@ XML3D.extend(RenderView.prototype, {
         bbox.setEmpty();
     },
 
-    cameraValueChanged: function() {
-        this.setProjectionDirty();
+    viewFrustumChanged: function() {
+        this.projectionDirty = true;
+        this.scene.requestRedraw("view frustum changed");
     },
 
     getClippingPlanes: function(bb) {
@@ -160,7 +153,7 @@ XML3D.extend(RenderView.prototype, {
 
 /**
  * @param {Configuration} configuration
- * @param {Scene} owner
+ * @param {Scene} scene
  * @param {RenderView} owner
  * @returns {Object}
  */

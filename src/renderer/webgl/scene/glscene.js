@@ -165,7 +165,6 @@ XML3D.extend(GLScene.prototype, {
             this.updateBoundingBox();
 
             activeView.getProjectionMatrix(c_projMat_tmp, aspectRatio);
-            console.log(c_projMat_tmp);
             activeView.getViewToWorldMatrix(c_viewToWorldMatrix);
 
             var frustum = activeView.getFrustum();

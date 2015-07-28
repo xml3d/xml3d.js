@@ -59,10 +59,10 @@ test("Int attribute notifcation tests", 2, function() {
 });
 
 test("Float attribute notification tests", 2, function() {
-    var e = document.createElementNS(XML3D.xml3dNS, "view");
+    var e = document.createElement("float");
     var a = this.factory.getAdapter(e);
-    e.setAttribute("fieldOfView", "0.5");
-    e.fieldOfView = 0.87;
+    e.setAttribute("key", "0.5");
+    e.key = 0.87;
     XML3D.flushDOMChanges();
 });
 

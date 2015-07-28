@@ -282,9 +282,15 @@ function promiseOneSceneCompleteAndRendered(xml3dElement) {
 }
 
 function promiseSceneRendered(xml3dElement, returnEvent) {
+    var deferred = Q.defer();
+
+    if(!xml3dElement) {
+        deferred.reject(new Error("No XML3D element given for promiseSceneRendered"));
+        return deferred.promise;
+    }
+
     var renderer = getRenderer(xml3dElement);
     var glContext = getContextForXml3DElement(xml3dElement);
-    var deferred = Q.defer();
 
     var first = true;
     var f = function(e) {

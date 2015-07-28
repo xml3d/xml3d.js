@@ -47,7 +47,7 @@ test("Planes", function() {
 
 test("Culling", function() {
     var frustum = new XML3DTestLib.Frustum.Frustum(1, 12, 0, 0.78, 1);
-    var test = new XML3DTestLib.Frustum.FrustumTest(frustum, new XML3D.Mat4());
+    var test = new XML3DTestLib.Frustum.FrustumTest(frustum, XML3D.math.mat4.create());
     var bbox = new XML3D.Box();
     ok(!test.isBoxVisible(bbox), "Empty box is not visible.");
 

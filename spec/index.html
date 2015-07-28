@@ -790,6 +790,15 @@
           <dt>Categories:</dt>
           <dd><a href="#interactive-elements">Interactive element</a></dd>
         </dl>
+      <p>The XML3D element is the root element of an XML3D scene. XML3D will create a <code>canvas</code> element at this position in the DOM to
+      display the rendered scene. CSS styles and event listeners from the XML3D element are also applied to the canvas allowing for mouse interaction with the
+        XML3D scene. </p>
+
+      <p>A page may have more than one XML3D element, in this case multiple canvases with their own WebGL contexts will be created. It is not possible
+      to share any data between XML3D scenes, though several scenes may of course reference the same external documents where shared data can be stored.</p>
+
+      <p>Because XML3D uses HTML ids to reference elements it is important to avoid duplicate ids. For example, a duplicate id for a <code>data</code> element that appears
+      in two different XML3D scenes on the same page may lead to undefined behavior. </p>
 
       <dl title='interface XML3DXml3dElement : HTMLElement' class='idl'>
         <dt>attribute unsigned long width</dt>
@@ -797,12 +806,27 @@
         <dt>attribute unsigned long height</dt>
         <dd>Vertical dimension</dd>
         <dt>readonly attribute boolean complete</dt>
-        <dd>Returns true if all resources of the root element has been completely downloaded and rendered; otherwise,
+        <dd>Returns true if all resources of the root element have been completely downloaded and rendered; otherwise,
           returns false.
         </dd>
 
-        <dt>attribute DOMString activeview</dt>
-        <dd>The activeview IDL attribute must reflect the respective content attribute of the same name.</dd>
+        <dt>attribute DOMString view</dt>
+        <dd>The view IDL attribute must reflect the respective content attribute of the same name. This defines the <a href="#the-view-element"><code>view</code></a> element
+          that XML3D will use when rendering the scene.</dd>
+
+        <dt>attribute Function onframedrawn</dt>
+        <dd>Event listener to be executed whenever a new frame has been drawn. Is passed a <a>FrameDrawn</a> event.
+        </dd>
+        <dt>attribute Function onload</dt>
+        <dd>
+          Event listener to be executed when the <code>xml3d</code> element has finished loading. This event is fired once after initial loading of the scene is complete, including
+          all external resources such as textures or external models. It will <b>not</b> be fired again if subsequent changes to the scene cause more resources to be loaded. When adding
+          a listener for this event through JavaScript it may be necessary to check the status of the <code>complete</code> attribute beforehand, as the <code>load</code> event will not
+          be resent if it was already dispatched before the listener was registered.
+          <div class="note">This event may be preceeded by one or more <a>FrameDrawn</a> events as XML3D continues to redraw the scene even
+            as external resources are being loaded.</div>
+        </dd>
+
 
         <dt>HTMLElement? getElementByPoint()</dt>
         <dd>

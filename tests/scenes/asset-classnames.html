@@ -6,7 +6,7 @@
 </head>
 <body style="background-color: #fff;width:500px">
 
- <xml3d id="xml3dTest" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
+ <xml3d id="xml3dTest" width="500px" height="300px" style="background: black">
     <defs>
         <material id="redmaterial" script="urn:xml3d:material:flat">
             <float3 name="diffuseColor">1 0.5 0.5</float3>
@@ -101,7 +101,7 @@
             <model id="mm1" src="#bigAsset" style="transform: translate3d(-2px, -2px, 0)" pick=".left.top, .bottom, center"></model>
         </group>
   </xml3d>
-  <xml3d id="xml3dReference" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
+  <xml3d id="xml3dReference" width="500px" height="300px" style="background: black">
         <group style="transform: translate3d(-2px, -2px, 0)">
             <mesh id="bottomLeft" type="triangles" material="#redmaterial">
                 <data src="#rectBase"></data>

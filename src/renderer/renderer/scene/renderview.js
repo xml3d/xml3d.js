@@ -68,6 +68,8 @@ XML3D.extend(RenderView.prototype, {
             mat4.invert(tmp_mat4, tmp_mat4);
             this.setWorldToViewMatrix(tmp_mat4);
             this.viewDirty = false;
+            // View frustum might have changed due to clipping planes
+            this.viewFrustumChanged();
         }
     })(),
 

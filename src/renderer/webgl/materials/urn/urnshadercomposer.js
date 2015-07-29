@@ -4,6 +4,7 @@ var ShaderDescriptor = require("./shader-descriptor.js");
 var ComputeRequest = require("../../../../xflow/interface/request.js").ComputeRequest;
 var addFragmentShaderHeader = require("../../shader/shader-utils.js").addFragmentShaderHeader;
 require("./diffuse.js");
+require("./default.js");
 require("./phong.js");
 require("./matte.js");
 require("./point.js");

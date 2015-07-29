@@ -547,7 +547,7 @@
             var aa = XML3D.AxisAngle.fromQuat(q0);
             var axis = this.inverseTransformOf(aa.axis);
             tmpQuat = XML3D.Quat.fromAxisAngle(axis, aa.angle);
-            this.position = this.position.subtract(p0).normalize().transformQuat(tmpQuat).add(p0);
+            this.position = this.position.subtract(p0).transformQuat(tmpQuat).add(p0);
         }
     })();
 

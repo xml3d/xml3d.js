@@ -39,7 +39,7 @@ test("Change view", 5, function() {
 });
 
 
-test("urn:xml3d:camera:projection", 5, function() {
+test("urn:xml3d:view:projection", 5, function() {
      stop();
 
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/view.html");
@@ -86,7 +86,7 @@ test("urn:xml3d:camera:projection", 5, function() {
     customNearFar.fin(QUnit.start).done();
 });
 
-test("urn:xml3d:camera:projective", 3, function() {
+test("urn:xml3d:view:projective", 3, function() {
      stop();
 
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/view.html");

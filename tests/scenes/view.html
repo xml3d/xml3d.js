@@ -98,15 +98,15 @@
     <group transform="#t_cam">
     </group>
     <view id="view_right" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)"></view>
-    <view id="view_right_projective" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)">
-      <float4x4 name="projectiveMatrix">1.4485281705856323, 0, 0, 0, 0, 2.4142134189605713, 0, 0, 0, 0, -9.523809432983398, -1, 0, 0, -94.18809509277344, 0</float4x4>
+    <view id="view_right_projective"  model="urn:xml3d:view:projective" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)">
+      <float4x4 name="projectionMatrix">1.4485281705856323, 0, 0, 0, 0, 2.4142134189605713, 0, 0, 0, 0, -9.523809432983398, -1, 0, 0, -94.18809509277344, 0</float4x4>
     </view>
     <view id="view_left" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)">
       <float name="fovVertical">0.2</float>
       <float name="near">0.2</float>
       <float name="far">20</float>
     </view>
-    <view id="view_left_projective" model="urn:xml3d:camera:projective" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)">
+    <view id="view_left_projective" model="urn:xml3d:view:projective" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)">
     </view>
     <view id="view_top" style="transform: translate3d(0px, 10px, 0px) rotate3d(1, 0, 0, -90.0deg)">
       <float name="fovVertical">0.2</float>

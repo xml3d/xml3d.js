@@ -20,7 +20,7 @@ var PROJECTION_MATRIX_OFFSET = 32;
 /** @const */
 var ENTRY_SIZE = PROJECTION_MATRIX_OFFSET + 16;
 
-var DEFAULT_CAMERA_CONFIGURATION = { model: "urn:xml3d:camera:perspective", dataNode: null };
+var DEFAULT_CAMERA_CONFIGURATION = { model: "urn:xml3d:view:perspective", dataNode: null };
 
 /**
  *
@@ -160,9 +160,9 @@ XML3D.extend(RenderView.prototype, {
 function createCamera(configuration, scene, owner) {
 
     switch(configuration.model) {
-        case "urn:xml3d:camera:perspective":
+        case "urn:xml3d:view:perspective":
             return new CameraModels.PerspectiveCameraModel(configuration.dataNode, scene, owner);
-        case "urn:xml3d:camera:projective":
+        case "urn:xml3d:view:projective":
             return new CameraModels.ProjectiveCameraModel(configuration.dataNode, scene, owner);
         default:
             XML3D.debug.logWarning("Unknown camera model:", configuration.model);

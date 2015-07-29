@@ -11,7 +11,7 @@ var assert = require('assert');
 
 var ProjectiveCameraData = {
     "projectionMatrix": {
-        type: XC.DATA_TYPE.FLOAT4X4, 'default': mat4.perspective(mat4.create(), (45 * Math.PI / 180), 1, 0.001, 10000)
+        type: XC.DATA_TYPE.FLOAT4X4, default: mat4.perspective(mat4.create(), (45 * Math.PI / 180), 1, 0.001, 10000)
     }
 };
 
@@ -67,8 +67,9 @@ AbstractCameraModel.prototype = {
 
 
 /**
- * @param cb
  * @param dataNode
+ * @param {Scene} scene
+ * @param {RenderView} owner
  * @constructor
  * @extends AbstractCameraModel
  */

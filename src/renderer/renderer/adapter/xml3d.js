@@ -2,7 +2,6 @@ var RenderAdapter = require("./base.js");
 var Utils = require("../utils.js");
 var Events = require("../../../interface/notification.js");
 var dispatchCustomEvent = require("../../../utils/misc.js").dispatchCustomEvent;
-var getOrCreateActiveView = require("../../../utils/misc.js").getOrCreateActiveView;
 var Resource = require("../../../base/resourcemanager.js").Resource;
 
 var XML3DRenderAdapter = function (factory, node) {
@@ -189,6 +188,27 @@ XML3DRenderAdapter.prototype.getElementByRay = (function () {
         return hitObject !== null ? hitObject.node : null;
     }
 })();
+
+
+/**
+ * Returns the active view element corresponding to the given xml3d element.
+ *
+ * @param {!Object} xml3d
+ * @return {Object} the active view element
+ */
+function getOrCreateActiveView(xml3d) {
+    // try to resolve reference
+    var view = xml3d.querySelector(xml3d.activeView) || xml3d.querySelector("view");
+    if (!view) {
+        // didn't find any: create new one
+        XML3D.debug.logWarning("xml3d element has no view defined: creating one.");
+
+        view = xml3d.ownerDocument.createElement("view");
+        xml3d.appendChild(view);
+        xml3d.removeAttribute("view");
+    }
+    return view;
+};
 
 module.exports = XML3DRenderAdapter;
 

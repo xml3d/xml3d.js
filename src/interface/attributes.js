@@ -39,14 +39,15 @@ handlers.IDHandler = function(id) {
     };
 };
 
-handlers.StringAttributeHandler = function(id) {
+handlers.StringAttributeHandler = function(id, params) {
     id = id.toLowerCase();
+    var defaultValue = params ? params.defaultValue: "";
     this.desc = {
         get : function() {
-            return this.getAttribute(id) || "";
+            return this.getAttribute(id) || defaultValue;
         },
         set : function(value) {
-            this.setAttribute(id, value);
+            this.setAttribute(id, value || defaultValue);
         }
     };
 };

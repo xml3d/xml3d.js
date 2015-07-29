@@ -96,7 +96,7 @@ classInfo['xml3d'] = {
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     getRenderInterface : {m: methods.xml3dGetRenderInterface},
-    activeView : {a: handlers.StringAttributeHandler}
+    activeView : {a: handlers.StringAttributeHandler, params: {defaultValue: "view"}}
     };
 
 classInfo['compute'] = {

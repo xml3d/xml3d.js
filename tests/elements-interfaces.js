@@ -101,7 +101,7 @@ test("Reference interface tests", function() {
     e = document.createElementNS(XML3D.xml3dNS, "xml3d");
     equal(e.getAttribute("activeview"), null, "no Attribute set");
     // Set via interface
-    equal(e.activeView, "", "No Attribute set.");
+    equal(e.activeView, "view", "If no attribute is set, the interface returns 'view').");
 
     e.activeView = "myxml3d";
     equal(e.activeView, "myxml3d", "xml3d.activeView = 'myxml3d'.");

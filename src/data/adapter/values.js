@@ -70,7 +70,7 @@ ValueDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, 
         this.xflowInputNode.paramName = newValue ? this.node.name : null;
     }else if (name == "sys"){
     	var parentDataAdapter = this.factory.getAdapter(this.node.parentNode);
-    	var filterMapping = parentDataAdapter.getXflowNode().hasSystemDataNode().filterMapping;
+    	var filterMapping = parentDataAdapter.getXflowNode()._children[0]._children[1]._filterMapping;
     	if (!this.node.attributes["sys"]){
     		//If the sys flag is removed we update the filter in system data node
 	    	filterMapping.removeName(filterMapping._names.indexOf(this.node.name));

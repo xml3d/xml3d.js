@@ -23,6 +23,8 @@ var Mapping = function(){
  * @returns {?C.Mapping}
  */
 Mapping.parse = function(string, dataNode){
+	if (!string)
+		return null;
     string = string.trim();
     var results = string.trim().match(orderMappingParser);
     if(results)

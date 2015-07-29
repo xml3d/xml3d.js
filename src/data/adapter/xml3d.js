@@ -39,17 +39,15 @@ XML3DDataAdapter.prototype.init = function()
 	var systemDataNodeURI = this.node.getAttribute("sys");
 	if (systemDataNodeURI){
 		var systemDataNodeHandler = this.getAdapterHandle(systemDataNodeURI);
-		//TODO(RF) : Should I add the whole data node or should iterate over the children in user defined node and add the children?
-		this.xflowDataNode.appendChild(systemDataNodeHandler.adapter.getXflowNode());
+		var xflowDataNode = new DataNode(false); // User defined system data node
+		xflowDataNode.sourceNode = systemDataNodeHandler.adapter.getXflowNode();
+		this.xflowDataNode.appendChild(xflowDataNode);
 	}
 	
 };
 
 XML3DDataAdapter.prototype.setDefaultValues = function(){
 	var xflowDataNode = new DataNode(false); // system data node
-    xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
-    xflowDataNode.userData = this.node;
-
     
     var inputNode = new InputNode();
     inputNode.name="time";

@@ -1,5 +1,6 @@
 var BaseDataAdapter = require("./base.js");
 var DataNode = require("../../xflow/interface/graph.js").DataNode;
+var Resource = require("../../base/resourcemanager.js").Resource;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
 var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
@@ -34,7 +35,7 @@ DataAdapter.prototype.init = function () {
 	}
     
     //get xml3d data adapter
-    var systemDataNode= this.factory.getAdapter(xml3dNode).xflowDataNode;
+    var systemDataAdapter= this.factory.getAdapter(xml3dNode);
 
     this.xflowDataNode = new DataNode(false);
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
@@ -48,7 +49,7 @@ DataAdapter.prototype.init = function () {
         this.xflowDataNode.setFilter(this.node.getAttribute("filter"));
         updateCompute(this);
     }
-    recursiveDataAdapterConstruction(this, systemDataNode);
+    recursiveDataAdapterConstruction(this, systemDataAdapter);
 };
 
 DataAdapter.prototype.updateAdapterHandle = function(key, url) {
@@ -101,7 +102,7 @@ function recursiveDataNodeAttrInit(parentNode) {
     }
 }
 
-function recursiveDataAdapterConstruction(adapter, systemDataNode) {
+function recursiveDataAdapterConstruction(adapter, systemDataAdapter) {
     /**
      *
      * <data> this is artificial and not visible
@@ -113,26 +114,15 @@ function recursiveDataAdapterConstruction(adapter, systemDataNode) {
         </data>
       </data>
      */
-	var filterNames = [];
+	var filterNames = []; // We store the node names with sys flag set
 	var xflowDataNode = new DataNode(false); // Data node to keep the visible dom nodes
+	
     for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
-    	xflowDataNode.appendChild(adapter.factory.getAdapter(child).getXflowNode());
-    	//Here we check for data nodes with sys flag set
-    	if (child.sys != undefined){
-    	    //Check if a system parameter with this name exists
-            // TODO(ksons): Use Xflow functionality to query output
-    	    if (systemDataNode.getChildByName(child.name)) {
-        		filterNames.push(child.name);
-            } else {
-                XML3D.debug.logWarning("Parameter "+ child.name + " doesn't exist in global parameters!");
-            }
-    	}
-    	else{
-	        var subadapter = adapter.factory.getAdapter(child);
-	        if (subadapter) {
-	            if (subadapter.getXflowNode) {
-	                adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
-	            } else if (subadapter.getScriptType) {
+        var subadapter = adapter.factory.getAdapter(child);
+        if (subadapter){
+        	if (subadapter.getXflowNode){
+                	xflowDataNode.appendChild(subadapter.getXflowNode());
+        	}else if (subadapter.getScriptType) {
 	                var scriptId = subadapter.node.name;
 	                if (!scriptId) {
 	                    XML3D.debug.logError("Parsing error: Externally referenced operators must have a 'name' attribute matching the name they were registered with. ", subadapter.node);
@@ -144,33 +134,53 @@ function recursiveDataAdapterConstruction(adapter, systemDataNode) {
 	                }
 	                adapter.xflowDataNode.setLoading(true);
 	            }
+            //Here we check for data nodes with sys flag set
+        	if (child.sys != undefined){
+        	    //Check if a system parameter with this name exists
+        	    if (systemDataAdapter.xflowDataNode._children[0].getOutputNames().indexOf(child.name)>-1) {
+            		filterNames.push(child.name);
+                } else {
+                    XML3D.debug.logWarning("Parameter "+ child.name + " doesn't exist in global parameters!");
+                }
+        	}
+        }
 
-	        }
-    	}
-    }
-
-    if(filterNames.length) {     // TODO: Do this in anyway, sync filter
-    	var filter = "keep("+filterNames.join(",")+")";
-    	var sysData = new DataNode(false);
-    	sysData.systemDataAdapter = true;
-    	sysData.sourceNode = systemDataNode;
-    	sysData.systemDataAdapter = true;
-    	sysData.setFilter(filter);
-    	
-    	var sysDataAndUserData = new DataNode(false);
-    	sysDataAndUserData.appendChild(xflowDataNode);
-    	sysDataAndUserData.appendChild(sysData);
-    	xflowDataNode.appendChild(sysData);
-    	
-    	XML3D.debug.assert(!adapter.getXflowNode().hasSystemDataNode());
-        adapter.xflowDataNode.appendChild(sysDataAndUserData);
     }
     
+    //check if this node is the user defined system node, then we should not add system node to it
+    var userDefinedSystemDataUri = Resource.getAbsoluteURI( systemDataAdapter.node.ownerDocument.URL, systemDataAdapter.node.getAttribute("sys"));
+    if (userDefinedSystemDataUri && adapter.node.getAttribute("id") == userDefinedSystemDataUri.fragment){
+    	adapter.xflowDataNode._children = xflowDataNode._children;
+    }
+    else{
+    	addSystemNodeToAdapter(filterNames,adapter,systemDataAdapter.xflowDataNode,xflowDataNode);
+    }
     // Passes _platform values to children nodes starting from the node
     // where these attributes are first defined
     if (adapter.xflowDataNode._platform !== null) {
         recursiveDataNodeAttrInit(adapter.getXflowNode());
     }
+}
+
+function addSystemNodeToAdapter(filterNames,adapter,systemDataNode,xflowDataNode){
+	
+	var filter = "keep("+filterNames.join(",")+")";
+
+	var sysData = new DataNode(false);
+	sysData.sourceNode = systemDataNode;
+	sysData.systemDataAdapter = true;
+	sysData.setFilter(filter);
+
+	
+	var sysDataAndUserData = new DataNode(false);
+	sysDataAndUserData.appendChild(xflowDataNode);
+	sysDataAndUserData.appendChild(sysData);
+
+	if (adapter.getXflowNode()._children.length){
+		XML3D.debug.assert(!adapter.getXflowNode()._children[0]._children[1].systemDataAdapter);
+	}
+    adapter.xflowDataNode.appendChild(sysDataAndUserData);
+    return;
 }
 
 /**

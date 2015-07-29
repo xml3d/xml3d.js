@@ -95,6 +95,7 @@ XML3D.extend(GLScene.prototype, {
             this.updateLightParameters();
             this.lights.lightValueChanged();
         }
+        this.updateUserDefinedSystemNode();
         this.setRendererDependentData();
         this.updateObjectsForRendering();
 
@@ -259,6 +260,13 @@ XML3D.extend(GLScene.prototype, {
     
     setRendererDependentData: function(){
     },
+    updateUserDefinedSystemNode:function (){
+    	var systemDataNodeURI = this.systemDataAdapter.node.getAttribute("sys");
+    	if (systemDataNodeURI){
+    		var systemDataNodeHandler = this.systemDataAdapter.getAdapterHandle(systemDataNodeURI);
+    		this.systemDataAdapter.xflowDataNode._children[1]._sourceNode = systemDataNodeHandler.adapter.xflowDataNode;
+    	}
+    }
 });
 module.exports = GLScene;
 

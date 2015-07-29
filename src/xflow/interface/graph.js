@@ -515,17 +515,6 @@ DataNode.prototype.removeChild = function(child){
     Base._flushResultCallbacks();
 };
 /**
- * @param {InputNode|null} child
- */
-DataNode.prototype.getChildByName = function(name){
-	for (var i=0; i<this._children.length; i++){
-		if (this._children[i].name == name)
-			return this._children[i];
-	}
-    return null;
-};
-
-/**
  * @param {GraphNode} child
  * @param {GraphNode} beforeNode
  */
@@ -604,7 +593,7 @@ DataNode.prototype.setPlatform = function(platformSrc) {
 /**
  * @const
  */
-var filterParser = /^([A-Za-z\s]*)\(([^()]+)\)$/;
+var filterParser = /^([A-Za-z\s]*)\(([^()]*)\)$/;
 
 /**
  * Set filter by string

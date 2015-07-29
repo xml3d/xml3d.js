@@ -27,7 +27,7 @@ test("&lt;xml3d&gt; interface test", function() {
     equal(typeof e.getElementByRay, "function", "getElementByRay is of type 'function'");
     equal(typeof e.getLocalBoundingBox, "function", "getLocalBoundingBox is of type 'function'");
     equal(typeof e.getWorldBoundingBox, "function", "getWorldBoundingBox is of type 'function'");
-    equal(typeof e.activeView, "string", "activeView is of type 'string'");
+    equal(typeof e.view, "string", "view is of type 'string'");
 });
 test("&lt;data&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "data");

@@ -8,7 +8,7 @@
 </head>
 <body>
 <div>
-  <xml3d id="myxml3d" style="width: 500px; height: 300px; background-color: black;" activeview="#view_right">
+  <xml3d id="myxml3d" style="width: 500px; height: 300px; background-color: black;" view="#view_right">
     <defs>
       <material id="material_front" script="urn:xml3d:material:phong">
         <float3 name="diffuseColor">0 0 1</float3>
@@ -98,7 +98,7 @@
     <group transform="#t_cam">
     </group>
     <view id="view_right" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)"></view>
-    <view id="view_right_projective"  model="urn:xml3d:view:projective" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)">
+    <view id="view_right_projective" model="urn:xml3d:view:projective" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)">
       <float4x4 name="projectionMatrix">1.4485281705856323 0 0 0 0 2.4142134189605713 0 0 0 0 -9.523809432983398 -1 0 0 -94.18809509277344 0</float4x4>
     </view>
     <view id="view_left" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)">
@@ -150,13 +150,14 @@
 <script type="text/javascript">
   function changeView(which) {
     if(!which) {
-      document.getElementById("myxml3d").removeAttribute("activeview");
+      document.getElementById("myxml3d").removeAttribute("view");
     } else {
-      document.getElementById("myxml3d").activeView = "#view_" + which;
+      document.getElementById("myxml3d").view = "#view_" + which;
     }
 
   }
 </script>
+
 
 
 

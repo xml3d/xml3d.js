@@ -10,109 +10,87 @@ var XML3DRenderAdapter = function (factory, node) {
     this.firstLoadFired = false;
 };
 XML3D.createClass(XML3DRenderAdapter, RenderAdapter, {
-    updateActiveViewAdapter: function () {
-        var href = this.node.getAttribute("activeView");
-        if (href) {
-            this.connectAdapterHandle("activeView", this.getAdapterHandle(href));
-        } else {
-            this.disconnectAdapterHandle("activeView");
-        }
-    },
 
-    setViewAdapter: function (adapter) {
-        adapter = adapter || this.getConnectedAdapter("activeView");
-        if (!(adapter && adapter.getRenderNode)) {
-            var viewElement = getOrCreateActiveView(this.node);
-            adapter = this.factory.getAdapter(viewElement);
-        }
+    activeViewChanged: function () {
+        var viewElement = getOrCreateActiveView(this.node);
+        var adapter = this.factory.getAdapter(viewElement);
         this.factory.getScene().setActiveView(adapter.getRenderNode());
     },
 
-    attributeChangedCallback: function(name, oldValue, newValue) {
-        if(name.toLowerCase() == "activeview") {
-            this.updateActiveViewAdapter();
-            this.setViewAdapter();
+    attributeChangedCallback: function (name, oldValue, newValue) {
+        if (name == "view") {
+            this.activeViewChanged();
         }
     },
 
-    dispose: function () {
-        this.clearAdapterHandles();
-    }
-});
-
-XML3DRenderAdapter.prototype.notifyChanged = function (evt) {
-
-    switch (evt.type) {
-        case Events.ADAPTER_HANDLE_CHANGED:
-            this.setViewAdapter(evt.adapter);
-            return;
-        case Events.NODE_INSERTED:
-            // This also initializes the children
-            this.initElement(evt.mutation.target);
-            return;
-        case Events.NODE_REMOVED:
-            // Handled in removed node
-            return;
-    }
-};
-
-/* Interface methods */
-
-/*
- * This function is called when scene DOM is loaded and all adapters are attached
- */
-XML3DRenderAdapter.prototype.onConfigured = function () {
-    this.updateActiveViewAdapter();
-    this.setViewAdapter();
-
-    // emit load event when all resources currently loading are completed
-    var callback = this.onLoadComplete.bind(this);
-    // register callback for canvasId == 0 i.e. global resources
-    Resource.addLoadCompleteListener(0, callback);
-    // register callback for canvasId of this node
-    Resource.addLoadCompleteListener(this.factory.canvasId, callback);
-    this.onLoadComplete();
-};
-
-XML3DRenderAdapter.prototype.onLoadComplete = function (canvasId) {
-    if (Resource.isLoadComplete(0) && Resource.isLoadComplete(this.factory.canvasId)) {
-        this.fireLoadEventAfterDraw = true;
-    }
-};
-
-XML3DRenderAdapter.prototype.onFrameDrawn = function () {
-    if (this.fireLoadEventAfterDraw) {
-        this.fireLoadEventAfterDraw = false;
-        this.firstLoadFired = true;
-        dispatchCustomEvent(this.node, 'load', false, true, null);
-    }
-};
-
-
-XML3DRenderAdapter.prototype.getComplete = function () {
-    if (this.fireLoadEventAfterDraw) return false;
-    if (!this.firstLoadFired) return false;
-    return Resource.isLoadComplete(0) && Resource.isLoadComplete(this.factory.canvasId);
-};
-
-XML3DRenderAdapter.prototype.getWorldBoundingBox = function () {
-    var bbox = new XML3D.Box();
-    Array.prototype.forEach.call(this.node.childNodes, function (c) {
-        if (c.getWorldBoundingBox) {
-            bbox.extend(c.getWorldBoundingBox());
+    notifyChanged: function (evt) {
+        switch (evt.type) {
+            case Events.NODE_INSERTED:
+                // This also initializes the children
+                this.initElement(evt.mutation.target);
+                return;
         }
-    });
-    return bbox;
-};
+    },
+
+
+    /*
+     * This function is called when scene DOM is loaded and all adapters are attached
+     */
+    onConfigured: function () {
+        this.activeViewChanged();
+
+        // emit load event when all resources currently loading are completed
+        var callback = this.onLoadComplete.bind(this);
+        // register callback for canvasId == 0 i.e. global resources
+        Resource.addLoadCompleteListener(0, callback);
+        // register callback for canvasId of this node
+        Resource.addLoadCompleteListener(this.factory.canvasId, callback);
+        this.onLoadComplete();
+    },
+
+    /* Interface methods */
+
+    onLoadComplete: function (canvasId) {
+        if (Resource.isLoadComplete(0) && Resource.isLoadComplete(this.factory.canvasId)) {
+            this.fireLoadEventAfterDraw = true;
+        }
+    },
+
+    onFrameDrawn: function () {
+        if (this.fireLoadEventAfterDraw) {
+            this.fireLoadEventAfterDraw = false;
+            this.firstLoadFired = true;
+            dispatchCustomEvent(this.node, 'load', false, true, null);
+        }
+    },
+
+
+    getComplete: function () {
+        if (this.fireLoadEventAfterDraw) return false;
+        if (!this.firstLoadFired) return false;
+        return Resource.isLoadComplete(0) && Resource.isLoadComplete(this.factory.canvasId);
+    },
+
+    getWorldBoundingBox: function () {
+        var bbox = new XML3D.Box();
+        Array.prototype.forEach.call(this.node.childNodes, function (c) {
+            if (c.getWorldBoundingBox) {
+                bbox.extend(c.getWorldBoundingBox());
+            }
+        });
+        return bbox;
+    }
+})
+;
 //XML3D element is the root with no transform of its own so by definition it's always in world space
 XML3DRenderAdapter.prototype.getLocalBoundingBox = XML3DRenderAdapter.prototype.getWorldBoundingBox;
 
 /**
  *
- * @param x number x coordinate in screen space
- * @param y number y coordinate in screen space
- * @param hitPoint? XML3D.Vec3
- * @param hitNormal? XML3D.Vec3
+ * @param {number} x x coordinate in screen space
+ * @param {number} y y coordinate in screen space
+ * @param {XML3D.Vec3?} hitPoint
+ * @param {XML3D.Vec3?} hitNormal
  * @returns {*}
  */
 XML3DRenderAdapter.prototype.getElementByPoint = function (x, y, hitPoint, hitNormal) {
@@ -198,7 +176,7 @@ XML3DRenderAdapter.prototype.getElementByRay = (function () {
  */
 function getOrCreateActiveView(xml3d) {
     // try to resolve reference
-    var view = xml3d.querySelector(xml3d.activeView) || xml3d.querySelector("view");
+    var view = xml3d.querySelector(xml3d.view) || xml3d.querySelector("view");
     if (!view) {
         // didn't find any: create new one
         XML3D.debug.logWarning("xml3d element has no view defined: creating one.");

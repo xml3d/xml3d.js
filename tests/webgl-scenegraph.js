@@ -42,13 +42,13 @@ test("Change active view via script", 6, function () {
 
     var test = frameLoaded.then(function (doc) {
         var s = doc.getElementById("xml3DElem");
-        equal(s.activeView, "#defaultView", "Initial active view is #default"); // 3
+        equal(s.view, "#defaultView", "Initial active view is #default"); // 3
         var v = doc.getElementById("defaultView");
         var m = XML3D.math.mat4.create();
         QUnit.closeMatrix(v.getViewMatrix(), XML3D.math.mat4.translate(m, m, [0, 0, -3]), EPSILON, "Check view matrix"); // 4
-        s.activeView = "#viewOrientationTest";
+        s.view = "#viewOrientationTest";
         XML3D.flushDOMChanges();
-        equal(s.activeView, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 5
+        equal(s.view, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 5
         var h = getHandler(s);
         ok(h.renderer.needsDraw, "Redraw required");
         return s;
@@ -193,7 +193,7 @@ test("Simple add/remove transformed group with mesh", 17, function () {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
-    x.setAttribute("activeView", "#identView");
+    x.setAttribute("view", "#identView");
     var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
     mesh.setAttribute("id", "addedMesh");
     mesh.setAttribute("src", "#meshdata");
@@ -424,7 +424,7 @@ test("Camera with group transforms", 6, function () {
 
         //Simple test of camera orientation to check that view matrix is built correctly
         camtest.style.display = 'inherit';
-        scene.setAttribute("activeView", "#viewOrientationTest");
+        scene.setAttribute("view", "#viewOrientationTest");
 
         return scene;
     }).then(promiseSceneRendered).then(function (s) {
@@ -434,7 +434,7 @@ test("Camera with group transforms", 6, function () {
     }).then(function (s) {
         camtest.style.display = 'none';
         group5.style.display = 'inherit';
-        s.setAttribute("activeView", "#transformTestView");
+        s.setAttribute("view", "#transformTestView");
 
         return s;
     }).then(promiseSceneRendered).then(function (s) {
@@ -560,7 +560,7 @@ test("Camera setDirection/upVector", 2, function () {
 
         camtest.style.display = 'inherit';
         view.setAttribute("style", "transform: rotate3d(0, 0, 1, 0deg)");
-        scene.setAttribute("activeView", "#viewOrientationTest");
+        scene.setAttribute("view", "#viewOrientationTest");
 
         return scene;
     }).then(promiseSceneRendered).then(function (s) {

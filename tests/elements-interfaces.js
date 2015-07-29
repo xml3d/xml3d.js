@@ -99,20 +99,20 @@ test("String interface tests", function() {
 
 test("Reference interface tests", function() {
     e = document.createElementNS(XML3D.xml3dNS, "xml3d");
-    equal(e.getAttribute("activeview"), null, "no Attribute set");
+    equal(e.getAttribute("view"), null, "no Attribute set");
     // Set via interface
-    equal(e.activeView, "view", "If no attribute is set, the interface returns 'view').");
+    equal(e.view, "view", "If no attribute is set, the interface returns 'view').");
 
-    e.activeView = "myxml3d";
-    equal(e.activeView, "myxml3d", "xml3d.activeView = 'myxml3d'.");
-    equal(e.getAttribute("activeview"), "myxml3d", "getAttribute = 'myxml3d'.");
-    e.activeView = true;
-    equal(e.activeView, "true", "xml3d.activeView == 'true'.");
-    equal(e.getAttribute("activeview"), "true", "getAttribute = 'true'.");
+    e.view = "myxml3d";
+    equal(e.view, "myxml3d", "xml3d.view = 'myxml3d'.");
+    equal(e.getAttribute("view"), "myxml3d", "getAttribute = 'myxml3d'.");
+    e.view = true;
+    equal(e.view, "true", "xml3d.view == 'true'.");
+    equal(e.getAttribute("view"), "true", "getAttribute = 'true'.");
 
     // Set via attribute
-    e.setAttribute("activeview", "#myView");
-    equal(e.activeView, "#myView", "Value set via setAttribute to 123.");
+    e.setAttribute("view", "#myView");
+    equal(e.view, "#myView", "Value set via setAttribute to 123.");
 });
 
 test("Float interface tests (XHTML: Case sensitive)", function() {

@@ -262,7 +262,7 @@ module("Multiple XML3D nodes", {
     }
 });
 
-test("Default view with no activeView set", 3, function() {
+test("Default view with no view set", 3, function() {
     var x = this.doc.getElementById("xml3DElem2"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
 

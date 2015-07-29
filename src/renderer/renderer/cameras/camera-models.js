@@ -21,7 +21,7 @@ var PerspectiveCameraData = {
     "near": {type: XC.DATA_TYPE.FLOAT3, 'default': undefined},
     "far": {type: XC.DATA_TYPE.FLOAT3, 'default': undefined},
     "aspect": {type: XC.DATA_TYPE.FLOAT, 'default': undefined},
-    "boundingBox": {type: XC.DATA_TYPE.FLOAT, 'default': undefined}
+    "worldBoundingBox": {type: XC.DATA_TYPE.FLOAT, 'default': undefined}
 };
 
 /**
@@ -130,7 +130,7 @@ XML3D.createClass(PerspectiveCameraModel, AbstractCameraModel, {
         var aspect = result.getOutputData("aspect").getValue()[0];
 
         if (near == undefined || far == undefined) {
-            var boundingBox = new XML3D.Box(result.getOutputData("boundingBox").getValue())
+            var boundingBox = new XML3D.Box(result.getOutputData("worldBoundingBox").getValue())
             var nearFar = this.owner.getClippingPlanes(boundingBox);
 
             near = near == undefined ? nearFar.near : near;

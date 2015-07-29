@@ -4,7 +4,7 @@ var XC = require("../../../xflow/interface/constants.js");
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
 var InputNode = require("../../../xflow/interface/graph.js").InputNode;
 
-var SceneParameters = ["width", "height", "aspect", "boundingBox"];
+var SceneParameters = ["width", "height", "aspect", "worldBoundingBox"];
 
 /**
  *
@@ -15,7 +15,7 @@ var SceneData = function() {
 
     var width = createInputNode(this.data, "width", XC.DATA_TYPE.FLOAT, new Float32Array([600]));
     var height = createInputNode(this.data, "height", XC.DATA_TYPE.FLOAT, new Float32Array([800]));
-    var boundingBox = createInputNode(this.data, "boundingBox", XC.DATA_TYPE.FLOAT, new XML3D.Box().data);
+    var worldBoundingBox = createInputNode(this.data, "worldBoundingBox", XC.DATA_TYPE.FLOAT, new XML3D.Box().data);
 
     var request = new ComputeRequest(this.data, SceneParameters, null);
     var result = this.result = request.getResult();
@@ -23,12 +23,11 @@ var SceneData = function() {
     defineFloatProperty(this, "width", result, width);
     defineFloatProperty(this, "height", result, height);
 
-    Object.defineProperty(this, "boundingBox", {
+    Object.defineProperty(this, "worldBoundingBox", {
         get: function () {
-            return result.getOutputData("boundingBox").getValue();
+            return result.getOutputData("worldBoundingBox").getValue();
         }, set: function (value) {
-            boundingBox.data.setValue(value);
-
+            worldBoundingBox.data.setValue(value);
         }
     });
 

@@ -14,7 +14,7 @@ var XC = require("../../../xflow/interface/constants.js");
 var URI = require("../../../utils/uri.js").URI;
 var EventEmitter = require('events').EventEmitter;
 var mat4 = require("gl-matrix").mat4;
-
+var assert = require("assert");
 /**
  * @extends {EventEmitter}
  * @constructor
@@ -58,8 +58,7 @@ XML3D.createClass(Scene, EventEmitter, {
      */
     setActiveView: function (view) {
         if (view != this.activeView) {
-            if (!view)
-                throw new Error("Active view must not be null");
+            assert(view, "Active view must not be null");
             this.activeView = view;
             this.emit(C.EVENT_TYPE.VIEW_CHANGED, this.activeView);
         }
@@ -106,7 +105,7 @@ XML3D.createClass(Scene, EventEmitter, {
     updateBoundingBox: function () {
         if (this.rootNode.boundingBoxDirty) {
             this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
-            this.data.boundingBox = this.boundingBox.data;
+            this.data.worldBoundingBox = this.boundingBox.data;
         }
     },
 

@@ -53,7 +53,10 @@ XML3D.extend(ShaderClosure.prototype, {
     addDirectivesToSource: function (directives, source) {
         var header = "";
         directives.forEach(function (v) {
-            header += "#define " + v + "\n";
+            if (v[0] === "#")
+                header += v + "\n";
+            else
+                header += "#define " + v + "\n";
         });
         return header + "\n" + source;
     },

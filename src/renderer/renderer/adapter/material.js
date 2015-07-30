@@ -40,26 +40,26 @@ XML3D.createClass(MaterialRenderAdapter, RenderAdapter,  {
     updateMaterialModel: function () {
         this._materialModel = null;
 
-        var uri = this.getMaterialScript();
+        var uri = this.getMaterialModel();
         if (uri.scheme == "urn") {
-            this.disconnectAdapterHandle("script");
+            this.disconnectAdapterHandle("model");
             this._materialModel = { "type": "urn", "urn": uri };
             return;
         }
 
-        this.connectAdapterHandle("script", this.getAdapterHandle(uri, "data", 0));
-        var adapter = this.getConnectedAdapter('script');
+        this.connectAdapterHandle("model", this.getAdapterHandle(uri, "data", 0));
+        var adapter = this.getConnectedAdapter("model");
         if (adapter && adapter.getScriptType) {
             this._materialModel = { type: adapter.getScriptType(), script: adapter.getScript() };
         }
     },
 
-    getMaterialScript: function () {
-        return new URI(this.node.getAttribute("script"));
+    getMaterialModel: function () {
+        return new URI(this.node.getAttribute("model"));
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
-        if (name == "script") {
+        if (name == "model") {
             this.updateMaterialConfiguration();
         }
     },

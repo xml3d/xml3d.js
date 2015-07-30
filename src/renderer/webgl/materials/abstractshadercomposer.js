@@ -81,14 +81,14 @@ XML3D.createClass(AbstractShaderComposer, EventEmitter, {
     onShaderInfoChanged: function (shaderInfo) {
         this.setShaderInfo(shaderInfo);
         this.setShaderRecompile();
-        this.context.requestRedraw("Shader script changed");
+        this.context.requestRedraw("Material model changed");
     },
 
     onShaderRequestChange: function (request, changeType) {
         this.dataChanged = true;
         if (changeType == XC.RESULT_STATE.CHANGED_STRUCTURE)
             this.setShaderRecompile();
-        this.context.requestRedraw("Shader data changed");
+        this.context.requestRedraw("Material data changed");
     },
 
     /**

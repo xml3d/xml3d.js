@@ -279,7 +279,7 @@ classInfo['material'] = {
     getProtoInfo: {m: methods.XML3DShaderProviderTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DShaderProviderTypeIsOutputConnected},
     getResult: {m: methods.XML3DShaderProviderTypeGetResult},
-    script: {a: handlers.StringAttributeHandler},
+    model: {a: handlers.StringAttributeHandler},
     src: {a: handlers.StringAttributeHandler}
     };
 /**

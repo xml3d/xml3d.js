@@ -49,11 +49,11 @@ XML3D.createClass(URNShaderComposer, AbstractShaderComposer, {
     setShaderScript: function (uri) {
 
         if (!uri) {
-            XML3D.debug.logError("Shader has no script attached: ", this.adapter.node);
+            XML3D.debug.logError("Material has no script attached: ", this.adapter.node);
             return;
         }
         if (uri.scheme != "urn") {
-            XML3D.debug.logError("Shader script reference should start with an URN: ", this.adapter.node);
+            XML3D.debug.logError("Material model reference should start with an URN: ", this.adapter.node);
             return;
         }
         var descriptor = getShaderDescriptor(uri.path);

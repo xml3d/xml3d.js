@@ -17,40 +17,40 @@
                <transform id="t5" translation="0 -2 0"/>
                <transform id="t6" translation="2.5 -2 0"/>
                
-               <material id="material_diffuse" script="urn:xml3d:material:diffuse">
+               <material id="material_diffuse" model="urn:xml3d:material:diffuse">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
                   <float name="ambientIntensity">0.8</float>
                </material>
-               <material id="material_diffuse_texture" script="urn:xml3d:material:diffuse">
+               <material id="material_diffuse_texture" model="urn:xml3d:material:diffuse">
                   <float3 name="diffuseColor">0.5 1 1</float3>
                   <float name="ambientIntensity">0.5</float>
                   <texture id="tex1" name="diffuseTexture">
                     <img id="tex1img" src="textures/yellow.png"/>
                   </texture>
                </material>
-               <material id="material_diffuse_vertexcolors" script="urn:xml3d:material:diffuse">
+               <material id="material_diffuse_vertexcolors" model="urn:xml3d:material:diffuse">
                   <bool name="useVertexColor">true</bool>
                   <float name="ambientIntensity">0.9</float>
                   <float3 name="diffuseColor">0.4 0.8 0.8</float3>
                </material>
-               <material id="material_phong" script="urn:xml3d:material:phong">
+               <material id="material_phong" model="urn:xml3d:material:phong">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
                   <float name="ambientIntensity">0.8</float>
                </material>
-               <material id="material_phong_texture" script="urn:xml3d:material:phong">
+               <material id="material_phong_texture" model="urn:xml3d:material:phong">
                   <float3 name="diffuseColor">0.5 1 1</float3>
                   <float name="ambientIntensity">0.5</float>
                   <texture id="tex1" name="diffuseTexture">
                     <img id="tex1img" src="textures/yellow.png"/>
                   </texture>
                </material>
-               <material id="material_phong_vertexcolors" script="urn:xml3d:material:phong">
+               <material id="material_phong_vertexcolors" model="urn:xml3d:material:phong">
                   <bool name="useVertexColor">true</bool>
                   <float name="ambientIntensity">0.9</float>
                   <float3 name="diffuseColor">0.4 0.8 0.8</float3>
                </material>
 
-               <data id="mySimpleMesh" type="triangles">
+               <data id="mySimpleMesh">
                   <int name="index">0 1 2 1 2 3</int>
                   <float3 name="position">-1.0 -1.0 -10.0
                          1.0 -1.0 -10.0

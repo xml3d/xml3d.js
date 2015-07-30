@@ -8,7 +8,7 @@ module("Adapter Handles", {
             that.window = document.getElementById("xml3dframe").contentWindow;
             start();
         };
-        loadDocument("scenes/adapter-handles.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/adapter-handles.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -28,17 +28,17 @@ test("Get Local Adapters", function() {
 
     ok(handle.hasAdapter(), "Handle of #transform1 has 'data' adapter ");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    equal(handle.getAdapter().node.nodeName, "transform", "Adapter adapts transform");
+    equal(handle.getAdapter().node.localName, "transform", "Adapter adapts transform");
 
     handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#data1", "data");
     ok(handle.hasAdapter(), "Handle of #data1 has 'data' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    equal(handle.getAdapter().node.nodeName, "data", "Adapter adapts data");
+    equal(handle.getAdapter().node.localName, "data", "Adapter adapts data");
 
     handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#material1", "data");
     ok(handle.hasAdapter(), "Handle of #material1 has 'data' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    equal(handle.getAdapter().node.nodeName, "material", "Adapter adapts material");
+    equal(handle.getAdapter().node.localName, "material", "Adapter adapts material");
 
     handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#material1", 'webgl', canvasId);
     ok(handle.hasAdapter(), "Handle of #material1 has 'webgl' adapter");
@@ -54,7 +54,7 @@ test("Get Local Adapters", function() {
     handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", "data");
     ok(handle.hasAdapter(), "Handle of #mesh1 has 'data' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    equal(handle.getAdapter().node.nodeName, "mesh", "Adapter adapts mesh");
+    equal(handle.getAdapter().node.localName, "mesh", "Adapter adapts mesh");
 
     handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", 'webgl', canvasId);
     ok(handle.hasAdapter(), "Handle of #mesh1 has 'webgl' adapter");

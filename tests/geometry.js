@@ -7,7 +7,7 @@ module("Geometry", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/points.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/points.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -121,7 +121,7 @@ module("Geometry", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/lines.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/lines.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

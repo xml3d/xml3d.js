@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<xml3d xmlns="http://www.xml3d.org/2009/xml3d" >
-    <material id="flatgreen2" script="urn:xml3d:material:flat">
-        <float3 name="diffuseColor">0 1 0</float3>
-    </material>
-    <material id="wood" script="urn:xml3d:material:flat">
-        <float3 name="diffuseColor">1 1 0</float3>
-    </material>
+<xml3d xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+        <material id="flatgreen2" model="urn:xml3d:material:flat">
+            <float3 name="diffuseColor">0 1 0</float3>
+        </material>
+        <material id="wood" model="urn:xml3d:material:flat">
+            <float3 name="diffuseColor">1 1 0</float3>
+        </material>
+    </defs>
 </xml3d>

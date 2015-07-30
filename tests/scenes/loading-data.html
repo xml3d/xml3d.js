@@ -5,33 +5,34 @@
   <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
-  <xml3d id="xml3DElem" width="500px" height="300px" >
+  <xml3d id="xml3DElem" width="500px" height="300px">
       <defs>
 
-           <data id="inlineData" >
+           <data id="inlineData">
                 <int name="index">0 1 2 1 2 3</int>
                 <float3 name="position">-1.0 -1.0 -10.0  1.0 -1.0 -10.0  -1.0 1.0 -10.0  1.0 1.0 -10.0</float3>
                 <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
            </data>
 
-           <material id="testmaterial" script="urn:xml3d:material:phong" src="#originalmaterialData"></material>
+           <material id="testmaterial" src="#originalmaterialData" model="urn:xml3d:material:phong"></material>
 
-           <data id="originalmaterialData" >
-               <float3 name="diffuseColor"      >1.0 0.5 0.5</float3>
-               <float  name="ambientIntensity"  >0.5</float>
-               <texture name="diffuseTexture" id="testTex" >
-                   <img id="testImg" src="textures/blue.png" />
+           <data id="originalmaterialData">
+               <float3 name="diffuseColor">1.0 0.5 0.5</float3>
+               <float name="ambientIntensity">0.5</float>
+               <texture name="diffuseTexture" id="testTex">
+                   <img id="testImg" src="textures/blue.png">
                </texture>
            </data>
 
-          <data id="swapData" >
-               <texture name="diffuseTexture" id="testTex" >
-                   <img id="swapImg" src="textures/blue.png" />
+          <data id="swapData">
+               <texture name="diffuseTexture" id="testTex">
+                   <img id="swapImg" src="textures/blue.png">
                </texture>
            </data>
 
        </defs>
         <mesh type="triangles" id="testMesh" material="#textmaterial" src="#inlineData"></mesh>
     </xml3d>
-</body>
-</html>
+
+
+</body></html>

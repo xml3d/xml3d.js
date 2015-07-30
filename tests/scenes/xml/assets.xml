@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <xml3d xmlns="http://www.xml3d.org/2009/xml3d" >
     <defs>
-    <material id="redmaterial" script="urn:xml3d:material:flat">
+    <material id="redmaterial" model="urn:xml3d:material:flat">
         <float3 name="diffuseColor">1 0.5 0.5</float3>
         <float name="ambientIntensity">1.0</float>
     </material>
-    <material id="pinkmaterial" script="urn:xml3d:material:flat">
+    <material id="pinkmaterial" model="urn:xml3d:material:flat">
         <float3 name="diffuseColor">1 0.5 1</float3>
         <float name="ambientIntensity">1.0</float>
     </material>
-    <material id="bluematerial" script="urn:xml3d:material:flat">
+    <material id="bluematerial" model="urn:xml3d:material:flat">
         <float3 name="diffuseColor">0 0 1</float3>
         <float name="ambientIntensity">1.0</float>
     </material>
-    <material id="greenmaterial" script="urn:xml3d:material:flat">
+    <material id="greenmaterial" model="urn:xml3d:material:flat">
         <float3 name="diffuseColor">0 1 0</float3>
         <float name="ambientIntensity">1.0</float>
     </material>

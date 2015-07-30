@@ -60,7 +60,7 @@ test("material ID changes", function() {
     color.textContent = "1 0 1";
     newmaterial.appendChild(color);
     newmaterial.id = "notThere";
-    newmaterial.script = "urn:xml3d:material:flat";
+    newmaterial.model = "urn:xml3d:material:flat";
     this.doc.getElementsByTagName("defs")[0].appendChild(newmaterial);
     hTest.draw();
     ok(true, "Add a new material of id #notThere");

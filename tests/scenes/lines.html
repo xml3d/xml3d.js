@@ -1,0 +1,45 @@
+<!DOCTYPE html><html><head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Lines</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="600px" height="400px" style="background: black">
+
+    <defs>
+      <data id="lineData">
+        <float3 name="position">0 0 0   1 0 0   0 0 0   0 1 0</float3>
+      </data>
+
+      <data id="lineData2">
+        <float3 name="position">0 0 0   1 0 0  0 1 0  -1 0 0</float3>
+        <int name="index">0 1 0 2 0 3</int>
+        <float3 name="diffuseColor">0 0 1</float3>
+      </data>
+      <data id="lineData3">
+        <float3 name="position">0 0 0   1 0 0  0 1 0  -1 0 0</float3>
+        <float3 name="diffuseColor">0 1 0</float3>
+      </data>
+    </defs>
+
+    <material id="linematerial" model="urn:xml3d:material:flat">
+        <float3 name="diffuseColor">1 0 0</float3>
+    </material>
+
+    <group style="transform: translateZ(-15px)">
+        <group material="#linematerial">
+            <mesh type="lines" src="#lineData"></mesh>
+        </group>
+        <group material="#linematerial" style="transform: translateX(-3px)">
+            <mesh type="lines" src="#lineData2"></mesh>
+        </group>
+        <group material="#linematerial" style="transform: translateX(3px)">
+            <mesh type="linestrips" src="#lineData3">
+        </mesh></group>
+    </group>
+
+  </xml3d>
+
+
+</body></html>

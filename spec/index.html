@@ -592,7 +592,7 @@
         </table>
       </div>
       <p>
-        The projective view model defines a projective view frustum based on a projection matrix. This view model is typically used, if the
+        The <dfn>projective view model</dfn> defines a projective view frustum based on a projection matrix. This view model is typically used, if the
         intrisic camera parameters are computed, e.g. from a webcam image using computer vision algorithms.
       </p>
     </section>
@@ -1068,7 +1068,7 @@
       The coordinate system of the <span class="element-name">view</span> element defines the coordinate system for the view (aka extrinsic camera parameters).
       </p>
       <p>
-      The view model used by the view is defined by the <dfn id="attr-view-model">model</dfn> attribute.
+      The view model used by the view is defined by the <dfn id="attr-view-model">view model attribute</dfn>.
       If the <code>model</code> attribute is present, it must contain a valid non-empty URN referencing one of the <a>predefined view models</a>.
       If the URN is empty or references an unknown view model, or if the <code>model</code> attribute is not present, the <a>perspective view model</a> is used.
       <div class="note">Currently, XML3D supports predefined view models only. However, similar to materials, we envisage programmable view models for future versions of XML3D.
@@ -1218,10 +1218,10 @@
             <dd>URI reference to another data element containing the data for this mesh. Can be a reference to an external document.</dd>
 
             <dt>attribute DOMString material</dt>
-            <dd>URI reference to a <a href="#the-material-element"><code>material</code></a> element.</dd>
+            <dd>URI reference to a <a>material element</a>.</dd>
 
             <dt>attribute DOMString transform</dt>
-            <dd>URI reference to a <a href="#the-transform-element"><code>transform</code></a> element.</dd>
+            <dd>URI reference to a <a>transform element</a>.</dd>
 
             <dt>XML3DDataResult getResult(Array filter)</dt>
             <dd>Returns a XML3DDataResult object containing the data for the fields requested by the given filter, eg.
@@ -1365,8 +1365,8 @@
             <dt>Categories:</dt>
             <dd><a href="#data-elements">Data element</a></dd>
         </dl>
-      <p>A material describes the surface shading of an object. Materials are defined using a <span class="element-name">material</span>
-      element and then
+      <p>A material describes the surface shading of an object.
+      Materials are defined using the <dfn>material element</dfn> and then
       referenced by the <a href="#dfn-material-property" class="internalDFN">material</a> property on a given <a href="#scene-elements">scene
       element</a> to indicate that the
       given element shall be shaded using the referenced material. Multiple scene elements can share a material.
@@ -1376,13 +1376,13 @@
 
 
       <p>
-      The material model used by the material is defined by the <dfn id="attr-material-script">script</dfn> attribute.
-      The <code>script</code> attribute must be present, and must contain a valid non-empty URL referencing either a <a href="#predefined-material-models">predefined material model</a> or
+      The material model used by the material is defined by the <dfn id="attr-material-model">material model attribute</dfn>.
+      The <code>model</code> attribute must be present, and must contain a valid non-empty URL referencing either a <a href="#predefined-material-models">predefined material model</a> or
       a scripted material model, e.g. using shade.js.
       </p>
-      <p>Here is a simple example for a material based on the predefined phong material model:</p>
+      <p>Here is a simple example for a material based on the predefined <a>phong material model</a>:</p>
        <pre class='example highlight'>
-&lt;material script=&quot;urn:xml3d:material:phong&quot;&gt;
+&lt;material model=&quot;urn:xml3d:material:phong&quot;&gt;
   &lt;float3 name=&quot;diffuseColor&quot;&gt;0 0 1&lt;/float3&gt;
   &lt;texture name=&quot;diffuseTexture&quot;&gt;
     &lt;img src=&quot;../stone.jpg&quot;/&gt;
@@ -1391,8 +1391,8 @@
 </pre>
 
       <dl title='interface XML3DMaterialElement : XML3DDataElement' class='idl'>
-        <dt>attribute DOMString script</dt>
-        <dd>The <code>script</code> IDL attribute must reflect the <a href="#attr-material-script" class="internalDFN">script</a> content attribute.</dd>
+        <dt>attribute DOMString model</dt>
+        <dd>The <code>model</code> IDL attribute must reflect the <a href="#attr-material-model" class="internalDFN">model</a> content attribute.</dd>
       </dl>
     </section>
     <section>
@@ -2588,7 +2588,7 @@
       });
     </pre>
     <div class="note">As long as a custom operator appears after the <code>xml3d.js</code> script in the document flow the <code>Xflow.registerOperator</code> function can (and should)
-      be called immediately. This is typical behavior for a Javascript plugin architecture and ensures the operators have been registered before XML3D initializes the scene (during the
+      be called immediately. This is typical behavior for a JavaScript plugin architecture and ensures the operators have been registered before XML3D initializes the scene (during the
     <code>document.onload</code> event).</div>
 
     <p>In essence the declaration of the compute operator must contain at least a list of input and output fields, including types, and an <code>evaluate</code> function that is called by

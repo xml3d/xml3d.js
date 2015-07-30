@@ -11,12 +11,11 @@ var CLIPPLANE_NEAR_MIN = 0.01;
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
 
+var LOCAL_MATRIX_OFFSET = 16;
 /** @const */
-var VIEW_TO_WORLD_MATRIX_OFFSET = 0;
+var WORLD_TO_VIEW_MATRIX_OFFSET = LOCAL_MATRIX_OFFSET + 16;
 /** @const */
-var WORLD_TO_VIEW_MATRIX_OFFSET = 16;
-/** @const */
-var PROJECTION_MATRIX_OFFSET = 32;
+var PROJECTION_MATRIX_OFFSET = WORLD_TO_VIEW_MATRIX_OFFSET + 16;
 /** @const */
 var ENTRY_SIZE = PROJECTION_MATRIX_OFFSET + 16;
 
@@ -35,9 +34,14 @@ var RenderView = function (scene, pageEntry, opt) {
     this.projectionDirty = true;
 
     this.camera = createCamera(opt.camera ? opt.camera : DEFAULT_CAMERA_CONFIGURATION, scene, this);
-    this.localMatrix = mat4.create();
     this.worldSpacePosition = vec3.create();
-    this.viewDirty = true;
+
+    /**
+     * Can we rely on the world to view matrix?
+     * @type {boolean}
+     */
+    this.viewMatrixDirty = true;
+
     this.frustum = null;
 };
 RenderView.ENTRY_SIZE = ENTRY_SIZE;
@@ -46,60 +50,41 @@ XML3D.createClass(RenderView, RenderNode);
 
 XML3D.extend(RenderView.prototype, {
 
-    setLocalMatrix: function (source) {
-        this.localMatrix = source;
-        this.setTransformDirty();
-    },
-
     getFrustum: function () {
         return this.frustum;
     },
 
     updateViewMatrix: (function () {
         var tmp_mat4 = mat4.create();
-        var tmp_parent = mat4.create();
 
         return function () {
-            mat4.copy(tmp_mat4, this.localMatrix);
-            this.parent.getWorldMatrix(tmp_parent);
-            mat4.multiply(tmp_mat4, tmp_parent, tmp_mat4);
+            this.getWorldMatrix(tmp_mat4);
             vec3.set(this.worldSpacePosition, tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
-            this.setViewToWorldMatrix(tmp_mat4);
             mat4.invert(tmp_mat4, tmp_mat4);
-            this.setWorldToViewMatrix(tmp_mat4);
-            this.viewDirty = false;
+            this.setMat4InPage(tmp_mat4, WORLD_TO_VIEW_MATRIX_OFFSET);
+            this.viewMatrixDirty = false;
             // View frustum might have changed due to clipping planes
             this.viewFrustumChanged();
         }
     })(),
-
-    setWorldToViewMatrix: function (source) {
-        this.setMat4InPage(source, WORLD_TO_VIEW_MATRIX_OFFSET);
-    },
-
-    setViewToWorldMatrix: function (source) {
-        this.setMat4InPage(source, VIEW_TO_WORLD_MATRIX_OFFSET);
-    },
 
     setProjectionMatrix: function (source) {
         this.setMat4InPage(source, PROJECTION_MATRIX_OFFSET);
         this.projectionDirty = false;
     },
 
-    setTransformDirty: function () {
-        this.viewDirty = true;
+    onTransformDirty: function () {
+        this.viewMatrixDirty = true;
+        this.worldMatrixDirty = true;
         this.scene.requestRedraw("view pose changed");
     },
 
     getViewToWorldMatrix: function (dest) {
-        if (this.viewDirty) {
-            this.updateViewMatrix();
-        }
-        this.getMat4FromPage(dest, VIEW_TO_WORLD_MATRIX_OFFSET);
+        this.getWorldMatrix(dest);
     },
 
     getWorldToViewMatrix: function (dest) {
-        if (this.viewDirty) {
+        if (this.viewMatrixDirty) {
             this.updateViewMatrix();
         }
         this.getMat4FromPage(dest, WORLD_TO_VIEW_MATRIX_OFFSET);

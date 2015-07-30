@@ -96,9 +96,7 @@ XML3D.createClass(Scene, EventEmitter, {
         var root = new RenderGroup(this, pageEntry, {
             material: this.getDefaultMaterial(), name: "@scene"
         });
-        root.setWorldMatrix(mat4.create());
         root.setLocalMatrix(mat4.create());
-        root.transformDirty = false;
         return root;
     },
 
@@ -118,9 +116,7 @@ XML3D.createClass(Scene, EventEmitter, {
         throw new Error("Scene::createDrawable not implemented");
     },
 
-    requestRedraw: function (/*reason*/) {
-        throw new Error("Scene::requestRedraw not implemented");
-    },
+    requestRedraw: function (/*reason*/) { },
 
     traverse: function (callback) {
         this.rootNode.traverse(callback);

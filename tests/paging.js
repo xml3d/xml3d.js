@@ -11,7 +11,7 @@ var SIZES = {
  PAGE:  1 << 12,
     GROUP: 38,
     OBJECT: 108,
-    VIEW:   48
+    VIEW:   64
 
 
 }

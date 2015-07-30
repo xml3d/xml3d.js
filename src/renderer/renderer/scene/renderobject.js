@@ -61,11 +61,6 @@ var RenderObject = function (scene, pageEntry, opt) {
      */
     this.object = opt.object || {data: null, type: "triangles"};
 
-    /**
-     * Can we rely on current WorldMatrix?
-     * @type {boolean}
-     */
-    this.transformDirty = true;
 
     /**
      * Can we rely on current Bounding Boxes?
@@ -93,7 +88,9 @@ RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
 RenderObject.IDENTITY_MATRIX = mat4.create();
 
+
 XML3D.createClass(RenderObject, RenderNode, {
+
     createTransformRequest: function () {
         if (!this.object.data)
             return null;
@@ -133,23 +130,14 @@ XML3D.createClass(RenderObject, RenderNode, {
         return this.object ? this.object.data : null;
     },
 
-    getLocalMatrix: function (dest) {
-        this.getMat4FromPage(dest, LOCAL_MATRIX_OFFSET);
-    },
-
-    setLocalMatrix: function (source) {
-        this.setMat4InPage(source, LOCAL_MATRIX_OFFSET);
-        this.setTransformDirty();
-        this.setBoundingBoxDirty();
-    },
-
     dispose: function () {
         this.transformDataRequest && this.transformDataRequest.clear();
         this.scene.remove(this);
     },
 
     onTransformDataChange: function () {
-        this.setTransformDirty();
+        //this.setTransformDirty();
+        console.error("Here")
     },
 
     getModelViewMatrix: function (dest) {
@@ -188,7 +176,7 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     updateWorldSpaceMatrices: function (view, projection) {
-        if (this.transformDirty) {
+        if (this.worldMatrixDirty) {
             this.updateWorldMatrix();
         }
         this.updateModelViewMatrix(view);
@@ -197,7 +185,7 @@ XML3D.createClass(RenderObject, RenderNode, {
         this.updateModelViewProjectionMatrix(projection);
     },
 
-    updateWorldMatrix: (function () {
+    /*updateWorldMatrix: (function () {
         var tmp_mat = mat4.create();
         return function () {
             this.parent.getWorldMatrix(tmp_mat);
@@ -211,15 +199,13 @@ XML3D.createClass(RenderObject, RenderNode, {
                     XML3D.math.mat4.multiply(tmp_mat, tmp_mat, transformData.getValue());
                 }
             }
-            this.setWorldMatrix(tmp_mat);
-            this.boundingBoxDirty = true;
-            this.transformDirty = false;
+            this._storeWorldMatrix(tmp_mat);
         }
-    })(),
+    })(),*/
 
     /** Relies on an up-to-date transform matrix **/
     updateModelViewMatrix: function (view) {
-        if (this.transformDirty) {
+        if (this.worldMatrixDirty) {
             this.updateWorldMatrix();
         }
         var page = this.page;
@@ -256,8 +242,8 @@ XML3D.createClass(RenderObject, RenderNode, {
         XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEWPROJECTION_MATRIX_OFFSET, page, offset + MODELVIEW_MATRIX_OFFSET, projection, 0);
     },
 
-    setTransformDirty: function () {
-        this.transformDirty = true;
+    onTransformDirty: function () {
+        this.worldMatrixDirty = true;
         this.setBoundingBoxDirty();
         this.scene.emit(C.EVENT_TYPE.SCENE_SHAPE_CHANGED);
         this.scene.requestRedraw("Transformation changed");
@@ -286,7 +272,7 @@ XML3D.createClass(RenderObject, RenderNode, {
 
     setBoundingBoxDirty: function () {
         this.boundingBoxDirty = true;
-        this.parent.setBoundingBoxDirty();
+        this.parent && this.parent.setBoundingBoxDirty();
     },
 
     setWorldSpaceBoundingBox: function (bbox) {

@@ -5,15 +5,9 @@ var LightModels = require("../lights/light-models.js");
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
 
-var tmp_worldMatrix = XML3D.math.mat4.create();
-
-var SHADOWMAP_OFFSET_MATRIX = new Float32Array([0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0]);
 
 /** @const */
-var CLIPPLANE_NEAR_MIN = 1.0;
-
-/** @const */
-var ENTRY_SIZE = 16;
+var ENTRY_SIZE = 32;
 
 var c_BoundingBox = new XML3D.Box();
 
@@ -63,11 +57,6 @@ XML3D.extend(RenderLight.prototype, {
         this.lightStructureChanged(false);
     },
 
-    setLocalMatrix: function (source) {
-        XML3D.debug.logError("RenderLight::setLocalMatrix not implemented");
-    },
-
-
     getFrustum: function (aspect) {
         this.scene.getBoundingBox(c_BoundingBox);
         return this.model.getFrustum(aspect, c_BoundingBox);
@@ -83,24 +72,15 @@ XML3D.extend(RenderLight.prototype, {
         this.scene.emit(EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this, removed);
     },
 
-    updateWorldMatrix: function () {
-        if (this.parent) {
-            this.parent.getWorldMatrix(tmp_worldMatrix);
-            this.setWorldMatrix(tmp_worldMatrix);
-            // We change position / direction of the light
-            this.lightValueChanged();
-        }
-    },
-
     visibilityChanged: function (newVal) {
         // Visibility is a light parameter
         this.lightValueChanged();
     },
 
-    setTransformDirty: function () {
-        this.updateWorldMatrix();
+    onTransformDirty: function () {
+        this.worldMatrixDirty = true;
+        this.lightValueChanged();
     },
-
 
     remove: function () {
         this.parent.removeChild(this);

@@ -1,5 +1,9 @@
 /** @const */
 var WORLD_MATRIX_OFFSET = 0;
+var LOCAL_MATRIX_OFFSET = 16;
+
+var IDENT = XML3D.math.mat4.create();
+
 
 /**
  * @constructor
@@ -17,9 +21,17 @@ var RenderNode = function (type, scene, pageEntry, opt) {
     this.page = pageEntry.page;
     this.offset = pageEntry.offset;
     this.entrySize = pageEntry.size;
-    this.transformDirty = true;
     this.children = [];
     this.parent = null;
+
+    this.setLocalMatrix(IDENT);
+
+    /**
+     * Can we rely on current WorldMatrix?
+     * @type {boolean}
+     */
+    this.worldMatrixDirty = true;
+
 
     this.setParent(opt.parent || scene.rootNode);
 
@@ -103,23 +115,38 @@ XML3D.extend(RenderNode.prototype, {
     },
 
     getWorldMatrix: function (dest) {
-        if (this.transformDirty) {
-            this.parent.getWorldMatrix(dest);
-            this.updateWorldMatrix(dest);
+        if (this.worldMatrixDirty) {
+            this.updateWorldMatrix();
+            this.worldMatrixDirty = false;
         }
         this.getMat4FromPage(dest, WORLD_MATRIX_OFFSET);
     },
 
-    setWorldMatrix: function (source) {
-        this.setMat4InPage(source, WORLD_MATRIX_OFFSET);
-        this.transformDirty = false;
-        if (this.setBoundingBoxDirty) {
-            this.setBoundingBoxDirty();
+    updateWorldMatrix: function () {
+        var tmp_worldMatrix = XML3D.math.mat4.create();
+        if (this.parent) {
+            this.parent.getWorldMatrix(tmp_worldMatrix);
+            XML3D.math.mat4.multiplyOffset(tmp_worldMatrix, 0, this.page, this.offset + LOCAL_MATRIX_OFFSET, tmp_worldMatrix, 0);
+        } else {
+            this.getLocalMatrix(tmp_worldMatrix);
         }
+        this.setMat4InPage(tmp_worldMatrix, WORLD_MATRIX_OFFSET);
+        this.worldTransformationChanged();
     },
 
-    setTransformDirty: function () {
-        this.transformDirty = true;
+    worldTransformationChanged: function() {},
+
+    setLocalMatrix: function (source) {
+        this.setMat4InPage(source, LOCAL_MATRIX_OFFSET);
+        this.onTransformDirty();
+    },
+
+    getLocalMatrix: function (dest) {
+        this.getMat4FromPage(dest, LOCAL_MATRIX_OFFSET);
+    },
+
+    onTransformDirty: function () {
+        this.worldMatrixDirty = true;
     },
 
     remove: function () {

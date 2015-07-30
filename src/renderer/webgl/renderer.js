@@ -14,6 +14,7 @@ var MAX_PICK_BUFFER_DIMENSION = 512;
 var vec3 = require("gl-matrix").vec3;
 var quat = require("gl-matrix").quat;
 var mat4 = require("gl-matrix").mat4;
+var Timer = window.performance || Date;
 
 var OPTION_SSAO = "renderer-ssao";
 var FLAGS = {};
@@ -253,12 +254,27 @@ XML3D.extend(GLRenderer.prototype, {
         return this.needsDraw;
     },
 
-    renderToCanvas: function () {
-        this.prepareRendering();
+    updateScene: function (stats) {
+        var start = Timer.now();
+        this.scene.update();
+        var duration = Timer.now() - start;
+        stats.update = { duration: duration };
+    },
+
+    drawScene: function(stats) {
+        var start = Timer.now();
         this.renderInterface.getRenderPipeline().render(this.scene);
-        var stats = this.renderInterface.getRenderPipeline().getRenderStats();
-        this.needsDraw = false; //Set this late, because redraw might be triggered during rendering (TODO: avoid that!)
-        XML3D.debug.logDebug("Rendered to Canvas");
+        stats.draw = this.renderInterface.getRenderPipeline().getRenderStats();var duration = Timer.now() - start;
+        stats.draw.duration = duration;
+    },
+
+    renderToCanvas: function () {
+        var stats = {};
+        this.updateScene(stats);
+        this.drawScene(stats);
+        //Set this late, because redraw might be triggered during rendering (TODO: avoid that!)
+        this.needsDraw = false;
+        XML3D.debug.logDebug("Rendered to Canvas", stats);
         return stats;
     },
 
@@ -266,7 +282,7 @@ XML3D.extend(GLRenderer.prototype, {
         y = canvasToGlY(this._canvasHandler.getCanvas(), y);
         if (this.needsPickingDraw) {
             this.needsPickingDraw = false;
-            this.prepareRendering();
+            this.updateScene({});
             this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight());
             this.pickObjectPass.render(this.scene.ready);
             XML3D.debug.logDebug("Rendered Picking Buffer");
@@ -275,9 +291,7 @@ XML3D.extend(GLRenderer.prototype, {
         return this.pickedObject;
     },
 
-    prepareRendering: function () {
-        this.scene.update();
-    },
+
 
     /**
      * Uses gluUnProject() to transform the 2D screen point to a 3D ray.

@@ -121,6 +121,7 @@ XML3D.createClass(AbstractShaderComposer, EventEmitter, {
                 that.updateClosureFromLightParameters(shader, scene);
             });
         }
+        this.updateLightValues = false;
     },
 
     /**

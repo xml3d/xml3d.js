@@ -81,7 +81,7 @@ AbstractCanvasHandler.prototype.dispatchFrameDrawnEvent = function (start, end, 
         }
     };
     var data = {
-        timeStart: start, timeEnd: end, renderTimeInMilliseconds: end - start, count: stats.count
+        timeStart: start, timeEnd: end, renderTimeInMilliseconds: end - start, stats: stats, count: stats.draw.count
     };
     this.dispatchCustomEvent("framedrawn", data);
 };

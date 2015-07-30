@@ -13,7 +13,7 @@ var ShadowMapService = function (context, scene) {
     this.context = context;
     scene.on(EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightStructureChanged.bind(this));
     scene.on(EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChanged.bind(this));
-    scene.on(EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChanged.bind(this));
+    scene.on(EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChanged.bind(this, scene));
 
     this.shadowMapInfos = [];
     this.dirty = true;
@@ -36,7 +36,11 @@ XML3D.extend(ShadowMapService.prototype, {
         this.requestRendering("light value changed");
     },
 
-    onSceneShapeChanged: function () {
+    onSceneShapeChanged: function (scene) {
+        if(this.shadowMapInfos.length) {
+            // Request new light parameters because the light frustums changed
+            scene.updateLightParameters();
+        }
         this.requestRendering("scene shape changed");
     },
 

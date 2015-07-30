@@ -86,11 +86,7 @@ XML3D.extend(GLScene.prototype, {
     },
 
     update: function () {
-        if (this.lightsNeedUpdate) {
-            this.lightsNeedUpdate = false;
-            this.updateLightParameters();
-            this.lights.lightValueChanged();
-        }
+        this.updateLights();
         this.updateObjectsForRendering();
 
         // Render shadow maps if necessary
@@ -99,7 +95,14 @@ XML3D.extend(GLScene.prototype, {
         // Make sure that shaders are updates AFTER objects
         // Because unused shader closures are cleared on update
         this.updateShaders();
-    }, updateLightParameters: function () {
+    },
+
+    updateLights: function () {
+        if (!this.lightsNeedUpdate) {
+            return;
+        }
+        this.lightsNeedUpdate = false;
+        this.lights.lightValueChanged();
         var parameters = this.systemUniforms;
 
         this.lights.fillGlobalParameters(parameters);
@@ -122,6 +125,11 @@ XML3D.extend(GLScene.prototype, {
         }
 
 
+    },
+
+    updateLightParameters: function () {
+        // Defer to next cluster update
+        this.lightsNeedUpdate = true;
     },
 
     updateSystemUniforms: function (names) {
@@ -203,20 +211,15 @@ XML3D.extend(GLScene.prototype, {
             this.context.requestRedraw("Active view changed.");
         });
         this.on(C.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (/*event*/) {
-            this.lightsNeedUpdate = true;
+            this.updateLightParameters();
             this.shaderFactory.setLightStructureDirty();
             this.context.requestRedraw("Light structure changed.");
         });
         this.on(C.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (light) {
-            this.lightsNeedUpdate = true;
+            this.updateLightParameters();
             this.shaderFactory.setLightValueChanged();
             this.lights.lightValueChanged(light);
             this.context.requestRedraw("Light value changed.");
-        });
-         this.on(C.EVENT_TYPE.SCENE_SHAPE_CHANGED, function (/* event */) {
-            // Need to update light frustum. Defer this until the next render phase
-            // TODO(ksons) Only light frustum and shadow maps need update, not the whole scene
-             this.lightsNeedUpdate = true;
         });
 
         Options.addObserver(this.onFlagsChange.bind(this));

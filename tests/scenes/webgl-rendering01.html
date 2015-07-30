@@ -6,7 +6,7 @@
 </head>
 
   <body style="background-color: #FFF;width:500px">
-   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;">
+   <xml3d id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" view="#defaultView">
     <defs>
     <transform id="t_group3" rotation="0 1 0 1.57"></transform>
     <transform id="t_viewtest" rotation="0 1 0 1.57"></transform>
@@ -68,12 +68,12 @@
 
 
     <group id="cameraGroup1" transform="#t_camera1">
-         <view id="transformTestView" position="0 0 -3" orientation="0 1 0 3.141"></view>
+         <view id="transformTestView" style="transform: translate3d(0px, 0px, -3px) rotate3d(0, 1, 0, 180.0deg)"></view>
     </group>
-    <view id="defaultView" position="0 0 3"></view>
-    <view id="identView" position="0 0 0"></view>
+    <view id="defaultView" style="transform: translate3d(0px, 0px, 3px)"></view>
+    <view id="identView" style="transform: translate3d(0px, 0px, 0px)"></view>
 
-    <view id="viewOrientationTest" position="-3 0 0" orientation="0 1 0 -1.57"></view>
+    <view id="viewOrientationTest" style="transform: translate3d(-3px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)"></view>
 
     <group id="viewTest" style="display: none;" transform="#t_viewtest">
         <mesh src="#meshdata" type="triangles"></mesh>
@@ -142,4 +142,5 @@
    </script>
   
  
+
 </body></html>

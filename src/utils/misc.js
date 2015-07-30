@@ -97,48 +97,7 @@
         };
 
     var __autoCreatedViewId = 0;
-    /**
-     * Returns the active view element corresponding to the given xml3d element.
-     *
-     * @param {!Object} xml3d
-     * @return {Object} the active view element
-     */
-    exports.getOrCreateActiveView = function(xml3d)
-    {
-        // try to resolve reference
-        var ref = xml3d.activeView;
-        if(ref)
-        {
-            var v = window.XML3D.URIResolver.resolveLocal(ref);
-            if(!v)
-                throw "XML3D Error: xml3d references view that is not defined: '" + ref + "'.";
 
-            return v;
-        }
-
-        // didn't succeed, so now try to just take the first view
-        var firstView = xml3d.querySelector("view");
-        if(firstView)
-        {
-            // if it has an id, set it as active
-            if(firstView.id && firstView.id.length > 0)
-                xml3d.activeView = "#" + firstView.id;
-
-            return firstView;
-        }
-
-        // didn't find any: create new one
-        XML3D.debug.logWarning("xml3d element has no view defined: creating one.");
-
-        var vid = "xml3d.autocreatedview_" + __autoCreatedViewId++;
-        var v = XML3D.createElement("view");
-        v.setAttribute("id", vid);
-
-        xml3d.appendChild(v);
-        xml3d.activeView = "#" + vid;
-
-        return v;
-    };
 
     var tmpCanvas, tmpContext;
 

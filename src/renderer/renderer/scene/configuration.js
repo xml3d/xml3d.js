@@ -1,16 +1,15 @@
 var uniqueObjectId = require("../../webgl/base/utils.js").getUniqueCounter();
 /**
- * Connects a light model with a data node containing light paramters
- * and a render light to evaluate the world position of the light.
- * The LightConfiguration is immutable
+ * A configuration connects a model (material, light, camera) with a data node containing
+ * the parameters for the model
+ * The Configuration is immutable
  *
- * @param model The light model
- * @param {Xflow.DataNode} dataNode  The light parameters of this node
- * @param {RenderLight} light  The light in the transformation hierarchy
+ * @param model The model (e.g. identified by an URN)
+ * @param {Xflow.DataNode} dataNode  The parameters of this model instance
  * @param {{}} opt
  * @constructor
  */
-var LightConfiguration = function(model, dataNode, opt) {
+var Configuration = function(model, dataNode, opt) {
     opt = opt || {};
 
     this.id = uniqueObjectId();
@@ -33,4 +32,4 @@ var LightConfiguration = function(model, dataNode, opt) {
     this.name = opt.name || null;
 };
 
-module.exports = LightConfiguration;
+module.exports = Configuration;

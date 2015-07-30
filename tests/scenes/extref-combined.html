@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
+<!DOCTYPE html><html><head lang="en">
   <meta charset="UTF-8">
   <title>XML3D External References</title>
   <link rel="stylesheet" type="text/css" media="all" href="frame.css">
@@ -23,7 +21,7 @@
         </material>
 
       </defs>
-    <view id="myView" ></view>
+    <view id="myView"></view>
     <light id="myLight"></light>
     
     <group id="jsonGroup" transform="#t_object1" style="display: none;">
@@ -43,9 +41,9 @@
     </group>
 
     <group id="jsonSequenceGroup" transform="#t_object1" style="display: none;">
-      <mesh id="myMesh06" compute="position = xflow.lerpSeq(position, key)" >
-        <data src="json/sequence.json" ></data>
-        <float name="key" >1.5</float>
+      <mesh id="myMesh06" compute="position = xflow.lerpSeq(position, key)">
+        <data src="json/sequence.json"></data>
+        <float name="key">1.5</float>
       </mesh>
     </group>
     
@@ -70,8 +68,8 @@
         </material>
         
 	  </defs>
-	<view  ></view>
-	<light ></light>
+	<view></view>
+	<light></light>
     
     <group id="groupRef1" transform="#t_object1Ref1">
         <mesh type="triangles" src="#simplePlaneRef1"></mesh>
@@ -79,9 +77,9 @@
     
   </xml3d>
 
-  <xml3d id="xml3dReference2" width="320px" height="240px" style="background-color: #ccc" >
+  <xml3d id="xml3dReference2" width="320px" height="240px" style="background-color: #ccc">
     <defs>
-        <transform id="t_object1Ref2" translation="-3 2.5 0" ></transform>
+        <transform id="t_object1Ref2" translation="-3 2.5 0"></transform>
         <data id="simplePlaneRef2">
             <int id="indicesRef2" name="index">0 1 2 1 2 3</int>
             <float3 id="positionsRef2" name="position">1 -3 -10.0  3 -3 -10.0  1 -1 -10.0 3 -1 -10.0</float3>
@@ -90,7 +88,7 @@
         </data>
 
     </defs>
-    <view ></view>
+    <view></view>
     <light> </light>
 
     <group id="groupRef2" transform="#t_object1Ref2">
@@ -100,21 +98,21 @@
   </xml3d>
 
 
-  <xml3d id="xml3dReference3" width="320px" height="240px" style="background-color: #ccc" >
+  <xml3d id="xml3dReference3" width="320px" height="240px" style="background-color: #ccc">
     <defs>
-      <transform id="t_object1Ref3" translation="-3 2.5 0" ></transform>
+      <transform id="t_object1Ref3" translation="-3 2.5 0"></transform>
 
     </defs>
-    <view ></view>
-    <light ></light>
+    <view></view>
+    <light></light>
 
     <group id="groupRef3" transform="#t_object1Ref3">
-      <mesh type="triangles" compute="position = xflow.lerpSeq(position, key)" >
+      <mesh type="triangles" compute="position = xflow.lerpSeq(position, key)">
         <int name="index">0 1 2 1 2 3</int>
-        <float3 name="position" key="0" > 1 -3 -10.0    3 -3 -10.0    1 -1 -10.0   3 -1 -10.0</float3>
-        <float3 name="position" key="1" >0 -3 -10.0    4 -3 -10.0    0 -1 -10.0   4 -1 -10.0</float3>
-        <float3 name="position" key="2" >0 -4 -10.0    4 -4 -10.0    0 0 -10.0   4 0 -10.0</float3>
-        <float name="key" >1.5</float>
+        <float3 name="position" key="0"> 1 -3 -10.0    3 -3 -10.0    1 -1 -10.0   3 -1 -10.0</float3>
+        <float3 name="position" key="1">0 -3 -10.0    4 -3 -10.0    0 -1 -10.0   4 -1 -10.0</float3>
+        <float3 name="position" key="2">0 -4 -10.0    4 -4 -10.0    0 0 -10.0   4 0 -10.0</float3>
+        <float name="key">1.5</float>
       </mesh>
     </group>
 
@@ -123,5 +121,6 @@
 
 
 
-</body>
-</html>
+
+
+</body></html>

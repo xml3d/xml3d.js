@@ -1,3 +1,63 @@
+module("WebGL Picking tests", {});
+
+test("Check current pick object (internal)", 9, function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-picking.xhtml");
+
+    var test = frameLoaded.then(function (doc) {
+        return doc.getElementById("xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var h = getHandler(s);
+        var doc = s.ownerDocument;
+        var picked = h.getPickObjectByPoint(88, 60);
+        ok(h.renderer.pickedObject, "Object picked");
+        strictEqual(h.renderer.pickedObject, picked, "Return value matches");
+        strictEqual(h.renderer.pickedObject.node, doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
+
+        picked = h.getPickObjectByPoint(5, 5);
+        strictEqual(h.renderer.pickedObject, null, "Nothing picked");
+        strictEqual(h.renderer.pickedObject, picked, "Return value matches");
+
+        picked = h.getPickObjectByPoint(88, 60);
+        ok(h.renderer.pickedObject, "Object picked");
+        strictEqual(h.renderer.pickedObject, picked, "Return value matches");
+        strictEqual(h.renderer.pickedObject.node, doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
+        return s;
+    });
+    test.fin(QUnit.start).done();
+
+});
+
+test("Simple picking with getElementByRay", 4, function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-picking.xhtml");
+
+    var test = frameLoaded.then(function (doc) {
+        return doc.getElementById("xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var doc = s.ownerDocument;
+        var target = doc.getElementById("pickingMesh8");
+        var target2 = doc.getElementById("pickingMesh9");
+
+        var ray = new XML3D.Ray().setFromOriginDirection([10, -0.1, -10], [-1, 0, 0]);
+
+        var obj = s.getElementByRay(ray);
+        equal(obj, target, "Ray orthogonal to camera returned the first intersected mesh");
+
+        ray.direction = XML3D.Vec3.fromValues(1, 0, 0);
+        obj = s.getElementByRay(ray);
+        equal(obj, null, "The same ray with inverted direction returned null");
+
+        ray.origin = XML3D.Vec3.fromValues(-10, -0.1, -10);
+        obj = s.getElementByRay(ray);
+        equal(obj, target2, "The inverted ray shot from the other side returns the right mesh");
+        return s;
+    });
+    test.fin(QUnit.start).done();
+
+});
+
+
 module("WebGL Picking tests", {
     setup : function() {
         stop();
@@ -20,24 +80,6 @@ module("WebGL Picking tests", {
 });
 
 
-test("Check current pick object (internal)", function() {
-    var xml3dElement = this.doc.getElementById("xml3DElem");
-    var h = getHandler(xml3dElement);
-    var picked = h.getPickObjectByPoint(88,60);
-    ok(h.renderer.pickedObject, "Object picked");
-    strictEqual(h.renderer.pickedObject, picked, "Return value matches");
-    strictEqual(h.renderer.pickedObject.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
-
-    picked = h.getPickObjectByPoint(5,5);
-    strictEqual(h.renderer.pickedObject, null, "Nothing picked");
-    strictEqual(h.renderer.pickedObject, picked, "Return value matches");
-
-    var picked = h.getPickObjectByPoint(88,60);
-    ok(h.renderer.pickedObject, "Object picked");
-    strictEqual(h.renderer.pickedObject, picked, "Return value matches");
-    strictEqual(h.renderer.pickedObject.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
-
-});
 
 test("Pick with large object ids", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
@@ -172,25 +214,7 @@ test("Touch", function() {
 
 });
 
-test("Simple picking with getElementByRay", 5, function() {
-    var xml3dElement = this.doc.getElementById("xml3DElem");
-    var h = getHandler(xml3dElement);
-    var target = this.doc.getElementById("pickingMesh8");
-    var target2 = this.doc.getElementById("pickingMesh9");
 
-    var ray = new XML3D.Ray().setFromOriginDirection([10,-0.1,-10], [-1,0,0]);
-
-    var obj = xml3dElement.getElementByRay(ray);
-    equal(obj, target, "Ray orthogonal to camera returned the first intersected mesh");
-
-    ray.direction = XML3D.Vec3.fromValues(1, 0, 0);
-    obj = xml3dElement.getElementByRay(ray);
-    equal(obj, null, "The same ray with inverted direction returned null");
-
-    ray.origin = XML3D.Vec3.fromValues(-10, -0.1, -10);
-    obj = xml3dElement.getElementByRay(ray);
-    equal(obj, target2, "The inverted ray shot from the other side returns the right mesh");
-});
 
 test("Position and normal with getElementByRay", 6, function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");

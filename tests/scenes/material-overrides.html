@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
+<!DOCTYPE html><html><head lang="en">
   <meta charset="UTF-8">
   <title>Material Overrides</title>
   <link rel="stylesheet" type="text/css" media="all" href="frame.css">
@@ -12,7 +10,7 @@
 </h1>
 
 <div>
-  <xml3d id="xml3DElem" activeview="#Camera" style="width: 500px; height: 350px; background-color:grey;">
+  <xml3d id="xml3DElem" style="width: 500px; height: 350px; background-color:grey;" view="#Camera">
     <defs id="mainDef">
       <transform id="t_1" translation="-7.5 0 0"></transform>
       <transform id="t_2" translation="-4.5 0 0"></transform>
@@ -59,7 +57,7 @@
         <float name="ambientIntensity">1.0</float>
       </material>
     </defs>
-    <view id="Camera" position="0 0 15"></view>
+    <view id="Camera" style="transform: translate3d(0px, 0px, 15px)"></view>
     <group id="test2" style="display: none;">
       <mesh type="triangles">
         <data src="#cone"></data>
@@ -117,10 +115,12 @@
   function getPixelValue(canvas, x, y) {
     var pixels = new Uint8Array(4), a = new Array(4);
     canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
-    for (var i = 0; i &lt; 4; i++)
+    for (var i = 0; i < 4; i++)
       a[i] = pixels[i];
     return a;
   }
 </script>
-</body>
-</html>
+
+
+
+</body></html>

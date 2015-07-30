@@ -3,17 +3,18 @@ var RenderObject = require("./renderobject.js");
 var RenderView = require("./renderview.js");
 var RenderGroup = require("./rendergroup.js");
 var RenderLight = require("./renderlight.js");
-var MaterialConfiguration = require("./material-configuration.js");
+var MaterialConfiguration = require("./configuration.js");
 var LightManager = require("../lights/light-manager.js");
 var C = require("./constants.js");
 var InputNode = require("../../../xflow/interface/graph.js").InputNode;
 var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
+var SceneData = require("./scene-data.js");
 var XC = require("../../../xflow/interface/constants.js");
 var URI = require("../../../utils/uri.js").URI;
 var EventEmitter = require('events').EventEmitter;
 var mat4 = require("gl-matrix").mat4;
-
+var assert = require("assert");
 /**
  * @extends {EventEmitter}
  * @constructor
@@ -31,6 +32,19 @@ var Scene = function () {
     this._defaultMaterial = null;
 
     this.rootNode = this.createRootNode();
+
+    var data = this.data = new SceneData();
+
+    Object.defineProperty(this, "width", {
+        get: function() { return data.width; },
+        set: function(width) { data.width = width; }
+    });
+
+    Object.defineProperty(this, "height", {
+        get: function() { return data.height; },
+        set: function(height) { data.height = height; }
+    });
+
 };
 
 XML3D.createClass(Scene, EventEmitter, {
@@ -44,8 +58,7 @@ XML3D.createClass(Scene, EventEmitter, {
      */
     setActiveView: function (view) {
         if (view != this.activeView) {
-            if (!view)
-                throw new Error("Active view must not be null");
+            assert(view, "Active view must not be null");
             this.activeView = view;
             this.emit(C.EVENT_TYPE.VIEW_CHANGED, this.activeView);
         }
@@ -91,10 +104,9 @@ XML3D.createClass(Scene, EventEmitter, {
 
     updateBoundingBox: function () {
         if (this.rootNode.boundingBoxDirty) {
-            // TODO: There should always be an active view
-            this.activeView && this.activeView.setProjectionDirty();
+            this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
+            this.data.worldBoundingBox = this.boundingBox.data;
         }
-        this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
     },
 
     getBoundingBox: function (bb) {
@@ -141,6 +153,11 @@ XML3D.createClass(Scene, EventEmitter, {
             );
         }
         return this._defaultMaterial;
+    },
+
+    handleResizeEvent: function (width, height) {
+        this.width = width;
+        this.height = height;
     }
 
 

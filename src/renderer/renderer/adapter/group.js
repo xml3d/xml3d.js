@@ -1,17 +1,15 @@
-var TransformableAdapter = require("./transformable.js");
+var SceneElementAdapter = require("./scene-element.js");
 var Events = require("../../../interface/notification.js");
 var mat4 = require("gl-matrix").mat4;
 
 var GroupRenderAdapter = function (factory, node) {
-    TransformableAdapter.call(this, factory, node, true, true);
-    this.style = window.getComputedStyle(node);
+    SceneElementAdapter.call(this, factory, node, true, true);
     this.createRenderNode();
 };
 
-XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
+XML3D.createClass(GroupRenderAdapter, SceneElementAdapter, {
 
     createRenderNode: function () {
-        //TODO: Shouldn't have to go through the renderer...
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();
         this.renderNode = this.getScene().createRenderGroup({
@@ -19,56 +17,8 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
         });
         this.updateLocalMatrix();
         this.updateMaterialHandler();
-        var bbox = new XML3D.Box();
-        this.renderNode.setWorldSpaceBoundingBox(bbox);
-    },
-
-    notifyChanged: function (evt) {
-        TransformableAdapter.prototype.notifyChanged.call(this, evt);
-        return this.handleConnectedAdapterEvent(evt);
-    },
-
-    attributeChangedCallback: function (name, oldValue, newValue) {
-        TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
-    },
-
-    handleConnectedAdapterEvent: function (evt) {
-        switch (evt.type) {
-            case Events.NODE_INSERTED:
-                // This also initializes the children
-                this.initElement(evt.mutation.target);
-                break;
-            case Events.THIS_REMOVED:
-                this.dispose();
-                break;
-            case Events.ADAPTER_HANDLE_CHANGED:
-                break;
-            case Events.NODE_REMOVED:
-                break;
-            default:
-                XML3D.debug.logWarning("Unhandled connected adapter event for " + evt.key + " in group adapter");
-        }
-    },
-
-     styleChangedCallback: function() {
-        TransformableAdapter.prototype.styleChangedCallback.call();
         this.updateVisibility();
-    },
-
-    updateVisibility: function() {
-        var none = this.style.getPropertyValue("display").trim() == "none";
-        var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
-        this.renderNode.setLocalVisible(!(none || hidden));
-    },
-
-    dispose: function () {
-        // Dispose all children as well
-        this.traverse(function (adapter) {
-            if (adapter && adapter.destroy)
-                adapter.dispose();
-        });
-        this.getRenderNode().remove();
-        this.clearAdapterHandles();
+        this.renderNode.setWorldSpaceBoundingBox(new XML3D.Box());
     },
 
     /* Interface methods */

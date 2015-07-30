@@ -1,64 +1,62 @@
-<!doctype html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
   <title>XML3D CSS Scene</title>
-  <link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
   <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
 
    <xml3d id="xml3dTest" width="400" height="200">
 	  <defs>
-      <data id="meshData" >
+      <data id="meshData">
         <int name="index">0 1 2 1 2 3</int>
         <float3 name="position">-1.0 -1.0 0 1.0 -1.0 0  -1.0 1.0 0  1.0 1.0 0 </float3>
         <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
       </data>
 	  </defs>
-    <view fieldofview="0.5"></view>
+    <view><float name="fovVertical">0.5</float></view>
 
-    <group id="rootGroup" style="transform: translate3d(0px,0px,-10px)" >
-      <group style="transform: rotateZ(45deg)"  >
-        <group style="transform: scale3d(2,0.5,1)" >
-          <mesh src="#meshData" ></mesh>
+    <group id="rootGroup" style="transform: translate3d(0px,0px,-10px)">
+      <group style="transform: rotateZ(45deg)">
+        <group style="transform: scale3d(2,0.5,1)">
+          <mesh src="#meshData"></mesh>
         </group>
       </group>
     </group>
     <group style="transform: translate3d(-3px, 0px, -10px) translate3d(-1px, -1px, 0)
             rotate3d(0, 0, 1, 45deg) rotate3d(0, 0, 1, 0.5rad) scale3d(0.75, 0.5, 1)
             rotate3d(0, 0, 1, -45deg) translate3d(1px, 1px, 0px)">
-      <mesh id="mesh" src="#meshData" ></mesh>
+      <mesh id="mesh" src="#meshData"></mesh>
     </group>
   </xml3d>
 
 
   <xml3d id="xml3dReference" width="400" height="200">
     <defs>
-      <transform id="xfm" scale="0.75 0.5 1" translation="-3 0 -10" rotation="0 0 1 0.5"
-                 center="-1 -1 0" scaleorientation="0 0 1 0.785398163" ></transform>
-      <transform id="t1" translation="0 0 -10" ></transform>
-      <transform id="t2" rotation="0 0 1 0.785398163" ></transform>
-      <transform id="t3" scale="2 0.5 1" ></transform>
-      <data id="meshDataRef" >
+      <transform id="xfm" scale="0.75 0.5 1" translation="-3 0 -10" rotation="0 0 1 0.5" center="-1 -1 0" scaleorientation="0 0 1 0.785398163"></transform>
+      <transform id="t1" translation="0 0 -10"></transform>
+      <transform id="t2" rotation="0 0 1 0.785398163"></transform>
+      <transform id="t3" scale="2 0.5 1"></transform>
+      <data id="meshDataRef">
         <int name="index">0 1 2 1 2 3</int>
         <float3 name="position">-1.0 -1.0 0  1.0 -1.0 0  -1.0 1.0 0  1.0 1.0 0 </float3>
         <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
       </data>
     </defs>
-    <view fieldofview="0.5"></view>
-    <group transform="#t1" >
-      <group transform="#t2" >
-        <group transform="#t3" >
-          <mesh src="#meshDataRef" ></mesh>
+    <view><float name="fovVertical">0.5</float></view>
+    <group transform="#t1">
+      <group transform="#t2">
+        <group transform="#t3">
+          <mesh src="#meshDataRef"></mesh>
         </group>
       </group>
     </group>
-    <group transform="#xfm" >
-      <mesh src="#meshDataRef" ></mesh>
+    <group transform="#xfm">
+      <mesh src="#meshDataRef"></mesh>
     </group>
   </xml3d>
 
-</body>
-</html>
+
+
+</body></html>

@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
+<!DOCTYPE html><html><head lang="en">
   <meta charset="UTF-8">
   <title>XML3D Bounding Box Test Scene</title>
   <link rel="stylesheet" type="text/css" media="all" href="frame.css">
   <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
-<xml3d id="myXml3d" style="width: 300px; height: 200px;" activeview="#controller_view">
+<xml3d id="myXml3d" style="width: 300px; height: 200px;" view="#controller_view">
   <defs>
     <data id="mySimpleMesh">
       <int name="index">0 1 2 1 2 3</int>
@@ -109,7 +107,7 @@
       <float3 name="color">1 0 0</float3>
     </material>
   </defs>
-  <view id="controller_view" position="0 0 10"></view>
+  <view id="controller_view" style="transform: translate3d(0px, 0px, 10px)"></view>
   <group id="g_Root">
     <group id="g_TopCube" transform="#t_TopCube">
       <group id="g_TopFront" transform="#t_Front">
@@ -195,5 +193,6 @@
     </group>
   </group>
 </xml3d>
-</body>
-</html>
+
+
+</body></html>

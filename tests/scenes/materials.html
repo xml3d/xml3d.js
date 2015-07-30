@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
+<!DOCTYPE html><html><head lang="en">
   <meta charset="UTF-8">
-  <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
   <script type="text/javascript" src="../../build/output/xml3d.js"></script>
   <script type="text/javascript" src="../scripts/shade.js"></script>
   <title>Materials</title>
@@ -13,7 +11,7 @@
     return env.customColor;
   }
 </script>
-<xml3d id="Scene" activeview="#v_Camera" style="width: 512px; height: 512px; background-color:rgb(65,65,65);">
+<xml3d id="Scene" style="width: 512px; height: 512px; background-color:rgb(65,65,65);" view="#v_Camera">
   <defs>
     <material id="material" script="urn:xml3d:material:phong">
       <float3 name="emissiveColor">0 0 1</float3>
@@ -22,12 +20,10 @@
     </material>
   </defs>
   <view id="v_view"></view>
-  <group id="Plane" class="layer-0" material="#material"
-         style="transform:matrix3d(1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000925,0.000000,0.000000,1.000000);">
+  <group id="Plane" class="layer-0" material="#material" style="transform:matrix3d(1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000925,0.000000,0.000000,1.000000);">
     <model id="Plane" src="assets/plane.xml#Plane"></model>
   </group>
-  <group id="Camera" class="layer-0"
-         style="transform:matrix3d(1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,4.207090,1.000000);">
+  <group id="Camera" class="layer-0" style="transform:matrix3d(1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,4.207090,1.000000);">
     <view id="v_Camera"></view>
   </group>
 </xml3d>
@@ -74,5 +70,6 @@
 
 </div>
 
-</body>
-</html>
+
+
+</body></html>

@@ -65,11 +65,6 @@ test("view interface test", function() {
     ok(node.getViewMatrix().data instanceof Float32Array, "view::getViewMatrix returns XML3D.Mat4");
     deepEqual(node.getViewMatrix().data, XML3D.math.mat4.create(), "view::getViewMatrix returns with default parameters.");
 
-    equal(node.setDirection(XML3D.Vec3.fromValues(1, 0, 0)), undefined, "view::setDirection returns nothing");
-    equal(node.setUpVector(XML3D.Vec3.fromValues(1, 0, 0)), undefined, "view::setUpVector returns nothing");
-    equal(node.lookAt(XML3D.Vec3.fromValues(1, 0, 0)), undefined, "view::lookAt returns nothing");
-    ok(node.getDirection().data instanceof Float32Array, "view::getDirection returns XML3D.Vec3");
-    ok(node.getUpVector().data instanceof Float32Array, "view::getUpVector returns XML3D.Vec3");
 });
 test("data interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "data");
@@ -80,38 +75,3 @@ test("data interface test", function() {
 });
 
 
-test("view::lookAt tests", function() {
-    var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
-    ok(node);
-    QUnit.closeVector(node.position, XML3D.math.vec3.create(), EPSILON, "Default position");
-    QUnit.closeRotation(node.orientation.data, [0,0,1,0], EPSILON, "Default orientation");
-    node.lookAt(XML3D.Vec3.fromValues(0,0,-10));
-    QUnit.closeRotation(node.orientation.data, [0,0,1,0], EPSILON, "Look along default direction");
-    node.lookAt(XML3D.Vec3.fromValues(10,0,0));
-    QUnit.closeRotation(node.orientation.data, [0,-1,0, Math.PI/2.0], EPSILON, "Look to the right");
-    node.lookAt(XML3D.Vec3.fromValues(0,0,10));
-    QUnit.closeRotation(node.orientation.data, [0,1,0, Math.PI], EPSILON, "Look to the back");
-    node.lookAt(XML3D.Vec3.fromValues(-10,0,0));
-    QUnit.closeRotation(node.orientation.data, [0,1,0, Math.PI/2.0], EPSILON, "Look to the left");
-});
-
-test("view::setUpVector tests", function() {
-    var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
-    ok(node);
-    QUnit.closeVector(node.position, XML3D.math.vec3.create(), EPSILON, "Default position");
-    QUnit.closeRotation(node.orientation.data, XML3D.math.vec4.fromValues(0,0,1,0), EPSILON, "Default orientation");
-    node.setUpVector(XML3D.Vec3.fromValues(0,0,1));
-    QUnit.closeRotation(node.orientation, [1,0,0, Math.PI/2.0], EPSILON, "Up vector is +z");
-    node.orientation = new XML3D.AxisAngle();
-    node.setUpVector(XML3D.Vec3.fromValues(0,-1,0));
-    QUnit.closeRotation(node.orientation, [0,0,1, Math.PI], EPSILON, "Up vector is -y");
-});
-
-test("view::setDirection tests", function() {
-    var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
-    ok(node);
-    QUnit.closeVector(node.position, XML3D.math.vec3.create(), EPSILON, "Default position");
-    QUnit.closeRotation(node.orientation, [0,0,1,0], EPSILON, "Default orientation");
-    node.setDirection(XML3D.Vec3.fromValues(0,1,0));
-    QUnit.closeRotation(node.orientation, [1,0,0, Math.PI/2.0], EPSILON, "Up vector is +z");
-});

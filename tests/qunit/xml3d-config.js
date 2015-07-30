@@ -88,7 +88,7 @@ QUnit.extend( QUnit, {
 
     closeArray : function(actual, expected, maxDifference, message, isImage) {
 
-        isImage = isImage == undefined ? false : true;
+        isImage = isImage == undefined ? false : isImage;
 
         if(!actual || actual.length !== expected.length || isNaN(actual.length)){
             QUnit.push(false, actual, expected, message);
@@ -260,7 +260,7 @@ function promiseIFrameLoaded(url) {
     };
     // TODO: Loading failed
     v.addEventListener("load", f, true);
-    v.src = url;
+    v.src = url +window.location.search;
     return deferred.promise;
 };
 
@@ -282,9 +282,15 @@ function promiseOneSceneCompleteAndRendered(xml3dElement) {
 }
 
 function promiseSceneRendered(xml3dElement, returnEvent) {
+    var deferred = Q.defer();
+
+    if(!xml3dElement) {
+        deferred.reject(new Error("No XML3D element given for promiseSceneRendered"));
+        return deferred.promise;
+    }
+
     var renderer = getRenderer(xml3dElement);
     var glContext = getContextForXml3DElement(xml3dElement);
-    var deferred = Q.defer();
 
     var first = true;
     var f = function(e) {

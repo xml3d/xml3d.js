@@ -39,15 +39,17 @@ test("View Transformation local", function() {
     XML3D.math.mat4.translate(m,m,[0,0,10]);
     XML3D.math.mat4.invert(m, m);
 
-    view.position = [view.position.data[0], view.position.data[1], 10.0];
+    view.style.transform = "translate3d(0,0,10px)";
     QUnit.closeMatrix(view.getViewMatrix(), m, EPSILON, "View translated to 0,0,10.");
     QUnit.close(view.getViewMatrix().data[14], -10, EPSILON, "Checked entry in matrix");
 
     // Turn around
-    var axis = XML3D.math.vec3.fromValues(1, 0, 0);
-    view.orientation = XML3D.AxisAngle.fromValues(1,0,0,Math.PI/2.0);
+    view.style.transform += "rotate3d(1,0,0,90deg)";
+
     var q = XML3D.math.vec4.create();
     m = XML3D.math.mat4.create();
+    var axis = XML3D.math.vec3.fromValues(1, 0, 0);
+
     XML3D.math.quat.setAxisAngle(q, axis, Math.PI /2);
     XML3D.math.mat4.fromRotationTranslation(m, q, [0,0,10]);
     XML3D.math.mat4.invert(m,m);
@@ -55,8 +57,8 @@ test("View Transformation local", function() {
     QUnit.close(view.getViewMatrix().data[13], -10, EPSILON, "Checked entry in matrix");
     QUnit.close(view.getViewMatrix().data[6], -1, EPSILON, "Checked entry in matrix");
 
-    view.setAttribute("orientation", "0 1 0 " + Math.PI / 4);
-    view.setAttribute("position", "1 2 3");
+    view.setAttribute("style", "transform: translate3d(1px, 2px, 3px) rotate3d(0, 1, 0, 45deg);");
+    // console.log(view.style.transform);
     m = XML3D.math.mat4.create();
     XML3D.math.mat4.translate(m, m, [1,2,3]);
     XML3D.math.mat4.rotate(m, m, Math.PI / 4, [0, 1, 0]);

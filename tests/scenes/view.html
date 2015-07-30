@@ -8,7 +8,7 @@
 </head>
 <body>
 <div>
-  <xml3d xmlns="http://www.xml3d.org/2009/xml3d" id="myxml3d" renderer="rtpie" style="width: 500px; height: 300px; background-color: black;" activeview="#view_right">
+  <xml3d id="myxml3d" style="width: 500px; height: 300px; background-color: black;" view="#view_right">
     <defs>
       <material id="material_front" script="urn:xml3d:material:phong">
         <float3 name="diffuseColor">0 0 1</float3>
@@ -90,17 +90,30 @@
       </data>
       <transform id="t_cam" translation="0 0 2" rotation="0 1 0 1.5708"></transform>
     </defs>
-    <view id="view_rear" position="0 0 -10" orientation="0 1 0 3.14159" fieldofview="0.7854"></view>
-    <view id="view_front" position="0 0 10" fieldofview="0.7854"></view>
+    <view id="view_rear" style="transform: translate3d(0px, 0px, -10px) rotate3d(0, 1, 0, 180.0deg)"></view>
+    <view id="view_front" style="transform: translate3d(0px, 0px, 10px)"></view>
     <group transform="#t_cam">
 
     </group>
     <group transform="#t_cam">
     </group>
-    <view id="view_right" position="10 0 0" orientation="0 1 0 1.5708" fieldofview="0.7854"></view>
-    <view id="view_left" position="-10 0 0" orientation="0 1 0 -1.5708" fieldofview="0.7854"></view>
-    <view id="view_top" position="0 10 0" orientation="1 0 0 -1.5708" fieldofview="0.7854"></view>
-    <view id="view_bottom" position="0 -10 0" orientation="1 0 0 1.5708" fieldofview="0.7854"></view>
+    <view id="view_right" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)"></view>
+    <view id="view_right_projective" model="urn:xml3d:view:projective" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)">
+      <float4x4 name="projectionMatrix">1.4485281705856323 0 0 0 0 2.4142134189605713 0 0 0 0 -9.523809432983398 -1 0 0 -94.18809509277344 0</float4x4>
+    </view>
+    <view id="view_left" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)">
+      <float name="fovVertical">0.2</float>
+      <float name="near">0.2</float>
+      <float name="far">20</float>
+    </view>
+    <view id="view_left_projective" model="urn:xml3d:view:projective" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)">
+    </view>
+    <view id="view_top" style="transform: translate3d(0px, 10px, 0px) rotate3d(1, 0, 0, -90.0deg)">
+      <float name="fovVertical">0.2</float>
+    </view>
+    <view id="view_bottom" style="transform: translate3d(0px, -10px, 0px) rotate3d(1, 0, 0, 90.0deg)">
+      <float name="fovHorizontal">0.5</float>
+    </view>
     <group id="root">
       <group>
         <group id="shape_d2e23" material="#material_front">
@@ -129,13 +142,23 @@
     <a href="#" onclick="changeView('left')">left</a> |
     <a href="#" onclick="changeView('right')">right</a> |
     <a href="#" onclick="changeView('top')">top</a> |
-    <a href="#" onclick="changeView('bottom')">bottom</a></div>
+    <a href="#" onclick="changeView('bottom')">bottom</a> |
+    <a href="#" onclick="changeView()">none</a> |
+    <a href="#" onclick="changeView('left_projective')">left projective</a> |
+  <a href="#" onclick="changeView('right_projective')">right projective</a></div>
 </div>
 <script type="text/javascript">
   function changeView(which) {
-    document.getElementById("myxml3d").activeView = "#view_" + which;
+    if(!which) {
+      document.getElementById("myxml3d").removeAttribute("view");
+    } else {
+      document.getElementById("myxml3d").view = "#view_" + which;
+    }
+
   }
 </script>
+
+
 
 
 </body></html>

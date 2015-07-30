@@ -17,7 +17,7 @@
       <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708" translation="1 2 3"></transform>
     </defs>
     <group id="viewParent">
-        <view id="myView" fieldofview="0.5"></view>
+        <view id="myView"><float name="fovVertical">0.5</float></view>
     </group>
     <group id="lightParent">
         <light id="myLight" model="urn:xml3d:light:point"></light>
@@ -41,5 +41,6 @@
         <group id="child02" transform="#t_identity"></group>
     </group>
   </xml3d>
+
 
 </body></html>

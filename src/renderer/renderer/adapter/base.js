@@ -35,10 +35,6 @@ XML3D.createClass(RenderAdapter, NodeAdapter, {
     styleChangedCallback: function () {
     },
 
-    applyTransformMatrix: function (transform) {
-        return transform;
-    },
-
     getScene: function () {
         return this.factory.renderer.scene;
     }

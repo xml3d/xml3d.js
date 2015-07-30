@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<xml3d id="Scene" activeview="#v_pview" style="width: 512px; height: 512px; background-color:rgb(65,65,65);">
+<xml3d id="Scene" style="width: 512px; height: 512px; background-color:rgb(65,65,65);" view="#v_pview">
  <defs>
  <material id="Material-001" script="urn:xml3d:material:phong">
     <float3 name="diffuseColor">0.8000000715255737 0.013141818344593048 0.02618921920657158</float3>
@@ -16,7 +16,7 @@
     <float3 name="diffuseColor">0.800000011920929 0.800000011920929 0.800000011920929</float3>
   </material>
  </defs>
- <view id="v_pview" position="0 0  31" orientation="0 0 1 1.57"></view>
+ <view id="v_pview" style="transform: translate3d(0px, 0px, 0px) rotate3d(0, 0, 1, 90.0deg)"></view>
  <group id="Spot" class="layer-0" style="transform:matrix3d(1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,10.000000,1.000000);">
    <light model="urn:xml3d:light:spot">
      <float name="falloffAngle">0.3927</float>
@@ -61,5 +61,6 @@
   <a href="#" onclick="setDirection()">set direction as light parameter</a><br>
 
 </div>
-</body>
-</html>
+
+
+</body></html>

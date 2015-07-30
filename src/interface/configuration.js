@@ -96,7 +96,7 @@ classInfo['xml3d'] = {
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     getRenderInterface : {m: methods.xml3dGetRenderInterface},
-    activeView : {a: handlers.StringAttributeHandler}
+    view : {a: handlers.StringAttributeHandler, params: {defaultValue: "view"}}
     };
 
 classInfo['compute'] = {
@@ -531,17 +531,9 @@ classInfo['view'] = {
     onkeypress: {a: handlers.EventAttributeHandler},
     onkeydown: {a: handlers.EventAttributeHandler},
     onkeyup: {a: handlers.EventAttributeHandler},
-    position: {a: handlers.Vec3AttributeHandler, params: [0, 0, 0]},
-    orientation: {a: handlers.AxisAngleAttributeHandler, params: [0, 0, 1, 0]},
-    fieldOfView: {a: handlers.FloatAttributeHandler, params: 0.785398},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
-    setDirection: {m: methods.viewSetDirection},
-    setUpVector: {m: methods.viewSetUpVector},
-    lookAt: {m: methods.viewLookAt},
-    getDirection: {m: methods.viewGetDirection},
-    getUpVector: {m: methods.viewGetUpVector},
-    getViewMatrix: {m: methods.viewGetViewMatrix},
-    projection: {a: handlers.StringAttributeHandler}
+    getProjectionMatrix:{m: methods.viewGetProjectionMatrix},
+    getViewMatrix: {m: methods.viewGetViewMatrix}
     };
 
 module.exports = {

@@ -1,26 +1,26 @@
-<!DOCTYPE>
-<head>
-<title>XML3D Data Adapter Scene</title>
-<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
-<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+<!DOCTYPE html><html><head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Loading Asset</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
-  <xml3d id="xml3DElem" width="500px" height="300px" >
+  <xml3d id="xml3DElem" width="500px" height="300px">
       <defs>
 
            <material id="testmaterial" script="urn:xml3d:material:phong">
-               <float3 name="diffuseColor"      >1.0 0.5 0.5</float3>
-               <float  name="ambientIntensity"  >0.5</float>
+               <float3 name="diffuseColor">1.0 0.5 0.5</float3>
+               <float name="ambientIntensity">0.5</float>
            </material>
 
-           <asset id="inlineAsset" >
-                <assetdata name="material" >
-                   <texture name="diffuseTexture" id="testTex" >
-                       <img id="testImg" src="textures/blue.png" />
+           <asset id="inlineAsset">
+                <assetdata name="material">
+                   <texture name="diffuseTexture" id="testTex">
+                       <img id="testImg" src="textures/blue.png">
                    </texture>
                 </assetdata>
 
-                <assetdata name="base" >
+                <assetdata name="base">
                     <float3 name="position">-1.0 -1.0 -10.0  1.0 -1.0 -10.0  -1.0 1.0 -10.0  1.0 1.0 -10.0</float3>
                     <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
                 </assetdata>
@@ -30,7 +30,9 @@
            </asset>
 
        </defs>
-       <model src="#inlineAsset" ></model>
+       <view></view>
+       <model src="#inlineAsset"></model>
     </xml3d>
-</body>
-</html>
+
+
+</body></html>

@@ -5,7 +5,7 @@
   <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
   <body style="background-color: #FFF;width:500px">
-   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;">
+   <xml3d id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" view="#defaultView">
     <defs>
 
       <material id="phong1" script="urn:xml3d:material:phong">
@@ -33,7 +33,7 @@
 
     </defs>
 
-     <view id="defaultView" position="0 0 3"></view>
+     <view id="defaultView" style="transform: translate3d(0px, 0px, 3px)"></view>
      <group transform="#t_Lamp" id="mainlight">
        <light model="urn:xml3d:light:point">
          <float3 name="attenuation">1 0 0</float3>
@@ -51,4 +51,5 @@
     </xml3d>
   
  
+
 </body></html>

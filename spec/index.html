@@ -521,12 +521,80 @@
     </section>
   </section>
   <section>
-    <h3>Predefined camera models</h3>
+    <h3>Predefined view models</h3>
+    This section describes the currently available <dfn>predefined view models</dfn>.
     <section>
       <h4>Perspective</h4>
+        <p>URN: <code>urn:xml3d:view:perspective</code></p>
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>fovVertical</td>
+            <td>float</td>
+            <td>Math.PI / 4</td>
+            <td>The vertical field of view of the view frustum in radians</td>
+          </tr>
+          <tr>
+            <td>fovHorizontal</td>
+            <td>float</td>
+            <td>-</td>
+            <td>The horizontal field of view of the view frustum in radians</td>
+          </tr>
+          <tr>
+            <td>near</td>
+            <td>float</td>
+            <td>-</td>
+            <td>The distance of the near clipping plane (unitless)</td>
+          </tr>
+          <tr>
+            <td>far</td>
+            <td>float</td>
+            <td>-</td>
+            <td>The distance of the far clipping plane (unitless)</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="issue">TODO: Figure that explains the frustum</div>
+      <p>
+        The <dfn>perspective view model</dfn> defines a perspective view frustum based on the near and far planes and on a vertical or horizontal opening angle.
+        A small field of view roughly corresponds to a telephoto lens; a large field of view roughly corresponds to a wide-angle lens.
+        If fovHorizontal is given, the frustum is defined using this horizontal angle, otherwise fovVertical is used.
+        If the far or the near clipping place is not defined, the system will try to compute a useful value automatically based on the scene's dimension.
+      </p>
     </section>
     <section>
       <h4>Projective</h4>
+       <p>URN: <code>urn:xml3d:view:projective</code></p>
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>projectionMatrix</td>
+            <td>float4x4</td>
+            <td></td>
+            <td>The frustum described as projection matrix</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The projective view model defines a projective view frustum based on a projection matrix. This view model is typically used, if the
+        intrisic camera parameters are computed, e.g. from a webcam image using computer vision algorithms.
+      </p>
     </section>
   </section>
 
@@ -544,7 +612,7 @@
     <div class="propdef">
       <dl>
         <dt>
-          <span class="index-def" title="'display'"><a name="propdef-display" class="propdef-title"><strong>'display'</strong></a></span>
+          <span class="index-def" title="'display'"><strong>'display'</strong></span>
         </dt>
         <dd>
           <table class="propinfo" cellspacing="0" cellpadding="0">
@@ -606,7 +674,7 @@
     <div class="propdef">
       <dl>
         <dt>
-          <span class="index-def" title="'transform'"><a name="propdef-transform" class="propdef-title"><strong>'transform'</strong></a></span>
+          <span class="index-def" title="'transform'"><strong>'transform'</strong></span>
         </dt>
         <dd>
           <table class="propinfo" cellspacing="0" cellpadding="0">
@@ -809,7 +877,7 @@
           <dt>Categories:</dt>
           <dd><a href="#interactive-elements">Interactive element</a></dd>
         </dl>
-      <p>The XML3D element is the root element of an XML3D scene. XML3D will create a <code>canvas</code> element at this position in the DOM to
+      <p>The <dfn>xml3d element</dfn> is the root element of an XML3D scene. It will create a <code>canvas</code> element at this position in the DOM to
       display the rendered scene. CSS styles and event listeners from the XML3D element are also applied to the canvas allowing for mouse interaction with the
         XML3D scene. </p>
 
@@ -818,6 +886,11 @@
 
       <p>Because XML3D uses HTML ids to reference elements it is important to avoid duplicate ids. For example, a duplicate id for a <code>data</code> element that appears
       in two different XML3D scenes on the same page may lead to undefined behavior. </p>
+
+      <p>The <dfn id="attr-xml3d-view"><code>view</code></dfn> attribute, if present, must contain a selector that returns a <a>view element</a> as first matching element using  <code>querySelector</code> on the xml3d element.
+        The selection mechanism is described in the Selectors API [[selectors-api2]]. If the attribute is not present, or if the selector does not return a valid view element, the selector <code>view</code> is used instead,
+        returning the first view in the scene. If no view is available, the system must append a view element as first child of the xml3d element.
+      </p>
 
       <dl title='interface XML3DXml3dElement : HTMLElement' class='idl'>
         <dt>attribute unsigned long width</dt>
@@ -830,8 +903,7 @@
         </dd>
 
         <dt>attribute DOMString view</dt>
-        <dd>The view IDL attribute must reflect the respective content attribute of the same name. This defines the <a href="#the-view-element"><code>view</code></a> element
-          that XML3D will use when rendering the scene.</dd>
+        <dd>The view IDL attribute must reflect the respective content attribute of the same name.</dd>
 
         <dt>attribute Function onframedrawn</dt>
         <dd>Event listener to be executed whenever a new frame has been drawn. Is passed a <a>FrameDrawn</a> event.
@@ -986,50 +1058,55 @@
       <h4>The <code>view</code> element</h4>
         <dl class='element'>
             <dt>Categories:</dt>
-            <dd><a href="#transformable-elements">Transformable element</a></dd>
+          <dd><a href="#data-elements">Data element</a></dd>
+          <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
+      <p>The <dfn>view element</dfn> defines a viewport into the scene.
+      The used view (or camera) model that defines the projection of the scene to the XML3D canvas is defined by
+      the <a href="#attr-view-model" class="internalDFN">model</a> attribute. The view uses the <a href="h-generic-data-model">generic data model</a> to define
+      the parameters of the referenced view model (intrinsic camera parameters).
+      The coordinate system of the <span class="element-name">view</span> element defines the coordinate system for the view (aka extrinsic camera parameters).
+      </p>
+      <p>
+      The view model used by the view is defined by the <dfn id="attr-view-model">model</dfn> attribute.
+      If the <code>model</code> attribute is present, it must contain a valid non-empty URN referencing one of the <a>predefined view models</a>.
+      If the URN is empty or references an unknown view model, or if the <code>model</code> attribute is not present, the <a>perspective view model</a> is used.
+      <div class="note">Currently, XML3D supports predefined view models only. However, similar to materials, we envisage programmable view models for future versions of XML3D.
+      </div>
+
+      <p>This example illustrates the use of a view based on the predefined perspective view model using its default parameters:</p>
+       <pre class='example highlight'>
+&lt;view&gt;&lt;/view&gt;
+       </pre>
+       It defines a perspective frustum that conforms to the right-handed rules and points along the negative z-axis. In the following example, the default direction is
+      altered using CSS Transformations. Additionally, the perspective frustum has a different vertical field-of-view:
+       <pre class='example highlight'>
+&lt;view style=&quot;transform: rotate3d(0, 1, 0, 180deg);&quot;&gt;
+  &lt;float name=&quot;fovVertical&quot;&gt;0.5&lt;/float&gt;
+&lt;/view&gt;
+       </pre>
+
+     <p>This example illustrates the use of a projective view model using a custom projection matrix:</p>
+       <pre class='example highlight'>
+&lt;view model=&quot;urn:xml3d:view:projective&quot;&gt;
+  &lt;float4x4 name=&quot;projectionMatrix&quot;&gt;1.4485281705856323 0 0 0 0 2.4142134189605713 0 0 0 0 -9.523809432983398 -1 0 0 -94.18809509277344 0&lt;/float4x4&gt;
+&lt;/view&gt;
+       </pre>
+      <div class="note">XML3D does not define navigation through the scene by e.g. binding mouse events to changes to the active view element.
+        Instead, this is left to the application (or some navigation library), because the navigation is part of the interaction with the scene and is typically very application-specific.</div>
+
         <dl title='interface XML3DViewElement : HTMLElement' class='idl'>
-            <dt>attribute Vec3 position</dt>
-            <dd>The position of the camera in world space</dd>
-
-            <dt>attribute AxisAngle orientation</dt>
-            <dd>The orientation (rotation) of the camera in axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
-
-            <dt>attribute float fieldofview</dt>
-            <dd>The <b>vertical</b> field of view of this camera, expressed in radians.
-            </dd>
-
-            <dt>attribute DOMString projection</dt>
-            <dd>Overrides the camera's internal projection matrix. The attribute should contain a URI to a data element
-                supplying a float4x4 matrix named "projection". This can be used to, for example, create an orthographic camera. </dd>
-
+            <dt>attribute DOMString model</dt>
+            <dd>The <code>model</code> IDL attribute must reflect the <a href="#attr-view-model" class="internalDFN">model</a> content attribute.</dd>
             <dt>Mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this view element in world space.
-            </dd>
-
-            <dt>void setUpVector(Vec3 direction)</dt>
-            <dd>Change the up vector of the camera. This method changes the current orientation. The up vector will be
-                lost if the orientation is explicitly set at a later time.
-            </dd>
-
-            <dt>void setDirection(Vec3 direction)</dt>
-            <dd>Change the orientation of the camera to look along the given direction vector.
-            </dd>
-
-            <dt>Vec3 getDirection()</dt>
-            <dd>Returns the current direction of the camera, which is extracted from the orientation.
-            </dd>
-
-            <dt>Vec3 getUpVector()</dt>
-            <dd>Returns the current up vector of the camera, which is extracted from the orientation.
             </dd>
 
             <dt>Mat4 getViewMatrix()</dt>
             <dd>Returns the view matrix of the camera (the matrix used to transform from world to view space).
             </dd>
-
-            <dt>void lookAt(Vec3 point)</dt>
-            <dd>Change the orientation of the camera to look at the given point.
+            <dt>Mat4 getProjectionMatrix()</dt>
+            <dd>Returns the projection matrix for the frustum defined by this view.
             </dd>
         </dl>
     </section>
@@ -1044,17 +1121,15 @@
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
       <p>The <span class="element-name">light</span> element defines a light source in the scene that emits light based on the light model defined by
-      the <a href="#attr-light-model" class="internalDFN">model</a> attribute. The light uses the <a href="h-generic-data-model">generic data model</a> to define the parameters of the referenced material model.
+      the <a href="#attr-light-model" class="internalDFN">model</a> attribute. The light uses the <a href="h-generic-data-model">generic data model</a> to define the parameters of the referenced light model.
       The coordinate system of the <span class="element-name">light</span> element defines the base coordinate system for the light. However, the final position and direction of the light source can altered by
       specific parameters of the light model.
       </p>
       <p>A light affects all geometry elements within the same scene, i.e. with the same xml3d element as ancestor.</p>
-      <div class="issue">Do we need means for or at least a note about filtering the affected elements?</div>
       <p>
       The light model used by the light is defined by the  <dfn id="attr-light-model">model</dfn> attribute.
       If the <code>model</code> attribute is present, it must contain a valid non-empty URN referencing one of the <a href="#predefined-light-models">predefined light models</a>.
       If the URN is empty or references an unknown light model, or if the <code>model</code> attribute is not present, the <a href="#predefined-light-models">directional light</a> model is used.
-      <div class="issue">Should we ignore unknown light models instead?</div>
       <div class="note">Currently, XML3D supports predefined light models only. However, similar to materials, we envisage programmable light models for future versions of XML3D.
       </div>
 

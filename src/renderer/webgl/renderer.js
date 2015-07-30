@@ -68,9 +68,6 @@ var GLRenderer = function (element, canvasHandler) {
 
     this._canvasHandler = canvasHandler;
     var canvas = this._canvasHandler.getCanvas();
-    this.width = canvas.clientWidth;
-    this.height = canvas.clientHeight;
-
     this.context = new GLContext(canvas, this._canvasHandler.id);
     this.scene = new GLScene(this.context);
 
@@ -97,7 +94,9 @@ var GLRenderer = function (element, canvasHandler) {
     this.changeListener = new DataChangeListener(this);
 
     this.renderInterface = this.createRenderInterface();
-    this.createDefaultPipelines();
+
+    this.handleResizeEvent(canvas.clientWidth, canvas.clientHeight);
+
     Options.addObserver(this.onFlagsChange.bind(this));
 };
 
@@ -220,8 +219,8 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     calculateMatricesForRay: function (ray, viewMat, projMat) {
-        this.rayCamera.updatePosition(ray.origin.data);
-        this.rayCamera.updateOrientation(this.calculateOrientationForRayDirection(ray));
+        mat4.multiply(viewMat, mat4.fromTranslation(viewMat, ray.origin.data), this.calculateOrientationForRayDirection(ray));
+        this.rayCamera.setLocalMatrix(viewMat);
         this.rayCamera.getWorldToViewMatrix(viewMat);
         var aspect = this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight();
         this.rayCamera.getProjectionMatrix(projMat, aspect);
@@ -255,10 +254,10 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     renderToCanvas: function () {
-        this.needsDraw = false; //Set this early to avoid endless rendering if an exception is thrown during rendering
         this.prepareRendering();
         this.renderInterface.getRenderPipeline().render(this.scene);
         var stats = this.renderInterface.getRenderPipeline().getRenderStats();
+        this.needsDraw = false; //Set this late, because redraw might be triggered during rendering (TODO: avoid that!)
         XML3D.debug.logDebug("Rendered to Canvas");
         return stats;
     },

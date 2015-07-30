@@ -1,4 +1,5 @@
-var TransformableAdapter = require("./transformable.js");
+var SceneElementAdapter = require("./scene-element.js");
+
 var Events = require("../../../interface/notification.js");
 var Resource = require("../../../base/resourcemanager.js").Resource;
 
@@ -6,12 +7,11 @@ var Resource = require("../../../base/resourcemanager.js").Resource;
  * @constructor
  */
 var MeshRenderAdapter = function (factory, node) {
-    TransformableAdapter.call(this, factory, node, true, true);
-    this.style = window.getComputedStyle(node);
+    SceneElementAdapter.call(this, factory, node, true, true);
     this.createRenderNode();
 };
 
-XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
+XML3D.createClass(MeshRenderAdapter, SceneElementAdapter, {
 
     createRenderNode: function () {
         var dataAdapter = Resource.getAdapter(this.node, "data");
@@ -34,46 +34,18 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
-        TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+        SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
         if (name == "type") {
-            this.renderNode.setType(newValue);
+            this.renderNode.setType(this.getMeshType());
         }
-    },
-
-    styleChangedCallback: function() {
-        TransformableAdapter.prototype.styleChangedCallback.call();
-        this.updateVisibility();
-    },
-
-    updateVisibility: function() {
-        var none = this.style.getPropertyValue("display").trim() == "none";
-        var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
-        this.renderNode.setLocalVisible(!(none || hidden));
-        this.renderNode.setPickable(!none);
     },
 
     /**
      * @param {Events.Notification} evt
      */
     notifyChanged: function (evt) {
-        TransformableAdapter.prototype.notifyChanged.call(this, evt);
-        switch (evt.type) {
-            case  Events.NODE_INSERTED:
-                return;
-            case Events.THIS_REMOVED:
-                this.dispose();
-                return;
-            case Events.NODE_REMOVED:
-                // this.createPerObjectData();
-                return;
-        }
+        SceneElementAdapter.prototype.notifyChanged.call(this, evt);
     },
-
-    dispose: function () {
-        this.getRenderNode().remove();
-        this.clearAdapterHandles();
-    },
-
 
     // Interface methods
 

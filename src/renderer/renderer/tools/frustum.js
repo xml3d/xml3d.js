@@ -1,7 +1,7 @@
 var vec3 = require("gl-matrix").vec3;
 var tmp1 = vec3.create();
 var tmp2 = vec3.create();
-
+var assert = require("assert");
 
 /**
  *
@@ -14,20 +14,23 @@ var tmp2 = vec3.create();
  * @constructor
  */
 var Frustum = function (nearPlane, farPlane, fovx, fovy, aspect, orthographic) {
-    /**
-     *
-     * @type {boolean}
-     */
-    if (typeof(orthographic) === "undefined")
-        this.orthographic = false; else
-        this.orthographic = orthographic;
-    this.setFrustum(nearPlane, farPlane, fovx, fovy, aspect, this.orthographic);
+    this.setFrustum(nearPlane, farPlane, fovx, fovy, aspect, orthographic);
 };
 
 XML3D.extend(Frustum.prototype, {
-    setFrustum: function (nearPlane, farPlane, fovx, fovy, aspect, orthographic) {
-        if (fovx && fovy)
-            throw new Error("fovx and fovy cannot both be non-zero.");
+    /**
+     *
+     * @param nearPlane
+     * @param farPlane
+     * @param fovx Horizontal field of view in radians
+     * @param fovy Vertical field of view in radians
+     * @param aspect
+     * @param {bool?} orthographic
+     */
+    setFrustum: function (nearPlane, farPlane, fovx, fovy, aspect , orthographic) {
+        assert(nearPlane > 0 && farPlane > 0, "Near or far plane undefined or non-positive");
+        assert(!(fovx && fovy), "fovx and fovy cannot both be non-zero.");
+        assert(aspect > 0, "aspect cannot both be non-zero.");
 
         if (fovx) {
             this.right = nearPlane * Math.tan(fovx / 2);
@@ -43,10 +46,7 @@ XML3D.extend(Frustum.prototype, {
         this.nearPlane = nearPlane;
         this.farPlane = farPlane;
 
-        if (typeof(orthographic) === "undefined")
-            this.orthographic = false; else
-            this.orthographic = orthographic;
-
+        this.orthographic = orthographic == undefined ? false : orthographic;
     },
 
     getProjectionMatrix: function (matrix) {
@@ -119,6 +119,7 @@ XML3D.extend(Frustum.prototype, {
             m[14] = D;
             m[15] = 0;
         }
+        return matrix;
     },
 
     getPlanes: (function () {
@@ -214,22 +215,20 @@ XML3D.extend(FrustumTest.prototype, {
      * @param bbox
      * @returns {boolean}
      */
-    isBoxVisible: (function () {
-
-        return function (bbox) {
+    isBoxVisible:  function (bbox) {
             if (bbox.isEmpty())
                 return false;
-
 
             for (var i = 0; i < this.frustumPlanes.length; i++) {
                 var plane = this.frustumPlanes[i];
                 var normal = plane.normal;
-                var bbx = normal.x >= 0.0 ? bbox.max.x : bbox.min.x;
-                var bby = normal.y >= 0.0 ? bbox.max.y : bbox.min.y;
-                var bbz = normal.z >= 0.0 ? bbox.max.z : bbox.min.z;
+                var bbx = normal[0] >= 0.0 ? bbox.data[3] : bbox.data[0];
+                var bby = normal[1] >= 0.0 ? bbox.data[4] : bbox.data[1];
+                var bbz = normal[2] >= 0.0 ? bbox.data[5] : bbox.data[2];
 
                 // Compute the distance
-                var distance = bbx * normal.x + bby * normal.y + bbz * normal.z + plane.distance;
+                var distance = bbx * normal[0] + bby * normal[1] + bbz * normal[2] + plane.distance;
+                assert(!isNaN(distance));
 
                 // if highest point is below plane then all below.
                 if (distance < 0.0) {
@@ -237,8 +236,7 @@ XML3D.extend(FrustumTest.prototype, {
                 }
             }
             return true;
-        }
-    }())
+    }
 
 });
 

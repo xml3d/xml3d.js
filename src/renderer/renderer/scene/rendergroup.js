@@ -1,5 +1,8 @@
 var RenderNode = require("./rendernode.js");
 var Constants = require("./constants.js");
+var Frustum = require("../tools/frustum.js").Frustum;
+var vec3 = require("gl-matrix").vec3;
+var mat4 = require("gl-matrix").mat4;
 
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
@@ -13,6 +16,12 @@ var WORLD_BB_OFFSET = LOCAL_MATRIX_OFFSET + 16;
 /** @const */
 var ENTRY_SIZE = WORLD_BB_OFFSET + 6;
 
+
+   /** @const */
+    var CLIPPLANE_NEAR_MIN = 0.01;
+
+    /** @const */
+    var DEFAULT_FIELDOFVIEW = 45 / 180 * Math.PI;
 /**
  *
  * @constructor
@@ -36,11 +45,17 @@ XML3D.createClass(RenderGroup, RenderNode);
 
 XML3D.extend(RenderGroup.prototype, {
     getLocalMatrix: function (dest) {
-        this.getMat4FromPage(dest, LOCAL_MATRIX_OFFSET);
+        var o = this.offset + LOCAL_MATRIX_OFFSET;
+        for (var i = 0; i < 16; i++, o++) {
+            dest[i] = this.page[o];
+        }
     },
 
-    setLocalMatrix: function (sourceMat4) {
-        this.setMat4InPage(sourceMat4, LOCAL_MATRIX_OFFSET);
+    setLocalMatrix: function (source) {
+        var o = this.offset + LOCAL_MATRIX_OFFSET;
+        for (var i = 0; i < 16; i++, o++) {
+            this.page[o] = source[i];
+        }
         this.setTransformDirty();
         this.setBoundingBoxDirty();
     },

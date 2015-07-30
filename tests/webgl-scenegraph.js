@@ -1,29 +1,130 @@
+module("WebGL Scenegraph", {});
+
+test("Test mesh.getLocalBoundingBox", 2, function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering01.html");
+
+    var test = frameLoaded.then(function (doc) {
+        var group = doc.getElementById("myTransformedGroup");
+        group.style.display = 'inherit';
+        return doc.getElementById("xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var doc = s.ownerDocument;
+        var mesh = doc.getElementById("myTransformedMesh");
+        var bb = mesh.getLocalBoundingBox();
+        QUnit.closeArray(bb.data, [1, 1, 0, -1, -1, 0], "Local box is has max [1, 1, 0] and min [-1, -1, 0]");
+        return s;
+    });
+    test.fin(QUnit.start).done();
+});
+
+test("Test mesh.getWorldBoundingBox", 2, function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering01.html");
+
+    var test = frameLoaded.then(function (doc) {
+        var group = doc.getElementById("myTransformedGroup");
+        group.style.display = 'inherit';
+        return doc.getElementById("xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var doc = s.ownerDocument;
+        var mesh = doc.getElementById("myTransformedMesh");
+        var bb = mesh.getWorldBoundingBox();
+        QUnit.closeArray(bb.data, [1, 1, -3, -1, -1, -3], "World box has max [1, 1, -3] and min [-1, -1, -3]");
+        return s;
+    });
+    test.fin(QUnit.start).done();
+});
+
+test("Change active view via script", 6, function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering01.html");
+
+    var test = frameLoaded.then(function (doc) {
+        var s = doc.getElementById("xml3DElem");
+        equal(s.view, "#defaultView", "Initial active view is #default"); // 3
+        var v = doc.getElementById("defaultView");
+        var m = XML3D.math.mat4.create();
+        QUnit.closeMatrix(v.getViewMatrix(), XML3D.math.mat4.translate(m, m, [0, 0, -3]), EPSILON, "Check view matrix"); // 4
+        s.view = "#viewOrientationTest";
+        XML3D.flushDOMChanges();
+        equal(s.view, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 5
+        var h = getHandler(s);
+        ok(h.renderer.needsDraw, "Redraw required");
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        var h = getHandler(s);
+        ok(!h.renderer.needsDraw, "Redraw not required");
+    });
+    test.fin(QUnit.start).done();
+});
+
+test("Simple add/remove mesh", 11, function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering01.html");
+    var scene, mesh, renderNode;
+
+    var test = frameLoaded.then(function (doc) {
+        var s = doc.getElementById("xml3DElem");
+        mesh = doc.createElement("mesh");
+        mesh.setAttribute("src", "#meshdata");
+
+        // Add a mesh
+        s.appendChild(mesh);
+        renderNode = getWebGLAdapter(mesh).renderNode;
+        scene = renderNode.scene;
+        equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        notEqual(scene.ready.indexOf(renderNode), -1, "renderNode in 'Ready' after draw");
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 40, 40);
+        deepEqual(actual, [255, 0, 0, 255], "Red at 40,40 [add mesh]");
+
+        // Remove the mesh
+        s.removeChild(mesh);
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        var adapter = getWebGLAdapter(mesh);
+        ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
+        equal(scene.ready.indexOf(renderNode), -1, "renderNode not in ready list after dispose");
+        equal(scene.queue.indexOf(renderNode), -1, "renderNode not in queue list after dispose");
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 40, 40);
+        deepEqual(actual, [0, 0, 0, 0], "Transparent at 40,40 [remove mesh]");
+        s.appendChild(mesh);
+        equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        notEqual(scene.ready.indexOf(getWebGLAdapter(mesh).renderNode), -1, "renderNode in 'Ready' after draw");
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 40, 40);
+        deepEqual(actual, [255, 0, 0, 255], "Red at 40,40 [re-add mesh]");
+        return s;
+    });
+    test.fin(QUnit.start).done();
+});
+
 module("WebGL Scenegraph", {
-    setup : function() {
+    setup: function () {
         stop();
         var that = this;
-        this.cb = function(e) {
+        this.cb = function (e) {
             ok(true, "Scene loaded");
             that.win = document.getElementById("xml3dframe").contentWindow;
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-rendering01.html"+window.location.search, this.cb);
-    },
-    teardown : function() {
+        loadDocument("scenes/webgl-rendering01.html" + window.location.search, this.cb);
+    }, teardown: function () {
         var v = document.getElementById("xml3dframe");
         v.removeEventListener("load", this.cb, true);
-    },
-    isRenderNodeInScene: function(name, scene) {
+    }, isRenderNodeInScene: function (name, scene) {
         var found = false;
-        scene.traverse(function(node) {
+        scene.traverse(function (node) {
             found = found || node.name == name;
         });
         return found;
     }
 
 });
-
 
 
 function getCanvasId(x) {
@@ -48,106 +149,9 @@ function getContextForXml3DElement(x) {
     return renderer ? renderer.context.gl : null;
 };
 
-test("Change active view via script", 8, function() {
-    // 1: Found frame
-    // 2: Scene loaded
-    var x = this.doc.getElementById("xml3DElem");
-    var h = getHandler(x);
-    x.addEventListener("framedrawn", function(n) {
-            ok("Redraw was triggered"); // 7
-            ok(!h.renderer.needsDraw, "Redraw not required"); // 8
-            start();
-    });
-    stop();
-    equal(x.activeView, "#defaultView", "Initial active view is #default"); // 3
-
-    var v = this.doc.getElementById("defaultView");
-    var m = XML3D.math.mat4.create();
-    QUnit.closeMatrix(v.getViewMatrix(), XML3D.math.mat4.translate(m, m, [0,0,-3]), EPSILON, "Check view matrix"); // 4
-
-    x.activeView = "#viewOrientationTest";
-    this.win.XML3D.flushDOMChanges();
-    equal(x.activeView, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 5
-    ok(h.renderer.needsDraw, "Redraw required"); // 6, fails in < 920181
-});
 
 
-test("Test mesh.getLocalBoundingBox", 3, function() {
-    // 1: Found frame
-    // 2: Scene loaded
-    var x = this.doc.getElementById("xml3DElem");
-    var h = getHandler(x);
-    var group = this.doc.getElementById("myTransformedGroup");
-    var mesh = this.doc.getElementById("myTransformedMesh");
-    x.addEventListener("framedrawn", function(n) {
-        var bb = mesh.getLocalBoundingBox();
-        QUnit.closeArray(bb.data, [1,1,0,-1,-1,0], "Local box is has max [1, 1, 0] and min [-1, -1, 0]");
-        start();
-    });
-    stop();
-    group.style.display = 'inherit';
-
-});
-
-test("Test mesh.getWorldBoundingBox", 3, function() {
-    // 1: Found frame
-    // 2: Scene loaded
-    var x = this.doc.getElementById("xml3DElem");
-    var h = getHandler(x);
-    var group = this.doc.getElementById("myTransformedGroup");
-    var mesh = this.doc.getElementById("myTransformedMesh");
-    x.addEventListener("framedrawn", function(n) {
-        var bb = mesh.getWorldBoundingBox();
-        QUnit.closeArray(bb.data, [1,1,-3,-1,-1,-3], "World box has max [1, 1, -3] and min [-1, -1, -3]");
-
-        start();
-    });
-    stop();
-    group.style.display = 'inherit';
-
-});
-
-
-test("Simple add/remove mesh", 12, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-    var h = getHandler(x);
-
-    var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
-    mesh.setAttribute("src", "#meshdata");
-
-    // Add a mesh
-    x.appendChild(mesh);
-    var renderNode = getWebGLAdapter(mesh).renderNode;
-    var scene = renderNode.scene;
-    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
-    h.draw();
-    notEqual(scene.ready.indexOf(renderNode), -1, "renderNode in 'Ready' after draw");
-    actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add mesh]");
-
-    // Remove the mesh
-    var adapter = getWebGLAdapter(mesh);
-    x.removeChild(mesh);
-    ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
-    equal(scene.ready.indexOf(adapter.renderNode), -1, "renderNode not in ready list after dispose");
-    equal(scene.queue.indexOf(adapter.renderNode), -1, "renderNode not in queue list after dispose");
-    h.draw();
-    actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove mesh]");
-
-    // Add the mesh again
-    x.appendChild(mesh);
-    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
-    h.draw();
-    notEqual(scene.ready.indexOf(getWebGLAdapter(mesh).renderNode), -1, "renderNode in 'Ready' after draw");
-    actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [re-add mesh]");
-
-
-});
-
-test("Simple add/remove group with mesh", 10, function() {
+test("Simple add/remove group with mesh", 10, function () {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -166,7 +170,7 @@ test("Simple add/remove group with mesh", 10, function() {
     h.draw();
     notEqual(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
+    deepEqual(actual, [255, 0, 0, 255], "Red at 40,40 [add group with mesh]");
 
     var adapter = getWebGLAdapter(mesh);
     // Remove group
@@ -174,7 +178,7 @@ test("Simple add/remove group with mesh", 10, function() {
     ok(!getWebGLAdapter(group), "Group adapter is removed");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
+    deepEqual(actual, [0, 0, 0, 0], "Transparent at 40,40 [remove group]");
 
     // Re-add group
     x.appendChild(group);
@@ -182,14 +186,14 @@ test("Simple add/remove group with mesh", 10, function() {
     h.draw();
     notEqual(scene.ready.indexOf(renderNode), 1, "renderNode not in 'Ready' before draw");
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
+    deepEqual(actual, [255, 0, 0, 255], "Red at 40,40 [add group with mesh]");
 });
 
-test("Simple add/remove transformed group with mesh", 17, function() {
+test("Simple add/remove transformed group with mesh", 17, function () {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
-    x.setAttribute("activeView", "#identView");
+    x.setAttribute("view", "#identView");
     var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
     mesh.setAttribute("id", "addedMesh");
     mesh.setAttribute("src", "#meshdata");
@@ -213,7 +217,7 @@ test("Simple add/remove transformed group with mesh", 17, function() {
     h.draw();
     notEqual(scene.ready.indexOf(renderNode), -1, "renderNode in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
+    deepEqual(actual, [255, 0, 0, 255], "Red at 40,40 [add group with mesh]");
 
     // Remove group
     var adapter = getWebGLAdapter(mesh);
@@ -228,7 +232,7 @@ test("Simple add/remove transformed group with mesh", 17, function() {
     //ok(adapter.renderNode.is("Disposed"), "renderNode in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
+    deepEqual(actual, [0, 0, 0, 0], "Transparent at 40,40 [remove group]");
 
     // Re-add group
     x.appendChild(group);
@@ -240,12 +244,12 @@ test("Simple add/remove transformed group with mesh", 17, function() {
     h.draw();
     notEqual(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
+    deepEqual(actual, [255, 0, 0, 255], "Red at 40,40 [add group with mesh]");
 });
 
 module("WebGL Scenegraph", {});
 
-test("Add invisible groups and meshes", 6, function() {
+test("Add invisible groups and meshes", 6, function () {
     stop();
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering01.html");
     var mesh, group;
@@ -345,8 +349,8 @@ test("Change material via script", 5, function () {
 
 });
 
-test("Change visible/material for nested groups", 7, function() {
-     stop();
+test("Change visible/material for nested groups", 7, function () {
+    stop();
 
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering01.html");
     var outerGroup, innerGroup;
@@ -398,7 +402,7 @@ test("Change visible/material for nested groups", 7, function() {
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 40, 40);
-        QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON,  "Blue at 40,40 [child material overrides new parent material]");
+        QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Blue at 40,40 [child material overrides new parent material]");
         return s;
     });
 
@@ -420,7 +424,7 @@ test("Camera with group transforms", 6, function () {
 
         //Simple test of camera orientation to check that view matrix is built correctly
         camtest.style.display = 'inherit';
-        scene.setAttribute("activeView", "#viewOrientationTest");
+        scene.setAttribute("view", "#viewOrientationTest");
 
         return scene;
     }).then(promiseSceneRendered).then(function (s) {
@@ -430,7 +434,7 @@ test("Camera with group transforms", 6, function () {
     }).then(function (s) {
         camtest.style.display = 'none';
         group5.style.display = 'inherit';
-        s.setAttribute("activeView", "#transformTestView");
+        s.setAttribute("view", "#transformTestView");
 
         return s;
     }).then(promiseSceneRendered).then(function (s) {
@@ -446,7 +450,7 @@ test("Camera with group transforms", 6, function () {
         QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Camera facing top of cube, Blue")
         return s;
     }).then(function (s) {
-        view.setAttribute("orientation", "0 1 0 0");
+        view.setAttribute("style", "transform: rotate3d(0, 1, 0, 0deg)");
         camTransform.setAttribute("translation", "0 -6 0");
         return s;
     }).then(promiseSceneRendered).then(function (s) {
@@ -454,7 +458,7 @@ test("Camera with group transforms", 6, function () {
         QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Camera facing bottom of cube, Purple")
         return s;
     }).then(function (s) {
-        view.setAttribute("orientation", "0 0 0 0");
+        view.setAttribute("style", "");
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
@@ -542,7 +546,7 @@ test("Nested transforms", 7, function () {
 
 });
 
-test("Camera setDirection/upVector", 4, function () {
+test("Camera setDirection/upVector", 2, function () {
     stop();
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering01.html");
     var view;
@@ -555,15 +559,15 @@ test("Camera setDirection/upVector", 4, function () {
         view = doc.getElementById("viewOrientationTest");
 
         camtest.style.display = 'inherit';
-        view.setAttribute("orientation", "0 0 1 0");
-        scene.setAttribute("activeView", "#viewOrientationTest");
+        view.setAttribute("style", "transform: rotate3d(0, 0, 1, 0deg)");
+        scene.setAttribute("view", "#viewOrientationTest");
 
         return scene;
     }).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
         QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "Camera looking down z axis, transparent");
         return s;
-    }).then(function (s) {
+    });/*.then(function (s) {
         view.setDirection(XML3D.Vec3.fromValues(1, 0, 0));
         return s;
     }).then(promiseSceneRendered).then(function (s) {
@@ -578,13 +582,13 @@ test("Camera setDirection/upVector", 4, function () {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
         QUnit.closeArray(pick, [255, 255, 0, 255], PIXEL_EPSILON, "Camera looking left, yellow");
         return s;
-    });
+    });*/
     test.fin(QUnit.start).done();
 
 });
 
-test("Add a mesh dynamically", 3, function() {
-     stop();
+test("Add a mesh dynamically", 3, function () {
+    stop();
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering01.html");
     var d, g;
 

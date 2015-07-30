@@ -115,8 +115,7 @@ test("Centered View, changing direction and rotating", 20, function() {
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
     this.doc.getElementById("light_direction").innerHTML = "0 0 -1";
-    this.doc.getElementById("t_light").rotation.axis.set(new XML3DVec3(1.0, 1.0, 0));
-    this.doc.getElementById("t_light").rotation.angle = -0.84;
+    this.doc.getElementById("t_light").rotation = XML3D.AxisAngle([1 ,1 , 0, -0.84]);
     h.draw();
     actual = win.getPixelValue(gl, 150,         100);
     deepEqual(actual, [68, 136, 68, 255], "Rotate Light, light test 1");

@@ -137,7 +137,8 @@ function recursiveDataAdapterConstruction(adapter, systemDataAdapter) {
             //Here we check for data nodes with sys flag set
         	if (child.sys != undefined){
         	    //Check if a system parameter with this name exists
-        	    if (systemDataAdapter.xflowDataNode._children[0].getOutputNames().indexOf(child.name)>-1) {
+                // TODO: consider both, user defined and internal sys data node here!
+        	    if (systemDataAdapter.xflowDataNode.getOutputNames().indexOf(child.name)>-1) {
             		filterNames.push(child.name);
                 } else {
                     XML3D.debug.logWarning("Parameter "+ child.name + " doesn't exist in global parameters!");
@@ -146,7 +147,8 @@ function recursiveDataAdapterConstruction(adapter, systemDataAdapter) {
         }
 
     }
-    
+
+    // TODO: Move this to the XML3D DataAdapter
     //check if this node is the user defined system node, then we should not add system node to it
     var userDefinedSystemDataUri = Resource.getAbsoluteURI( systemDataAdapter.node.ownerDocument.URL, systemDataAdapter.node.getAttribute("sys"));
     if (userDefinedSystemDataUri && adapter.node.getAttribute("id") == userDefinedSystemDataUri.fragment){

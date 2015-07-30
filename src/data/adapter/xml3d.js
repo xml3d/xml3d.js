@@ -35,15 +35,24 @@ XML3DDataAdapter.prototype.init = function()
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
 	this.setDefaultValues();
-	
+
+    // TODO: create accessor for internal sys data and overall sys data (including user defined stuff)
+
 	var systemDataNodeURI = this.node.getAttribute("sys");
 	if (systemDataNodeURI){
 		var systemDataNodeHandler = this.getAdapterHandle(systemDataNodeURI);
+        // Remove previously added sys data node and add to xflowDataNode as second child.
+        addUserDefinedThingee()
 		var xflowDataNode = new DataNode(false); // User defined system data node
 		xflowDataNode.sourceNode = systemDataNodeHandler.adapter.getXflowNode();
 		this.xflowDataNode.appendChild(xflowDataNode);
 	}
 	
+};
+
+XML3DDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newValue) {
+    // TODO: listen for attribute sys changed. Remove sys node from new referenced node.
+    // Add new reference as sourcenode for user sys node. Readd sys node to old user sys node.
 };
 
 XML3DDataAdapter.prototype.setDefaultValues = function(){

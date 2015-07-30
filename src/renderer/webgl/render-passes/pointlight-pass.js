@@ -37,7 +37,7 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
             var gl = this.renderInterface.context.gl, target = this.output, width = target.getWidth(), height = target.getHeight(), aspect = width / height, frustum = this.light.getFrustum(aspect), program = this.program;
             for (var side = 0; side < target.glSides.length; side++) {
                 //calculate rotationmatrix for that face
-                var mat_rot = new XML3D.Mat4();
+                var mat_rot = mat4.create();
 
                 if (side == 0) { //look into +x o
                     mat_rot[0] = 0;     mat_rot[1] = 0;     mat_rot[2] = -1;
@@ -81,7 +81,7 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
 
                 this.light.model.getLightViewMatrix(c_viewMat_tmp);
                 //rotate for the apropriate side of the cubemap
-                XML3D.math.mat4.mul(c_viewMat_tmp, mat_rot.data, c_viewMat_tmp);
+                XML3D.math.mat4.mul(c_viewMat_tmp, mat_rot, c_viewMat_tmp);
 
                 frustum.getProjectionMatrix(c_projMat_tmp, aspect);
 

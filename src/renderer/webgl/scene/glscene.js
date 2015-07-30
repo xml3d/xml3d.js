@@ -194,7 +194,7 @@ XML3D.extend(GLScene.prototype, {
 
     updateReadyObjectsFromLightView: (function() {
         var c_viewToWorldMatrix = XML3D.math.mat4.create();
-        var c_bbox = XML3D.math.bbox.create();
+        var c_bbox = new XML3D.Box();
         var c_frustumTest = new FrustumTest();
 
         return function (lightmodel, frustum, c_worldToViewMatrix, c_projMat_tmp) {

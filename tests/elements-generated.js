@@ -129,7 +129,7 @@ test("&lt;material&gt; interface test", function() {
     equal(typeof e.getProtoInfo, "function", "getProtoInfo is of type 'function'");
     equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
     equal(typeof e.getResult, "function", "getResult is of type 'function'");
-    equal(typeof e.script, "string", "script is of type 'string'");
+    equal(typeof e.model, "string", "model is of type 'string'");
     equal(typeof e.src, "string", "src is of type 'string'");
 });
 test("&lt;light&gt; interface test", function() {

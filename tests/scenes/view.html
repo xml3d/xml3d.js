@@ -10,7 +10,7 @@
 <div>
   <xml3d id="myxml3d" style="width: 500px; height: 300px; background-color: black;" view="#view_right">
     <defs>
-      <material id="material_front" script="urn:xml3d:material:phong">
+      <material id="material_front" model="urn:xml3d:material:phong">
         <float3 name="diffuseColor">0 0 1</float3>
         <float name="ambientIntensity">1</float>
         <texture name="diffuseTexture" wrap="repeat">
@@ -23,7 +23,7 @@
         <float3 name="normal">0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0</float3>
         <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0</float2>
       </data>
-      <material id="material_right" script="urn:xml3d:material:phong">
+      <material id="material_right" model="urn:xml3d:material:phong">
         <float3 name="diffuseColor">1 0 0</float3>
         <float name="ambientIntensity">1</float>
         <texture name="diffuseTexture" wrap="repeat">
@@ -36,7 +36,7 @@
         <float3 name="normal">-1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0</float3>
         <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0</float2>
       </data>
-      <material id="material_rear" script="urn:xml3d:material:phong">
+      <material id="material_rear" model="urn:xml3d:material:phong">
         <float3 name="diffuseColor">1 1 0</float3>
         <float name="ambientIntensity">1</float>
         <texture name="diffuseTexture" wrap="repeat">
@@ -49,7 +49,7 @@
         <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0</float2>
       </data>
-      <material id="material_left" script="urn:xml3d:material:phong">
+      <material id="material_left" model="urn:xml3d:material:phong">
         <float3 name="diffuseColor">0 1 1</float3>
         <float name="ambientIntensity">1</float>
         <texture name="diffuseTexture" wrap="repeat">
@@ -62,7 +62,7 @@
         <float3 name="normal">1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0</float3>
         <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0</float2>
       </data>
-      <material id="material_top" script="urn:xml3d:material:phong">
+      <material id="material_top" model="urn:xml3d:material:phong">
         <float3 name="diffuseColor">0 1 0</float3>
         <float name="ambientIntensity">1</float>
         <texture name="diffuseTexture" wrap="repeat">
@@ -75,7 +75,7 @@
         <float3 name="normal">0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0</float3>
         <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0</float2>
       </data>
-      <material id="material_bottom" script="urn:xml3d:material:phong">
+      <material id="material_bottom" model="urn:xml3d:material:phong">
         <float3 name="diffuseColor">1 0 1</float3>
         <float name="ambientIntensity">1</float>
         <texture name="diffuseTexture" wrap="repeat">
@@ -157,6 +157,7 @@
 
   }
 </script>
+
 
 
 

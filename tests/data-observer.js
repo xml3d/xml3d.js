@@ -12,7 +12,7 @@ module("XML3DDataObserver tests", {
             that.window = document.getElementById("xml3dframe").contentWindow;
             start();
         };
-        loadDocument("scenes/xml3d-observer.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/xml3d-observer.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

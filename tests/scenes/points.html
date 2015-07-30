@@ -1,0 +1,74 @@
+<html><head>
+<title>XML3D Point Tests</title>
+<link rel="stylesheet" type="text/css" media="all" href="frame.css">
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="600px" height="400px" style="background: black">
+
+    <defs>
+      <data id="pointData">
+        <float3 name="position">0 -1 0   1 0 0   -1 0 0   0 1 0</float3>
+        <float3 name="color">1 1 1  0.8 0.8 0.8  0.6 0.6 0.6  0.4 0.4 0.4</float3>
+        <float2 name="texcoord">0 0  0.5 0   0 0.5   0.5 0.5</float2>
+        <float name="pointSize">0.5</float>
+      </data>
+    </defs>
+
+    <material id="pointColormaterial" model="urn:xml3d:material:point">
+        <bool name="useVertexColor">true</bool>
+    </material>
+    <material id="pointTexmaterial" model="urn:xml3d:material:point">
+      <float name="texCoordSize">0.5 0.5</float>
+      <texture name="diffuseTexture">
+          <img src="textures/points.png">
+      </texture>
+    </material>
+    <material id="pointTexColormaterial" model="urn:xml3d:material:point">
+      <bool name="useVertexColor">true</bool>
+      <float name="texCoordSize">0.5 0.5</float>
+      <texture name="diffuseTexture">
+          <img src="textures/points.png">
+      </texture>
+    </material>
+
+
+    <group style="transform: translateZ(-15px)">
+        <group material="#pointColormaterial">
+            <mesh type="points" src="#pointData"></mesh>
+        </group>
+        <group style="transform: translateX(-4px)" material="#pointTexmaterial">
+            <mesh type="points" src="#pointData"></mesh>
+        </group>
+        <group style="transform: translateX(4px)" material="#pointTexColormaterial">
+            <mesh type="points" src="#pointData"></mesh>
+        </group>
+    </group>
+    <group style="transform: translate3d(0, 4px, -20px)">
+      <group material="#pointColormaterial">
+          <mesh type="points" src="#pointData"></mesh>
+      </group>
+      <group style="transform: translateX(-4px)" material="#pointTexmaterial">
+          <mesh type="points" src="#pointData">
+      </mesh></group>
+      <group style="transform: translateX(4px)" material="#pointTexColormaterial">
+          <mesh type="points" src="#pointData">
+      </mesh></group>
+    </group>
+    <group style="transform: translate3d(0, -3px, -12px)">
+      <group material="#pointColormaterial">
+          <mesh type="points" src="#pointData">
+      </mesh></group>
+      <group style="transform: translateX(-4px)" material="#pointTexmaterial">
+          <mesh type="points" src="#pointData">
+      </mesh></group>
+      <group style="transform: translateX(4px)" material="#pointTexColormaterial">
+          <mesh type="points" src="#pointData">
+      </mesh></group>
+    </group>
+
+
+  </xml3d>
+
+
+</body></html>

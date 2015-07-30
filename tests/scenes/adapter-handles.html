@@ -1,0 +1,35 @@
+<html>
+<head>
+  <title>XML3D Adapter Handles Tests</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+
+<xml3d id="xml3dTest" width="320px" height="240px" style="background-color: #ccc">
+  <defs>
+    <transform id="transform1" translation="-3 2.5 0"></transform>
+    <data id="data1">
+      <int name="index">0 1 2 1 2 3</int>
+      <float3 name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+      <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+
+    <material id="material1" model="urn:xml3d:material:flat">
+      <float3 name="diffuseColor">0 0 0</float3>
+    </material>
+
+  </defs>
+  <view id="myView"></view>
+  <light id="myLight"></light>
+
+  <group id="group1" transform="#transform1" material="#material1">
+    <mesh id="mesh1" type="triangles" src="#data1"></mesh>
+  </group>
+
+</xml3d>
+
+
+</body>
+</html>

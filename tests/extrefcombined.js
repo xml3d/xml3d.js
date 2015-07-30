@@ -2,7 +2,7 @@ module("External References", {
     setup : function() {
         var that = this;
         stop();
-        Q.fcall(promiseIFrameLoaded, "scenes/extref-combined.html?xml3d-loglevel=debug").then(function (doc) {
+        Q.fcall(promiseIFrameLoaded, "scenes/extref-combined.html").then(function (doc) {
             that.doc = doc;
             ok(true, "Scene loaded");
         }).fin(QUnit.start).done();

@@ -9,31 +9,31 @@
    <xml3d id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" view="#defaultView">
     <defs>   
    
-    <material id="texmaterial1" script="urn:xml3d:material:phong">
+    <material id="texmaterial1" model="urn:xml3d:material:phong">
         <texture id="tex1" name="diffuseTexture">
             <img id="tex1img" src="textures/yellow.png">
         </texture>
     </material>
     
-    <material id="npotTexmaterial" script="urn:xml3d:material:phong">
+    <material id="npotTexmaterial" model="urn:xml3d:material:phong">
         <float3 name="specularColor">0 0 0</float3>
         <texture id="npottex" name="diffuseTexture" wrap="repeat">
             <img id="npotteximg" src="textures/bluegreen.png">
         </texture>
     </material>
      
-    <material id="diffuseTexmaterial" script="urn:xml3d:material:diffuse">
+    <material id="diffuseTexmaterial" model="urn:xml3d:material:diffuse">
         <texture id="tex1" name="diffuseTexture">
             <img id="tex1img" src="textures/yellow.png">
         </texture>
     </material>
     
-    <material id="custommaterial" script="urn:xml3d:material:customtest">
+    <material id="custommaterial" model="urn:xml3d:material:customtest">
     </material>
-    <material id="custommaterial2" script="urn:xml3d:material:customtest">
+    <material id="custommaterial2" model="urn:xml3d:material:customtest">
         <float3 name="someColor">0 0 1</float3>
     </material>
-    <material id="diffusematerial" script="urn:xml3d:material:diffuse">
+    <material id="diffusematerial" model="urn:xml3d:material:diffuse">
         <float3 name="diffuseColor">1 1 1</float3>
         <float name="ambientIntensity">1</float>
         <bool name="useVertexColor">true</bool>

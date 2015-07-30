@@ -20,7 +20,7 @@
         <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
       </assetmesh>
     </asset>
-    <material id="material" script="urn:xml3d:material:phong">
+    <material id="material" model="urn:xml3d:material:phong">
       <float3 name="emissiveColor">0 0 1</float3>
       <float3 name="diffuseColor">0 1 0</float3>
       <float3 name="customColor">0 1 1</float3>
@@ -37,27 +37,27 @@
 <script>
   var material = document.querySelector("#material");
   var setMatte = function () {
-    material.setAttribute("script", "urn:xml3d:material:matte");
+    material.setAttribute("model", "urn:xml3d:material:matte");
   };
 
   var setPhong = function () {
-    material.setAttribute("script", "urn:xml3d:material:phong");
+    material.setAttribute("model", "urn:xml3d:material:phong");
   };
 
   var setUnknown = function () {
-    material.setAttribute("script", "urn:xml3d:material:unknown");
+    material.setAttribute("model", "urn:xml3d:material:unknown");
   };
 
   var setShadeInternal = function () {
-    material.setAttribute("script", "#customMaterial");
+    material.setAttribute("model", "#customMaterial");
   };
 
   var setShadeExternal = function () {
-    material.setAttribute("script", "assets/plane.xml#customMaterial");
+    material.setAttribute("model", "assets/plane.xml#customMaterial");
   };
 
   var setShadeExternalJS = function () {
-    material.setAttribute("script", "assets/materials/yellow.js");
+    material.setAttribute("model", "assets/materials/yellow.js");
   };
 
   var changeInternalShadeJS = function () {

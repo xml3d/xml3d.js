@@ -44,6 +44,9 @@
         if (!viewElement) {
             throw("Must provide a view element when initializing the StandardCamera!");
         }
+        if (viewElement.hasAttribute("style")) {
+            XML3D.debug.logWarning("This camera controller does not support CSS transforms, unexpected things may happen! Try using a <transform> element instead.");
+        }
         opt = opt || {};
         this.view = viewElement;
         this.xml3d = this.getXML3DForView(viewElement);
@@ -480,8 +483,8 @@
     };
 
     ViewInterface.prototype.getTransformForView = function(view) {
-        if (view.parentElement.hasAttribute("transform") && view.parentElement.getAttribute("transform").match(/Generated_Camera_Transform/)) {
-            return document.querySelector(view.parentElement.getAttribute("transform"));
+        if (view.hasAttribute("transform")) {
+            return document.querySelector(view.getAttribute("transform"));
         }
         return this.createTransformForView(view);
     };
@@ -489,14 +492,11 @@
     ViewInterface.prototype.createTransformForView = (function() {
         var viewCount = 0;
         return function(view) {
-            var group = document.createElement("group");
             var transform = document.createElement("transform");
             var tid = "Generated_Camera_Transform_" + viewCount++;
             transform.setAttribute("id", tid);
-            group.appendChild(transform);
-            group.setAttribute("transform", "#"+tid);
-            view.parentElement.appendChild(group);
-            group.appendChild(view);
+            view.parentElement.appendChild(transform);
+            view.setAttribute("transform", "#"+tid);
             return transform;
         }
     })();

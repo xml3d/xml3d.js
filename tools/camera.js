@@ -142,11 +142,11 @@
         ev.returnValue = false;
     };
 
-    XML3D.StandardCamera.prototype.NO_MOUSE_ACTION = 0;
-    XML3D.StandardCamera.prototype.TRANSLATE = 1;
-    XML3D.StandardCamera.prototype.DOLLY = 2;
-    XML3D.StandardCamera.prototype.ROTATE = 3;
-    XML3D.StandardCamera.prototype.LOOKAROUND = 4;
+    XML3D.StandardCamera.prototype.NO_MOUSE_ACTION = "no_action";
+    XML3D.StandardCamera.prototype.TRANSLATE = "translate";
+    XML3D.StandardCamera.prototype.DOLLY = "dolly";
+    XML3D.StandardCamera.prototype.ROTATE = "rotate";
+    XML3D.StandardCamera.prototype.LOOKAROUND = "lookaround";
 
     XML3D.StandardCamera.prototype.mousePressEvent = function(event) {
 
@@ -190,18 +190,6 @@
 
         this.action = this.NO_MOUSE_ACTION;
         return false;
-    };
-
-    XML3D.StandardCamera.prototype.computeMouseSpeed = function(event) {
-        var dx = (event.pageX - this.prevPos.x);
-        var dy = (event.pageY - this.prevPos.y);
-        var dist = Math.sqrt(+dx*dx + dy*+dy);
-        this.delay = this.timer.restart();
-        if (this.delay == 0)
-            this.mouseSpeed = dist;
-          else
-            this.mouseSpeed = dist/this.delay;
-        XML3D.debug.logWarning("Mouse speed: " + this.mouseSpeed);
     };
 
     XML3D.StandardCamera.prototype.mouseMoveEvent = function(event, camera) {
@@ -484,6 +472,7 @@
 
     ViewInterface.prototype.getTransformForView = function(view) {
         if (view.hasAttribute("transform")) {
+            //If the view element already has a transform we can reuse that
             return document.querySelector(view.getAttribute("transform"));
         }
         return this.createTransformForView(view);

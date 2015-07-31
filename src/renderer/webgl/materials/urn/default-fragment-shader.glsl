@@ -288,8 +288,8 @@ struct SurfaceColors {
 
 SurfaceColors getSurfaceColors(SurfaceParameters parameters) {
 	vec3 linearBaseColor = getBaseColor();
-	float luminance = luminance(linearBaseColor);
-	vec3 tint = luminance > 0.0 ? linearBaseColor / luminance : vec3(1.0);
+	float lum = luminance(linearBaseColor);
+	vec3 tint = lum > 0.0 ? linearBaseColor / lum : vec3(1.0);
 	vec3 specularColor = mix(parameters.specular * 0.8 * mix(vec3(1.0), tint, parameters.specularTint), linearBaseColor, parameters.metallic);
 	vec3 sheenColor = mix(vec3(1.0), tint, parameters.sheenTint);
 	return SurfaceColors(linearBaseColor, specularColor, sheenColor);
@@ -389,9 +389,9 @@ void main() {
 			if (pointLightOn[idx]) {
 				vec4 lightPosition = viewMatrix * vec4(pointLightPosition[idx], 1.0);
 				vec3 L = lightPosition.xyz - fragPosition;
-				float attenuation = attenuation(L, pointLightAttenuation[idx]);
+				float atten = attenuation(L, pointLightAttenuation[idx]);
 				L = normalize(L);
-				finalColor += lightContribution(originalTangentSpace, perturbedTangentSpace, L, V, colors, parameters) * pointLightIntensity[idx] * attenuation;
+				finalColor += lightContribution(originalTangentSpace, perturbedTangentSpace, L, V, colors, parameters) * pointLightIntensity[idx] * atten;
 			}
 		}
 	#endif
@@ -413,7 +413,7 @@ void main() {
 				if (shadowInfluence > 0.0) {
 					vec4 lightPosition = viewMatrix * vec4(spotLightPosition[idx], 1.0);
 					vec3 L = lightPosition.xyz - fragPosition;
-					float attenuation = attenuation(L, spotLightAttenuation[idx]);
+					float atten = attenuation(L, spotLightAttenuation[idx]);
 					L = normalize(L);
 					vec3 D = normalize((viewMatrix * vec4(-spotLightDirection[idx], 0.0)).xyz);
 					float angle = dot(L, D);
@@ -421,7 +421,7 @@ void main() {
 						float softness = 1.0;
 						if (angle < spotLightCosSoftFalloffAngle[idx])
 							softness = (angle - spotLightCosFalloffAngle[idx]) / (spotLightCosSoftFalloffAngle[idx] - spotLightCosFalloffAngle[idx]);
-						finalColor += lightContribution(originalTangentSpace, perturbedTangentSpace, L, V, colors, parameters) * spotLightIntensity[idx] * attenuation * softness * shadowInfluence;
+						finalColor += lightContribution(originalTangentSpace, perturbedTangentSpace, L, V, colors, parameters) * spotLightIntensity[idx] * atten * softness * shadowInfluence;
 					}
 				}
 			}

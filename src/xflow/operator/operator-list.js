@@ -167,62 +167,10 @@ OperatorList.prototype.allocateOutput = function (programData, async) {
     }
 };
 
-/*
- OperatorList.prototype.checkInput = function(programData){
- for(var i = 0; i < this.entries.length; ++i){
- var entry = this.entries[i];
- var mapping = entry.operator.mapping;
- for(var j = 0; j < mapping.length; ++j){
- if(entry.isTransferInput(j)){
- var outputType = this.entries[entry.getTransferInputOperatorIndex(j)].operator.outputs[
- entry.getTransferInputOutputIndex(j)].type;
-
- if(outputType != entry.type){
- XML3D.debug.logError("Xflow: operator " + entry.operator.name + ": Input for " + entry.source +
- " has wrong type. Expected: " + C.getTypeName(entry.type)
- + ", but got: " +  C.getTypeName(outputType) );
- return false;
- }
-
- }
- else{
- var mappingName = entry.getInputMappingName(j);
- if(!entry.optional && !mappingName){
- XML3D.debug.logError("Xflow: operator " + entry.operator.name + ": Missing input argument for "
- + entry.source);
- return false;
- }
- if(mappingName){
- var channel = programData.getChannel(entry.getDirectInputIndex(j));
- if(!channel){
- XML3D.debug.logError("Xflow: operator " + entry.operator.name + ": Input of name '" + mappingName +
- "' not found. Used for parameter " + entry.source);
- return false;
- }
- var dataEntry = channel.getDataEntry();
- if(!entry.optional && (!dataEntry || dataEntry.getLength() == 0)){
- XML3D.debug.logError("Xflow: operator " + entry.operator.name + ": Input for " + entry.source +
- ' contains no data.');
- return false;
- }
- if(dataEntry && dataEntry.type != entry.type){
- XML3D.debug.logError("Xflow: operator " + entry.operator.name + ": Input for " + entry.source +
- " has wrong type. Expected: " + C.getTypeName(entry.type)
- + ", but got: " +  C.getTypeName(dataEntry.type) );
- return false;
- }
- }
- }
- }
- }
- }
- */
-
     // TODO: This function appears in multiple units
     function addInputToArgs(args, entry, programData){
         var mapping = entry.operator.mapping;
         for(var i = 0; i < mapping.length; ++i){
-            var mapEntry = mapping[i];
             var dataEntry = programData.getDataEntry(entry.getDirectInputIndex(i));
             args.push(dataEntry ? dataEntry.getValue() : null);
         }

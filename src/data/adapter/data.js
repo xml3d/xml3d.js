@@ -31,6 +31,9 @@ DataAdapter.prototype.init = function () {
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
 
+    this.srcDataNode = new DataNode(false);
+    this.xflowDataNode.appendChild(this.srcDataNode);
+
     // Setting platform and node type information for a data sequence
     this.xflowDataNode.setPlatform(this.node.getAttribute("platform"));
 
@@ -183,7 +186,7 @@ DataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newVa
 
 DataAdapter.prototype.connectedAdapterChanged = function (key, adapter /*, status */) {
     if (key === "src") {
-        this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
+        this.srcDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
     } else if (key === "dataflow") {
         this.xflowDataNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
     } else if (this.externalScripts[key]) {

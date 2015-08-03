@@ -1,224 +1,177 @@
-module("Data Adapter", {
-    setup : function() {
-        stop();
-        var that = this;
-        this.cb = function(e) {
-            ok(true, "Scene loaded");
-            that.doc = document.getElementById("xml3dframe").contentDocument;
-            start();
-        };
-        loadDocument("scenes/data-adapter.html"+window.location.search, this.cb);
-    },
-    teardown : function() {
-        var v = document.getElementById("xml3dframe");
-        v.removeEventListener("load", this.cb, true);
-    },
-    hasKey : function(dataTable, key) {
-        for(tmpKey in dataTable)
-        {
-            if(tmpKey == key)
-            {
-               return true;
-            }
-        }
-        return false;
-    },
-    getDataTable : function(elementId) {
-        var factory       = new XML3D.data.XML3DDataAdapterFactory(this);
-        var node          = this.doc.getElementById(elementId);
-        var dataCollector = factory.getAdapter(node);
-        return dataCollector.createDataTable();
-    }
-});
+module("Data Adapter", {});
 
-function compareArrays(arr1, arr2)
-{
-    if(arr1.length != arr2.length)
+function getDataTable(doc, elementId) {
+    var factory       = new XML3DTestLib.XML3DDataAdapterFactory(this);
+    var node          = doc.getElementById(elementId);
+    var dataCollector = factory.getAdapter(node);
+    return dataCollector.getComputeResult()._dataEntries;
+}
+
+function hasKey(dataTable, key) {
+    for(tmpKey in dataTable)
     {
-        return false;
-    }
-    
-    if(arr1.toString() != arr2.toString())
-    {
-        return false;
-    }
-    
-    for(var i=0; i < arr1.length; i++)
-    {   
-        if(arr1[i] != arr2[i])
+        if(tmpKey == key)
         {
-            return false;
+            return true;
         }
     }
-    return true;
-};
+    return false;
+}
 
-test("Test on flat mesh element", 22, function() {
-    var win = this.doc.defaultView;
-    var dataTable = this.getDataTable("test1");
-    ok(dataTable, "Data table created");
-    
-    ok(this.hasKey(dataTable, "index"), "Entry 'index' exists");
-    ok(this.hasKey(dataTable, "position"), "Entry 'position' exists");
-    ok(this.hasKey(dataTable, "normal"), "Entry 'normal' exists");
-    ok(!this.hasKey(dataTable, "something"), "Entry 'something' not exists");
+test("Test on flat mesh element", function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-adapter.html");
 
-    var data = dataTable["index"];
-    ok(this.hasKey(data, "tupleSize"), "Entry 'tupleSize' exists");
-    ok(this.hasKey(data, "value"), "Entry 'value' exists");
-    equal(data['tupleSize'], 1, "Tuple size is 1");
-    equal(data.value.length, 3, "Expected data length");
-    equal(data.value[1], 2, "Expected data value");
-    
-    data = dataTable["position"];
-    ok(this.hasKey(data, "tupleSize"), "Entry 'tupleSize' exists");
-    ok(this.hasKey(data, "value"), "Entry 'value' exists");
-    equal(data['tupleSize'], 3, "Tuple size is 3");
-    equal(data.value.length, 3, "Expected data length");
-    QUnit.close(data.value[1], 2.0, EPSILON, "Expected data value");
+    var test = frameLoaded.then(function(doc) {
+        var win = doc.defaultView;
+        var dataTable = getDataTable(doc, "test1");
+        ok(dataTable, "Data table created");
 
+        ok(hasKey(dataTable, "index"), "Entry 'index' exists");
+        ok(hasKey(dataTable, "position"), "Entry 'position' exists");
+        ok(hasKey(dataTable, "normal"), "Entry 'normal' exists");
+        ok(!hasKey(dataTable, "something"), "Entry 'something' not exists");
 
-    data = dataTable["normal"];
-    ok(this.hasKey(data, "tupleSize"), "Entry 'tupleSize' exists");
-    ok(this.hasKey(data, "value"), "Entry 'value' exists");
-    equal(data['tupleSize'], 3, "Tuple size is 3");
-    equal(data.value.length, 3, "Expected data length");
-    QUnit.close(data.value[0], 1.1, EPSILON, "Expected data value");
-});
+        var data = dataTable["index"];
+        equal(data.getTupleSize(), 1, "Tuple size is 1");
+        equal(data.getValue().length, 3, "Expected data length");
+        equal(data.getValue()[1], 2, "Expected data value");
 
-test("Test on flat data element", 21, function() {
-    var win = this.doc.defaultView;
-    var dataTable = this.getDataTable("test2");
-    // 1: Found frame
-    // 2: Scene loaded
-    ok(dataTable, "Found datatable");
-
-    ok(this.hasKey(dataTable, "index"), "Entry 'index' exists.");
-    ok(this.hasKey(dataTable, "position"), "Entry 'position' exists.");
-    ok(this.hasKey(dataTable, "normal"), "Entry 'normal' exists.");
-
-    var data = dataTable["index"];
-    ok(this.hasKey(data, "tupleSize"), "Found index.tupleSize"); // 7
-    ok(this.hasKey(data, "value"), "Found index.value");
-    equal(data['tupleSize'], 1, "Tuple size is 1");
-    equal(data.value.length, 3, "Expected data length");
-    equal(data.value[1], 5, "Expected data value");
+        data = dataTable["position"];
+        equal(data.getTupleSize(), 3, "Tuple size is 3");
+        equal(data.getValue().length, 3, "Expected data length");
+        QUnit.close(data.getValue()[1], 2.0, EPSILON, "Expected data value");
 
 
-    data = dataTable["position"];
-    ok(this.hasKey(data, "tupleSize"), "Found position.tupleSize");
-    ok(this.hasKey(data, "value"), "Found position.value");
-    equal(data.value.length, 3, "Expected data length");
-    QUnit.close(data.value[2], 6.0, EPSILON, "Expected data value");
-    equal(data['tupleSize'], 3, "Tuple size is 3");
-
-    data = dataTable["normal"];
-    ok(this.hasKey(data, "tupleSize"), "Found normal.tupleSize");
-    ok(this.hasKey(data, "value"), "Found normal.value");
-    equal(data.value.length, 3, "Expected data length");
-    QUnit.close(data.value[2], 6.0, EPSILON, "Expected data value");
-    equal(data['tupleSize'], 3, "Tuple size is 3");
-});
-
-test("Test with embedded data element", 21, function() {
-    var win = this.doc.defaultView;
-    var dataTable = this.getDataTable("test3");
-    ok(dataTable, "Found datatable");
-
-    ok(this.hasKey(dataTable, "index"), "Entry 'index' exists.");
-    ok(this.hasKey(dataTable, "position"), "Entry 'position' exists.");
-    ok(this.hasKey(dataTable, "normal"), "Entry 'normal' exists.");
-
-    var data = dataTable["index"];
-    ok(this.hasKey(data, "tupleSize"));
-    ok(this.hasKey(data, "value"));
-    equal(data['tupleSize'], 1, "Tuple size is 1");
-    equal(data.value.length, 3, "Expected data length");
-    equal(data.value[1], 5, "Expected data value");
-
-    data = dataTable["position"];
-    ok(this.hasKey(data, "tupleSize"));
-    ok(this.hasKey(data, "value"));
-    QUnit.close(data.value[2], 33.0, EPSILON, "Expected data value");
-    equal(data.value.length, 3, "Expected data length");
-    equal(data.tupleSize, 3, "Tuple size is 3");
-
-    data = dataTable["normal"];
-    ok(this.hasKey(data, "tupleSize"));
-    ok(this.hasKey(data, "value"));
-    QUnit.close(data.value[1], 5.0, EPSILON, "Expected data value");
-    equal(data.value.length, 3, "Expected data length");
-    equal(data.tupleSize, 3, "Tuple size is 3");
-});
-
-test("Reference via 'src' attribute", 5, function() {
-    var dataTable2 = this.getDataTable("test2");
-    var dataTable41 = this.getDataTable("test4-1");
-    var dataTable42 = this.getDataTable("test4-2");
-    ok(dataTable2 && dataTable41 && dataTable42, "All tables exist");
-    
-    strictEqual(dataTable2, dataTable41, "Table of referencing and referenced are identical");
-    strictEqual(dataTable2, dataTable42, "Table of referencing (with ignored children) and referenced are identical");
+        data = dataTable["normal"];
+        equal(data.getTupleSize(), 3, "Tuple size is 3");
+        equal(data.getValue().length, 3, "Expected data length");
+        QUnit.close(data.getValue()[0], 1.1, EPSILON, "Expected data value");
+    });
+    test.fin(QUnit.start).done();
 
 });
 
-test("Sequence test", 7, function() {
-    var dataTable = this.getDataTable("sequence01");
-    data = dataTable.position;
-    ok(data);
-    QUnit.close(data.value[0], 0.0, EPSILON, "Expected data value");
-    ok(data.sequence);
-    equal(data.sequence.length, 5, "5 entries in sequence.");
-    equal(typeof data.sequence[0].key, "number", "'key' is a number.");
-    console.dir(data.sequence);
+test("Test on flat data element", function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-adapter.html");
+    var test = frameLoaded.then(function(doc) {
+        var win = doc.defaultView;
+        var dataTable = getDataTable(doc, "test2");
+        ok(dataTable, "Found datatable");
+
+        ok(hasKey(dataTable, "index"), "Entry 'index' exists.");
+        ok(hasKey(dataTable, "position"), "Entry 'position' exists.");
+        ok(hasKey(dataTable, "normal"), "Entry 'normal' exists.");
+
+        var data = dataTable["index"];
+        equal(data.getTupleSize(), 1, "Tuple size is 1");
+        equal(data.getValue().length, 3, "Expected data length");
+        equal(data.getValue()[1], 5, "Expected data value");
+
+
+        data = dataTable["position"];
+        equal(data.getValue().length, 3, "Expected data length");
+        QUnit.close(data.getValue()[2], 6.0, EPSILON, "Expected data value");
+        equal(data.getTupleSize(), 3, "Tuple size is 3");
+
+        data = dataTable["normal"];
+        equal(data.getValue().length, 3, "Expected data length");
+        QUnit.close(data.getValue()[2], 6.0, EPSILON, "Expected data value");
+        equal(data.getTupleSize(), 3, "Tuple size is 3");
+    });
+    test.fin(QUnit.start).done();
 });
 
-test("Test all tuple sizes", 29, function() {
-    var dataTable = this.getDataTable("tupleSizeTest");
-    ok(dataTable);
-    
-    ok(this.hasKey(dataTable, "intTest"));
-    ok(this.hasKey(dataTable, "int4Test"));
-    ok(this.hasKey(dataTable, "boolTest"));
-    ok(this.hasKey(dataTable, "textureTest"));
-    ok(this.hasKey(dataTable, "floatTest"));
-    ok(this.hasKey(dataTable, "float2Test"));
-    ok(this.hasKey(dataTable, "float3Test"));
-    ok(this.hasKey(dataTable, "float4Test"));
-    
-    var data = dataTable["intTest"];
-    ok(this.hasKey(data, "tupleSize"));
-    equal(data["tupleSize"],1,"<int> has tupleSize 1");
-    
-    var data = dataTable["int4Test"];
-    ok(this.hasKey(data, "tupleSize"));
-    equal(data["tupleSize"],4,"<int4> has tupleSize 4");
+test("Test with embedded data element", function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-adapter.html");
+    var test = frameLoaded.then(function(doc) {
+        var win = doc.defaultView;
+        var dataTable = getDataTable(doc, "test3");
+        ok(dataTable, "Found datatable");
 
-    data = dataTable["boolTest"];
-    ok(this.hasKey(data, "tupleSize"));
-    equal(data["tupleSize"],1,"<bool> has tupleSize 1");
-    
-    data = dataTable["textureTest"];
-    ok(this.hasKey(data, "tupleSize"));
-    equal(data["tupleSize"],1,"<texture> has tupleSize 1");         
-    
-    data = dataTable["floatTest"];
-    ok(this.hasKey(data, "tupleSize"));
-    equal(data["tupleSize"],1,"<float> has tupleSize 1");
-    
-    data = dataTable["float2Test"];
-    ok(this.hasKey(data, "tupleSize"));
-    equal(data["tupleSize"],2,"<float2> has tupleSize 2");
-    
-    data = dataTable["float3Test"];
-    ok(this.hasKey(data, "tupleSize"));
-    equal(data["tupleSize"],3,"<float3> has tupleSize 3");
-    
-    data = dataTable["float4Test"];
-    ok(this.hasKey(data, "tupleSize"));
-    equal(data["tupleSize"],4,"<float4> has tupleSize 4");
+        ok(hasKey(dataTable, "index"), "Entry 'index' exists.");
+        ok(hasKey(dataTable, "position"), "Entry 'position' exists.");
+        ok(hasKey(dataTable, "normal"), "Entry 'normal' exists.");
 
-    data = dataTable["float4x4Test"];
-    ok(this.hasKey(data, "tupleSize"));
-    equal(data["tupleSize"],16,"<float4x4> has tupleSize 16");
+        var data = dataTable["index"];
+        equal(data.getTupleSize(), 1, "Tuple size is 1");
+        equal(data.getValue().length, 3, "Expected data length");
+        equal(data.getValue()[1], 5, "Expected data value");
+
+        data = dataTable["position"];
+        QUnit.close(data.getValue()[2], 33.0, EPSILON, "Expected data value");
+        equal(data.getValue().length, 3, "Expected data length");
+        equal(data.getTupleSize(), 3, "Tuple size is 3");
+
+        data = dataTable["normal"];
+        QUnit.close(data.getValue()[1], 2, EPSILON, "Expected data value");
+        equal(data.getValue().length, 3, "Expected data length");
+        equal(data.getTupleSize(), 3, "Tuple size is 3");
+    });
+    test.fin(QUnit.start).done();
+});
+
+test("Reference via 'src' attribute", function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-adapter.html");
+    var test = frameLoaded.then(function(doc) {
+        var dataTable2 = getDataTable(doc, "test2");
+        var dataTable41 = getDataTable(doc, "test4-1");
+        var dataTable42 = getDataTable(doc, "test4-2");
+        ok(dataTable2 && dataTable41 && dataTable42, "All tables exist");
+
+        QUnit.closeArray(dataTable2.normal.getValue(), dataTable41.normal.getValue(), EPSILON, "Normals of referencer and reference are identical");
+        QUnit.closeArray(dataTable2.position.getValue(), dataTable41.position.getValue(), EPSILON, "Positions of referencer and reference are identical");
+        QUnit.closeArray(dataTable2.index.getValue(), dataTable41.index.getValue(), EPSILON, "Indices of referencer and reference are identical");
+
+        QUnit.closeArray(dataTable42.normal.getValue(), [4, 5, 6], EPSILON, "Normals were overridden by child data node");
+        QUnit.closeArray(dataTable42.position.getValue(), [11.0, 22.0, 33.0], EPSILON, "Positions were overridden by child data node");
+        QUnit.closeArray(dataTable42.index.getValue(), [4, 5, 6], EPSILON, "Indices are the same as the referenced node");
+    });
+    test.fin(QUnit.start).done();
+});
+
+test("Test all tuple sizes", function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-adapter.html");
+    var test = frameLoaded.then(function(doc) {
+        var dataTable = getDataTable(doc, "tupleSizeTest");
+        ok(dataTable);
+
+        ok(hasKey(dataTable, "intTest"));
+        ok(hasKey(dataTable, "int4Test"));
+        ok(hasKey(dataTable, "boolTest"));
+        ok(hasKey(dataTable, "textureTest"));
+        ok(hasKey(dataTable, "floatTest"));
+        ok(hasKey(dataTable, "float2Test"));
+        ok(hasKey(dataTable, "float3Test"));
+        ok(hasKey(dataTable, "float4Test"));
+
+        var data = dataTable["intTest"];
+        equal(data.getTupleSize(), 1, "<int> has tupleSize 1");
+
+        data = dataTable["int4Test"];
+        equal(data.getTupleSize(), 4, "<int4> has tupleSize 4");
+
+        data = dataTable["boolTest"];
+        equal(data.getTupleSize(), 1, "<bool> has tupleSize 1");
+
+        data = dataTable["floatTest"];
+        equal(data.getTupleSize(), 1, "<float> has tupleSize 1");
+
+        data = dataTable["float2Test"];
+        equal(data.getTupleSize(), 2, "<float2> has tupleSize 2");
+
+        data = dataTable["float3Test"];
+        equal(data.getTupleSize(), 3, "<float3> has tupleSize 3");
+
+        data = dataTable["float4Test"];
+        equal(data.getTupleSize(), 4, "<float4> has tupleSize 4");
+
+        data = dataTable["float4x4Test"];
+        equal(data.getTupleSize(), 16, "<float4x4> has tupleSize 16");
+    });
+    test.fin(QUnit.start).done();
 });

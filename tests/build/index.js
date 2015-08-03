@@ -13,5 +13,6 @@ module.exports = {
     AdapterHandle: require("../../src/base/adapterhandle.js"),
     Adapter: require("../../src/base/adapter.js"),
     addFragmentShaderHeader: require("../../src/renderer/webgl/shader/shader-utils.js").addFragmentShaderHeader,
-    callAdapterFunc: require("../../src/utils/misc.js").callAdapterFunc
+    callAdapterFunc: require("../../src/utils/misc.js").callAdapterFunc,
+    XML3DDataAdapterFactory: require("../../src/data/adapter/factory.js")
 };

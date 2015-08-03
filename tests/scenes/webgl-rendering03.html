@@ -42,6 +42,15 @@
         </float3>
       </data>
 
+        <data id="ls_Point1">
+            <float3 name="intensity" id="pointIntensity">
+                10 0 0
+            </float3>
+            <float3 name="attenuation">
+                1 0 0
+            </float3>
+        </data>
+
       <data id="ls_Spot">
         <float3 id="lsIntensity" name="intensity">
           0 10 0
@@ -59,13 +68,8 @@
     <view id="defaultView" style="transform: translate3d(0px, 0px, 3px)"></view>
     
     <group transform="#t_Point" id="pointlight">
-      <light id="pointlightLight" model="urn:xml3d:light:point">
-        <float3 name="intensity" id="pointIntensity">
-          10 0 0
-        </float3>
-        <float3 name="attenuation">
-          1 0 0
-        </float3>
+      <light id="pointlightLight" model="urn:xml3d:light:point" src="#ls_Point1">
+
       </light>
     </group>
     <group id="dirlight" transform="#t_dirLight">

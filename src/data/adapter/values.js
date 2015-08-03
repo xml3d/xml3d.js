@@ -70,13 +70,16 @@ ValueDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, 
         this.xflowInputNode.paramName = newValue ? this.node.name : null;
     }else if (name == "sys"){
     	var parentDataAdapter = this.factory.getAdapter(this.node.parentNode);
-    	var filterMapping = parentDataAdapter.getXflowNode()._children[0]._children[1]._filterMapping;
+    	if (parentDataAdapter.getXflowNode()._children[0]._children.length >1 && parentDataAdapter.getXflowNode()._children[0]._children[1].systemDataNode == true)
+    	  var filterMapping = parentDataAdapter.getXflowNode()._children[0]._children[1]._filterMapping;
+    	
     	if (!this.node.attributes["sys"]){
     		//If the sys flag is removed we update the filter in system data node
 	    	filterMapping.removeName(filterMapping._names.indexOf(this.node.name));
     	}else {
-    		//If sys flag is set
-    		filterMapping.setName(filterMapping.length,this.node.name);
+    		//If sys flag is set, we add the node name to the filter
+    		if (filterMapping)
+    		  filterMapping.setName(filterMapping.length,this.node.name);
     	}
     }
 };

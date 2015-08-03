@@ -76,10 +76,10 @@ DataAdapter.prototype.onXflowLoadEvent = function(node, newLevel, oldLevel){
     }
 };
 DataAdapter.prototype.getDataComplete = function(){
-    return this.xflowDataNode.getProgressLevel() == Infinity;
+    return this.xflowDataNode._children[0].getProgressLevel() == Infinity;
 };
 DataAdapter.prototype.getDataProgressLevel = function(){
-    return this.xflowDataNode.getProgressLevel();
+    return this.xflowDataNode._children[0].getProgressLevel();
 };
 
     /** Recursively passing platform information to children of a data node
@@ -114,7 +114,7 @@ function recursiveDataAdapterConstruction(adapter, systemDataAdapter) {
         </data>
       </data>
      */
-	var filterNames = []; // We store the node names with sys flag set
+	var filterNames = []; // Where we store the node names with sys flag set
 	var xflowDataNode = new DataNode(false); // Data node to keep the visible dom nodes
 	
     for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
@@ -137,7 +137,6 @@ function recursiveDataAdapterConstruction(adapter, systemDataAdapter) {
             //Here we check for data nodes with sys flag set
         	if (child.sys != undefined){
         	    //Check if a system parameter with this name exists
-                // TODO: consider both, user defined and internal sys data node here!
         	    if (systemDataAdapter.xflowDataNode.getOutputNames().indexOf(child.name)>-1) {
             		filterNames.push(child.name);
                 } else {
@@ -148,15 +147,8 @@ function recursiveDataAdapterConstruction(adapter, systemDataAdapter) {
 
     }
 
-    // TODO: Move this to the XML3D DataAdapter
-    //check if this node is the user defined system node, then we should not add system node to it
-    var userDefinedSystemDataUri = Resource.getAbsoluteURI( systemDataAdapter.node.ownerDocument.URL, systemDataAdapter.node.getAttribute("sys"));
-    if (userDefinedSystemDataUri && adapter.node.getAttribute("id") == userDefinedSystemDataUri.fragment){
-    	adapter.xflowDataNode._children = xflowDataNode._children;
-    }
-    else{
-    	addSystemNodeToAdapter(filterNames,adapter,systemDataAdapter.xflowDataNode,xflowDataNode);
-    }
+    addSystemNodeToAdapter(filterNames,adapter,systemDataAdapter.xflowDataNode,xflowDataNode);
+    	
     // Passes _platform values to children nodes starting from the node
     // where these attributes are first defined
     if (adapter.xflowDataNode._platform !== null) {
@@ -167,27 +159,23 @@ function recursiveDataAdapterConstruction(adapter, systemDataAdapter) {
 function addSystemNodeToAdapter(filterNames,adapter,systemDataNode,xflowDataNode){
 	
 	var filter = "keep("+filterNames.join(",")+")";
-
 	var sysData = new DataNode(false);
+	var sysDataAndUserData = new DataNode(false);
+	
 	sysData.sourceNode = systemDataNode;
+	sysData.systemDataNode = true;
 	sysData.systemDataAdapter = true;
 	sysData.setFilter(filter);
-
-	
-	var sysDataAndUserData = new DataNode(false);
 	sysDataAndUserData.appendChild(xflowDataNode);
 	sysDataAndUserData.appendChild(sysData);
 
-	if (adapter.getXflowNode()._children.length){
-		XML3D.debug.assert(!adapter.getXflowNode()._children[0]._children[1].systemDataAdapter);
-	}
-    adapter.xflowDataNode.appendChild(sysDataAndUserData);
-    return;
+  adapter.xflowDataNode.appendChild(sysDataAndUserData);
+  return;
 }
 
 /**
  * The notifyChanged() method is called by the XML3D data structure to
- * notify the DataAdapter about data changes (DOM mustation events) in its
+ * notify the DataAdapter about data changes (DOM mutation events) in its
  * associating node. When this method is called, all observers of the
  * DataAdapter are notified about data changes via their notifyDataChanged()
  * method.
@@ -217,9 +205,9 @@ DataAdapter.prototype.notifyChanged = function (evt) {
 
         // Make sure to use the actual dom node!
         if (followUpAdapter) {
-            this.xflowDataNode.insertBefore(insertedXflowNode, followUpAdapter.getXflowNode());
+            this.xflowDataNode._children[0].insertBefore(insertedXflowNode, followUpAdapter.getXflowNode());
         } else {
-            this.xflowDataNode.appendChild(insertedXflowNode);
+            this.xflowDataNode._children[0].appendChild(insertedXflowNode);
         }
 
     } else if (evt.type === Events.NODE_REMOVED) {
@@ -229,7 +217,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
         }
 
         var removedXflowNode = adapter.getXflowNode();
-        this.xflowDataNode.removeChild(removedXflowNode);
+        this.xflowDataNode._children[0].removeChild(removedXflowNode);
 
     } else if (evt.type === Events.THIS_REMOVED) {
         this.clearAdapterHandles();
@@ -248,6 +236,7 @@ DataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newVa
     }
 };
 
+// should I also chenge here: adapter.getXflowNode()._children[0] ?
 DataAdapter.prototype.connectedAdapterChanged = function (key, adapter /*, status */) {
     if (key === "src") {
         this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;

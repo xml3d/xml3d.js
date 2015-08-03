@@ -147,11 +147,8 @@ XML3D.createClass(Scene, EventEmitter, {
     },
 
     setRendererIndependentData: function () {
-    	//Set the time
-    	var timeIndex = this.systemDataAdapter.xflowDataNode._children[0].getOutputNames().indexOf("time");
-    	var testIndex = this.systemDataAdapter.xflowDataNode._children[0].getOutputNames().indexOf("test");
-    	this.systemDataAdapter.xflowDataNode._children[0]._children[timeIndex].data.setValue(new Float32Array([performance.now()]));
-    	this.systemDataAdapter.xflowDataNode._children[0]._children[testIndex].data.setValue(new Float32Array([10.0]));
+    	this.systemDataAdapter.xflowDataNode._children[0]._children[0].data.setValue(new Float32Array([performance.now()]));
+    	this.systemDataAdapter.xflowDataNode._children[0]._children[1].data.setValue(new Float32Array([10.0]));
     	
     }
 });

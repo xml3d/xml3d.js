@@ -6,7 +6,7 @@ Xflow.registerOperator("xflow.animateColor", {
     	var d = new Date();
     	diffuseColor[0] = Math.cos(time[0]/500);
     	diffuseColor[1] = Math.sin(time[0]/500);
-    	diffuseColor[2] = 0;
+    	diffuseColor[2] = Math.tan(time[0]/500);
     	return diffuseColor;
     }
 });

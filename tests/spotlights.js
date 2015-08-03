@@ -21,7 +21,7 @@ test("Initialization: entries in lights.spot check", 10, function () {
         QUnit.closeArray(params.spotLightAttenuation, [0, 0, 1], EPSILON, "Test light attenuation entry");
         QUnit.closeArray(params.spotLightOn, [1], EPSILON, "Test light 'on' entry");
         QUnit.closeArray(params.spotLightSoftness, [0.5], EPSILON, "Test light softness entry");
-        QUnit.closeArray(params.spotLightFalloffAngle, [0.785], EPSILON, "Test light cutOffAngle entry");
+        QUnit.closeArray(params.spotLightCutoffAngle, [0.785], EPSILON, "Test light cutoffAngle entry");
         QUnit.closeArray(params.spotLightPosition, [0, 0, 1], EPSILON, "Test for default position entry");
         QUnit.closeArray(params.spotLightDirection, [0, 0, -1], EPSILON, "Test for default direction entry");
         return scene;
@@ -113,10 +113,10 @@ test("Change of light material parameters check against lights.spot", 7, functio
         QUnit.closeArray(params.spotLightSoftness, [0.2], EPSILON, "Test softness entry change");
 
 
-        ls_Spot.querySelector("[name=falloffAngle]").textContent = "0.6";
+        ls_Spot.querySelector("[name=cutoffAngle]").textContent = "0.6";
         win.XML3D.flushDOMChanges();
         lights.fillGlobalParameters(params, /* force = */ true);
-        QUnit.closeArray(params.spotLightFalloffAngle, [0.6], EPSILON, "Test falloffAngle entry change");
+        QUnit.closeArray(params.spotLightCutoffAngle, [0.6], EPSILON, "Test cutoffAngle entry change");
 
         ls_Spot.querySelector("[name=intensity]").textContent = "1 0 1";
         win.XML3D.flushDOMChanges();

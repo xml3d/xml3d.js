@@ -574,7 +574,7 @@
             <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
           </tr>
           <tr>
-            <td>falloffAngle</td>
+            <td>cutoffAngle</td>
             <td>float</td>
             <td>Math.PI/4</td>
             <td>Spot angle in radians. Controls the size of the outer cone of a spot light, i.e. the circular area a spot
@@ -590,11 +590,11 @@
           </tbody>
         </table>
       </div>
-      <div class="issue">Improve description of softness including figure and find a better name for falloffAngle</div>
       <p>
         Spot light source are a variation of point lights: Instead of emitting light omnidirectional, they emit light from their position in a cone of direction.
-        The <i>fallOffAngle</i> attribute defines the size of the cone. Objects outside the cone defined by the <i>fallOffAngle</i> are not lit by the light source. The <i>softness</i>
-        attribute defines the percentage of the cone in which the illumination ramps down from full to no illumination, i.e. a softness of 0 specifies a hard transition between full to no illumination and a softness of 1.0 a linear transition along the radius of the cone.
+        The <i>cutoffAngle</i> attribute defines the size of the cone. Objects outside the cone defined by the <i>cutoffAngle</i> are not lit by the light source. The <i>softness</i>
+        attribute defines the percentage of the cone in which the illumination ramps down from full to no illumination, i.e. a softness of 0 specifies a hard transition between full
+        to no illumination and a softness of 1.0 a linear transition along the radius of the cone.
       </p>
     </section>
   </section>
@@ -2766,8 +2766,7 @@
 
         BLAST binary       model/vnd.xml3d.[model|mesh]+blast
     </pre>
-    <p>XML3D will set the appropriate <code>Accept</code> header when requesting these resources. The response should include a
-    <code>Content-Type</code> header with the same content-type <b>or</b> the appropriate standard type
+    <p>The response should include a <code>Content-Type</code> header with the same content-type <b>or</b> the appropriate standard type
     <code>application/json</code>, <code>application/xml</code> or <code>application/octet-stream</code>. </p>
     <div class="note">A response with no <code>Content-Type</code> header at all <em>will not be handled</em> and will generate an error message.</div>
 </section>

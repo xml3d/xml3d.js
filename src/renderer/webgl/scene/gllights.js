@@ -6,7 +6,7 @@ var lightModels = {
         parameters: ["directionalLightDirection", "directionalLightIntensity", "directionalLightOn", "directionalLightCastShadow", "directionalLightMatrix", "directionalLightShadowBias", "directionalLightShadowMap"]
     },
     spot: {
-        parameters: ["spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection", "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightMatrix", "spotLightShadowBias", "spotLightShadowMap"]
+        parameters: ["spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection", "spotLightOn", "spotLightSoftness", "spotLightCosCutoffAngle", "spotLightCosSoftCutoffAngle", "spotLightCastShadow", "spotLightMatrix", "spotLightShadowBias", "spotLightShadowMap"]
     }
 };
 

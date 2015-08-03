@@ -107,18 +107,18 @@ XML3D.extend(GLScene.prototype, {
 
         // Derived parameters that are implementation specific.
         // TODO: Put those to an appropriate place
-        var spotLightFalloffAngle = parameters["spotLightFalloffAngle"];
+        var spotLightCutoffAngle = parameters["spotLightCutoffAngle"];
         var spotLightSoftness = parameters["spotLightSoftness"];
-        if(spotLightFalloffAngle) {
+        if(spotLightCutoffAngle) {
             // Map both parameters into cosinus space
-            var spotLightCosSoftFalloffAngle = [];
-            var spotLightCosFalloffAngle = [];
-            for (var i = 0; i < spotLightFalloffAngle.length; i++) {
-                spotLightCosFalloffAngle[i] = Math.cos(spotLightFalloffAngle[i]);
-                spotLightCosSoftFalloffAngle[i] = Math.cos(spotLightFalloffAngle[i] * (1.0 - spotLightSoftness[i]));
+            var spotLightCosSoftCutoffAngle = [];
+            var spotLightCosCutoffAngle = [];
+            for (var i = 0; i < spotLightCutoffAngle.length; i++) {
+                spotLightCosCutoffAngle[i] = Math.cos(spotLightCutoffAngle[i]);
+                spotLightCosSoftCutoffAngle[i] = Math.cos(spotLightCutoffAngle[i] * (1.0 - spotLightSoftness[i]));
             }
-            parameters["spotLightCosFalloffAngle"] = spotLightCosFalloffAngle;
-            parameters["spotLightCosSoftFalloffAngle"] = spotLightCosSoftFalloffAngle;
+            parameters["spotLightCosCutoffAngle"] = spotLightCosCutoffAngle;
+            parameters["spotLightCosSoftCutoffAngle"] = spotLightCosSoftCutoffAngle;
         }
 
 

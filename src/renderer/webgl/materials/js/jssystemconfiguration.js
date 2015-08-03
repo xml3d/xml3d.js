@@ -89,10 +89,10 @@ var SYSTEM_CONTEXT_TEMPLATE =  {
         "spotLightDirection": {
             "type": "array", "elements": {"type": "object", "kind": "float3"}, "staticSize": 5, "source": "uniform"
         },
-        "spotLightCosFalloffAngle": {
+        "spotLightCosCutoffAngle": {
             "type": "array", "elements": {"type": "number"}, "staticSize": 5, "source": "uniform"
         },
-        "spotLightCosSoftFalloffAngle": {
+        "spotLightCosSoftCutoffAngle": {
             "type": "array", "elements": {"type": "number"}, "staticSize": 5, "source": "uniform"
         },
         "spotLightCastShadow": {

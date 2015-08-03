@@ -25,7 +25,7 @@ var SpotLightData = {
     "attenuation": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 1]},
     "position": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
     "direction": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
-    "falloffAngle": {type: XC.DATA_TYPE.FLOAT, 'default': [Math.PI / 4]},
+    "cutoffAngle": {type: XC.DATA_TYPE.FLOAT, 'default': [Math.PI / 4]},
     "softness": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0]},
     "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0001]},
     "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
@@ -86,7 +86,7 @@ var LightModel = function (id, light, dataNode, config) {
         this.dataNode = createXflowData(config);
     }
 
-    // Horizontal opening angle of the light camera. Derived from falloffAngle in case of spot light
+    // Horizontal opening angle of the light camera. Derived from cutoffAngle in case of spot light
     this.fovy =  Math.PI/2.0;
 
     this.lightParameterRequest = new ComputeRequest(this.dataNode, this.parameters, this.lightParametersChanged.bind(this));
@@ -293,7 +293,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
     },
 
     lightParametersChanged: function (request, changeType) {
-        this.fovy = this.getParameter("falloffAngle")[0] * 2;
+        this.fovy = this.getParameter("cutoffAngle")[0] * 2;
         LightModel.prototype.lightParametersChanged.call(this, request, changeType);
     }
 });

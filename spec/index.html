@@ -871,12 +871,12 @@
               &lt;/mesh&gt;
           </pre>
 
-          <p>If two data elements containing fields with identical names are present in an XFlow data graph then the value nearest the top will replace any value
+          <p>If two data elements containing fields with identical names are present in an XFlow data graph then the outermost value will replace any value
             nested deeper within the graph. In this example the value of the <code>color</code> field will be <code>1.0 0.0 0.0</code> when referencing <code>#my-data</code>:</p>
 
           <pre class='example highlight'>
               &lt;data id="my-data"&gt;
-                  &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt; &lt;!-- Overrides the previous color --&gt;
+                  &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt; &lt;!-- Overrides the nested color --&gt;
                   &lt;data&gt;
                       &lt;float3 name="color"&gt;1.0 1.0 1.0&lt;/float3&gt;
                   &lt;/data&gt;
@@ -1569,8 +1569,8 @@
          <dd>May contain a filter (<code>keep</code>, <code>rename</code> or <code>remove</code>) to adjust the data that is provided by this data element. See the
               Wiki page <a href="https://github.com/xml3d/xml3d.js/wiki/How-to-use-Xflow">How to use Xflow</a> for more information.</dd>
          <dt>attribute DOMString src</dt>
-         <dd>Accepts an HTML ID reference to another data element. The other element's data will be included in place of this one. Note that any child elements
-             are ignored when the <code>src</code> attribute is set.</dd>
+         <dd>Accepts an HTML ID reference to another data element. The other element's data will be included as an implicit first child of this data node. Note that in
+           cases of duplicate data any child data or value elements will override the data found in the <code>src</code> node.</dd>
          <dt>XML3DDataResult getResult(Array filter)</dt>
          <dd>Returns a XML3DDataResult object containing the data for the fields requested by the given filter, eg.
               <code>["position", "index", "normal"]</code>. This is useful for accessing the data directly through JavaScript.</dd>

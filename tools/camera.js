@@ -23,22 +23,6 @@
     //Check, if basics have already been defined
     if(!XML3D)
         XML3D = {};
-    if(!XML3D.util)
-        XML3D.util = {};
-
-    XML3D.util.Timer = function() {
-        this.start();
-    };
-
-    XML3D.util.Timer.prototype.restart = function() {
-        var prevTime = this.time;
-        this.start();
-        return this.time - prevTime;
-    };
-
-    XML3D.util.Timer.prototype.start = function() {
-        this.time = new Date().getTime();
-    };
 
     XML3D.StandardCamera = function(element, opt) {
         if (!element) {
@@ -60,7 +44,6 @@
         this.useKeys = opt.useKeys !== undefined ? opt.useKeys : false;
 
         this.elementInterface = new ElementInterface(this.element, this.xml3d);
-        this.timer = new XML3D.util.Timer();
         this.prevPos = {x: -1, y: -1};
         this.prevTouchPositions = [];
         this.prevTouchPositions[0] = {

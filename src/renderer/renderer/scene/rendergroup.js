@@ -92,10 +92,6 @@ XML3D.extend(RenderGroup.prototype, {
         this.scene.emit(EVENT_TYPE.SCENE_STRUCTURE_CHANGED, child, true);
     },
 
-    getChildren: function () {
-        return this.children;
-    },
-
     onTransformDirty: function () {
         if (this.worldMatrixDirty) {
             //We can be sure all child nodes are already set to transformDirty from here

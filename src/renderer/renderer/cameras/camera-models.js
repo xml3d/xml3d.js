@@ -78,9 +78,13 @@ var ProjectiveCameraModel = function (dataNode, scene, owner) {
 };
 
 XML3D.createClass(ProjectiveCameraModel, AbstractCameraModel, {
-    getProjectionMatrix: function (aspect) {
+    getProjectionMatrix: function (dest) {
         var result = this.cameraParameterRequest.getResult();
         var projectionMatrix = result.getOutputData("projectionMatrix").getValue();
+        if(dest) {
+            mat4.copy(dest, projectionMatrix);
+            return dest;
+        }
         return projectionMatrix;
     },
 
@@ -140,9 +144,9 @@ XML3D.createClass(PerspectiveCameraModel, AbstractCameraModel, {
         this.frustum.setFrustum(near, far, fovh, fovv, aspect /*, orthographic = false */);
     },
 
-    getProjectionMatrix: function () {
+    getProjectionMatrix: function (dest) {
         this._updateFrustum();
-        return this.frustum.getProjectionMatrix(mat4.create());
+        return this.frustum.getProjectionMatrix(dest || mat4.create());
     },
 
     getFrustum: function () {

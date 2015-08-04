@@ -1,5 +1,6 @@
 var BaseRenderPass = require("./base.js");
 var mat4 = require("gl-matrix").mat4;
+var assert = require("assert");
 
 var PickObjectRenderPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
@@ -15,6 +16,8 @@ XML3D.extend(PickObjectRenderPass.prototype, {
             }, c_systemUniformNames = ["id", "modelViewProjectionMatrix"];
 
         return function (objects, viewMatrix, projMatrix) {
+            assert(objects);
+
             var gl = this.renderInterface.context.gl, target = this.output;
             target.bind();
 
@@ -33,10 +36,8 @@ XML3D.extend(PickObjectRenderPass.prototype, {
                     continue;
 
                 if (viewMatrix && projMatrix) {
-                    obj.updateModelViewMatrix(viewMatrix);
-                    obj.updateModelViewProjectionMatrix(projMatrix);
+                    obj.updateWorldSpaceMatrices(viewMatrix, projMatrix);
                 }
-
                 obj.getModelViewProjectionMatrix(c_mvp);
 
                 var objId = j + 1;

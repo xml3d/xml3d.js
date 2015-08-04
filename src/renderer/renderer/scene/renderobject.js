@@ -5,6 +5,7 @@ var C = require("./constants.js");
 var Scene= require("./scene.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 var mat4 = require("gl-matrix").mat4;
+var mat3 = require("gl-matrix").mat3;
 
 // Entry:
 /** @const */
@@ -40,7 +41,7 @@ var ENTRY_SIZE = MODELVIEW_MATRIX_N_OFFSET + 16;
  *  related {@link IShaderComposer}.
  *
  * @constructor
- * @implements {IRenderObject}
+ * @extends RenderNode
  * @param {Scene} scene
  * @param {Object} pageEntry
  * @param {Object} opt
@@ -61,6 +62,10 @@ var RenderObject = function (scene, pageEntry, opt) {
      */
     this.object = opt.object || {data: null, type: "triangles"};
 
+    this._modelViewMatrix = new Float32Array(this.page.buffer, (this.offset + MODELVIEW_MATRIX_OFFSET) * Float32Array.BYTES_PER_ELEMENT, 16);
+    this._modelViewProjectionMatrix = new Float32Array(this.page.buffer, (this.offset + MODELVIEWPROJECTION_MATRIX_OFFSET) * Float32Array.BYTES_PER_ELEMENT, 16);
+    this._modelMatrixN = new Float32Array(this.page.buffer, (this.offset + MODEL_MATRIX_N_OFFSET) * Float32Array.BYTES_PER_ELEMENT, 9);
+    this._modelViewMatrixN = new Float32Array(this.page.buffer, (this.offset + MODELVIEW_MATRIX_N_OFFSET) * Float32Array.BYTES_PER_ELEMENT, 9);
 
     /**
      * Can we rely on current Bounding Boxes?
@@ -85,9 +90,6 @@ var RenderObject = function (scene, pageEntry, opt) {
     this.override = null;
 };
 RenderObject.ENTRY_SIZE = ENTRY_SIZE;
-
-RenderObject.IDENTITY_MATRIX = mat4.create();
-
 
 XML3D.createClass(RenderObject, RenderNode, {
 
@@ -141,48 +143,48 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     getModelViewMatrix: function (dest) {
-        this.getMat4FromPage(dest, MODELVIEW_MATRIX_OFFSET);
+        if(dest) {
+            return mat4.copy(dest, this._modelViewMatrix);
+        }
+        return this._modelViewMatrix;
+    },
+
+    getModelViewProjectionMatrix: function (dest) {
+        if(dest) {
+            return mat4.copy(dest, this._modelViewProjectionMatrix);
+        }
+        return this._modelViewProjectionMatrix;
     },
 
     getModelMatrixN: function (dest) {
-        var o = this.offset + MODEL_MATRIX_N_OFFSET;
-        dest[0] = this.page[o];
-        dest[1] = this.page[o + 1];
-        dest[2] = this.page[o + 2];
-        dest[3] = this.page[o + 4];
-        dest[4] = this.page[o + 5];
-        dest[5] = this.page[o + 6];
-        dest[6] = this.page[o + 8];
-        dest[7] = this.page[o + 9];
-        dest[8] = this.page[o + 10];
+        if(dest) {
+            return mat3.copy(dest, this._modelMatrixN);
+        }
+        return this._modelMatrixN;
     },
 
     getModelViewMatrixN: function (dest) {
-        var o = this.offset + MODELVIEW_MATRIX_N_OFFSET;
-        dest[0] = this.page[o];
-        dest[1] = this.page[o + 1];
-        dest[2] = this.page[o + 2];
-        dest[3] = this.page[o + 4];
-        dest[4] = this.page[o + 5];
-        dest[5] = this.page[o + 6];
-        dest[6] = this.page[o + 8];
-        dest[7] = this.page[o + 9];
-        dest[8] = this.page[o + 10];
+        if(dest) {
+            return mat3.copy(dest, this._modelViewMatrixN);
+        }
+        return this._modelViewMatrixN;
     },
 
 
-    getModelViewProjectionMatrix: function (dest) {
-        this.getMat4FromPage(dest, MODELVIEWPROJECTION_MATRIX_OFFSET);
-    },
-
-    updateWorldSpaceMatrices: function (view, projection) {
+    updateWorldSpaceMatrices: function (world2ViewMatrix, projection) {
         if (this.worldMatrixDirty) {
             this.updateWorldMatrix();
         }
-        this.updateModelViewMatrix(view);
-        this.updateModelMatrixN();
-        this.updateModelViewMatrixN();
-        this.updateModelViewProjectionMatrix(projection);
+        mat4.mul(this._modelViewMatrix, world2ViewMatrix, this._worldMatrix);
+        var success = mat3.normalFromMat4(this._modelMatrixN, this._worldMatrix);
+        if(!success) {
+            mat3.identity(this._modelMatrixN);
+        }
+        success = mat3.normalFromMat4(this._modelViewMatrixN, this._modelViewMatrix);
+        if(!success) {
+            mat3.identity(this._modelViewMatrixN);
+        }
+        mat4.mul(this._modelViewProjectionMatrix, projection, this._modelViewMatrix);
     },
 
     /*updateWorldMatrix: (function () {
@@ -202,45 +204,6 @@ XML3D.createClass(RenderObject, RenderNode, {
             this._storeWorldMatrix(tmp_mat);
         }
     })(),*/
-
-    /** Relies on an up-to-date transform matrix **/
-    updateModelViewMatrix: function (view) {
-        if (this.worldMatrixDirty) {
-            this.updateWorldMatrix();
-        }
-        var page = this.page;
-        var offset = this.offset;
-        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEW_MATRIX_OFFSET, page, offset + WORLD_MATRIX_OFFSET, view, 0);
-    },
-
-    updateModelMatrixN: (function () {
-        var c_tmpMatrix = mat4.create();
-        return function () {
-            this.getWorldMatrix(c_tmpMatrix);
-            mat4.invert(c_tmpMatrix, c_tmpMatrix);
-            var normalMatrix = c_tmpMatrix ? mat4.transpose(c_tmpMatrix, c_tmpMatrix) : RenderObject.IDENTITY_MATRIX;
-            this.setMat4InPage(normalMatrix, MODEL_MATRIX_N_OFFSET);
-        }
-    })(),
-
-    /** Relies on an up-to-date view matrix **/
-    updateModelViewMatrixN: (function () {
-        var c_tmpMatrix = mat4.create();
-        return function () {
-            this.getModelViewMatrix(c_tmpMatrix);
-            mat4.invert(c_tmpMatrix, c_tmpMatrix);
-            var normalMatrix = c_tmpMatrix ? mat4.transpose(c_tmpMatrix, c_tmpMatrix) : RenderObject.IDENTITY_MATRIX;
-            this.setMat4InPage(normalMatrix, MODELVIEW_MATRIX_N_OFFSET);
-        }
-    })(),
-
-
-    /** Relies on an up-to-date view matrix **/
-    updateModelViewProjectionMatrix: function (projection) {
-        var page = this.page;
-        var offset = this.offset;
-        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEWPROJECTION_MATRIX_OFFSET, page, offset + MODELVIEW_MATRIX_OFFSET, projection, 0);
-    },
 
     onTransformDirty: function () {
         this.worldMatrixDirty = true;

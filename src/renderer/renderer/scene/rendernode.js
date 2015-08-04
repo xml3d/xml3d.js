@@ -1,9 +1,10 @@
+var mat4 = require("gl-matrix").mat4;
+var assert = require("assert");
+
+
 /** @const */
 var WORLD_MATRIX_OFFSET = 0;
 var LOCAL_MATRIX_OFFSET = 16;
-
-var IDENT = XML3D.math.mat4.create();
-
 
 /**
  * @constructor
@@ -21,10 +22,15 @@ var RenderNode = function (type, scene, pageEntry, opt) {
     this.page = pageEntry.page;
     this.offset = pageEntry.offset;
     this.entrySize = pageEntry.size;
-    this.children = [];
-    this.parent = null;
 
-    this.setLocalMatrix(IDENT);
+    // Hierarchy
+    this.parent = null;
+    this.children = [];
+
+    // Transformations
+    this._localMatrix = new Float32Array(this.page.buffer, (this.offset + LOCAL_MATRIX_OFFSET) * Float32Array.BYTES_PER_ELEMENT, 16);
+    this._worldMatrix = new Float32Array(this.page.buffer, (this.offset + WORLD_MATRIX_OFFSET) * Float32Array.BYTES_PER_ELEMENT, 16);
+    mat4.identity(this._localMatrix);
 
     /**
      * Can we rely on current WorldMatrix?
@@ -32,13 +38,14 @@ var RenderNode = function (type, scene, pageEntry, opt) {
      */
     this.worldMatrixDirty = true;
 
-
-    this.setParent(opt.parent || scene.rootNode);
-
+    // Visibility
     this.localVisible = true;
     // The global visibility depends on visibility of parents
     this.visible = true;
-    this.evaluateVisibility();
+
+    // Will also evaluate the visibility
+    this.setParent(opt.parent || scene.rootNode);
+
 };
 
 XML3D.extend(RenderNode.prototype, {
@@ -119,30 +126,31 @@ XML3D.extend(RenderNode.prototype, {
             this.updateWorldMatrix();
             this.worldMatrixDirty = false;
         }
-        this.getMat4FromPage(dest, WORLD_MATRIX_OFFSET);
+        if(dest) {
+            mat4.copy(dest, this._worldMatrix);
+        }
+        return this._worldMatrix;
     },
 
     updateWorldMatrix: function () {
-        var tmp_worldMatrix = XML3D.math.mat4.create();
         if (this.parent) {
-            this.parent.getWorldMatrix(tmp_worldMatrix);
-            XML3D.math.mat4.multiplyOffset(tmp_worldMatrix, 0, this.page, this.offset + LOCAL_MATRIX_OFFSET, tmp_worldMatrix, 0);
+            var parentMatrix = this.parent.getWorldMatrix();
+            XML3D.math.mat4.multiply(this._worldMatrix, parentMatrix, this._localMatrix);
         } else {
-            this.getLocalMatrix(tmp_worldMatrix);
+            mat4.copy(this._worldMatrix, this._localMatrix);
         }
-        this.setMat4InPage(tmp_worldMatrix, WORLD_MATRIX_OFFSET);
         this.worldTransformationChanged();
     },
 
     worldTransformationChanged: function() {},
 
-    setLocalMatrix: function (source) {
-        this.setMat4InPage(source, LOCAL_MATRIX_OFFSET);
+    setLocalMatrix: function (newVal) {
+        mat4.copy(this._localMatrix, newVal);
         this.onTransformDirty();
     },
 
-    getLocalMatrix: function (dest) {
-        this.getMat4FromPage(dest, LOCAL_MATRIX_OFFSET);
+    getLocalMatrix: function () {
+        return this._localMatrix;
     },
 
     onTransformDirty: function () {

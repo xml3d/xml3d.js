@@ -2,6 +2,7 @@ var BaseRenderPass = require("./base.js");
 var vec3 = require("gl-matrix").vec3;
 var mat4 = require("gl-matrix").mat4;
 var mat3 = require("gl-matrix").mat3;
+var assert = require("assert");
 
 var PickNormalRenderPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
@@ -19,6 +20,7 @@ XML3D.createClass(PickNormalRenderPass, BaseRenderPass, {
             }, c_systemUniformNames = ["modelViewProjectionMatrix", "modelViewMatrixN"];
 
         return function (object, viewMatrix, projMatrix) {
+            assert(object && viewMatrix && projMatrix);
             var gl = this.renderInterface.context.gl, target = this.output;
 
             target.bind();
@@ -27,11 +29,7 @@ XML3D.createClass(PickNormalRenderPass, BaseRenderPass, {
             gl.disable(gl.CULL_FACE);
             gl.disable(gl.BLEND);
 
-            if (viewMatrix && projMatrix) {
-                object.updateModelViewMatrix(viewMatrix);
-                object.updateModelViewProjectionMatrix(projMatrix);
-            }
-
+            object.updateWorldSpaceMatrices(viewMatrix, projMatrix);
             object.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 
             object.getWorldMatrix(c_worldMatrix);

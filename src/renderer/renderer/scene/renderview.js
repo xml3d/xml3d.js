@@ -30,47 +30,43 @@ var RenderView = function (scene, pageEntry, opt) {
     RenderNode.call(this, NODE_TYPE.VIEW, scene, pageEntry, opt);
     opt = opt || {};
 
-    this.lastAspectRatio = 1;
-    this.projectionDirty = true;
-
-    this.camera = createCamera(opt.camera ? opt.camera : DEFAULT_CAMERA_CONFIGURATION, scene, this);
-    this.worldSpacePosition = vec3.create();
+    /**
+     * World to view matrix
+     * @type {Float32Array}
+     * @private
+     */
+    this._viewMatrix = new Float32Array(this.page.buffer, (this.offset + WORLD_TO_VIEW_MATRIX_OFFSET) * Float32Array.BYTES_PER_ELEMENT, 16);
 
     /**
      * Can we rely on the world to view matrix?
      * @type {boolean}
      */
     this.viewMatrixDirty = true;
+    this.worldSpacePosition = vec3.create();
 
+
+    this._projectionMatrix = new Float32Array(this.page.buffer, (this.offset + PROJECTION_MATRIX_OFFSET) * Float32Array.BYTES_PER_ELEMENT, 16);
+    this.lastAspectRatio = 1;
+    this.projectionDirty = true;
+    this.camera = createCamera(opt.camera ? opt.camera : DEFAULT_CAMERA_CONFIGURATION, scene, this);
     this.frustum = null;
 };
 RenderView.ENTRY_SIZE = ENTRY_SIZE;
 
-XML3D.createClass(RenderView, RenderNode);
-
-XML3D.extend(RenderView.prototype, {
+XML3D.createClass(RenderView, RenderNode, {
 
     getFrustum: function () {
         return this.frustum;
     },
 
-    updateViewMatrix: (function () {
-        var tmp_mat4 = mat4.create();
-
-        return function () {
-            this.getWorldMatrix(tmp_mat4);
-            vec3.set(this.worldSpacePosition, tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
-            mat4.invert(tmp_mat4, tmp_mat4);
-            this.setMat4InPage(tmp_mat4, WORLD_TO_VIEW_MATRIX_OFFSET);
-            this.viewMatrixDirty = false;
-            // View frustum might have changed due to clipping planes
-            this.viewFrustumChanged();
-        }
-    })(),
-
-    setProjectionMatrix: function (source) {
-        this.setMat4InPage(source, PROJECTION_MATRIX_OFFSET);
-        this.projectionDirty = false;
+    updateViewMatrix: function () {
+        var viewMatrix = this._viewMatrix;
+        this.getWorldMatrix(viewMatrix);
+        vec3.set(this.worldSpacePosition, viewMatrix[12], viewMatrix[13], viewMatrix[14]);
+        mat4.invert(viewMatrix, viewMatrix);
+        this.viewMatrixDirty = false;
+        // View frustum might have changed due to clipping planes
+        this.viewFrustumChanged();
     },
 
     onTransformDirty: function () {
@@ -87,7 +83,11 @@ XML3D.extend(RenderView.prototype, {
         if (this.viewMatrixDirty) {
             this.updateViewMatrix();
         }
-        this.getMat4FromPage(dest, WORLD_TO_VIEW_MATRIX_OFFSET);
+        if (dest) {
+            mat4.copy(dest, this._viewMatrix);
+            return dest;
+        }
+        return this._viewMatrix;
     },
 
     getProjectionMatrix: function (dest, aspect) {
@@ -95,13 +95,17 @@ XML3D.extend(RenderView.prototype, {
             // Set projectionMatrix
             this.frustum = this.camera.getFrustum(aspect);
             if(this.frustum) {
-                this.setProjectionMatrix(this.frustum.getProjectionMatrix(mat4.create()));
+                this.frustum.getProjectionMatrix(this._projectionMatrix);
             } else {
-                this.setProjectionMatrix(this.camera.getProjectionMatrix())
+                this.camera.getProjectionMatrix(this._projectionMatrix)
             }
             this.lastAspectRatio = aspect;
+            this.projectionDirty = false;
         }
-        this.getMat4FromPage(dest, PROJECTION_MATRIX_OFFSET);
+        if(dest) {
+            return mat4.copy(dest, this._projectionMatrix);
+        }
+        return this._projectionMatrix;
     },
 
     getWorldSpacePosition: function () {

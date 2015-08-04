@@ -161,18 +161,17 @@ XML3D.extend(GLScene.prototype, {
         return function (aspectRatio) {
             var activeView = this.getActiveView(), readyObjects = this.ready, i, l, obj;
 
+            this.updateBoundingBox();
+
             // Update all MV matrices
             activeView.getWorldToViewMatrix(c_worldToViewMatrix);
+            activeView.getProjectionMatrix(c_projMat_tmp, aspectRatio);
 
             for (i = 0, l = readyObjects.length; i < l; i++) {
                 obj = readyObjects[i];
-                obj.updateModelViewMatrix(c_worldToViewMatrix);
-                obj.updateModelMatrixN();
-                obj.updateModelViewMatrixN();
+                obj.updateWorldSpaceMatrices(c_worldToViewMatrix, c_projMat_tmp);
             }
-            this.updateBoundingBox();
 
-            activeView.getProjectionMatrix(c_projMat_tmp, aspectRatio);
             activeView.getViewToWorldMatrix(c_viewToWorldMatrix);
 
             var frustum = activeView.getFrustum();
@@ -184,7 +183,6 @@ XML3D.extend(GLScene.prototype, {
 
             for (i = 0, l = readyObjects.length; i < l; i++) {
                 obj = readyObjects[i];
-                obj.updateModelViewProjectionMatrix(c_projMat_tmp);
                 obj.getWorldSpaceBoundingBox(c_bbox);
                 obj.inFrustum = doFrustumCulling ? c_frustumTest.isBoxVisible(c_bbox) : true;
             }
@@ -194,9 +192,7 @@ XML3D.extend(GLScene.prototype, {
         var readyObjects = this.ready;
         for (var i = 0, l = readyObjects.length; i < l; i++) {
             var obj = readyObjects[i];
-            obj.updateModelViewMatrix(worldToViewMatrix);
-            obj.updateModelMatrixN();
-            obj.updateModelViewProjectionMatrix(projectionMatrix);
+            obj.updateWorldSpaceMatrices(worldToViewMatrix, projectionMatrix);
         }
     },
     addListeners: function () {

@@ -1,6 +1,7 @@
 var BaseRenderPass = require("./base.js");
 var mat4 = require("gl-matrix").mat4;
 var vec3 = require("gl-matrix").vec3;
+var assert = require("assert");
 
 var PickPositionRenderPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
@@ -17,6 +18,7 @@ XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
             }, c_systemUniformNames = ["bbox", "modelMatrix", "modelViewProjectionMatrix"];
 
         return function (obj, viewMatrix, projMatrix) {
+            assert(obj && viewMatrix && projMatrix);
             var gl = this.renderInterface.context.gl, target = this.output;
 
             target.bind();
@@ -25,10 +27,7 @@ XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
             gl.disable(gl.CULL_FACE);
             gl.disable(gl.BLEND);
 
-            if (viewMatrix && projMatrix) {
-                obj.updateModelViewMatrix(viewMatrix);
-                obj.updateModelViewProjectionMatrix(projMatrix);
-            }
+            obj.updateWorldSpaceMatrices(viewMatrix, projMatrix);
             obj.getWorldMatrix(c_modelMatrix);
 
             obj.getObjectSpaceBoundingBox(this.objectBoundingBox);

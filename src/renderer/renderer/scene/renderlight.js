@@ -5,7 +5,6 @@ var LightModels = require("../lights/light-models.js");
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
 
-
 /** @const */
 var ENTRY_SIZE = 32;
 
@@ -41,8 +40,7 @@ var RenderLight = function (scene, pageEntry, opt) {
 };
 RenderLight.ENTRY_SIZE = ENTRY_SIZE;
 
-XML3D.createClass(RenderLight, RenderNode);
-XML3D.extend(RenderLight.prototype, {
+XML3D.createClass(RenderLight, RenderNode, {
 
     setLightType: function (modelId, data) {
         if (this.model) {

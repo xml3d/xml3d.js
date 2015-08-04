@@ -40,26 +40,26 @@
         this.time = new Date().getTime();
     };
 
-    XML3D.StandardCamera = function(viewElement, opt) {
-        if (!viewElement) {
-            throw("Must provide a view element when initializing the StandardCamera!");
+    XML3D.StandardCamera = function(element, opt) {
+        if (!element) {
+            throw("Must provide an element to control when initializing the StandardCamera!");
         }
-        if (viewElement.hasAttribute("style")) {
+        if (element.hasAttribute("style")) {
             XML3D.debug.logWarning("This camera controller does not support CSS transforms, unexpected things may happen! Try using a <transform> element instead.");
         }
         opt = opt || {};
-        this.view = viewElement;
-        this.xml3d = this.getXML3DForView(viewElement);
+        this.element = element;
+        this.xml3d = this.getXML3DForElement(element);
 
         this.mode = opt.mode || "examine";
         this.touchTranslateMode = opt.touchTranslateMode || "twofinger";
-        //Note: The revolve point is relative to the view element's parent coordinate space.
+        //Note: The revolve point is relative to the element's parent coordinate space.
         this.revolveAroundPoint = opt.revolveAroundPoint || XML3D.Vec3.fromValues(0, 0, 0);
         this.rotateSpeed = opt.rotateSpeed || 3;
         this.zoomSpeed = opt.zoomSpeed || 20;
         this.useKeys = opt.useKeys !== undefined ? opt.useKeys : false;
 
-        this.viewInterface = new ViewInterface(this.view, this.xml3d);
+        this.elementInterface = new ElementInterface(this.element, this.xml3d);
         this.timer = new XML3D.util.Timer();
         this.prevPos = {x: -1, y: -1};
         this.prevTouchPositions = [];
@@ -68,13 +68,25 @@
             y : -1
         };
         this.prevZoomVectorLength = null;
-        this.upVector = this.viewInterface.upVector;
+        this.upVector = this.elementInterface.upVector;
 
         this.attach();
     };
 
     XML3D.StandardCamera.prototype.setRevolvePoint = function(vec) {
         this.revolveAroundPoint = vec;
+    };
+
+    XML3D.StandardCamera.prototype.setZoomSpeed = function(speed) {
+        this.zoomSpeed = speed;
+    };
+
+    XML3D.StandardCamera.prototype.setRotateSpeed = function(speed) {
+        this.rotateSpeed = speed;
+    };
+
+    XML3D.StandardCamera.prototype.setCameraMode = function(mode) {
+        this.mode = mode;
     };
 
     XML3D.StandardCamera.prototype.attach = function() {
@@ -123,13 +135,13 @@
     XML3D.StandardCamera.prototype.__defineGetter__("width", function() { return this.xml3d.width;});
     XML3D.StandardCamera.prototype.__defineGetter__("height", function() { return this.xml3d.height;});
 
-    XML3D.StandardCamera.prototype.getXML3DForView = function(view) {
-        var node = view.parentNode;
+    XML3D.StandardCamera.prototype.getXML3DForElement = function(element) {
+        var node = element.parentNode;
         while (node && node.localName !== "xml3d") {
             node = node.parentNode;
         }
         if (!node) {
-            throw("Could not find XML3D element for the given view.");
+            throw("Could not find the root XML3D element for the given element.");
         }
         return node;
     };
@@ -198,15 +210,15 @@
             return;
         switch(this.action) {
             case(this.TRANSLATE):
-                var f = 2.0* Math.tan(this.viewInterface.fieldOfView/2.0) / this.height;
+                var f = 2.0* Math.tan(this.elementInterface.fieldOfView/2.0) / this.height;
                 var dx = f*(ev.pageX - this.prevPos.x) * this.zoomSpeed;
                 var dy = f*(ev.pageY - this.prevPos.y) * this.zoomSpeed;
                 var trans = XML3D.Vec3.fromValues(-dx, dy, 0.0);
-                this.viewInterface.translate(this.viewInterface.inverseTransformOf(trans));
+                this.elementInterface.translate(this.elementInterface.inverseTransformOf(trans));
                 break;
             case(this.DOLLY):
                 var dy = this.zoomSpeed * (ev.pageY - this.prevPos.y) / this.height;
-                this.viewInterface.translate(this.viewInterface.inverseTransformOf(XML3D.Vec3.fromValues(0, 0, dy)));
+                this.elementInterface.translate(this.elementInterface.inverseTransformOf(XML3D.Vec3.fromValues(0, 0, dy)));
                 break;
             case(this.ROTATE):
 
@@ -216,17 +228,17 @@
                 var mx = XML3D.Quat.fromAxisAngle([0,1,0], dx);
                 var my = XML3D.Quat.fromAxisAngle([1,0,0], dy);
                 mx = mx.mul(my);
-                this.viewInterface.rotateAroundPoint(mx, this.revolveAroundPoint);
+                this.elementInterface.rotateAroundPoint(mx, this.revolveAroundPoint);
                 break;
             case(this.LOOKAROUND):
                 var dx = -this.rotateSpeed*0.1 * (ev.pageX - this.prevPos.x) * 2.0 * Math.PI / this.width;
                 var dy = this.rotateSpeed*0.1 * (ev.pageY - this.prevPos.y) * 2.0 * Math.PI / this.height;
-                var cross = this.upVector.cross(this.viewInterface.direction);
+                var cross = this.upVector.cross(this.elementInterface.direction);
 
                 var mx = XML3D.Quat.fromAxisAngle( this.upVector , dx);
                 var my = XML3D.Quat.fromAxisAngle( cross , dy);
 
-                this.viewInterface.lookAround(mx, my, this.upVector);
+                this.elementInterface.lookAround(mx, my, this.upVector);
                 break;
         }
 
@@ -322,11 +334,11 @@
         switch(this.action) {
             case(this.TRANSLATE):
                 if (this.touchTranslateMode == "threefinger") {
-                    var f = 2.0* Math.tan(this.viewInterface.fieldOfView/2.0) / this.height;
+                    var f = 2.0* Math.tan(this.elementInterface.fieldOfView/2.0) / this.height;
                     var dx = f*(ev.touches[0].pageX - this.prevTouchPositions[0].x);
                     var dy = f*(ev.touches[0].pageY - this.prevTouchPositions[0].y);
                     var trans = XML3D.Vec3.fromValues(-dx*this.zoomSpeed, dy*this.zoomSpeed, 0.0);
-                    this.viewInterface.translate(this.viewInterface.inverseTransformOf(trans));
+                    this.elementInterface.translate(this.elementInterface.inverseTransformOf(trans));
                 }
                 break;
             case(this.DOLLY):
@@ -342,11 +354,11 @@
                     if (prevMidpoint !== undefined) {
                         var curMidpoint = {x:(ev.touches[0].pageX + ev.touches[1].pageX) / 2 ,
                                            y:(ev.touches[0].pageY + ev.touches[1].pageY) / 2 }
-                        var f = 2.0* Math.tan(this.viewInterface.fieldOfView/2.0) / this.height;
+                        var f = 2.0* Math.tan(this.elementInterface.fieldOfView/2.0) / this.height;
                         var dx = f*(curMidpoint.x - prevMidpoint.x);
                         var dy = f*(curMidpoint.y - prevMidpoint.y);
                         var trans = XML3D.Vec3.fromValues(-dx*this.zoomSpeed, dy*this.zoomSpeed, 0.0);
-                        this.viewInterface.translate(this.viewInterface.inverseTransformOf(trans));
+                        this.elementInterface.translate(this.elementInterface.inverseTransformOf(trans));
                     }
                 }
 
@@ -355,7 +367,7 @@
                     var currLength = Math.sqrt(dv.x*dv.x + dv.y*dv.y);
 
                     var dy = this.zoomSpeed * (currLength - this.prevZoomVectorLength) / this.height;
-                    this.viewInterface.translate(this.viewInterface.inverseTransformOf(XML3D.Vec3.fromValues(0, 0, -dy)));
+                    this.elementInterface.translate(this.elementInterface.inverseTransformOf(XML3D.Vec3.fromValues(0, 0, -dy)));
 
                     this.prevZoomVectorLength = currLength;
                 } else {
@@ -371,17 +383,17 @@
                 var mx = XML3D.Quat.fromAxisAngle([0,1,0], dx);
                 var my = XML3D.Quat.fromAxisAngle([1,0,0], dy);
                 mx = mx.mul(my);
-                this.viewInterface.rotateAroundPoint(mx, this.revolveAroundPoint);
+                this.elementInterface.rotateAroundPoint(mx, this.revolveAroundPoint);
                 break;
             case(this.LOOKAROUND):
                 var dx = -this.rotateSpeed*0.1 * (ev.touches[0].pageX - this.prevTouchPositions[0].x) * 2.0 * Math.PI / this.width;
                 var dy = this.rotateSpeed*0.1 * (ev.touches[0].pageY - this.prevTouchPositions[0].y) * 2.0 * Math.PI / this.height;
-                var cross = this.upVector.cross(this.viewInterface.direction);
+                var cross = this.upVector.cross(this.elementInterface.direction);
 
                 var mx = XML3D.Quat.fromAxisAngle( this.upVector , dx);
                 var my = XML3D.Quat.fromAxisAngle( cross , dy);
 
-                this.viewInterface.lookAround(mx, my, this.upVector);
+                this.elementInterface.lookAround(mx, my, this.upVector);
                 break;
         }
 
@@ -422,38 +434,38 @@
         }
 
         var xml3d = this.xml3d;
-        var view = this.viewInterface;
-        var dir = view.direction;
+        var element = this.elementInterface;
+        var dir = element.direction;
         var np;
         if (xml3d) {
             switch (KeyID) {
             case 38: // up
             case 87: // w
-                np = view.position;
+                np = element.position;
                 np.z += dir.z * this.zoomSpeed * 0.05;
                 np.x += dir.x * this.zoomSpeed * 0.05;
-                view.position = np;
+                element.position = np;
                 break;
             case 39: // right
             case 68: // d
-                np = view.position;
+                np = element.position;
                 np.x -= dir.z * this.zoomSpeed * 0.05;
                 np.z += dir.x * this.zoomSpeed * 0.05;
-                view.position = np;
+                element.position = np;
                 break;
             case 37: // left
             case 65: // a
-                np = view.position;
+                np = element.position;
                 np.x += dir.z * this.zoomSpeed * 0.05;
                 np.z -= dir.x * this.zoomSpeed * 0.05;
-                view.position = np;
+                element.position = np;
                 break;
             case 40: // down
             case 83: // s
-                np = view.position;
+                np = element.position;
                 np.z -= dir.z * this.zoomSpeed * 0.05;
                 np.x -= dir.x * this.zoomSpeed * 0.05;
-                view.position = np;
+                element.position = np;
                 break;
 
             default:
@@ -464,71 +476,71 @@
     };
 
 
-    var ViewInterface = function(view, xml3d) {
-        this.view = view;
+    var ElementInterface = function(element, xml3d) {
+        this.element = element;
         this.xml3d = xml3d;
-        this.transform = this.getTransformForView(view);
+        this.transform = this.getTransformForView(element);
     };
 
-    ViewInterface.prototype.getTransformForView = function(view) {
-        if (view.hasAttribute("transform")) {
-            //If the view element already has a transform we can reuse that
-            return document.querySelector(view.getAttribute("transform"));
+    ElementInterface.prototype.getTransformForView = function(element) {
+        if (element.hasAttribute("transform")) {
+            //If the element already has a transform we can reuse that
+            return document.querySelector(element.getAttribute("transform"));
         }
-        return this.createTransformForView(view);
+        return this.createTransformForView(element);
     };
 
-    ViewInterface.prototype.createTransformForView = (function() {
-        var viewCount = 0;
-        return function(view) {
+    ElementInterface.prototype.createTransformForView = (function() {
+        var elementCount = 0;
+        return function(element) {
             var transform = document.createElement("transform");
-            var tid = "Generated_Camera_Transform_" + viewCount++;
+            var tid = "Generated_Camera_Transform_" + elementCount++;
             transform.setAttribute("id", tid);
-            view.parentElement.appendChild(transform);
-            view.setAttribute("transform", "#"+tid);
+            element.parentElement.appendChild(transform);
+            element.setAttribute("transform", "#"+tid);
             return transform;
         }
     })();
 
-    ViewInterface.prototype.__defineGetter__("orientation", function() {
+    ElementInterface.prototype.__defineGetter__("orientation", function() {
         return XML3D.Quat.fromAxisAngle(this.transform.rotation);
     });
-    ViewInterface.prototype.__defineGetter__("position", function() {
+    ElementInterface.prototype.__defineGetter__("position", function() {
         return this.transform.translation;
     });
-    ViewInterface.prototype.__defineGetter__("worldPosition", function() {
-        var tmat = this.view.getWorldMatrix();
+    ElementInterface.prototype.__defineGetter__("worldPosition", function() {
+        var tmat = this.element.getWorldMatrix();
         return new XML3D.Vec3.fromValues(tmat.m42, tmat.m43, tmat.m44);
     });
-    ViewInterface.prototype.__defineSetter__("orientation", function(orientation) {
+    ElementInterface.prototype.__defineSetter__("orientation", function(orientation) {
         var aa = XML3D.AxisAngle.fromQuat(orientation);
         this.transform.setAttribute("rotation", aa.toDOMString());
     });
-    ViewInterface.prototype.__defineSetter__("position", function(position) {
+    ElementInterface.prototype.__defineSetter__("position", function(position) {
         this.transform.setAttribute("translation", position.toDOMString());
     });
-    ViewInterface.prototype.__defineGetter__("direction", function() {
+    ElementInterface.prototype.__defineGetter__("direction", function() {
         var dir = new XML3D.Vec3.fromValues(0, 0, -1);
         return dir.transformQuat(this.orientation);
     });
-    ViewInterface.prototype.__defineGetter__("upVector", function() {
+    ElementInterface.prototype.__defineGetter__("upVector", function() {
         var up = new XML3D.Vec3.fromValues(0, 1, 0);
         return up.transformQuat(this.orientation);
     });
-    ViewInterface.prototype.__defineGetter__("fieldOfView", function() {
-        var fovh = this.view.querySelector("float[name=fovHorizontal]");
+    ElementInterface.prototype.__defineGetter__("fieldOfView", function() {
+        var fovh = this.element.querySelector("float[name=fovHorizontal]");
         if (fovh) {
             var h = fovh.getValue();
             return 2 * Math.atan(Math.tan(h / 2.0) * this.xml3d.width / this.xml3d.height);
         }
-        var fovv = this.view.querySelector("float[name=fovVertical]");
+        var fovv = this.element.querySelector("float[name=fovVertical]");
         if (fovv) {
             return fovv.getValue();
         }
         return (45 * Math.PI / 180); //Default FOV
     });
 
-    ViewInterface.prototype.rotateAroundPoint = (function() {
+    ElementInterface.prototype.rotateAroundPoint = (function() {
         var tmpQuat = new XML3D.Quat();
 
         return function(q0, p0) {
@@ -540,7 +552,7 @@
         }
     })();
 
-    ViewInterface.prototype.lookAround = function(rotSide, rotUp, upVector) {
+    ElementInterface.prototype.lookAround = function(rotSide, rotUp, upVector) {
         var check = rotUp.mul(this.orientation);
 
         var tmp = XML3D.Vec3.fromValues(0,0,-1).transformQuat(check);
@@ -553,15 +565,15 @@
         this.orientation = rot;
     };
 
-    ViewInterface.prototype.rotate = function(q0) {
+    ElementInterface.prototype.rotate = function(q0) {
         this.orientation = this.orientation.mul(q0).normalize();
     };
 
-    ViewInterface.prototype.translate = function(t0) {
+    ElementInterface.prototype.translate = function(t0) {
         this.position = this.position.add(t0);
     };
 
-    ViewInterface.prototype.inverseTransformOf = function(vec) {
+    ElementInterface.prototype.inverseTransformOf = function(vec) {
         return vec.transformQuat(this.orientation);
     };
 })();

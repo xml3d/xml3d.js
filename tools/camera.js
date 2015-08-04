@@ -53,8 +53,8 @@
 
         this.mode = opt.mode || "examine";
         this.touchTranslateMode = opt.touchTranslateMode || "twofinger";
-        //Note: The revolve point is relative to the element's parent coordinate space.
-        this.revolveAroundPoint = opt.revolveAroundPoint || this.getInverseTranslationOfParent(element);
+        //Note: The examine point is relative to the element's parent coordinate space.
+        this.examinePoint = opt.examinePoint || this.getInverseTranslationOfParent(element);
         this.rotateSpeed = opt.rotateSpeed || 3;
         this.zoomSpeed = opt.zoomSpeed || 20;
         this.useKeys = opt.useKeys !== undefined ? opt.useKeys : false;
@@ -73,20 +73,31 @@
         this.attach();
     };
 
-    XML3D.StandardCamera.prototype.setRevolvePoint = function(vec) {
-        this.revolveAroundPoint = vec;
+    XML3D.StandardCamera.prototype.translate = function(t0) {
+        this.elementInterface.translate(t0);
     };
 
-    XML3D.StandardCamera.prototype.setZoomSpeed = function(speed) {
-        this.zoomSpeed = speed;
+    XML3D.StandardCamera.prototype.rotate = function(r0) {
+        this.elementInterface.rotate(r0);
     };
 
-    XML3D.StandardCamera.prototype.setRotateSpeed = function(speed) {
-        this.rotateSpeed = speed;
+    XML3D.StandardCamera.prototype.examine = function(element) {
+        if (!element.getWorldBoundingBox) {
+            XML3D.debug.logError(element + " is not a valid examine target. Valid target elements include <group>, <mesh> and <model>.");
+            return;
+        }
+        var bb = element.getWorldBoundingBox();
+        var center = bb.center();
+        var r = center.len();
+        var newPos = center.clone();
+        newPos.z += r / Math.tan(this.elementInterface.fieldOfView / 2);
+        this.elementInterface.position = newPos;
+        this.elementInterface.orientation = new XML3D.Quat();
+        this.examinePoint = bb.center();
     };
 
-    XML3D.StandardCamera.prototype.setCameraMode = function(mode) {
-        this.mode = mode;
+    XML3D.StandardCamera.prototype.lookAt = function(target) {
+        this.elementInterface.lookAt(target);
     };
 
     XML3D.StandardCamera.prototype.attach = function() {
@@ -237,7 +248,7 @@
                 var mx = XML3D.Quat.fromAxisAngle([0,1,0], dx);
                 var my = XML3D.Quat.fromAxisAngle([1,0,0], dy);
                 mx = mx.mul(my);
-                this.elementInterface.rotateAroundPoint(mx, this.revolveAroundPoint);
+                this.elementInterface.rotateAroundPoint(mx, this.examinePoint);
                 break;
             case(this.LOOKAROUND):
                 var dx = -this.rotateSpeed*0.1 * (ev.pageX - this.prevPos.x) * 2.0 * Math.PI / this.width;
@@ -392,7 +403,7 @@
                 var mx = XML3D.Quat.fromAxisAngle([0,1,0], dx);
                 var my = XML3D.Quat.fromAxisAngle([1,0,0], dy);
                 mx = mx.mul(my);
-                this.elementInterface.rotateAroundPoint(mx, this.revolveAroundPoint);
+                this.elementInterface.rotateAroundPoint(mx, this.examinePoint);
                 break;
             case(this.LOOKAROUND):
                 var dx = -this.rotateSpeed*0.1 * (ev.touches[0].pageX - this.prevTouchPositions[0].x) * 2.0 * Math.PI / this.width;
@@ -584,5 +595,18 @@
 
     ElementInterface.prototype.inverseTransformOf = function(vec) {
         return vec.transformQuat(this.orientation);
+    };
+
+    ElementInterface.prototype.lookAt = function(point) {
+        var dir = point.sub(this.position).normalize();
+        var up = XML3D.Vec3.fromValues(0,1,0);
+        var orientation = this.orientation;
+        var basisX = new XML3D.Vec3(dir).cross(up);
+        if (!basisX.length()) {
+            basisX = XML3D.Vec3.fromValues(1,0,0).transformQuat(orientation);
+        }
+        var basisY = basisX.clone().cross(dir);
+        var basisZ = new XML3D.Vec3(dir).negate();
+        this.orientation = XML3D.Quat.fromBasis(basisX, basisY, basisZ);
     };
 })();

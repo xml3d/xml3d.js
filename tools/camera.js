@@ -54,7 +54,7 @@
         this.mode = opt.mode || "examine";
         this.touchTranslateMode = opt.touchTranslateMode || "twofinger";
         //Note: The revolve point is relative to the element's parent coordinate space.
-        this.revolveAroundPoint = opt.revolveAroundPoint || XML3D.Vec3.fromValues(0, 0, 0);
+        this.revolveAroundPoint = opt.revolveAroundPoint || this.getInverseTranslationOfParent(element);
         this.rotateSpeed = opt.rotateSpeed || 3;
         this.zoomSpeed = opt.zoomSpeed || 20;
         this.useKeys = opt.useKeys !== undefined ? opt.useKeys : false;
@@ -144,6 +144,15 @@
             throw("Could not find the root XML3D element for the given element.");
         }
         return node;
+    };
+
+    XML3D.StandardCamera.prototype.getInverseTranslationOfParent = function(element) {
+        if (!element.parentElement.getWorldMatrix) {
+            return XML3D.Vec3.fromValues(0,0,0);
+        }
+        var tmat = element.parentElement.getWorldMatrix();
+        tmat = tmat.invert();
+        return XML3D.Vec3.fromValues(tmat.m41, tmat.m42, tmat.m43);
     };
 
     XML3D.StandardCamera.prototype.stopEvent = function(ev) {

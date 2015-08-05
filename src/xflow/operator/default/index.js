@@ -15,7 +15,6 @@ require("./get.js");
 require("./grayscaleImage.js");
 require("./lerp3seq.js");
 require("./magnitudeImage.js");
-require("./merge3.js");
 require("./morph3.js");
 require("./mul4x4.js");
 require("./noiseImage.js");

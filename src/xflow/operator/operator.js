@@ -19,7 +19,7 @@ var operators = {};
 var registerOperator = function(name, data){
     var opCollection, platform;
 
-    initOperator(data);
+    initOperator(data, name);
     if(!operators[name]) {
         operators[name] = {};
     }
@@ -69,13 +69,22 @@ var getOperators = function(name, platform){
     return operators[name][platform];
 };
 
-function initOperator(operator){
+function initOperator(operator, name){
     var indexMap = {};
     // Init types of outputs and params
     for(var i= 0; i < operator.outputs.length; ++i){
+        if (operator.outputs[i].type === undefined) {
+            XML3D.debug.logError("Xflow operator '"+name+"' is missing required attribute 'type' for output parameter "+i);
+        }
         operator.outputs[i].type = C.DATA_TYPE_MAP[operator.outputs[i].type];
     }
     for(var i= 0; i < operator.params.length; ++i){
+        if (operator.params[i].source === undefined) {
+            XML3D.debug.logError("Xflow operator '"+name+"' is missing required attribute 'source' for input parameter "+i);
+        }
+        if (operator.params[i].type === undefined) {
+            XML3D.debug.logError("Xflow operator '"+name+"' is missing required attribute 'type' for input parameter "+i);
+        }
         operator.params[i].type = C.DATA_TYPE_MAP[operator.params[i].type];
         indexMap[operator.params[i].source] = i;
     }

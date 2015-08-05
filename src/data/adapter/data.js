@@ -4,6 +4,7 @@ var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
 var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
 var AdapterHandle = require("../../base/adapterhandle.js");
+var Base = require("../../xflow/base.js");
 
 /**
  * The DataAdapter implements the
@@ -192,6 +193,7 @@ DataAdapter.prototype.connectedAdapterChanged = function (key, adapter /*, statu
     } else if (this.externalScripts[key]) {
         window.eval(adapter.script);
         this.xflowDataNode.notify(XC.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     }
     // Cycle the load state to force a load event even if the new sourceNode is cached
     this.xflowDataNode.setLoading(true);

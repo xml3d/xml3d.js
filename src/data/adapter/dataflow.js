@@ -3,6 +3,7 @@ var DataNode = require("../../xflow/interface/graph.js").DataNode;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
 var AdapterHandle = require("../../base/adapterhandle.js");
+var Base = require("../../xflow/base.js");
 
 /**
  * DataAdapter handling a <dataflow> element
@@ -49,6 +50,7 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
             window.eval(evt.adapter.script);
             setLoadingStateForMatchingXflowNodes(this.xflowDataNode, evt.key, false);
             this.xflowDataNode.notify(XC.RESULT_STATE.CHANGED_STRUCTURE);
+            Base._flushResultCallbacks();
         }
     }
 

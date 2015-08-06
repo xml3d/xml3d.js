@@ -39,9 +39,6 @@ test("&lt;data&gt; interface test", function() {
     equal(typeof e.filter, "string", "filter is of type 'string'");
     equal(typeof e.getOutputNames, "function", "getOutputNames is of type 'function'");
     equal(typeof e.getOutputChannelInfo, "function", "getOutputChannelInfo is of type 'function'");
-    equal(typeof e.getComputeInfo, "function", "getComputeInfo is of type 'function'");
-    equal(typeof e.getProtoInfo, "function", "getProtoInfo is of type 'function'");
-    equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
     equal(typeof e.getResult, "function", "getResult is of type 'function'");
     equal(typeof e.src, "string", "src is of type 'string'");
 });
@@ -98,9 +95,6 @@ test("&lt;mesh&gt; interface test", function() {
     equal(typeof e.getWorldBoundingBox, "function", "getWorldBoundingBox is of type 'function'");
     equal(typeof e.getOutputNames, "function", "getOutputNames is of type 'function'");
     equal(typeof e.getOutputChannelInfo, "function", "getOutputChannelInfo is of type 'function'");
-    equal(typeof e.getComputeInfo, "function", "getComputeInfo is of type 'function'");
-    equal(typeof e.getProtoInfo, "function", "getProtoInfo is of type 'function'");
-    equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
     equal(typeof e.getResult, "function", "getResult is of type 'function'");
     equal(typeof e.src, "string", "src is of type 'string'");
 });
@@ -125,9 +119,6 @@ test("&lt;material&gt; interface test", function() {
     equal(typeof e.compute, "string", "compute is of type 'string'");
     equal(typeof e.getOutputNames, "function", "getOutputNames is of type 'function'");
     equal(typeof e.getOutputChannelInfo, "function", "getOutputChannelInfo is of type 'function'");
-    equal(typeof e.getComputeInfo, "function", "getComputeInfo is of type 'function'");
-    equal(typeof e.getProtoInfo, "function", "getProtoInfo is of type 'function'");
-    equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
     equal(typeof e.getResult, "function", "getResult is of type 'function'");
     equal(typeof e.model, "string", "model is of type 'string'");
     equal(typeof e.src, "string", "src is of type 'string'");

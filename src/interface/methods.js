@@ -4,9 +4,7 @@ var callAdapterFunc = require("../utils/misc.js").callAdapterFunc;
 var CSS = require("../utils/css.js");
 
 var Vec3 = require("../types/vec3.js");
-var Quat = require("../types/quat.js");
 var Mat4 = require("../types/mat4.js");
-var AxisAngle = require("../types/axisangle.js");
 var vec3 = require("gl-matrix").vec3;
 
 var methods = {};
@@ -184,31 +182,6 @@ methods.XML3DNestedDataContainerTypeGetOutputChannelInfo =
             }
             return null;
         };
-// TODO: Get rid of these
-methods.XML3DNestedDataContainerTypeGetComputeInfo =
-    methods.XML3DShaderProviderTypeGetComputeInfo =
-        methods.meshGetComputeInfo = function () {
-            XML3D.flushDOMChanges();
-            XML3D.debug.logError(this.nodeName + "::getComputeInfo is not implemeted yet.");
-            return null;
-        };
-
-methods.XML3DNestedDataContainerTypeGetProtoInfo =
-    methods.XML3DShaderProviderTypeGetProtoInfo =
-        methods.meshGetProtoInfo = function () {
-            XML3D.flushDOMChanges();
-            XML3D.debug.logError(this.nodeName + "::getProtoInfo is not implemeted yet.");
-            return null;
-        };
-
-methods.XML3DNestedDataContainerTypeIsOutputConnected =
-    methods.XML3DShaderProviderTypeIsOutputConnected =
-        methods.meshIsOutputConnected = function () {
-            XML3D.flushDOMChanges();
-            XML3D.debug.logError(this.nodeName + "::isOutputConnected is not implemeted yet.");
-            return false;
-        };
-
 
 function createValues(result, names) {
     var values = {};

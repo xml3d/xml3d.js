@@ -119,9 +119,6 @@ classInfo['data'] = {
     complete: {p: properties.XML3DNestedDataContainerTypeComplete},
     getOutputNames: {m: methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
-    getComputeInfo: {m: methods.XML3DNestedDataContainerTypeGetComputeInfo},
-    getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
-    isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
     src: {a: handlers.StringAttributeHandler}
     };
@@ -138,9 +135,6 @@ classInfo['dataflow'] = {
     complete: {p: properties.XML3DNestedDataContainerTypeComplete},
     getOutputNames: {m: methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
-    getComputeInfo: {m: methods.XML3DNestedDataContainerTypeGetComputeInfo},
-    getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
-    isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult}
     };
 /**
@@ -217,9 +211,6 @@ classInfo['mesh'] = {
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     getOutputNames: {m: methods.meshGetOutputNames},
     getOutputChannelInfo: {m: methods.meshGetOutputChannelInfo},
-    getComputeInfo: {m: methods.meshGetComputeInfo},
-    getProtoInfo: {m: methods.meshGetProtoInfo},
-    isOutputConnected: {m: methods.meshIsOutputConnected},
     getResult: {m: methods.meshGetResult},
     src: {a: handlers.StringAttributeHandler}
     };
@@ -275,9 +266,6 @@ classInfo['material'] = {
     compute: {a: handlers.StringAttributeHandler},
     getOutputNames: {m: methods.XML3DShaderProviderTypeGetOutputNames},
     getOutputChannelInfo: {m: methods.XML3DShaderProviderTypeGetOutputChannelInfo},
-    getComputeInfo: {m: methods.XML3DShaderProviderTypeGetComputeInfo},
-    getProtoInfo: {m: methods.XML3DShaderProviderTypeGetProtoInfo},
-    isOutputConnected: {m: methods.XML3DShaderProviderTypeIsOutputConnected},
     getResult: {m: methods.XML3DShaderProviderTypeGetResult},
     model: {a: handlers.StringAttributeHandler},
     src: {a: handlers.StringAttributeHandler}
@@ -306,9 +294,6 @@ classInfo['light'] = {
     compute: {a: handlers.StringAttributeHandler},
     getOutputNames: {m: methods.XML3DShaderProviderTypeGetOutputNames},
     getOutputChannelInfo: {m: methods.XML3DShaderProviderTypeGetOutputChannelInfo},
-    getComputeInfo: {m: methods.XML3DShaderProviderTypeGetComputeInfo},
-    getProtoInfo: {m: methods.XML3DShaderProviderTypeGetProtoInfo},
-    isOutputConnected: {m: methods.XML3DShaderProviderTypeIsOutputConnected},
     getResult: {m: methods.XML3DShaderProviderTypeGetResult},
     src: {a: handlers.StringAttributeHandler},
     model: {a: handlers.StringAttributeHandler}
@@ -326,9 +311,6 @@ classInfo['lightshader'] = {
     compute: {a: handlers.StringAttributeHandler},
     getOutputNames: {m: methods.XML3DShaderProviderTypeGetOutputNames},
     getOutputChannelInfo: {m: methods.XML3DShaderProviderTypeGetOutputChannelInfo},
-    getComputeInfo: {m: methods.XML3DShaderProviderTypeGetComputeInfo},
-    getProtoInfo: {m: methods.XML3DShaderProviderTypeGetProtoInfo},
-    isOutputConnected: {m: methods.XML3DShaderProviderTypeIsOutputConnected},
     getResult: {m: methods.XML3DShaderProviderTypeGetResult},
     script: {a: handlers.StringAttributeHandler},
     src: {a: handlers.StringAttributeHandler}
@@ -361,9 +343,6 @@ classInfo['assetmesh'] = {
     platform: {a: handlers.EnumAttributeHandler, params: {values: PlatformTypes, defaultValue: 1}},
     getOutputNames: {m: methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
-    getComputeInfo: {m: methods.XML3DNestedDataContainerTypeGetComputeInfo},
-    getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
-    isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
     src: {a: handlers.StringAttributeHandler}
     };

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <!-- PREVENT on select-->
+
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+  <script type="text/javascript" src="../../tools/camera.js"></script>
+
+  <script type="text/javascript" src="scripts/input_options.js"></script>
+
+  <script type="text/javascript">
+    document.addEventListener("load", attachTFWidget, false);
+
+    function attachTFWidget() {
+      new XML3D.webgl.TransferFunctionWidget("transferFunction1", "divForTFWidget");
+    }
+    ;
+  </script>
+
+</head>
+<body>
+<div id="log" style="display:none;"></div>
+<div style="margin:20px;"> Test volume tag</div>
+
+<div style="position:absolute; top:50px; left:20px; outline:1px solid black; ">
+  <xml3d style="width: 612px; height: 500px; background-color: white;" view="#view_volume">
+
+    <defs>
+      <material id="transferFunction1" model="urn:xml3d:material:raycaster">
+        <texture id="newTextureTF" name="transferFunction">
+          <img src="transferfunctions/ndt.png">
+        </texture>
+      </material>
+
+      <transform id="t_volume" translation="-28 -3.5 -17.5"></transform>
+      <transform id="t_view" translation="85.46 17.425 50.79" rotation="-0.164 0.98 0.063 1.05"></transform>
+    </defs>
+
+    <view id="view_volume" transform="#t_view">
+      <float name="fovVertical">0.7854</float>
+    </view>
+
+    <group id="group_volume1" material="#transferFunction1" transform="#t_volume1">
+      <volume id="test_volume">
+        <data src="xml/ndt_volumes.xml#ndtVolume5MB"></data>
+        <float3 name="gridSize">56 383 70</float3>
+        <float3 name="size">56 20 35</float3>
+        <int id="test_volume_rt" name="renderType">1</int>
+        <float name="stepSize">0.12</float>
+        <float name="baseIntensity">30.0</float>
+        <float name="rayTerminationAccuracy">0.975</float>
+        <int name="randomizeStartPosition">0</int>
+      </volume>
+    </group>
+
+  </xml3d>
+
+
+  <div id="divInfo" style="position:absolute; top:10px; left:650px;">
+    <p><b>Rendering method</b></p>
+    <select id="cRenderType" style="margin-top:12px;" onchange="onValueChange(this.value, 'test_volume_rt');">
+      <option value="0">Transparent</option>
+      <option value="1">Maximum Intensity Projection</option>
+    </select>
+  </div>
+
+  <!-- <div id="divForTFWidget" style="position:absolute; top:70px; left:650px; "/> !-->
+</div>
+<script type="text/javascript">
+  window.addEventListener("load", function () {
+    window.DemoCamera = new XML3D.StandardCamera(document.querySelector("view"), {
+      mode: "examine"
+    });
+  });
+</script>
+
+
+</body>
+</html>

@@ -54,7 +54,7 @@ XML3D.extend(ObjectSorter.prototype, {
             opaque[progId] = sortedArray.map(function(e) { return e.obj; });
         }
 
-        var cameraPosition = scene.getActiveView().position;
+        var cameraPosition = scene.getActiveView().worldSpacePosition;
 
         //Sort transparent objects from back to front
         var tlength = transparentArray.length;

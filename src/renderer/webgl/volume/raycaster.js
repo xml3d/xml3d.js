@@ -1,4 +1,4 @@
-XML3D.shaders.register("raycaster", {
+XML3D.materials.register("raycaster", {
     vertex : [
         "attribute vec3 position;",
 
@@ -249,7 +249,7 @@ XML3D.shaders.register("raycaster", {
     }
 });
 
-XML3D.shaders.register("backface", {
+XML3D.materials.register("backface", {
     vertex : [
         "attribute vec3 position;",
 		

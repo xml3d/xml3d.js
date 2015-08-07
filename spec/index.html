@@ -819,9 +819,12 @@
             <a href="#the-compute-operator"><code>compute operator</code></a> to generate the transformation matrix. 
           </p>
 
-          <div class="issue">Overriding rules for the various transform options</div>
+          <div class="note">In cases where both a CSS transform and a <code>transform</code> attribute are given the CSS transform will take precedence.</div>
 
           <pre class="example highlight">
+            &lt;!-- Using a CSS3 transform --&gt;
+            &lt;group style="transform: translate3d(0px, 0px, 10px)"&gt;&lt;/group&gt;
+
             &lt;!-- Using a transform element --&gt;
             &lt;transform id="myTransformElement" translation="0 0 10"&gt;&lt;/transform&gt;
             &lt;group transform="#myTransformElement"&gt;&lt;/group&gt;
@@ -837,9 +840,6 @@
               &lt;float3 name="translation"&gt;0 0 10&lt;/float3&gt;
             &lt;/data&gt;
             &lt;group transform="#myComputeTransform"&gt;&lt;/group&gt;
-
-            &lt;!-- Using a CSS3 transform --&gt;
-            &lt;group style="transform: translate3d(0px, 0px, 10px)"&gt;&lt;/group&gt;
           </pre>
 
           <p>The above example shows four different ways of defining the same transformation on a <a href="#the-group-element"><code>group</code></a> element.</p>
@@ -965,9 +965,9 @@
       <p>The <dfn>xml3d element</dfn> is the root element of an XML3D scene. It will create a <code>canvas</code> element at this position in the DOM to
       display the rendered scene. CSS styles and event listeners from the XML3D element are also applied to the canvas allowing for mouse interaction with the
         XML3D scene. </p>
-      <div class="issue">Sharing data between XML3D elements does work</div>
-      <p>A page may have more than one XML3D element, in this case multiple canvases with their own WebGL contexts will be created. It is not possible
-      to share any data between XML3D scenes, though several scenes may of course reference the same external documents where shared data can be stored.</p>
+
+      <p>A page may have more than one XML3D element, in this case multiple canvases with their own WebGL contexts will be created. It is also possible to share date elements
+        between scenes in which case XML3D will automatically create the necessary WebGL buffers for each context.</p>
 
       <p>Because XML3D uses HTML ids to reference elements it is important to avoid duplicate ids. For example, a duplicate id for a <code>data</code> element that appears
       in two different XML3D scenes on the same page may lead to undefined behavior. </p>
@@ -1021,8 +1021,9 @@
         </dd>
 
         <dt>HTMLElement? getElementByRay()</dt>
-        <dd>Returns the first element that intersects with ray if the ray intersects with a scene element; otherwise,
-          returns null.
+        <dd>Returns the first element that intersects with the ray if the ray intersects with a scene element; otherwise,
+          returns null. Unlike <code>getElementByPoint</code> this function is not dependent on the currently active view. This makes it useful for, for example,
+          finding the surface normal of an object at a particular point regardless of whether or not that object is currently visible to the active camera.
             <dl class='parameters'>
                 <dt>ray ray</dt>
                 <dd></dd>
@@ -1032,7 +1033,6 @@
                 <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
             </dl>
         </dd>
-
 
 
         <dt>Box getLocalBoundingBox()</dt>
@@ -1054,7 +1054,6 @@
 
 
       </dl>
-      <div class="issue">Better description for getElementByRay especially how it differs from *byPoint</div>
     </section>
   </section>
 
@@ -1183,6 +1182,9 @@
             <dt>Mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this view element in world space.
             </dd>
+            <dt>Mat4 getLocalMatrix()</dt>
+            <dd>Returns the local transformation matrix of this view element (does not include parent transformations).
+            </dd>
 
             <dt>Mat4 getViewMatrix()</dt>
             <dd>Returns the view matrix of the camera (the matrix used to transform from world to view space).
@@ -1191,7 +1193,7 @@
             <dd>Returns the projection matrix for the frustum defined by this view.
             </dd>
         </dl>
-      <div class="issue">getLocalMatrix is missing</div>
+
     </section>
     <section>
 
@@ -1235,8 +1237,15 @@
        <dl title='interface XML3DLightElement : XML3DDataElement' class='idl'>
         <dt>attribute DOMString model</dt>
         <dd>The <code>model</code> IDL attribute must reflect the <a href="#attr-light-model" class="internalDFN">model</a> content attribute.</dd>
+
+         <dt>Mat4 getWorldMatrix()</dt>
+         <dd>Returns the transformation matrix of this light element in world space.
+         </dd>
+         <dt>Mat4 getLocalMatrix()</dt>
+         <dd>Returns the local transformation matrix of this light element (does not include parent transformations).
+         </dd>
       </dl>
-      <div class="issue">Missing get*Matrix functions</div>
+
     </section>
     <section>
 
@@ -1388,13 +1397,17 @@
         <dd>Returns the transformation matrix of this model in world space, including parent transformations.
         </dd>
 
+        <dt>Mat4 getLocalMatrix()</dt>
+        <dd>Returns the local transformation matrix of this model element (does not include parent transformations).
+        </dd>
+
         <dt>Box getLocalBoundingBox()</dt>
         <dd>Returns the bounding box of this model without any parent transformations applied.</dd>
 
         <dt>Box getWorldBoundingBox()</dt>
         <dd>Returns the bounding box of this model in world space, including parent transformations.</dd>
       </dl>
-      <div class="issue">Missing getLocalMatrix function</div>
+
     </section>
 
   </section>
@@ -1926,19 +1939,14 @@
       <p>An assetmesh represents a single drawable mesh in the asset and works similar to the <a href="#the-mesh-element"><code>mesh</code></a> element. Unlike the <code>mesh</code> element
       assetmeshes are identified by their <code>name</code> attribute, which may not be duplicated within the same <a href="#the-asset-element"><code>asset</code></a>.</p>
 
-      <p>In addition to the <code>transform</code> attribute a transformation matrix may be provided for the assetmesh by including a
-        <a href="#the-float-float2-float3-float4-and-float4x4-elements"><code>float4x4</code></a> element with the name <code>meshTransform</code> in the assetmesh, as shown below:</p>
+      <p>As with the <a>mesh element</a> a transformation may be supplied either through the <code>transform</code> attribute or through a CSS3 transform.</p>
 
-      <div class="issue">Remove the meshTransform reference</div>
       <pre class="example highlight">
-        &lt;assetmesh name="exampleMesh" type="triangles" material="#exampleMaterial"&gt;
-          &lt;float4x4 name="meshTransform"&gt;1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1&lt;/float4x4&gt;
+        &lt;assetmesh name="exampleMesh" style="transform: translate3d(0px, 0px, 10px)" type="triangles" material="#exampleMaterial"&gt;
           &lt;data src="#myMeshData"&gt;&lt;/data&gt;
+          &lt;assetdata src="#someMoreMeshData"&gt;&lt;/assetdata&gt;
         &lt;/assetmesh&gt;
       </pre>
-
-      <p>When a transformation matrix is provided in this way it will override any other transforms the assetmesh may have (eg. through the <code>transform</code> or <code>style</code> attributes). </p>
-      <div class="note">Supplying a transformation matrix in this way also works for <a href="#the-mesh-element"><code>mesh</code></a> elements. </div>
 
       <dl title='interface XML3DAssetmeshElement : HTMLElement' class='idl'>
         <dt>attribute DOMString name</dt>

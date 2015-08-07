@@ -100,47 +100,50 @@ XML3DDataAdapter.prototype.addUserDefinedSystemNode = function (URI) {  //Here w
         config.element(node);
     if (!node || node._configured === undefined)
         return null;
-    
-    var elemHandler = node._configured;
-    var key = this.factory.aspect + "_" + this.factory.canvasId;
-    var adapter = elemHandler.adapters[key];
-    if (adapter == undefined){
-    	
-	    adapter = this.factory.createAdapter(node);
-		
-	    if (adapter) {
-	        elemHandler.adapters[key] = adapter;
-	    }
-	    
-	    var xflowDataNode = new DataNode(false); // Higher level dataNode to contain the actual Nodes
-	    adapter.xflowDataNode = new DataNode(false);
-	    adapter.xflowDataNode.addLoadListener(adapter.onXflowLoadEvent.bind(adapter));
-	    adapter.xflowDataNode.userData = adapter.node;
-	    
-	    // Setting platform and node type information for a data sequence
-	    adapter.xflowDataNode.setPlatform(adapter.node.getAttribute("platform"));
-	
-	    adapter.updateAdapterHandle("src", adapter.node.getAttribute("src"));
-	    if(!adapter.assetData){
-	    	adapter.xflowDataNode.setFilter(adapter.node.getAttribute("filter"));
-	        updateCompute(adapter);
-	    }
-	    
-	    for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
-	    	var subadapter = adapter.factory.getAdapter(child);
-	    	if (subadapter.getXflowNode){
-	//        	adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
-	    		xflowDataNode.appendChild(subadapter.getXflowNode());
-	    	}
-	    }
-	    adapter.xflowDataNode.appendChild(xflowDataNode);
-	    
-	    if (adapter.xflowDataNode._platform !== null) {
-	        recursiveDataNodeAttrInit(adapter.getXflowNode());
-	    }
-    }else{
-    		adapter.xflowDataNode.removeChild(adapter.xflowDataNode._children[1]);
-    }
+
+    var adapter = this.factory.getAdapter(node);
+    //
+    //var elemHandler = node._configured;
+    //var key = this.factory.aspect + "_" + this.factory.canvasId;
+    //var adapter = elemHandler.adapters[key];
+    //if (adapter == undefined){
+    //
+	 //   //adapter = this.factory.createAdapter(node);
+		//
+	 //   if (adapter) {
+	 //       elemHandler.adapters[key] = adapter;
+	 //   }
+	 //
+	 //   var xflowDataNode = new DataNode(false); // Higher level dataNode to contain the actual Nodes
+	 //   adapter.xflowDataNode = new DataNode(false);
+	 //   adapter.xflowDataNode.addLoadListener(adapter.onXflowLoadEvent.bind(adapter));
+	 //   adapter.xflowDataNode.userData = adapter.node;
+	 //
+	 //   // Setting platform and node type information for a data sequence
+	 //   adapter.xflowDataNode.setPlatform(adapter.node.getAttribute("platform"));
+    //
+	 //   adapter.updateAdapterHandle{("src", adapter.node.getAttribute("src"));
+	 //   if(!adapter.assetData)
+	 //   	adapter.xflowDataNode.setFilter(adapter.node.getAttribute("filter"));
+	 //       updateCompute(adapter);
+	 //   }
+	 //
+	 //   for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
+	 //   	var subadapter = adapter.factory.getAdapter(child);
+	 //   	if (subadapter.getXflowNode){
+    ////        	adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
+	 //   		xflowDataNode.appendChild(subadapter.getXflowNode());
+	 //   	}
+	 //   }
+	 //   adapter.xflowDataNode.appendChild(xflowDataNode);
+	 //
+	 //   if (adapter.xflowDataNode._platform !== null) {
+	 //       recursiveDataNodeAttrInit(adapter.getXflowNode());
+	 //   }
+    //}else{
+
+    adapter.xflowDataNode.removeChild(adapter.xflowDataNode._children[1]);
+    //}
     
     if (this.xflowDataNode._children.length == 2){
     	var oldUserSystemNode = this.getUserDefinedSystemNode();

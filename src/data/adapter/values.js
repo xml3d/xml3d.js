@@ -69,8 +69,10 @@ ValueDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, 
     } else if (name == "param") {
         this.xflowInputNode.paramName = newValue ? this.node.name : null;
     }else if (name == "sys"){
-    	var parentDataAdapter = this.factory.getAdapter(this.node.parentNode);
-    	if (parentDataAdapter.getXflowNode()._children[0]._children.length >1 && parentDataAdapter.getXflowNode()._children[0]._children[1].systemDataNode == true)
+        var parentDataAdapter = this.factory.getAdapter(this.node.parentNode);
+
+        // TODO: move this logic to the data adapter!
+        if (parentDataAdapter.getXflowNode()._children[0]._children.length >1 && parentDataAdapter.getXflowNode()._children[0]._children[1].systemDataNode == true)
     	  var filterMapping = parentDataAdapter.getXflowNode()._children[0]._children[1]._filterMapping;
     	
     	if (!this.node.attributes["sys"]){

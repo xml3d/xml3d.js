@@ -50,7 +50,6 @@ GLCanvasHandler.prototype.initialize = function () {
         XML3D.flushDOMChanges();
 
         if (that.canvasSizeChanged() || that.renderer.needsRedraw() || Options.getValue(OPTION_CONTINUOUS)) {
-            that.dispatchUpdateEvent();
             that.draw();
         }
 

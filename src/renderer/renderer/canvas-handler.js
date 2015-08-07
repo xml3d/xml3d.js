@@ -52,16 +52,6 @@ AbstractCanvasHandler.prototype.dispatchCustomEvent = function(type, detail) {
     this._xml3dElement.dispatchEvent(event);
 };
 
-
-/**
- * The update event can be used by user to sync actions
- * with rendering
- */
-AbstractCanvasHandler.prototype.dispatchUpdateEvent = function () {
-    this.dispatchCustomEvent("update");
-};
-
-
 AbstractCanvasHandler.prototype.dispatchResizeEvent = function (dimensions) {
     this.dispatchCustomEvent("resize", dimensions);
 };

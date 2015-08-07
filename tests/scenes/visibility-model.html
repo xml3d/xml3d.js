@@ -42,7 +42,9 @@
     </data>
     <data id="position3">
       <data src="#position1"></data>
-      <float4x4 name="meshTransform">
+    </data>
+    <data id="t1">
+      <float4x4 name="transform">
         0.5 0 0 0
         0 0.5 0 0
         0 0 1 0
@@ -69,7 +71,7 @@
       </assetmesh>
     </asset>
     <asset id="asset2Alt">
-      <assetmesh name="blaBlubb" type="triangles" material="#pinkmaterial">
+      <assetmesh name="blaBlubb" type="triangles" material="#pinkmaterial" transform="#t1">
         <data src="#rectBase"></data>
         <data src="#position3"></data>
       </assetmesh>
@@ -80,7 +82,7 @@
     </asset>
 
     <asset id="asset3" src="#asset2">
-      <assetmesh name="mesh3" includes="base" type="triangles" material="#greenmaterial" style="transform: translateX(-2px)">
+      <assetmesh name="mesh3" includes="base" type="triangles" material="#greenmaterial" transform="#t1">
         <data src="#position3"></data>
       </assetmesh>
     </asset>

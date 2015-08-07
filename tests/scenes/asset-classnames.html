@@ -39,60 +39,44 @@
         <data id="position2">
            <float3 name="position">1.0 -1.0 -10.0  3.0 -1.0 -10.0  1.0 1.0 -10.0  3.0 1.0 -10.0</float3>
         </data>
-        <data id="position3">
-           <data src="#position1"></data>
-           <float4x4 name="meshTransform">
-                0.5 0 0 0
-                0 0.5 0 0
-                0 0 1 0
-                0 0 0 1
-            </float4x4>
-        </data>
 
         <asset id="bigAsset">
             <assetmesh class="bottom left" name="upperLeft" type="triangles" material="#redmaterial">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
             </assetmesh>
-            <assetmesh class="bottom" type="triangles" material="#redmaterial">
+            <assetmesh class="bottom" type="triangles" material="#redmaterial" style="transform: matrix3d(1, 0, 0, 0,   0, 1, 0, 0,   0, 0, 1, 0,   2, 0, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   2 0 0 1</float4x4>
             </assetmesh>
-            <assetmesh class="bottom right" type="triangles" material="#redmaterial">
+            <assetmesh class="bottom right" type="triangles" material="#redmaterial" style="transform: matrix3d(1, 0, 0, 0,   0, 1, 0, 0,   0, 0, 1, 0,  4, 0, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   4 0 0 1</float4x4>
             </assetmesh>
-            <assetmesh class="left" type="triangles" material="#bluematerial">
+            <assetmesh class="left" type="triangles" material="#bluematerial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   0 2 0 1</float4x4>
             </assetmesh>
-            <assetmesh name="center" type="triangles" material="#bluematerial">
+            <assetmesh name="center" type="triangles" material="#bluematerial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 2, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   2 2 0 1</float4x4>
             </assetmesh>
-            <assetmesh class="right" type="triangles" material="#bluematerial">
+            <assetmesh class="right" type="triangles" material="#bluematerial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 4, 2, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   4 2 0 1</float4x4>
             </assetmesh>
-            <assetmesh class="top left" type="triangles" material="#pinkmaterial">
+            <assetmesh class="top left" type="triangles" material="#pinkmaterial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 4, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   0 4 0 1</float4x4>
             </assetmesh>
-            <assetmesh class="top" type="triangles" material="#pinkmaterial">
+            <assetmesh class="top" type="triangles" material="#pinkmaterial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 4, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   2 4 0 1</float4x4>
+                
             </assetmesh>
-            <assetmesh class="top right" name="lowerRight" type="triangles" material="#pinkmaterial">
+            <assetmesh class="top right" name="lowerRight" type="triangles" material="#pinkmaterial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 4, 4, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   4 4 0 1</float4x4>
             </assetmesh>
         </asset>
 
@@ -107,45 +91,38 @@
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
             </mesh>
-            <mesh id="bottomCenter" type="triangles" material="#redmaterial">
+            <mesh id="bottomCenter" type="triangles" material="#redmaterial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   2 0 0 1</float4x4>
             </mesh>
-            <mesh id="bottomRight" type="triangles" material="#redmaterial">
+            <mesh id="bottomRight" type="triangles" material="#redmaterial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 4, 0, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   4 0 0 1</float4x4>
             </mesh>
-            <mesh id="centerLeft" type="triangles" material="#bluematerial" style="display: none;">
+            <mesh id="centerLeft" type="triangles" material="#bluematerial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   0 2 0 1</float4x4>
             </mesh>
-            <mesh id="center" type="triangles" material="#bluematerial">
+            <mesh id="center" type="triangles" material="#bluematerial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 2, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   2 2 0 1</float4x4>
             </mesh>
-            <mesh id="centerRight" type="triangles" material="#bluematerial" style="display: none;">
+            <mesh id="centerRight" type="triangles" material="#bluematerial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 4, 2, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   4 2 0 1</float4x4>
+                
             </mesh>
-            <mesh id="topLeft" type="triangles" material="#pinkmaterial">
+            <mesh id="topLeft" type="triangles" material="#pinkmaterial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 4, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   0 4 0 1</float4x4>
             </mesh>
-            <mesh id="topCenter" type="triangles" material="#pinkmaterial" style="display: none;">
+            <mesh id="topCenter" type="triangles" material="#pinkmaterial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 4, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   2 4 0 1</float4x4>
             </mesh>
-            <mesh id="topRight" name="lowerRight" type="triangles" material="#pinkmaterial" style="display: none;">
+            <mesh id="topRight" name="lowerRight" type="triangles" material="#pinkmaterial" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 4, 4, 0, 1)">
                 <data src="#rectBase"></data>
                 <data src="#position1"></data>
-                <float4x4 name="meshTransform">1 0 0 0   0 1 0 0   0 0 1 0   4 4 0 1</float4x4>
             </mesh>
         </group>
 

@@ -73,8 +73,6 @@ var RenderObject = function (scene, pageEntry, opt) {
      */
     this.boundingBoxDirty = true;
 
-    this.transformDataRequest = this.createTransformRequest();
-
     /**
      * The drawable closure transforms object data and type into
      * a drawable entity
@@ -94,12 +92,6 @@ RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 RenderObject.IDENTITY_MATRIX = mat4.create();
 
 XML3D.createClass(RenderObject, RenderNode, {
-    createTransformRequest: function () {
-        if (!this.object.data)
-            return null;
-        return new ComputeRequest(this.object.data, ["meshTransform"], this.onTransformDataChange.bind(this));
-    },
-
     createDrawable: function () {
         var result = this.scene.createDrawable(this);
         if (result) {
@@ -144,7 +136,6 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     dispose: function () {
-        this.transformDataRequest && this.transformDataRequest.clear();
         this.scene.remove(this);
     },
 
@@ -204,13 +195,6 @@ XML3D.createClass(RenderObject, RenderNode, {
             var page = this.page;
             var offset = this.offset;
             XML3D.math.mat4.multiplyOffset(tmp_mat, 0, page, offset + LOCAL_MATRIX_OFFSET, tmp_mat, 0);
-            if (this.transformDataRequest) {
-                var result = this.transformDataRequest.getResult();
-                var transformData = result.getOutputData("meshTransform");
-                if (transformData && transformData.getValue()) {
-                    XML3D.math.mat4.multiply(tmp_mat, tmp_mat, transformData.getValue());
-                }
-            }
             this.setWorldMatrix(tmp_mat);
             this.boundingBoxDirty = true;
             this.transformDirty = false;

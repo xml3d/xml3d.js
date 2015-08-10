@@ -11,6 +11,8 @@ as developing web pages. Every web developer who knows how to use the DOM (or jQ
 XML3D is also an evaluation platform of the W3C Community Group [Declarative 3D for the Web](http://www.w3.org/community/declarative3d/)
 
 #### Examples ####
+Here you can find [small examples](https://github.com/xml3d/xml3d-examples) of individual features. Below are some more complete demos:
+
 <a href="http://www.xml3d.org/xml3d/demos/19_RubiksCube/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/rubik.jpg"/></a>
 <a href="http://www.xml3d.org/xml3d/demos/25_Chess/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/chess.png"/></a>
 <a href="http://www.xml3d.org/xml3d/demos/12_MarsCity/marscity.xhtml"><img src="http://www.xml3d.org/xml3d/demos/thumbs/marscity.jpg?s"/></a>

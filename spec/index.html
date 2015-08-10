@@ -92,597 +92,6 @@
 </section>
 
 <section>
-  <h2>Predefined models</h2>
-  <div class="issue">Move this section to after Content Types</div>
-  <section>
-    <h3>Predefined primitive types</h3>
-    <section>
-      <h2>Triangle</h2>
-      <p>Attribute name: <code>triangles</code></p>
-      <p>WebGL primitive: <code>TRIANGLE</code></p>
-
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>index</td>
-            <td>int</td>
-            <td>A list of indicies to build triangles out of.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p>The triangle primitive type renders faces out of sets of 3 vertices. Triangles may be constructed with or without an array of indices. If no indices are provided
-        XML3D will construct the triangles from the array of vertex positions: the first 3 will create the first triangle, the next 3 the second and so on.</p>
-
-      <pre class="example highlight">
-        &lt;mesh type="triangles"&gt;
-          &lt;int name="index"&gt;0 1 2 1 3 2 ... &lt;/int&gt;
-          &lt;float3 name="position"&gt;-1 -1 1  1 -1 1  -1 1 1  1 1 1 ... &lt;/float3&gt;
-        &lt;/mesh&gt;
-      </pre>
-
-    </section>
-
-    <section>
-      <h2>Tristrip</h2>
-      <p>Attribute name: <code>tristrips</code></p>
-      <p>WebGL primitive: <code>TRIANGLE_STRIP</code></p>
-
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>index</td>
-            <td>int</td>
-            <td>A list of indicies to build tristrips out of.</td>
-          </tr>
-          <tr>
-            <td>vertexCount</td>
-            <td>int</td>
-            <td>The number of vertices or indices to use for each tristrip segment.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p>The tristrip primitive type creates triangles from a list of vertex positions and (optionally) a list of segments and/or indices. Each segment begins by building a triangle
-        out of 3 vertex positions. Each subsequent triangle in the segment is then created from the last two vertex positions and the next one in the list. Note that this
-        creates a sequence of connected triangles.</p>
-
-      <p>Segments can be used to create disconnected sets of triangles by providing a list of integers with the name <code>vertexCount</code>. Each number in the list
-        specifies the number of vertex positions to use for that segment. XML3D will then work through the list of vertex positions sequentially building a tristrip for each segment. </p>
-
-      <pre class="example highlight">
-        &lt;mesh type="tristrips"&gt;
-          &lt;int name="vertexCount"&gt;4 4 4 4 4 4&lt;/int&gt;
-          &lt;float3 name="position"&gt;-1 -1 1  1 -1 1  -1 1 1  1 1 1 ... &lt;/float3&gt;
-        &lt;/mesh&gt;
-      </pre>
-
-      <p>Note that because the first triangle in a segment requires 3 vertex positions to define, a segment with vertex count 4 will create two triangles, while vertex
-        count 5 will create 3 and so on.</p>
-    </section>
-
-    <section>
-      <h2>Line</h2>
-      <p>Attribute name: <code>lines</code></p>
-      <p>WebGL primitive: <code>LINES</code></p>
-
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>index</td>
-            <td>int</td>
-            <td>A list of indicies to build lines out of.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p>Lines are drawn from pairs of vertex positions and (optionally) a list of indices. </p>
-    </section>
-
-    <section>
-      <h2>Linestrip</h2>
-      <p>Attribute name: <code>linestrips</code></p>
-      <p>WebGL primitive: <code>LINE_STRIP</code></p>
-
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>index</td>
-            <td>int</td>
-            <td>A list of indicies to build linestrips out of.</td>
-          </tr>
-          <tr>
-            <td>vertexCount</td>
-            <td>int</td>
-            <td>The number of vertices or indices to use for each linestrip segment.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p>A linestrip is drawn from a list of vertex positions and (optionally) a list of segments and/or indices. For each segment a line is drawn between the first vertex and
-        the second, then the second and the third and so on. This creates a continuous line.</p>
-
-      <pre class="example highlight">
-      &lt;mesh type="linestrips"&gt;
-        &lt;int name="vertexCount"&gt;4 2&lt;/int&gt;
-        &lt;int name="index"&gt;0 1 2 3 1 3&lt;/int&gt;
-        &lt;float3 name="position"&gt;-1 -1 1  1 -1 1  -1 1 1  1 1 1 ... &lt;/float3&gt;
-      &lt;/mesh&gt;
-      </pre>
-
-      <p>The above example will create two line segments, the first using vertices 0, 1, 2, 3 and the second using vertices 1 and 3. </p>
-
-    </section>
-
-    <section>
-      <h2>Point</h2>
-      <p>Attribute name: <code>points</code></p>
-      <p>WebGL primitive: <code>POINT</code></p>
-
-      <p>Points are drawn from a list of vertex positions, which each position being drawn as a single point.</p>
-      <div class="note">Currently to change the size of the drawn points, or to draw them as textured sprites, it is necessary to define a custom material shader.</div>
-    </section>
-
-  </section>
-  <section>
-    <h3>Predefined material models</h3>
-    <div class="issue">Kristian: Finish TODOs in this section</div>
-    <section>
-      <h2>Matte</h2>
-
-      <p>URN: <code>urn:xml3d:material:matte</code></p>
-
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>diffuseColor</td>
-            <td>float3</td>
-            <td>1 1 1</td>
-            <td>The objects RGB color</td>
-          </tr>
-          <tr>
-            <td>useVertexColor</td>
-            <td>bool</td>
-            <td>false</td>
-            <td>if true, the vertex attribute 'color' is used to color the object.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        Simple material that does not apply any lighting but shades the object with a single uniform color defined by
-        the <code>diffuseColor</code> parameter or by the
-        vertex attribute <code>color</code>, if <code>useVertexColor</code> is set to ''true''.
-      </p>
-    </section>
-
-    <section>
-      <h2>Diffuse</h2>
-
-      <p>URN: <code>urn:xml3d:material:diffuse</code></p>
-
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>diffuseColor</td>
-            <td>float3</td>
-            <td>1 1 1</td>
-            <td>The object's RGB diffuse color component.</td>
-          </tr>
-          <tr>
-            <td>diffuseTexture</td>
-            <td>texture</td>
-            <td>-</td>
-            <td>TODO</td>
-          </tr>
-
-          <tr>
-            <td>emissiveColor</td>
-            <td>float3</td>
-            <td>0 0 0</td>
-            <td>The object's RGB emissive color component.</td>
-          </tr>
-          <tr>
-            <td>emissiveTexture</td>
-            <td>texture</td>
-            <td>-</td>
-            <td>TODO</td>
-          </tr>
-          <tr>
-            <td>ambientIntensity</td>
-            <td>float</td>
-            <td>0</td>
-            <td>The amount of the 'diffuseColor' to be added to the shading without considering lighting.</td>
-          </tr>
-          <tr>
-            <td>transparency</td>
-            <td>float</td>
-            <td>0</td>
-            <td>The transparency of the object, with 0 being opaque and 1 being fully transparent.</td>
-          </tr>
-          <tr>
-            <td>useVertexColor</td>
-            <td>bool</td>
-            <td>false</td>
-            <td>Setting <i>useVertexColor</i> to 'true', the vertex attribute 'color' will be multiplied to the diffuse
-              color component.
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        Material model for diffuse surfaces that reflects light equally in all directions. Additionally, the surface has
-        an optional emissive and ambient component.
-        This is the logic of the diffuse material model in JavaScript/shade.js pseudo code:
-      <pre class="highlight">
-        function shade(env) {
-          var diffuseColor = env.diffuseColor || new Vec3(1, 1, 1);
-          var emissiveColor = env.emissiveColor || new Vec3(0);
-          var transparency = Math.min(1, env.transparency);
-
-          if (env.useVertexColor && env.color) {
-            diffuseColor *= new Vec3(env.color);
-          }
-
-          if (env.diffuseTexture.sample2D) {
-             var texDiffuse = env.diffuseTexture.sample2D(env.texcoord);
-             diffuseColor *= texDiffuse.rgb();
-             transparency *= (1 - texDiffuse.a());
-          }
-
-          return Shade.diffuse(diffuseColor, env.normal)
-                      .transparent(transparency)
-                      .emissive(emissiveColor);
-        }
-      </pre>
-      </p>
-    </section>
-
-    <section>
-      <h2>Phong</h2>
-
-      <p>URN: <code>urn:xml3d:material:phong</code></p>
-
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>diffuseColor</td>
-            <td>float3</td>
-            <td>1 1 1</td>
-            <td>The object's RGB diffuse color component.</td>
-          </tr>
-          <tr>
-            <td>diffuseTexture</td>
-            <td>texture</td>
-            <td>-</td>
-            <td>TODO</td>
-          </tr>
-          <tr>
-            <td>specularColor</td>
-            <td>float3</td>
-            <td>0 0 0</td>
-            <td>The object's RGB specular color component.</td>
-          </tr>
-          <tr>
-            <td>specularTexture</td>
-            <td>texture</td>
-            <td>-</td>
-            <td>TODO</td>
-          </tr>
-          <tr>
-            <td>shininess</td>
-            <td>float</td>
-            <td>0.5</td>
-            <td>A scalar for the object's specular exponent, to be multiplied by 128 (e.g. a value of 0.5 will give a specular exponent of 64)</td>
-          </tr>
-          <tr>
-            <td>emissiveColor</td>
-            <td>float3</td>
-            <td>0 0 0</td>
-            <td>The object's RGB emissive color component.</td>
-          </tr>
-          <tr>
-            <td>emissiveTexture</td>
-            <td>texture</td>
-            <td>-</td>
-            <td>TODO</td>
-          </tr>
-          <tr>
-            <td>ambientIntensity</td>
-            <td>float</td>
-            <td>0</td>
-            <td>The amount of the 'diffuseColor' to be added to the shading without considering lighting.</td>
-          </tr>
-          <tr>
-            <td>transparency</td>
-            <td>float</td>
-            <td>0</td>
-            <td>The transparency of the object, with 0 being opaque and 1 being fully transparent.</td>
-          </tr>
-          <tr>
-            <td>useVertexColor</td>
-            <td>bool</td>
-            <td>false</td>
-            <td>Setting <i>useVertexColor</i> to 'true', the vertex attribute 'color' will be multiplied to the diffuse
-              color component.
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        TODO
-      </p>
-    </section>
-  </section>
-
-  <section>
-    <h3>Predefined light models</h3>
-    <section>
-      <h2>Point Lights</h2>
-      <p>URN: <code>urn:xml3d:light:point</code></p>
-      <div class="attributes">Parameters:
-        <table>
-          <tbody><tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>position</td>
-            <td>float3</td>
-            <td>0 0 0</td>
-            <td>The position of the point light in object space</td>
-          </tr>
-          <tr>
-            <td>attenuation</td>
-            <td>float3</td>
-            <td>0 0 1</td>
-            <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
-          </tr>
-          <tr>
-            <td>intensity</td>
-            <td>float3</td>
-            <td>1 1 1</td>
-            <td>The RGB intensity of the point light.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        Point light sources emit light from a single point in space with a uniform distribution in all directions, i.e. omnidirectional.
-        The position of the point light is defined by its <i>position</i> attribute and affected by the transformation of the light element that defines
-        the occurrence of the point light. The orientation of the light element is not influencing the light.
-      </p>
-    </section>
-
-    <section>
-      <h2>Directional Lights</h2>
-      <p>URN: <code>urn:xml3d:light:directional</code></p>
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>direction</td>
-            <td>float3</td>
-            <td>0 0 -1</td>
-            <td>The direction of the light in object space.</td>
-          </tr>
-          <tr>
-            <td>intensity</td>
-            <td>float3</td>
-            <td>1 1 1</td>
-            <td>The RGB intensity of the point light.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        Directional light sources, also known as distant light sources, emit light along parallel rays from an infinite distance away. The direction the light sources
-        emits from is defined by its <i>direction</i> attribute and affected by the transformation of the light element that defines
-        the occurrence of the distant light. The position of the light element is not taken into account.
-      </p>
-
-    </section>
-
-    <section>
-      <h2>Spot Lights</h2>  <p>URN: <code>urn:xml3d:light:spot</code></p>
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>position</td>
-            <td>float3</td>
-            <td>0 0 0</td>
-            <td>The position of the point light in object space</td>
-          </tr>
-          <tr>
-            <td>direction</td>
-            <td>float3</td>
-            <td>0 0 -1</td>
-            <td>The direction of the light in object space.</td>
-          </tr>
-          <tr>
-            <td>intensity</td>
-            <td>float3</td>
-            <td>1 1 1</td>
-            <td>The <i>RGB</i> intensity of the directional light.</td>
-          </tr>
-          <tr>
-            <td>attenuation</td>
-            <td>float3</td>
-            <td>0 0 1</td>
-            <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
-          </tr>
-          <tr>
-            <td>cutoffAngle</td>
-            <td>float</td>
-            <td>Math.PI/4</td>
-            <td>Spot angle in radians. Controls the size of the outer cone of a spot light, i.e. the circular area a spot
-              light covers.
-            </td>
-          </tr>
-          <tr>
-            <td>softness</td>
-            <td>float</td>
-            <td>0</td>
-            <td>Softness of the spot light in the range [0;1].</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        Spot light source are a variation of point lights: Instead of emitting light omnidirectional, they emit light from their position in a cone of direction.
-        The <i>cutoffAngle</i> attribute defines the size of the cone. Objects outside the cone defined by the <i>cutoffAngle</i> are not lit by the light source. The <i>softness</i>
-        attribute defines the percentage of the cone in which the illumination ramps down from full to no illumination, i.e. a softness of 0 specifies a hard transition between full
-        to no illumination and a softness of 1.0 a linear transition along the radius of the cone.
-      </p>
-    </section>
-  </section>
-  <section>
-    <h3>Predefined view models</h3>
-    This section describes the currently available <dfn>predefined view models</dfn>.
-    <section>
-      <h4>Perspective</h4>
-        <p>URN: <code>urn:xml3d:view:perspective</code></p>
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>fovVertical</td>
-            <td>float</td>
-            <td>Math.PI / 4</td>
-            <td>The vertical field of view of the view frustum in radians</td>
-          </tr>
-          <tr>
-            <td>fovHorizontal</td>
-            <td>float</td>
-            <td>-</td>
-            <td>The horizontal field of view of the view frustum in radians</td>
-          </tr>
-          <tr>
-            <td>near</td>
-            <td>float</td>
-            <td>-</td>
-            <td>The distance of the near clipping plane (unitless)</td>
-          </tr>
-          <tr>
-            <td>far</td>
-            <td>float</td>
-            <td>-</td>
-            <td>The distance of the far clipping plane (unitless)</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="issue">TODO: Kristian: Figure that explains the frustum</div>
-      <p>
-        The <dfn>perspective view model</dfn> defines a perspective view frustum based on the near and far planes and on a vertical or horizontal opening angle.
-        A small field of view roughly corresponds to a telephoto lens; a large field of view roughly corresponds to a wide-angle lens.
-        If fovHorizontal is given, the frustum is defined using this horizontal angle, otherwise fovVertical is used.
-        If the far or the near clipping place is not defined, the system will try to compute a useful value automatically based on the scene's dimension.
-      </p>
-    </section>
-    <section>
-      <h4>Projective</h4>
-       <p>URN: <code>urn:xml3d:view:projective</code></p>
-      <div class="attributes">Parameters:
-        <table>
-          <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-          <tr>
-            <td>projectionMatrix</td>
-            <td>float4x4</td>
-            <td></td>
-            <td>The frustum described as projection matrix</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        The <dfn>projective view model</dfn> defines a projective view frustum based on a projection matrix. This view model is typically used, if the
-        intrisic camera parameters are computed, e.g. from a webcam image using computer vision algorithms.
-      </p>
-    </section>
-  </section>
-
-</section>
-
-<section>
   <h2>Style</h2>
   Since XML3D extends HTML, all [[CSS2]] properties also apply to XML3D elements. However, only the semantic of a few of them make sense for the 3D scene description.
   In the following we list those properties that influence the rendering of the scene.
@@ -1968,9 +1377,810 @@
 </section>
 
 <section>
+  <h2>Xflow</h2>
+    <section>
+      <div class="issue">Kristian: Can we move this section to concepts?</div>
+      <h3>Filters</h3>
+      <p>Xflow defines three filters that may be applied to data through the <code>filter</code> attribute on <a href="#the-data-element"><code>data</code></a> and
+        <a href="#the-dataflow-element"><code>dataflow</code></a> elements. </p>
+
+      <pre>
+        filter="keep|remove(field1 [, field2...])"
+        filter="rename( { newFieldName : field [, newFieldName2 : field2...] } )"
+      </pre>
+
+      <p>A filter does not change the data itself but rather influences how that data is made available to other Xflow elements. For example, using a <code>remove</code>
+      filter does not actually remove the data from the Xflow element, it simply hides it from parent elements. </p>
+
+        <p>An Xflow element may only have one filter, if multiple filters are needed they can be applied with nested Xflow elements. </p>
+
+      <pre class="example highlight">
+        &lt;data filter="keep(A,D)"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt;
+          &lt;float name="B" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+          &lt;float name="C" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+          &lt;float name="D" &gt;1&lt;/float&gt;
+        &lt;/data&gt;
+
+        &lt;data filter="remove(D)"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt;
+          &lt;float name="B" &gt;1&lt;/float&gt;
+          &lt;float name="C" &gt;1&lt;/float&gt;
+          &lt;float name="D" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+        &lt;/data&gt;
+
+        &lt;data filter="rename( {A2 : A, B2 : B} )"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt; &lt;!-- will be renamed into A2 --&gt;
+          &lt;float name="B" &gt;1&lt;/float&gt; &lt;!-- will be renamed into B2 --&gt;
+          &lt;float name="C" &gt;1&lt;/float&gt;
+          &lt;float name="D" &gt;1&lt;/float&gt;
+        &lt;/data&gt;
+
+        &lt;data filter="keep( {A2 : A, B2 : B} )"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt; &lt;!-- will be renamed into A2 --&gt;
+          &lt;float name="B" &gt;1&lt;/float&gt; &lt;!-- will be renamed into B2 --&gt;
+          &lt;float name="C" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+          &lt;float name="D" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
+        &lt;/data&gt;
+
+        &lt;data filter="rename( {A1 : A, A2 : A, A3: A} )"&gt;
+          &lt;float name="A" &gt;0&lt;/float&gt; &lt;!-- will be provided under the names A1, A2 and A3 --&gt;
+        &lt;/data&gt;
+      </pre>
+
+    </section>
+  <section>
+    <h3>The compute operator</h3>
+    <p>Compute operators can be used to change or create data inside an Xflow graph. They operate like functions, receiving a set of input arguments, doing some work
+    and then outputting the result. On <a href="#the-data-element"><code>data</code></a> elements operators may be invoked through the <code>compute</code> attribute
+    using the following syntax:</p>
+
+    <pre>
+     compute="(output1 [,output2...]) = xflow.[operatorName]([argument1, ...])"
+    </pre>
+
+    <p>In <a href="#the-dataflow-element"><code>dataflow</code></a> elements one or more compute operators can be invoked inside a compute block using the
+      <a href="#the-dataflow-element"><code>&lt;compute&gt;</code></a> element.</p>
+
+    <p>The fields listed as outputs will be added to the list of data that this data element provides. The arguments must be available to the data element that invokes
+    the operator, either as <a href="#value-elements">value elements</a> or provided by a child data element. Compute operators can be invoked in sequence by nesting data
+    elements: </p>
+
+    <pre class='example highlight'>
+      &lt;data compute="position = xflow.add(position, offset2)"&gt;
+        &lt;data compute="position = xflow.add(position, offset1)"&gt;
+          &lt;float3 name="position"&gt;...&lt;/float3&gt;
+          &lt;float3 name="offset1"&gt;...&lt;/float3&gt;
+        &lt;/data&gt;
+        &lt;float3 name="offset2"&gt;...&lt;/float3&gt;
+      &lt;/data&gt;
+    </pre>
+
+    <p>XML3D includes several compute operators by default (a complete list may be found <a href="https://github.com/xml3d/xml3d.js/wiki/Xflow-operator-list">here</a>)
+    but also provides an interface to declare custom compute operators. These can be saved in their own JavaScript files and served alongside xml3d.js. Before being used a custom
+    operator must be registered with Xflow by calling <code>Xflow.registerOperator</code> with the following syntax:</p>
+
+    <pre class="example highlight">
+      Xflow.registerOperator("xflow.myOperatorName", {
+        outputs: [ {type: 'float3', name: 'outputName', customAlloc=true },
+                   ...
+        ],
+
+        params:  [ {type: 'int', source: 'inputName1', optional=true },
+                   {type: 'float3', source: 'inputName2', array=true },
+                   ...
+        ],
+
+        alloc: function(sizes [, inputName1, ...]) {
+           // Only necessary if one or more outputs have the flag 'customAlloc=true'
+           sizes['outputName'] = inputName2.length;
+        },
+
+        evaluate: function(outputName, inputName1, inputName2, info) {
+           ...
+        }
+      });
+    </pre>
+    <div class="note">As long as a custom operator appears after the <code>xml3d.js</code> script in the document flow the <code>Xflow.registerOperator</code> function can (and should)
+      be called immediately. This is typical behavior for a JavaScript plugin architecture and ensures the operators have been registered before XML3D initializes the scene (during the
+    <code>document.onload</code> event).</div>
+
+    <p>In essence the declaration of the compute operator must contain at least a list of input and output fields, including types, and an <code>evaluate</code> function that is called by
+      Xflow during data processing. Input fields may be marked as <code>optional</code>, otherwise they will generate an error if missing.
+
+    </p><p>Output fields may be allocated
+      with a custom size, indicated with the <code>customAlloc</code> flag. When this flag is present Xflow will call the <code>alloc</code> function, which should declare the sizes of the
+      data arrays that Xflow needs to create for these fields. If a field is not marked with <code>customAlloc</code> then Xflow will attempt to choose the right size based on the inputs to the
+      compute operator.
+    </p>
+    <p>
+      Fields marked with the <code>array</code> flag will be provided to the <code>evaluate</code> function as is and will exclude them from the normal length-matching checks that Xflow performs
+      on input arguments. This can be used, for example, to pass an array of data with 100 elements while the other input fields all contain thousands of elements. Normally this would generate
+      an error as Xflow would not be able to properly iterate through the data.</p>
+
+    <p>The <code>evaluate</code> function will always be called with the list of output fields first, then the input fields, then an <code>info</code> object supplied by Xflow. The <code>info</code>
+      object contains information about how the data can be iterated and offers a place to store data during processing:
+    </p>
+
+    <pre>
+      info = {
+        iterFlag: [true|false,...], // Is the input at this position an array that should be iterated over or a single element?
+        iterateCount: number,       // The number of elements in the input data to iterate over, ie. (input array length) / (tuple size)
+        customData: {}              // A field to hold custom data during and between operator executions
+      }
+    </pre>
+    <div class="note">Fields marked with the <code>array</code> flag will always have an iterFlag value of <code>false</code></div>
+
+    <p>The following is an example operator that uses the <code>info</code> object to iterate over a set of <em>positions</em>, adding a constant <em>offset</em> and returning the
+    result as a new array of <em>positions</em>: </p>
+
+    <pre class="example highlight">
+      Xflow.registerOperator("xflow.addOffset", {
+        outputs: [ {type: 'float3', name: 'result' }
+        ],
+
+        params:  [ {type: 'float3', source: 'position' },
+                   {type: 'float3', source: 'offset', array=true }
+        ],
+
+        evaluate: function(result, position, offset, info) {
+           // In this example 'offset' is an array with 3 values (a single float3)
+           // 'position' is an array containing thousands of values
+
+           for (var i=0; i < info.iterateCount; i++) {
+              result[i*3] = position[ info.iterFlag[0] ? i*3 : 0 ] + offset[0];
+              result[i*3+1] = position[ info.iterFlag[0] ? i*3+1 : 1 ] + offset[1];
+              result[i*3+1] = position[ info.iterFlag[0] ? i*3+2 : 2 ] + offset[2];
+           }
+        }
+      }
+    </pre>
+
+
+  </section>
+
+  <section>
+    <h3>Sequences</h3>
+    <p>Xflow allows arbitrarily long sequences of data to be defined using the <code>key</code> attribute on <a href="#value-elements">value elements</a>. This is useful,
+      for example, to define the base data for mesh animations to be driven by Xflow <a href="#the-compute-operator">compute operators</a>.
+    </p>
+    <pre class="example highlight">
+      &lt;data id="keyFrameData"&gt;
+        &lt;float3 name="position" key="0" &gt;-5 0 5 ... &lt;/float3&gt;
+        &lt;float3 name="normal" key="0" &gt;0 -1 0 ... &lt;/float3&gt;
+
+        &lt;float3 name="position" key="0.1" &gt;-2.886751 2.113249 2.886751 ... &lt;/float3&gt;
+        &lt;float3 name="normal" key="0.1"&gt;-0.554395 -0.620718 0.554395 ... &lt;/float3&gt;
+
+        &lt;float3 name="position" key="0.2"&gt;-1.341089 4.649148 1.341089 ... &lt;/float3&gt;
+        &lt;float3 name="normal" key="0.2"&gt;-0.696886 0.169412 0.696886 ... &lt;/float3&gt;
+
+        &lt;float3 name="position" key="0.3" &gt;-6.158403 1.408833 6.158403 ... &lt;/float3&gt;
+        &lt;float3 name="normal" key="0.3"&gt;-0.141341 -0.979819 0.141341 ... &lt;/float3&gt;
+
+        ...
+      &lt;/data&gt;
+    </pre>
+    <p>The above sequence of data represents the keyframes of a mesh animation. Typically a compute operator would then be used to interpolate between keyframes, or to
+    otherwise map the sequences of data to a definite set of <code>position</code> and <code>normal</code> data to be rendered.</p>
+
+  </section>
+
+
+</section>
+
+<section>
+  <h2>Predefined models</h2>
+  <section>
+    <h3>Predefined primitive types</h3>
+    <section>
+      <h2>Triangle</h2>
+      <p>Attribute name: <code>triangles</code></p>
+      <p>WebGL primitive: <code>TRIANGLE</code></p>
+
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>index</td>
+            <td>int</td>
+            <td>A list of indicies to build triangles out of.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The triangle primitive type renders faces out of sets of 3 vertices. Triangles may be constructed with or without an array of indices. If no indices are provided
+        XML3D will construct the triangles from the array of vertex positions: the first 3 will create the first triangle, the next 3 the second and so on.</p>
+
+      <pre class="example highlight">
+        &lt;mesh type="triangles"&gt;
+          &lt;int name="index"&gt;0 1 2 1 3 2 ... &lt;/int&gt;
+          &lt;float3 name="position"&gt;-1 -1 1  1 -1 1  -1 1 1  1 1 1 ... &lt;/float3&gt;
+        &lt;/mesh&gt;
+      </pre>
+
+    </section>
+
+    <section>
+      <h2>Tristrip</h2>
+      <p>Attribute name: <code>tristrips</code></p>
+      <p>WebGL primitive: <code>TRIANGLE_STRIP</code></p>
+
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>index</td>
+            <td>int</td>
+            <td>A list of indicies to build tristrips out of.</td>
+          </tr>
+          <tr>
+            <td>vertexCount</td>
+            <td>int</td>
+            <td>The number of vertices or indices to use for each tristrip segment.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The tristrip primitive type creates triangles from a list of vertex positions and (optionally) a list of segments and/or indices. Each segment begins by building a triangle
+        out of 3 vertex positions. Each subsequent triangle in the segment is then created from the last two vertex positions and the next one in the list. Note that this
+        creates a sequence of connected triangles.</p>
+
+      <p>Segments can be used to create disconnected sets of triangles by providing a list of integers with the name <code>vertexCount</code>. Each number in the list
+        specifies the number of vertex positions to use for that segment. XML3D will then work through the list of vertex positions sequentially building a tristrip for each segment. </p>
+
+      <pre class="example highlight">
+        &lt;mesh type="tristrips"&gt;
+          &lt;int name="vertexCount"&gt;4 4 4 4 4 4&lt;/int&gt;
+          &lt;float3 name="position"&gt;-1 -1 1  1 -1 1  -1 1 1  1 1 1 ... &lt;/float3&gt;
+        &lt;/mesh&gt;
+      </pre>
+
+      <p>Note that because the first triangle in a segment requires 3 vertex positions to define, a segment with vertex count 4 will create two triangles, while vertex
+        count 5 will create 3 and so on.</p>
+    </section>
+
+    <section>
+      <h2>Line</h2>
+      <p>Attribute name: <code>lines</code></p>
+      <p>WebGL primitive: <code>LINES</code></p>
+
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>index</td>
+            <td>int</td>
+            <td>A list of indicies to build lines out of.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Lines are drawn from pairs of vertex positions and (optionally) a list of indices. </p>
+    </section>
+
+    <section>
+      <h2>Linestrip</h2>
+      <p>Attribute name: <code>linestrips</code></p>
+      <p>WebGL primitive: <code>LINE_STRIP</code></p>
+
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>index</td>
+            <td>int</td>
+            <td>A list of indicies to build linestrips out of.</td>
+          </tr>
+          <tr>
+            <td>vertexCount</td>
+            <td>int</td>
+            <td>The number of vertices or indices to use for each linestrip segment.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>A linestrip is drawn from a list of vertex positions and (optionally) a list of segments and/or indices. For each segment a line is drawn between the first vertex and
+        the second, then the second and the third and so on. This creates a continuous line.</p>
+
+      <pre class="example highlight">
+      &lt;mesh type="linestrips"&gt;
+        &lt;int name="vertexCount"&gt;4 2&lt;/int&gt;
+        &lt;int name="index"&gt;0 1 2 3 1 3&lt;/int&gt;
+        &lt;float3 name="position"&gt;-1 -1 1  1 -1 1  -1 1 1  1 1 1 ... &lt;/float3&gt;
+      &lt;/mesh&gt;
+      </pre>
+
+      <p>The above example will create two line segments, the first using vertices 0, 1, 2, 3 and the second using vertices 1 and 3. </p>
+
+    </section>
+
+    <section>
+      <h2>Point</h2>
+      <p>Attribute name: <code>points</code></p>
+      <p>WebGL primitive: <code>POINT</code></p>
+
+      <p>Points are drawn from a list of vertex positions, which each position being drawn as a single point.</p>
+      <div class="note">Currently to change the size of the drawn points, or to draw them as textured sprites, it is necessary to define a custom material shader.</div>
+    </section>
+
+  </section>
+  <section>
+    <h3>Predefined material models</h3>
+    <div class="issue">Kristian: Finish TODOs in this section</div>
+    <section>
+      <h2>Matte</h2>
+
+      <p>URN: <code>urn:xml3d:material:matte</code></p>
+
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>diffuseColor</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The objects RGB color</td>
+          </tr>
+          <tr>
+            <td>useVertexColor</td>
+            <td>bool</td>
+            <td>false</td>
+            <td>if true, the vertex attribute 'color' is used to color the object.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Simple material that does not apply any lighting but shades the object with a single uniform color defined by
+        the <code>diffuseColor</code> parameter or by the
+        vertex attribute <code>color</code>, if <code>useVertexColor</code> is set to ''true''.
+      </p>
+    </section>
+
+    <section>
+      <h2>Diffuse</h2>
+
+      <p>URN: <code>urn:xml3d:material:diffuse</code></p>
+
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>diffuseColor</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The object's RGB diffuse color component.</td>
+          </tr>
+          <tr>
+            <td>diffuseTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+
+          <tr>
+            <td>emissiveColor</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The object's RGB emissive color component.</td>
+          </tr>
+          <tr>
+            <td>emissiveTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+          <tr>
+            <td>ambientIntensity</td>
+            <td>float</td>
+            <td>0</td>
+            <td>The amount of the 'diffuseColor' to be added to the shading without considering lighting.</td>
+          </tr>
+          <tr>
+            <td>transparency</td>
+            <td>float</td>
+            <td>0</td>
+            <td>The transparency of the object, with 0 being opaque and 1 being fully transparent.</td>
+          </tr>
+          <tr>
+            <td>useVertexColor</td>
+            <td>bool</td>
+            <td>false</td>
+            <td>Setting <i>useVertexColor</i> to 'true', the vertex attribute 'color' will be multiplied to the diffuse
+              color component.
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Material model for diffuse surfaces that reflects light equally in all directions. Additionally, the surface has
+        an optional emissive and ambient component.
+        This is the logic of the diffuse material model in JavaScript/shade.js pseudo code:
+      <pre class="highlight">
+        function shade(env) {
+          var diffuseColor = env.diffuseColor || new Vec3(1, 1, 1);
+          var emissiveColor = env.emissiveColor || new Vec3(0);
+          var transparency = Math.min(1, env.transparency);
+
+          if (env.useVertexColor && env.color) {
+            diffuseColor *= new Vec3(env.color);
+          }
+
+          if (env.diffuseTexture.sample2D) {
+             var texDiffuse = env.diffuseTexture.sample2D(env.texcoord);
+             diffuseColor *= texDiffuse.rgb();
+             transparency *= (1 - texDiffuse.a());
+          }
+
+          return Shade.diffuse(diffuseColor, env.normal)
+                      .transparent(transparency)
+                      .emissive(emissiveColor);
+        }
+      </pre>
+      </p>
+    </section>
+
+    <section>
+      <h2>Phong</h2>
+
+      <p>URN: <code>urn:xml3d:material:phong</code></p>
+
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>diffuseColor</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The object's RGB diffuse color component.</td>
+          </tr>
+          <tr>
+            <td>diffuseTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+          <tr>
+            <td>specularColor</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The object's RGB specular color component.</td>
+          </tr>
+          <tr>
+            <td>specularTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+          <tr>
+            <td>shininess</td>
+            <td>float</td>
+            <td>0.5</td>
+            <td>A scalar for the object's specular exponent, to be multiplied by 128 (e.g. a value of 0.5 will give a specular exponent of 64)</td>
+          </tr>
+          <tr>
+            <td>emissiveColor</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The object's RGB emissive color component.</td>
+          </tr>
+          <tr>
+            <td>emissiveTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+          <tr>
+            <td>ambientIntensity</td>
+            <td>float</td>
+            <td>0</td>
+            <td>The amount of the 'diffuseColor' to be added to the shading without considering lighting.</td>
+          </tr>
+          <tr>
+            <td>transparency</td>
+            <td>float</td>
+            <td>0</td>
+            <td>The transparency of the object, with 0 being opaque and 1 being fully transparent.</td>
+          </tr>
+          <tr>
+            <td>useVertexColor</td>
+            <td>bool</td>
+            <td>false</td>
+            <td>Setting <i>useVertexColor</i> to 'true', the vertex attribute 'color' will be multiplied to the diffuse
+              color component.
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        TODO
+      </p>
+    </section>
+  </section>
+
+  <section>
+    <h3>Predefined light models</h3>
+    <section>
+      <h2>Point Lights</h2>
+      <p>URN: <code>urn:xml3d:light:point</code></p>
+      <div class="attributes">Parameters:
+        <table>
+          <tbody><tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>position</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The position of the point light in object space</td>
+          </tr>
+          <tr>
+            <td>attenuation</td>
+            <td>float3</td>
+            <td>0 0 1</td>
+            <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
+          </tr>
+          <tr>
+            <td>intensity</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The RGB intensity of the point light.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Point light sources emit light from a single point in space with a uniform distribution in all directions, i.e. omnidirectional.
+        The position of the point light is defined by its <i>position</i> attribute and affected by the transformation of the light element that defines
+        the occurrence of the point light. The orientation of the light element is not influencing the light.
+      </p>
+    </section>
+
+    <section>
+      <h2>Directional Lights</h2>
+      <p>URN: <code>urn:xml3d:light:directional</code></p>
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>direction</td>
+            <td>float3</td>
+            <td>0 0 -1</td>
+            <td>The direction of the light in object space.</td>
+          </tr>
+          <tr>
+            <td>intensity</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The RGB intensity of the point light.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Directional light sources, also known as distant light sources, emit light along parallel rays from an infinite distance away. The direction the light sources
+        emits from is defined by its <i>direction</i> attribute and affected by the transformation of the light element that defines
+        the occurrence of the distant light. The position of the light element is not taken into account.
+      </p>
+
+    </section>
+
+    <section>
+      <h2>Spot Lights</h2>  <p>URN: <code>urn:xml3d:light:spot</code></p>
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>position</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The position of the point light in object space</td>
+          </tr>
+          <tr>
+            <td>direction</td>
+            <td>float3</td>
+            <td>0 0 -1</td>
+            <td>The direction of the light in object space.</td>
+          </tr>
+          <tr>
+            <td>intensity</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The <i>RGB</i> intensity of the directional light.</td>
+          </tr>
+          <tr>
+            <td>attenuation</td>
+            <td>float3</td>
+            <td>0 0 1</td>
+            <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
+          </tr>
+          <tr>
+            <td>cutoffAngle</td>
+            <td>float</td>
+            <td>Math.PI/4</td>
+            <td>Spot angle in radians. Controls the size of the outer cone of a spot light, i.e. the circular area a spot
+              light covers.
+            </td>
+          </tr>
+          <tr>
+            <td>softness</td>
+            <td>float</td>
+            <td>0</td>
+            <td>Softness of the spot light in the range [0;1].</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Spot light source are a variation of point lights: Instead of emitting light omnidirectional, they emit light from their position in a cone of direction.
+        The <i>cutoffAngle</i> attribute defines the size of the cone. Objects outside the cone defined by the <i>cutoffAngle</i> are not lit by the light source. The <i>softness</i>
+        attribute defines the percentage of the cone in which the illumination ramps down from full to no illumination, i.e. a softness of 0 specifies a hard transition between full
+        to no illumination and a softness of 1.0 a linear transition along the radius of the cone.
+      </p>
+    </section>
+  </section>
+  <section>
+    <h3>Predefined view models</h3>
+    This section describes the currently available <dfn>predefined view models</dfn>.
+    <section>
+      <h4>Perspective</h4>
+      <p>URN: <code>urn:xml3d:view:perspective</code></p>
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>fovVertical</td>
+            <td>float</td>
+            <td>Math.PI / 4</td>
+            <td>The vertical field of view of the view frustum in radians</td>
+          </tr>
+          <tr>
+            <td>fovHorizontal</td>
+            <td>float</td>
+            <td>-</td>
+            <td>The horizontal field of view of the view frustum in radians</td>
+          </tr>
+          <tr>
+            <td>near</td>
+            <td>float</td>
+            <td>-</td>
+            <td>The distance of the near clipping plane (unitless)</td>
+          </tr>
+          <tr>
+            <td>far</td>
+            <td>float</td>
+            <td>-</td>
+            <td>The distance of the far clipping plane (unitless)</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="issue">TODO: Kristian: Figure that explains the frustum</div>
+      <p>
+        The <dfn>perspective view model</dfn> defines a perspective view frustum based on the near and far planes and on a vertical or horizontal opening angle.
+        A small field of view roughly corresponds to a telephoto lens; a large field of view roughly corresponds to a wide-angle lens.
+        If fovHorizontal is given, the frustum is defined using this horizontal angle, otherwise fovVertical is used.
+        If the far or the near clipping place is not defined, the system will try to compute a useful value automatically based on the scene's dimension.
+      </p>
+    </section>
+    <section>
+      <h4>Projective</h4>
+      <p>URN: <code>urn:xml3d:view:projective</code></p>
+      <div class="attributes">Parameters:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>projectionMatrix</td>
+            <td>float4x4</td>
+            <td></td>
+            <td>The frustum described as projection matrix</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The <dfn>projective view model</dfn> defines a projective view frustum based on a projection matrix. This view model is typically used, if the
+        intrisic camera parameters are computed, e.g. from a webcam image using computer vision algorithms.
+      </p>
+    </section>
+  </section>
+
+</section>
+
+<section>
+    <h2>Content-Types</h2>
+    <p>XML3D specifies the following content-types for external resources:</p>
+    <pre>
+        JSON mesh file     model/vnd.xml3d.mesh+json
+
+        XML mesh file      model/vnd.xml3d.mesh+xml
+
+        XML asset file     model/vnd.xml3d.model+xml
+
+        BLAST binary       model/vnd.xml3d.[model|mesh]+blast
+    </pre>
+    <p>The response should include a <code>Content-Type</code> header with the same content-type <b>or</b> the appropriate standard type
+    <code>application/json</code>, <code>application/xml</code> or <code>application/octet-stream</code>. </p>
+    <div class="note">A response with no <code>Content-Type</code> header at all <em>will not be handled</em> and will generate an error message.</div>
+</section>
+
+
+<section>
   <h2>Datatypes</h2>
   <p>XML3D provides a range of math types based on the <a href="http://glmatrix.net/">glMatrix</a> library. In general the functions they provide are
-  immutable, with the exception of the <code>Box</code> and <code>Ray</code> types. </p>
+    immutable, with the exception of the <code>Box</code> and <code>Ray</code> types. </p>
 
 
   <section>
@@ -2188,9 +2398,9 @@
     <h3>AxisAngle</h3>
     <dl class='element'>
     </dl>
-    <p>An axis-angle representation of a rotation with the angle in radians. This type is used for all XML3D interface methods and element attributes that expect a rotation. 
-    When working with rotations mathematically it's best to first convert the AxisAngle representation to a Quat and convert back to AxisAngle when 
-    passing the result back to an XML3D interface.</p>
+    <p>An axis-angle representation of a rotation with the angle in radians. This type is used for all XML3D interface methods and element attributes that expect a rotation.
+      When working with rotations mathematically it's best to first convert the AxisAngle representation to a Quat and convert back to AxisAngle when
+      passing the result back to an XML3D interface.</p>
 
     <dl title='interface AxisAngle' class='idl'>
       <dt>attribute Float32Array data</dt>
@@ -2216,7 +2426,7 @@
       <dd>Returns a new AxisAngle wrapper around the given Float32Array. Note: Changes to the returned AxisAngle will also change the data in the array!</dd>
     </dl>
   </section>
-  
+
   <section>
     <h3>Quat</h3>
     <dl class='element'>
@@ -2295,7 +2505,7 @@
       <dd>Returns a new Quat wrapper around the given Float32Array. Note: Changes to the returned Quat will also change the data in the array!</dd>
     </dl>
   </section>
-  
+
   <section>
     <h3>Mat2</h3>
     <dl class='element'>
@@ -2480,7 +2690,7 @@
     <dl class='element'>
     </dl>
     <p>The Box type represents a bounding box with a stored minimum and maximum point. Unlike the math types the methods of the Box object are mutable and, when applicable,
-    return the same instance of the Box.</p>
+      return the same instance of the Box.</p>
 
     <dl title='interface Box' class='idl'>
       <dt>attribute Float32Array data</dt>
@@ -2577,255 +2787,43 @@
 </section>
 
 <section>
-  <h2>Xflow</h2>
-    <section>
-      <div class="issue">Kristian: Can we move this section to concepts?</div>
-      <h3>Filters</h3>
-      <p>Xflow defines three filters that may be applied to data through the <code>filter</code> attribute on <a href="#the-data-element"><code>data</code></a> and
-        <a href="#the-dataflow-element"><code>dataflow</code></a> elements. </p>
-
-      <pre>
-        filter="keep|remove(field1 [, field2...])"
-        filter="rename( { newFieldName : field [, newFieldName2 : field2...] } )"
-      </pre>
-
-      <p>A filter does not change the data itself but rather influences how that data is made available to other Xflow elements. For example, using a <code>remove</code>
-      filter does not actually remove the data from the Xflow element, it simply hides it from parent elements. </p>
-
-        <p>An Xflow element may only have one filter, if multiple filters are needed they can be applied with nested Xflow elements. </p>
-
-      <pre class="example highlight">
-        &lt;data filter="keep(A,D)"&gt;
-          &lt;float name="A" &gt;0&lt;/float&gt;
-          &lt;float name="B" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
-          &lt;float name="C" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
-          &lt;float name="D" &gt;1&lt;/float&gt;
-        &lt;/data&gt;
-
-        &lt;data filter="remove(D)"&gt;
-          &lt;float name="A" &gt;0&lt;/float&gt;
-          &lt;float name="B" &gt;1&lt;/float&gt;
-          &lt;float name="C" &gt;1&lt;/float&gt;
-          &lt;float name="D" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
-        &lt;/data&gt;
-
-        &lt;data filter="rename( {A2 : A, B2 : B} )"&gt;
-          &lt;float name="A" &gt;0&lt;/float&gt; &lt;!-- will be renamed into A2 --&gt;
-          &lt;float name="B" &gt;1&lt;/float&gt; &lt;!-- will be renamed into B2 --&gt;
-          &lt;float name="C" &gt;1&lt;/float&gt;
-          &lt;float name="D" &gt;1&lt;/float&gt;
-        &lt;/data&gt;
-
-        &lt;data filter="keep( {A2 : A, B2 : B} )"&gt;
-          &lt;float name="A" &gt;0&lt;/float&gt; &lt;!-- will be renamed into A2 --&gt;
-          &lt;float name="B" &gt;1&lt;/float&gt; &lt;!-- will be renamed into B2 --&gt;
-          &lt;float name="C" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
-          &lt;float name="D" &gt;1&lt;/float&gt; &lt;!-- will be removed --&gt;
-        &lt;/data&gt;
-
-        &lt;data filter="rename( {A1 : A, A2 : A, A3: A} )"&gt;
-          &lt;float name="A" &gt;0&lt;/float&gt; &lt;!-- will be provided under the names A1, A2 and A3 --&gt;
-        &lt;/data&gt;
-      </pre>
-
-    </section>
-  <section>
-    <h3>The compute operator</h3>
-    <p>Compute operators can be used to change or create data inside an Xflow graph. They operate like functions, receiving a set of input arguments, doing some work
-    and then outputting the result. On <a href="#the-data-element"><code>data</code></a> elements operators may be invoked through the <code>compute</code> attribute
-    using the following syntax:</p>
-
-    <pre>
-     compute="(output1 [,output2...]) = xflow.[operatorName]([argument1, ...])"
-    </pre>
-
-    <p>In <a href="#the-dataflow-element"><code>dataflow</code></a> elements one or more compute operators can be invoked inside a compute block using the
-      <a href="#the-dataflow-element"><code>&lt;compute&gt;</code></a> element.</p>
-
-    <p>The fields listed as outputs will be added to the list of data that this data element provides. The arguments must be available to the data element that invokes
-    the operator, either as <a href="#value-elements">value elements</a> or provided by a child data element. Compute operators can be invoked in sequence by nesting data
-    elements: </p>
-
-    <pre class='example highlight'>
-      &lt;data compute="position = xflow.add(position, offset2)"&gt;
-        &lt;data compute="position = xflow.add(position, offset1)"&gt;
-          &lt;float3 name="position"&gt;...&lt;/float3&gt;
-          &lt;float3 name="offset1"&gt;...&lt;/float3&gt;
-        &lt;/data&gt;
-        &lt;float3 name="offset2"&gt;...&lt;/float3&gt;
-      &lt;/data&gt;
-    </pre>
-
-    <p>XML3D includes several compute operators by default (a complete list may be found <a href="https://github.com/xml3d/xml3d.js/wiki/Xflow-operator-list">here</a>)
-    but also provides an interface to declare custom compute operators. These can be saved in their own JavaScript files and served alongside xml3d.js. Before being used a custom
-    operator must be registered with Xflow by calling <code>Xflow.registerOperator</code> with the following syntax:</p>
-
-    <pre class="example highlight">
-      Xflow.registerOperator("xflow.myOperatorName", {
-        outputs: [ {type: 'float3', name: 'outputName', customAlloc=true },
-                   ...
-        ],
-
-        params:  [ {type: 'int', source: 'inputName1', optional=true },
-                   {type: 'float3', source: 'inputName2', array=true },
-                   ...
-        ],
-
-        alloc: function(sizes [, inputName1, ...]) {
-           // Only necessary if one or more outputs have the flag 'customAlloc=true'
-           sizes['outputName'] = inputName2.length;
-        },
-
-        evaluate: function(outputName, inputName1, inputName2, info) {
-           ...
-        }
-      });
-    </pre>
-    <div class="note">As long as a custom operator appears after the <code>xml3d.js</code> script in the document flow the <code>Xflow.registerOperator</code> function can (and should)
-      be called immediately. This is typical behavior for a JavaScript plugin architecture and ensures the operators have been registered before XML3D initializes the scene (during the
-    <code>document.onload</code> event).</div>
-
-    <p>In essence the declaration of the compute operator must contain at least a list of input and output fields, including types, and an <code>evaluate</code> function that is called by
-      Xflow during data processing. Input fields may be marked as <code>optional</code>, otherwise they will generate an error if missing.
-
-    </p><p>Output fields may be allocated
-      with a custom size, indicated with the <code>customAlloc</code> flag. When this flag is present Xflow will call the <code>alloc</code> function, which should declare the sizes of the
-      data arrays that Xflow needs to create for these fields. If a field is not marked with <code>customAlloc</code> then Xflow will attempt to choose the right size based on the inputs to the
-      compute operator.
-    </p>
-    <p>
-      Fields marked with the <code>array</code> flag will be provided to the <code>evaluate</code> function as is and will exclude them from the normal length-matching checks that Xflow performs
-      on input arguments. This can be used, for example, to pass an array of data with 100 elements while the other input fields all contain thousands of elements. Normally this would generate
-      an error as Xflow would not be able to properly iterate through the data.</p>
-
-    <p>The <code>evaluate</code> function will always be called with the list of output fields first, then the input fields, then an <code>info</code> object supplied by Xflow. The <code>info</code>
-      object contains information about how the data can be iterated and offers a place to store data during processing:
-    </p>
-
-    <pre>
-      info = {
-        iterFlag: [true|false,...], // Is the input at this position an array that should be iterated over or a single element?
-        iterateCount: number,       // The number of elements in the input data to iterate over, ie. (input array length) / (tuple size)
-        customData: {}              // A field to hold custom data during and between operator executions
-      }
-    </pre>
-    <div class="note">Fields marked with the <code>array</code> flag will always have an iterFlag value of <code>false</code></div>
-
-    <p>The following is an example operator that uses the <code>info</code> object to iterate over a set of <em>positions</em>, adding a constant <em>offset</em> and returning the
-    result as a new array of <em>positions</em>: </p>
-
-    <pre class="example highlight">
-      Xflow.registerOperator("xflow.addOffset", {
-        outputs: [ {type: 'float3', name: 'result' }
-        ],
-
-        params:  [ {type: 'float3', source: 'position' },
-                   {type: 'float3', source: 'offset', array=true }
-        ],
-
-        evaluate: function(result, position, offset, info) {
-           // In this example 'offset' is an array with 3 values (a single float3)
-           // 'position' is an array containing thousands of values
-
-           for (var i=0; i < info.iterateCount; i++) {
-              result[i*3] = position[ info.iterFlag[0] ? i*3 : 0 ] + offset[0];
-              result[i*3+1] = position[ info.iterFlag[0] ? i*3+1 : 1 ] + offset[1];
-              result[i*3+1] = position[ info.iterFlag[0] ? i*3+2 : 2 ] + offset[2];
-           }
-        }
-      }
-    </pre>
-
-
-  </section>
-
-  <section>
-    <h3>Sequences</h3>
-    <p>Xflow allows arbitrarily long sequences of data to be defined using the <code>key</code> attribute on <a href="#value-elements">value elements</a>. This is useful,
-      for example, to define the base data for mesh animations to be driven by Xflow <a href="#the-compute-operator">compute operators</a>.
-    </p>
-    <pre class="example highlight">
-      &lt;data id="keyFrameData"&gt;
-        &lt;float3 name="position" key="0" &gt;-5 0 5 ... &lt;/float3&gt;
-        &lt;float3 name="normal" key="0" &gt;0 -1 0 ... &lt;/float3&gt;
-
-        &lt;float3 name="position" key="0.1" &gt;-2.886751 2.113249 2.886751 ... &lt;/float3&gt;
-        &lt;float3 name="normal" key="0.1"&gt;-0.554395 -0.620718 0.554395 ... &lt;/float3&gt;
-
-        &lt;float3 name="position" key="0.2"&gt;-1.341089 4.649148 1.341089 ... &lt;/float3&gt;
-        &lt;float3 name="normal" key="0.2"&gt;-0.696886 0.169412 0.696886 ... &lt;/float3&gt;
-
-        &lt;float3 name="position" key="0.3" &gt;-6.158403 1.408833 6.158403 ... &lt;/float3&gt;
-        &lt;float3 name="normal" key="0.3"&gt;-0.141341 -0.979819 0.141341 ... &lt;/float3&gt;
-
-        ...
-      &lt;/data&gt;
-    </pre>
-    <p>The above sequence of data represents the keyframes of a mesh animation. Typically a compute operator would then be used to interpolate between keyframes, or to
-    otherwise map the sequences of data to a definite set of <code>position</code> and <code>normal</code> data to be rendered.</p>
-
-  </section>
-
-
-</section>
-
-
-<section>
-    <h2>Content-Types</h2>
-    <p>XML3D specifies the following content-types for external resources:</p>
-    <pre>
-        JSON mesh file     model/vnd.xml3d.mesh+json
-
-        XML mesh file      model/vnd.xml3d.mesh+xml
-
-        XML asset file     model/vnd.xml3d.model+xml
-
-        BLAST binary       model/vnd.xml3d.[model|mesh]+blast
-    </pre>
-    <p>The response should include a <code>Content-Type</code> header with the same content-type <b>or</b> the appropriate standard type
-    <code>application/json</code>, <code>application/xml</code> or <code>application/octet-stream</code>. </p>
-    <div class="note">A response with no <code>Content-Type</code> header at all <em>will not be handled</em> and will generate an error message.</div>
-</section>
-
-
-<section>
   <h2>Events</h2>
-    <section>
-        <h3>Mouse and Keyboard Events</h3>
-        The following event listeners are available on all <a href="#interactive-elements">interactive elements</a>:
-            <ul>
-                <li>onclick</li>
-                <li>ondblclick</li>
-                <li>onmousedown</li>
-                <li>onmouseup</li>
-                <li>onmouseover</li>
-                <li>onmousemove</li>
-                <li>onmouseout</li>
-                <li>onkeypress</li>
-                <li>onkeydown</li>
-                <li>onkeyup</li>
-            </ul>
-        The event received by these listeners is a standard HTML5 <a href="http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevents">MouseEvent</a>
-        or <a href="http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents">KeyboardEvent</a> respectively. As in normal HTML, event listeners
-        may be added to the element through an appropriate <code>on[eventName]</code> attribute or through JavaScript using <code>element.addEventListener(...)</code>.
-        <div class="note">Listeners registered through an attribute must use the following format: <code>"myListenerFunction(event)"</code></div>
-    </section>
-    <section>
-        <h3>FrameDrawn</h3>
-      <div class="issue">Adapt IDL to the new stats object</div>
-        <dl title='interface FrameDrawn : CustomEvent' class='idl'>
-            <dt>attribute float detail.timeStart</dt>
-            <dd>The system time at the beginning of the frame draw.</dd>
-            <dt>attribute float detail.timeEnd</dt>
-            <dd>The system time at the end of the frame draw.</dd>
-            <dt>attribute float detail.renderTimeInMilliseconds</dt>
-            <dd>The total time taken to render this frame. Includes time spent updating the scene state and any XFlow data processing. </dd>
-            <dt>attribute int detail.count.objects</dt>
-            <dd>The total number of distinct meshes drawn in this frame after applying frustum culling (if enabled).</dd>
-            <dt>attribute int detail.count.primitives</dt>
-            <dd>The total number of primitives drawn in this frame after applying frustum culling (if enabled).</dd>
-        </dl>
-    </section>
+  <section>
+    <h3>Mouse and Keyboard Events</h3>
+    The following event listeners are available on all <a href="#interactive-elements">interactive elements</a>:
+    <ul>
+      <li>onclick</li>
+      <li>ondblclick</li>
+      <li>onmousedown</li>
+      <li>onmouseup</li>
+      <li>onmouseover</li>
+      <li>onmousemove</li>
+      <li>onmouseout</li>
+      <li>onkeypress</li>
+      <li>onkeydown</li>
+      <li>onkeyup</li>
+    </ul>
+    The event received by these listeners is a standard HTML5 <a href="http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevents">MouseEvent</a>
+    or <a href="http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents">KeyboardEvent</a> respectively. As in normal HTML, event listeners
+    may be added to the element through an appropriate <code>on[eventName]</code> attribute or through JavaScript using <code>element.addEventListener(...)</code>.
+    <div class="note">Listeners registered through an attribute must use the following format: <code>"myListenerFunction(event)"</code></div>
+  </section>
+  <section>
+    <h3>FrameDrawn</h3>
+    <div class="issue">Adapt IDL to the new stats object</div>
+    <dl title='interface FrameDrawn : CustomEvent' class='idl'>
+      <dt>attribute float detail.timeStart</dt>
+      <dd>The system time at the beginning of the frame draw.</dd>
+      <dt>attribute float detail.timeEnd</dt>
+      <dd>The system time at the end of the frame draw.</dd>
+      <dt>attribute float detail.renderTimeInMilliseconds</dt>
+      <dd>The total time taken to render this frame. Includes time spent updating the scene state and any XFlow data processing. </dd>
+      <dt>attribute int detail.count.objects</dt>
+      <dd>The total number of distinct meshes drawn in this frame after applying frustum culling (if enabled).</dd>
+      <dt>attribute int detail.count.primitives</dt>
+      <dd>The total number of primitives drawn in this frame after applying frustum culling (if enabled).</dd>
+    </dl>
+  </section>
 </section>
 
 </body>

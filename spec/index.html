@@ -329,21 +329,22 @@
 
       </section>
       <section>
-          <h4>Interactive elements</h4>
+          <h4>Pickable elements</h4>
           <dl class='element'>
-            <a href="#the-group-element"><code>group</code></a>, <a href="#the-mesh-element"><code>mesh</code></a>,
-            <a href="#the-model-element"><code>model</code></a>, <a href="#the-xml3d-element"><code>xml3d</code></a>
+             <a href="#the-mesh-element"><code>mesh</code></a>,
+            <a href="#the-model-element"><code>model</code></a></a>
           </dl>
-        <div class="issue">Clarify this section (other title, should we include groups and the xml3d element?)</div>
-          <p>Interactive elements are those which are able to receive mouse event listeners. The list of available mouse event listeners is described in the
-          <a href="#events">Events</a> section.</p>
+          <p>Pickable elements are the drawable geometries of a scene. These elements can trigger mouse events like most visible HTML elements do, we call this
+              <em>picking</em>. The list of available mouse event listeners is described in the <a href="#events">Events</a> section.</p>
 
-          <p>In order to receive a mouse event an element must have a renderable object somewhere in its subtree for the user to interact with. When the user
-          interacts with this object (eg. clicks on it) the relevant MouseEvent will be generated on the <a href="#the-mesh-element"><code>mesh</code></a> or
-              <a href="#the-model-element"><code>model</code></a> element and then bubbled up the scene hierarchy. This will continue until the event reaches the
+          <p>Mouse events will also bubble up through the scene hierarchy, which allows mouse event listeners to also be placed on the <a>group element</a> and the
+          <a>xml3d element</a>. Listeners on these elements can only be triggered by a pickable element (model or mesh) in the element's subtree.</p>
+
+          <p>When the user interacts with an object on the canvas (eg. clicks on it) the relevant MouseEvent will be generated on the <a href="#the-mesh-element"><code>mesh</code></a>
+              or <a href="#the-model-element"><code>model</code></a> element and then bubbled up the scene hierarchy. This will continue until the event reaches the
           <a href="#the-xml3d-element"><code>xml3d</code></a> element, or until <code>event.stopPropagation()</code> is called.</p>
 
-          <p>In the following example, when clicking on the object in the scene corresponding to this <a href="#the-mesh-element"><code>mesh</code></a> element,
+          <p>In the following example, when clicking on the object in the scene corresponding to this <a href="#the-mesh-element"><code>mesh</code></a> element
           both listeners will be triggered in the appropriate order:</p>
 
            <pre class='example highlight'>
@@ -368,8 +369,7 @@
 
       <h4>The <code>xml3d</code> element</h4>
         <dl class='element'>
-          <dt>Categories:</dt>
-          <dd><a href="#interactive-elements">Interactive element</a></dd>
+
         </dl>
       <p>The <dfn>xml3d element</dfn> is the root element of an XML3D scene. It will create a <code>canvas</code> element at this position in the DOM to
       display the rendered scene. CSS styles and event listeners from the XML3D element are also applied to the canvas allowing for mouse interaction with the
@@ -475,10 +475,9 @@
       <h4>The <code>group</code> element</h4>
         <dl class='element'>
             <dt>Categories:</dt>
-            <dd><a href="#interactive-elements">Interactive element</a></dd>
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
-        <p>Group elements are the non-leaf nodes in an XML3D scene tree. They can be used to build transformation hierarchies and to group
+        <p>The <dfn>group element</dfn> is a non-leaf node in an XML3D scene tree. They can be used to build transformation hierarchies and to group
         renderable objects together. Groups can be nested, but because they are not Xflow elements they may not hold any
         <a href="#data-elements">data elements</a> and cannot be referenced by other <code>group</code> elements. This means that
         unlike data elements, groups build a tree structure rather than a graph. Each group may only have a single parent.</p>
@@ -552,9 +551,9 @@
           <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
       <p>The <dfn>view element</dfn> defines a viewport into the scene.
-      The used view (or camera) model that defines the projection of the scene to the XML3D canvas is defined by
+      The view (or camera) model that defines the projection of the scene to the XML3D canvas is defined by
       the <a href="#attr-view-model" class="internalDFN">model</a> attribute. The view uses the <a href="h-generic-data-model">generic data model</a> to define
-      the parameters of the referenced view model (intrinsic camera parameters).
+      the parameters of the referenced view model (aka intrinsic camera parameters).
       The coordinate system of the <span class="element-name">view</span> element defines the coordinate system for the view (aka extrinsic camera parameters).
       </p>
       <p>
@@ -582,7 +581,7 @@
   &lt;float4x4 name=&quot;projectionMatrix&quot;&gt;1.4485281705856323 0 0 0 0 2.4142134189605713 0 0 0 0 -9.523809432983398 -1 0 0 -94.18809509277344 0&lt;/float4x4&gt;
 &lt;/view&gt;
        </pre>
-      <div class="note">XML3D does not define navigation through the scene by e.g. binding mouse events to changes to the active view element.
+      <div class="note">XML3D does not provide camera navigation through the scene by e.g. binding mouse events to changes to the active view element.
         Instead, this is left to the application (or some navigation library), because the navigation is part of the interaction with the scene and is typically very application-specific.</div>
 
         <dl title='interface XML3DViewElement : HTMLElement' class='idl'>
@@ -614,10 +613,10 @@
             <dd><a href="#data-elements">Data element</a></dd>
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
-      <p>The <span class="element-name">light</span> element defines a light source in the scene that emits light based on the light model defined by
-      the <a href="#attr-light-model" class="internalDFN">model</a> attribute. The light uses the <a href="h-generic-data-model">generic data model</a> to define the parameters of the referenced light model.
-      The coordinate system of the <span class="element-name">light</span> element defines the base coordinate system for the light. However, the final position and direction of the light source can altered by
-      specific parameters of the light model.
+      <p>The <dfn>light element</dfn> defines a light source in the scene that emits light based on the light model defined by
+      the <a href="#attr-light-model" class="internalDFN">model</a> attribute. The light uses the <a href="h-generic-data-model">generic data model</a> to define the
+          parameters of the referenced light model. The coordinate system of the <span class="element-name">light</span> element defines the base coordinate system
+          for the light. However, the final position and direction of the light source can altered by specific parameters of the light model.
       </p>
       <p>A light affects all geometry elements within the same scene, i.e. with the same xml3d element as ancestor.</p>
       <p>
@@ -664,11 +663,11 @@
         <dl class='element'>
             <dt>Categories:</dt>
             <dd><a href="#data-elements">Data element</a></dd>
-            <dd><a href="#interactive-elements">Interactive element</a></dd>
+            <dd><a href="#pickable-elements">Pickable element</a></dd>
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
 
-        <p>A mesh represents a single renderable object in the scene. To be drawn correctly a mesh must either inherit a
+        <p>The <dfn>mesh element</dfn> represents a single renderable object in the scene. To be drawn correctly a mesh must either inherit a
             <a href="#the-material-element"><code>material</code></a> from a parent element or assign its own through the <code>material</code> attribute.</p>
 
         <div class="note">A mesh can only be assigned a single material. Models that contain multiple materials will have to be broken down into separate meshes.</div>
@@ -752,10 +751,10 @@
       <dl class='element'>
         <dt>Categories:</dt>
         <dd><a href="#data-elements">Data element</a></dd>
-        <dd><a href="#interactive-elements">Interactive element</a></dd>
+        <dd><a href="#pickable-elements">Pickable element</a></dd>
         <dd><a href="#transformable-elements">Transformable element</a></dd>
       </dl>
-      <p>A model is an instantiation of an <a href="#the-asset-element"><code>asset</code></a>. This is useful for rendering complex objects
+      <p>The <dfn>model element</dfn> is used to instantiate an <a href="#the-asset-element"><code>asset</code></a>. This is useful for rendering complex objects
         with many individual meshes or materials. Not only is it easier to insert a single <code>model</code> element into the DOM, it's also much
         more efficient. </p>
 
@@ -830,7 +829,7 @@
       <h4>The <code>defs</code> element</h4>
         <dl class='element'>
         </dl>
-        <p>The defs element is simply an organizational tool to separate the scene tree from elements that are not explicitly
+        <p>The <dfn>defs element</dfn> is simply an organizational tool to separate the scene tree from elements that are not explicitly
         part of the scene, but may be referenced by elements that are. These implicit elements include <a href="#the-transform-element"><code>transform</code></a>,
         <a href="#the-material-element"><code>material</code></a>, <a href="#the-data-element"><code>data</code></a> and <a href="#the-dataflow-element"><code>dataflow</code></a>. Note that
         any of these elements may appear inside the scene tree as well, it's just good practice to keep them in the <code>defs</code> section
@@ -906,7 +905,7 @@
       <dl class='element'>
       </dl>
 
-      <p>In addition to CSS3 transformations applied through the <code>style</code> attribute, <code>transform</code> elements provide another way to define transformations for
+      <p>In addition to CSS3 transformations applied through the <code>style</code> attribute, the <dfn>transform element</dfn> provides another way to define transformations for
         <a href="#transformable-elements">transformable elements</a>. The various transformation components are combined into a transformation matrix which is then applied to the
       element or elements referencing this transform element. </p>
 
@@ -940,7 +939,7 @@
             <dt>Categories:</dt>
             <dd><a href="#data-elements">Data element</a></dd>
         </dl>
-        <p>Data elements are the non-leaf nodes in an Xflow graph. They act primarily as containers for data but may also modify that data through
+        <p>A <dfn>data element</dfn> is a non-leaf node in an Xflow graph. They act primarily as containers for data but may also modify that data through
         compute operators and filters. When data elements are nested the data from all child elements is merged, in this sense the parent data element acts as a data
          aggregator. In the case of two data fields with the same name the data element further down the list in the DOM will have priority. For example:</p>
 
@@ -1017,7 +1016,7 @@
         <dd><a href="#data-elements">Data element</a></dd>
       </dl>
 
-      <p>Dataflow elements can be thought of as templates for a compute operation consisting of several Xflow operators executed in sequence.
+      <p>The <dfn>dataflow element</dfn> can be thought of as a template for a compute operation consisting of one or more Xflow operators executed in sequence.
         This template can be defined once and then reused many times in the scene, applying the operations to a different set of input data each time.
         Consider the following dataflow example which computes <a href="http://en.wikipedia.org/wiki/Skeletal_animation">skeletal animation</a>
         for a mesh:</p>
@@ -1160,7 +1159,7 @@
             <dt>Categories:</dt>
             <dd><a href="#value-elements">Value element</a></dd>
         </dl>
-        <p>The <code>bool</code> element holds a space separated list of boolean values. The values may be given in string form (<code>true/false</code>) or as integers (<code>1/0</code>). </p>
+        <p>The <dfn>bool element</dfn> holds a space separated list of boolean values. The values may be given in string form (<code>true/false</code>) or as integers (<code>1/0</code>). </p>
 
         <dl title='interface XML3DBoolValueElement : HTMLElement' class='idl'>
             <dt>attribute DOMString name</dt>
@@ -1190,7 +1189,7 @@
         <dd>One or more <code>img</code>, <code>video</code>, or <code>canvas</code> elements</dd>
       </dl>
 
-      The texture element represents a texture that can be used as parameter for materials or as input for generic
+      The <dfn>texture element</dfn> represents a texture that can be used as parameter for materials or as input for generic
       dataflow processing.
       The image data of the texture is defined by its children.
       The texture element's attributes determine how samples are derived from the image.
@@ -1302,7 +1301,7 @@
         <dl class='element'>
         </dl>
 
-      <p>Defines an asset that can be instantiated through a <a href="#the-model-element"><code>model</code></a> element or extended by another asset. The asset element also
+      <p>The <dfn>asset element</dfn> defines an asset that can be instantiated through a <a href="#the-model-element"><code>model</code></a> element or extended by another asset. The asset element also
       defines a scope for the <code>name</code> and <code>includes</code> attributes of any child <code>assetdata</code> and <code>assetmesh</code> elements. </p>
 
       <p>Asset elements may be nested but their <code>id</code> must be unique within the document. </p>
@@ -1322,7 +1321,7 @@
             <dd><a href="#data-elements">Data element</a></dd>
         </dl>
 
-      <p>Similar to <a href="#the-data-element"><code>data</code></a> elements an assetdata is used to define and share generic data within an asset. Unlike <code>data</code>
+      <p>Similar to the <a>data element</a> an <dfn>assetdata element</dfn> is used to define and share generic data within an asset. Unlike <code>data</code>
       elements, assetdata elements may not be nested and are named by and referenced through a <code>name</code> attribute rather than an <code>id</code>. An assetdata element
       may contain normal <a href="#the-data-element"><code>data</code></a> elements as children.</p>
 
@@ -1345,7 +1344,7 @@
             <dd><a href="#data-elements">Data element</a></dd>
         </dl>
 
-      <p>An assetmesh represents a single drawable mesh in the asset and works similar to the <a href="#the-mesh-element"><code>mesh</code></a> element. Unlike the <code>mesh</code> element
+      <p>An <dfn>assetmesh element</dfn> represents a single drawable mesh in the asset and works similar to the <a href="#the-mesh-element"><code>mesh</code></a> element. Unlike the <code>mesh</code> element
       assetmeshes are identified by their <code>name</code> attribute, which may not be duplicated within the same <a href="#the-asset-element"><code>asset</code></a>.</p>
 
       <p>As with the <a>mesh element</a> a transformation may be supplied either through the <code>transform</code> attribute or through a CSS3 transform.</p>
@@ -2790,7 +2789,7 @@
   <h2>Events</h2>
   <section>
     <h3>Mouse and Keyboard Events</h3>
-    The following event listeners are available on all <a href="#interactive-elements">interactive elements</a>:
+    The following event listeners are available on all <a href="#pickable-elements">pickable elements</a> as well as the <a>group element</a> and the <a>xml3d element</a>:
     <ul>
       <li>onclick</li>
       <li>ondblclick</li>

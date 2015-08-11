@@ -136,6 +136,7 @@ XML3D.Xml3dSceneController = function(xml3dElement) {
     this.revolveAroundPoint = new window.XML3DVec3(0, 0, 0);
     this.rotateSpeed = 1;
     this.zoomSpeed = 20;
+    this.action = this.NO_MOUSE_ACTION;
 
     this.upVector = this.camera.upVector;
     this.useKeys = document.getElementById("useKeys");
@@ -278,7 +279,9 @@ XML3D.Xml3dSceneController.prototype.LOOKAROUND = 4;
 XML3D.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 
     var ev = event || window.event;
-
+    if (event.target.nodeName.toLowerCase() == "xml3d") {
+        event.preventDefault();
+    }
     switch (ev.button) {
         case 0:
             if(this.mode == "examine")
@@ -299,19 +302,17 @@ XML3D.Xml3dSceneController.prototype.mousePressEvent = function(event) {
     this.prevPos.x = ev.pageX;
     this.prevPos.y = ev.pageY;
 
-    if (this.action !== this.NO_MOUSE_ACTION) {
+    if (this.action) {
         XML3D.options.setValue("renderer-mousemove-picking", false);
     }
 
-    this.stopEvent(event);
     return false;
 };
 
 XML3D.Xml3dSceneController.prototype.mouseReleaseEvent = function(event) {
-    this.stopEvent(event);
-
-    if (this.action !== this.NO_MOUSE_ACTION) {
+    if (this.action) {
         XML3D.options.setValue("renderer-mousemove-picking", true);
+        event.preventDefault();
     }
 
     this.action = this.NO_MOUSE_ACTION;
@@ -373,16 +374,14 @@ XML3D.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
             break;
     }
 
-    if (this.action != this.NO_MOUSE_ACTION)
+    if (this.action)
     {
         this.needUpdate = true;
         this.prevPos.x = ev.pageX;
         this.prevPos.y = ev.pageY;
-        event.returnValue = false;
 
         this.update();
     }
-    this.stopEvent(event);
     return false;
 };
 
@@ -393,11 +392,10 @@ XML3D.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
 
 
 XML3D.Xml3dSceneController.prototype.touchStartEvent = function(event) {
-    if (event.target.nodeName.toLowerCase() == "xml3d") {
-        this.stopEvent(event);
-    }
-
     var ev = event || window.event;
+    if (event.target.nodeName.toLowerCase() == "xml3d") {
+        event.preventDefault();
+    }
 
     var button = (ev.which || ev.button);
 
@@ -428,11 +426,10 @@ XML3D.Xml3dSceneController.prototype.touchStartEvent = function(event) {
 };
 
 XML3D.Xml3dSceneController.prototype.touchEndEvent = function(event) {
-    if (event.target.nodeName.toLowerCase() == "xml3d") {
-        this.stopEvent(event);
-    }
-
     var ev = event || window.event;
+    if (this.action) {
+        event.preventDefault();
+    }
 
     switch (ev.touches.length) {
         case 1:
@@ -463,10 +460,6 @@ XML3D.Xml3dSceneController.prototype.touchEndEvent = function(event) {
 
 
 XML3D.Xml3dSceneController.prototype.touchMoveEvent = function(event, camera) {
-    if (event.target.nodeName.toLowerCase() == "xml3d") {
-        this.stopEvent(event);
-    }
-
     var ev = event || window.event;
     if (!this.action)
         return;
@@ -537,7 +530,7 @@ XML3D.Xml3dSceneController.prototype.touchMoveEvent = function(event, camera) {
             break;
     }
 
-    if (this.action != this.NO_MOUSE_ACTION)
+    if (this.action)
     {
         this.needUpdate = true;
 
@@ -546,8 +539,6 @@ XML3D.Xml3dSceneController.prototype.touchMoveEvent = function(event, camera) {
             touchPositions[i] = {x: ev.touches[i].pageX, y: ev.touches[i].pageY};
         }
         this.prevTouchPositions = touchPositions;
-
-        event.returnValue = false;
 
         this.update();
     }
@@ -613,7 +604,6 @@ XML3D.Xml3dSceneController.prototype.keyHandling = function(e) {
         }
         this.needUpdate = true;
     }
-    this.stopEvent(e);
 };
 
 //-----------------------------------------------------

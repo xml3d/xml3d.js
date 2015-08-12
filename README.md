@@ -73,7 +73,7 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
-4.9 - 31.03.2014
+4.9 - 31.03.2015
 * External Xflow Operators - [demo](http://xml3d.github.io/xml3d-examples/examples/facemorph/facemorph.html), [doc](https://github.com/xml3d/xml3d.js/wiki/External-resources#External_Xflow_Operators)
 * [IE 11 Support](https://github.com/xml3d/xml3d.js/issues/97)
 * Grunt build system now based on [Browserify](http://browserify.org/)

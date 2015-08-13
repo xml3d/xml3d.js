@@ -359,9 +359,6 @@ classInfo['assetdata'] = {
     platform: {a: handlers.EnumAttributeHandler, params: {values: PlatformTypes, defaultValue: 1}},
     getOutputNames: {m: methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
-    getComputeInfo: {m: methods.XML3DNestedDataContainerTypeGetComputeInfo},
-    getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
-    isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
     src: {a: handlers.StringAttributeHandler}
     };

@@ -249,7 +249,7 @@ function clearObserver(){
     }
 }
 
-if (document.readyState === "complete") {
+if (document.readyState === "complete" || document.readyState === "interactive") {
     onLoad();
 } else {
     document.addEventListener('DOMContentLoaded', onLoad, false);

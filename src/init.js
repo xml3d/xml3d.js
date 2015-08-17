@@ -270,8 +270,12 @@ function clearObserver(){
     }
 }
 
+if (document.readyState === "complete") {
+    onLoad();
+} else {
+    document.addEventListener('DOMContentLoaded', onLoad, false);
+}
 
-document.addEventListener('DOMContentLoaded', onLoad, false);
 window.addEventListener('unload', onUnload, false);
 window.addEventListener('reload', onUnload, false);
 

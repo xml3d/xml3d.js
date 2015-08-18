@@ -874,13 +874,13 @@
       given element shall be shaded using the referenced material. Multiple scene elements can share a material.
       The material uses the generic data model to define the parameters of the referenced material model.
       Note that graphics elements can override the parameters defined in the material element. Hence, the parameters in
-      the material element can be considered as default materials.</p>
+      the material element can be considered default values.</p>
 
 
       <p>
       The material model used by the material is defined by the <dfn id="attr-material-model">material model attribute</dfn>.
       The <code>model</code> attribute must be present, and must contain a valid non-empty URL referencing either a <a href="#predefined-material-models">predefined material model</a> or
-      a scripted material model, e.g. using shade.js.
+      a scripted material model, e.g. using shade.js or a custom shader.
       </p>
       <p>Here is a simple example for a material based on the predefined <a>phong material model</a>:</p>
        <pre class='example highlight'>
@@ -2154,6 +2154,70 @@
       </p>
     </section>
   </section>
+
+</section>
+
+
+<section>
+    <h2>Custom materials</h2>
+    <p>XML3D provides an interface to define custom materials in addition to the predefined material models. Such materials must first be registered
+    with XML3D:</p>
+    <pre class="example highlight">
+        XML3D.materials.register("my-material", { ...material definition... });
+    </pre>
+    <p>and may then be referenced through the <a href="#attr-material-model">model</a> attribute of a <a>material element</a>:</p>
+    <pre class="example highlight">
+        &lt;material model="urn:xml3d:materials:my-material"&gt;&lt;/material&gt;
+    </pre>
+    <p>The material definition must provide vertex and fragment shader code in the form of a string as well as definitions and default
+    values for all uniform and sampler variables:</p>
+    <pre class="example highlight">
+        XML3D.materials.register("my-material", {
+            vertex : "...vertex shader code...",
+            fragment : "...fragment shader code...",
+
+            //All uniform variables that appear in either shader block, with default values
+            uniforms : {
+                exampleFloat : 0.5,
+                exampleVec3  : [1, 1, 1]
+            },
+
+            //All textures that appear in either shader block
+            samplers : {
+                exampleTexture : null
+            },
+
+            //All vertex attributes that appear in the vertex shader
+            attributes : {
+                position : {required : true},
+                normal : null //Synonymous with {required : false}
+                exampleVertexAttribute : {required : false},
+            },
+
+            //Optional function to mark this material as requiring alpha blending
+            hasTransparency : function(params) {
+                return params.transparency && params.transparency.getValue()[0] > 0.001;
+            },
+
+            //Optional function to add compiler directives to shaders based on scene parameters (eg. the number of lights)
+            addDirectives : function(directives, lights, params) {
+                directives.push("HAS_EXAMPLETEXTURE " + ('exampleTexture' in params ? "1" : "0"));
+            }
+        });
+    </pre>
+    <p>As with the predefined material models the generic data model can be used to set material parameters like uniform variables and textures for 
+    custom materials:</p>
+    <pre class="example highlight">
+        &lt;material model="urn:xml3d:material:my-material"&gt;
+            &lt;float3 name="exampleVec3"&gt;0 1 0&lt;/float3&gt;
+            &lt;texture name="exampleTexture"&gt;
+                &lt;img src="textures/my-example-texture.png"/&gt;
+            &lt;/texture&gt;
+        &lt;/material&gt;
+    </pre>
+
+    <p>Custom materials may also be defined through <a href="https://github.com/xml3d/shade.js">shade.js</a> which is generally easier to use
+        and is able to generate cross platform materials that may be used outside of XML3D as well.</p>
 
 </section>
 

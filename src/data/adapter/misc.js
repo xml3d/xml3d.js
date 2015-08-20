@@ -122,7 +122,7 @@ createClass(SinkDataAdapter, DataAdapter, {
     VideoDataAdapter.prototype.createVideoFromURL = function(url) {
         var that = this;
         var uri = new URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
-        this.video = Resource.getVideo(uri, this.node.autoplay, this.node.loop,
+        this.video = Resource.getVideo(uri, this.node.autoplay, this.node.loop, this.node.muted,
             {
                 canplay : function(event, video) {
                     Util.dispatchCustomEvent(that.node, 'canplay', true, true, null);

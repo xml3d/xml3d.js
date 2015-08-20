@@ -750,7 +750,7 @@ Resource.getImage = function(uri, loadListener, errorListener) {
  *                            Listeners will be called with event as the first and video as the second parameter.
  * @return {HTMLVideoElement}
  */
-Resource.getVideo = function(uri, autoplay, loop, listeners) {
+Resource.getVideo = function(uri, autoplay, loop, muted, listeners) {
     // we use canvasId 0 to represent videos loaded in a document
     getOrCreateCounterObject(0).counter++;
 
@@ -770,6 +770,7 @@ Resource.getVideo = function(uri, autoplay, loop, listeners) {
 
     video.autoplay = autoplay;
     video.loop = loop;
+    video.muted = muted;
 
     function createCallback(listener) {
         return function(event) {

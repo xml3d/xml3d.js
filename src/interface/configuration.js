@@ -488,6 +488,7 @@ classInfo['video'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     src: {a: handlers.StringAttributeHandler},
     autoplay: {a: handlers.BoolAttributeHandler, params: false},
+    muted: {a: handlers.BoolAttributeHandler, params: false},
     play: {m: methods.videoPlay},
     pause: {m: methods.videoPause}
     };

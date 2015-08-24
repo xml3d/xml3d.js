@@ -1,6 +1,7 @@
 <!DOCTYPE html><html><head>
     <link rel="stylesheet" type="text/css" media="all" href="frame.css">
     <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <script type="text/javascript" src="../scripts/change-mesh-type.js"></script>
 
     <title>
         XML3D
@@ -28,6 +29,16 @@
 
         <data id="meshTypeLines">
             <string name="type">lines</string>
+        </data>
+
+        <data id="meshTypeDynamic">
+            <string id="meshTypeChangeTarget" name="type">triangles</string>
+        </data>
+
+        <data id="meshTypeCompute" compute="type = xflow.selectMeshType(selector, value1, value2)">
+            <string name="value1">triangles</string>
+            <string name="value2">lines</string>
+            <int id="meshTypeSelector" name="selector">0</int>
         </data>
 
     </defs>

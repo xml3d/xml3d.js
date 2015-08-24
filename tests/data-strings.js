@@ -1,6 +1,6 @@
 module("Xflow strings", {});
 
-test("Change mesh type through xflow", function () {
+test("Change mesh type with new data element", function () {
     stop();
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");
 
@@ -23,6 +23,48 @@ test("Change mesh type through xflow", function () {
         var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
         deepEqual(actual, [255, 255, 0, 255], "Triangle type from external data element");
 
+        return s;
+    });
+    test.fin(QUnit.start).done();
+});
+
+test("Change mesh type in data element", function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");
+
+    var test = frameLoaded.then(function (doc) {
+        doc.getElementById("meshTypeTest1").setAttribute("type", "#meshTypeDynamic");
+        return doc.getElementById("xml3dElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
+        deepEqual(actual, [255, 255, 0, 255], "Initial state is correct");
+
+        s.ownerDocument.getElementById("meshTypeChangeTarget").textContent = "lines";
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
+        deepEqual(actual, [0, 0, 0, 0], "Mesh responded to change in type field");
+        return s;
+    });
+    test.fin(QUnit.start).done();
+});
+
+test("Change mesh type through xflow operator", function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");
+
+    var test = frameLoaded.then(function (doc) {
+        doc.getElementById("meshTypeTest1").setAttribute("type", "#meshTypeCompute");
+        return doc.getElementById("xml3dElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
+        deepEqual(actual, [255, 255, 0, 255], "Initial operator returned triangles type");
+
+        s.ownerDocument.getElementById("meshTypeSelector").textContent = "1";
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
+        deepEqual(actual, [0, 0, 0, 0], "Changing operator input caused type lines to be used");
         return s;
     });
     test.fin(QUnit.start).done();

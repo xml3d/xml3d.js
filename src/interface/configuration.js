@@ -458,6 +458,20 @@ classInfo['bool'] = {
     value: {a: handlers.BoolArrayValueHandler},
     setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
     };
+
+/**
+ * Properties and methods for <string>
+ **/
+classInfo['string'] = {
+    id: {a: handlers.IDHandler},
+    className: {a: handlers.StringAttributeHandler, id: 'class'},
+    name: {a: handlers.StringAttributeHandler},
+    param: {a: handlers.BoolAttributeHandler, params: false},
+    key: {a: handlers.FloatAttributeHandler, params: 0.0},
+    value: {a: handlers.StringValueHandler},
+    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
+};
+
 /**
  * Properties and methods for <texture>
  **/

@@ -8,9 +8,9 @@ Xflow.registerOperator("xflow.selectMeshType", {
     },
     evaluate_core: function(result, selector, value1, value2){
         if (selector[0] == 0) {
-            return value1;
+            result[0] = value1[0];
         } else {
-            return value2;
+            result[0] = value2[0];
         }
     }
 });

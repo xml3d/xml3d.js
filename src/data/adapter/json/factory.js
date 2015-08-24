@@ -44,7 +44,8 @@ var TYPED_ARRAY_MAP = {
     "float4x4" : Float32Array,
     "bool" : Uint8Array,
     "byte" : Int8Array,
-    "ubyte" : Uint8Array
+    "ubyte" : Uint8Array,
+    "string": Array
 };
 
 var isLittleEndian = (function () {

@@ -46,8 +46,8 @@ DOMStringFetcher.prototype.getValue = function() {
                 this.xflowRequest = new ComputeRequest(adapter.getXflowNode(), [this.dataName], this._bindedCallback);
             var dataResult = this.xflowRequest.getResult();
             var stringData = (dataResult.getOutputData(this.dataName) && dataResult.getOutputData(this.dataName).getValue());
-            if (stringData)
-                return stringData;
+            if (stringData && stringData.length)
+                return stringData[0];
         }
     }
     return "";

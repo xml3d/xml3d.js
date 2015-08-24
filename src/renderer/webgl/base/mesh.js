@@ -8,7 +8,6 @@
  */
 var GLMesh = function (context, type) {
     this.context = context;
-    this.glType = getGLTypeFromString(type);
     this.buffers = {};
     this.uniformOverride = {};
     this.minIndex = 0;
@@ -17,13 +16,18 @@ var GLMesh = function (context, type) {
     this.vertexCount = null;
     this.minAttributeCount = -1;
     this.context.getStatistics().meshes++;
-    this.multiDraw = (this.glType == WebGLRenderingContext.LINE_STRIP || this.glType == WebGLRenderingContext.TRIANGLE_STRIP);
+    this.typeChanged(type);
 };
 
 XML3D.extend(GLMesh.prototype, {
     setIndexRange: function (minIndex, maxIndex) {
         this.minIndex = minIndex;
         this.maxIndex = maxIndex;
+    },
+
+    typeChanged: function(type) {
+        this.glType = getGLTypeFromString(type);
+        this.multiDraw = (this.glType == WebGLRenderingContext.LINE_STRIP || this.glType == WebGLRenderingContext.TRIANGLE_STRIP);
     },
 
     checkBufferCompatible: function (name, xflowDataBuffer) {

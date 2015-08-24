@@ -15,7 +15,7 @@ test("Change mesh type through xflow", function () {
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
-        deepEqual(actual, [0, 0, 0, 255], "Lines type from another local data element");
+        deepEqual(actual, [0, 0, 0, 0], "Lines type from another local data element");
 
         s.ownerDocument.getElementById("meshTypeTest1").setAttribute("type", "xml/data.xml#meshTypeTriangles");
         return s;

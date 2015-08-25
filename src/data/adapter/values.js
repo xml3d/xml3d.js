@@ -34,7 +34,7 @@ ValueDataAdapter.prototype.init = function()
     if (this.type === XC.DATA_TYPE.STRING) {
         value = value ? value.split(",") : [];
     }
-    var buffer = new BufferEntry(type, value);
+    var buffer = new BufferEntry(this.type, value);
 
     this.xflowInputNode = new InputNode(null);
     this.xflowInputNode.name = this.node.name;

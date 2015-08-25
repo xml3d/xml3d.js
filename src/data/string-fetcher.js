@@ -22,11 +22,11 @@ DOMStringFetcher.prototype.clear = function () {
 
 DOMStringFetcher.prototype.update = function () {
     var attrValue = this.node.getAttribute(this.attrName);
-    if (!attrValue.match(/#/)) {
+    if (!attrValue || !attrValue.match(/#/)) {
         this.clear();
         return; //Simple value, no need to register an adapterhandle
     }
-    var newHandle = this.owner.getAdapterHandle(this.node.getAttribute(this.attrName), "data", 0);
+    var newHandle = this.owner.getAdapterHandle(attrValue, "data", 0);
     if (newHandle != this.adapterHandle) {
         this.clear();
         this.adapterHandle = newHandle;

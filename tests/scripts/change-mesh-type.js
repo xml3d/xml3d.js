@@ -1,4 +1,4 @@
-Xflow.registerOperator("xflow.selectMeshType", {
+Xflow.registerOperator("xflow.selectString", {
     outputs: [  {type: 'string', name: 'result'}],
     params:  [  {type: 'int', source: 'selector'},
                 {type: 'string', source: 'value1'},

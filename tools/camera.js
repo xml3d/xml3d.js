@@ -48,6 +48,7 @@
         this.rotateSpeed = opt.rotateSpeed || 3;
         this.zoomSpeed = opt.zoomSpeed || 20;
         this.useKeys = opt.useKeys !== undefined ? opt.useKeys : false;
+        this.mousemovePicking = true;
 
         this.transformInterface = new TransformInterface(this.element, this.xml3d);
         this.prevPos = {x: -1, y: -1};
@@ -224,6 +225,7 @@
 
         if (this.action !== this.NO_MOUSE_ACTION) {
             //Disable object picking during camera actions
+            this.mousemovePicking = XML3D.options.getValue("renderer-mousemove-picking");
             XML3D.options.setValue("renderer-mousemove-picking", false);
         }
 
@@ -235,7 +237,7 @@
         this.stopEvent(event);
 
         if (this.action !== this.NO_MOUSE_ACTION) {
-            XML3D.options.setValue("renderer-mousemove-picking", true);
+            XML3D.options.setValue("renderer-mousemove-picking", this.mousemovePicking);
         }
 
         this.action = this.NO_MOUSE_ACTION;

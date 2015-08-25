@@ -142,7 +142,7 @@ function parseTextureSamplingParameters(wrap, filter, anisotropy) {
 
     if(anisotropy) {
         var number = parseFloat(anisotropy);
-        if (number == Number.NaN) {
+        if (isNaN(number)) {
             number = anisotropy == "max" ? Infinity : undefined
         } else {
             number = Math.min(1.0, number)

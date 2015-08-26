@@ -91,7 +91,7 @@
   </section>
   <section>
     <h3>Xflow</h3>
-        <section>
+    <section>
         <h4>Filters</h4>
         <p>Xflow defines three filters that may be applied to data through the <code>filter</code> attribute on the <a>data element</a> and the
             <a>dataflow element</a>. </p>
@@ -275,6 +275,7 @@
         <p>The above sequence of data represents the keyframes of a mesh animation. Typically a compute operator would then be used to interpolate between keyframes, or to
             otherwise map the sequences of data to a definite set of <code>position</code> and <code>normal</code> data to be rendered.</p>
     </section>
+  </section>
 </section>
 
 <section>
@@ -853,7 +854,9 @@
         </dl>
 
         <p>The <dfn>mesh element</dfn> represents a single renderable object in the scene. To be drawn correctly a mesh must either inherit a
-            <a href="#the-material-element" class="internalDFN">material</a> from a parent element or assign its own through the <code>material</code> attribute.</p>
+            <a href="#the-material-element" class="internalDFN">material</a> from a parent element or assign its own through the <code>material</code> attribute. The
+        <dfn id="attr-mesh-type">type attribute</dfn> determines how the mesh data is interpreted to be drawn and must be one of the
+            <a href="#predefined-primitive-types">predefined primitive types</a>.</p>
 
         <div class="note">A mesh can only be assigned a single material. Models that contain multiple materials will have to be broken down into separate meshes.</div>
 
@@ -1112,356 +1115,6 @@
   </section>
 
   <section>
-    <h3>Data and dataflow elements</h3>
-    <section>
-
-<!-- #data -->
-
-      <h4>The <code>data</code> element</h4>
-        <dl class='element'>
-            <dt>Categories:</dt>
-            <dd><a href="#data-elements">Data element</a></dd>
-        </dl>
-        <p>A <dfn>data element</dfn> is a non-leaf node in an Xflow graph. They act primarily as containers for data but may also modify that data through
-        compute operators and filters. When data elements are nested the data from all child elements is merged, in this sense the parent data element acts as a data
-         aggregator. In the case of two data fields with the same name the data element further down the list in the DOM will have priority. For example:</p>
-
-        <pre class='example highlight'>
-        &lt;data&gt; &lt;!-- At this level "color" will be "0.0 1.0 0.0" --&gt;
-          &lt;data&gt;
-            &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt;
-          &lt;/data&gt;
-          &lt;data&gt;
-            &lt;float3 name="color"&gt;0.0 1.0 0.0&lt;/float3&gt;
-          &lt;/data&gt;
-        &lt;/data&gt;
-        </pre>
-
-        <p>Data elements may also reference other data elements. This can be used to share a common dataset between objects, overwriting certain fields on a
-        per-object basis as required. See the <a href="#data-elements">data elements</a> section for an example.</p>
-
-        <p>One important use for data elements is to dynamically change or generate data, for example to drive an animation or generate a ground mesh from a height map.
-         This can be accomplished with a combination of compute operators and data overrides. The following is an example of a simple compute operator that will add the
-        provided offset to all vertex positions of a mesh:</p>
-
-         <pre class='example highlight'>
-        &lt;mesh&gt;
-           &lt;data compute="position = xflow.add(position, offset)"&gt;
-             &lt;float3 name="offset"&gt;0.5 0.5 0.5 ... &lt;/float3&gt;
-             &lt;data id="originalData"&gt;
-                &lt;float3 name="position"&gt;1.0 0.0 0.0 ... &lt;/float3&gt;
-             &lt;/data&gt;
-           &lt;/data&gt;
-        &lt;/mesh&gt;
-        </pre>
-
-        When using a compute operator with a data element all input arguments must be available to the data element that invokes the operator. In this example the
-        "position" field of the <code>mesh</code> will contain the offset position data, while the data element with id <code>originalData</code> will contain the
-        original positions. If this data element were referenced from another mesh it would also return the original positions:
-
-        <pre class='example highlight'>
-        &lt;mesh&gt;
-            &lt;!-- "positions" contains the original data 1.0 0.0 0.0 ... --&gt;
-           &lt;data src="#originalData"&gt;&lt;/data&gt;
-        &lt;/mesh&gt;
-        </pre>
-
-        Xflow is designed as a reactive framework, meaning operators will only be recomputed if input data has changed and a sink element has requested the
-        output data (eg. during a draw call in a subsequent frame).
-
-       <dl title='interface XML3DDataElement : HTMLElement' class='idl'>
-         <dt>readonly attribute boolean complete</dt>
-         <dd>Returns true if all external resources required by this data have been loaded, false otherwise.</dd>
-         <dt>attribute DOMString compute</dt>
-         <dd>A Javascript-like statement that can invoke an Xflow compute operator on a set of input data. See the <a href="#the-compute-operator">compute operator</a>
-              section for more information.</dd>
-         <dt>attribute DOMString filter</dt>
-         <dd>May contain a filter (<code>keep</code>, <code>rename</code> or <code>remove</code>) to adjust the data that is provided by this data element. See the
-              Wiki page <a href="https://github.com/xml3d/xml3d.js/wiki/How-to-use-Xflow">How to use Xflow</a> for more information.</dd>
-         <dt>attribute DOMString src</dt>
-         <dd>Accepts an HTML ID reference to another data element. The other element's data will be included as an implicit first child of this data node. Note that in
-           cases of duplicate data any child data or value elements will override the data found in the <code>src</code> node.</dd>
-         <dt>XML3DDataResult getResult(Array filter)</dt>
-         <dd>Returns a XML3DDataResult object containing the data for the fields requested by the given filter, eg.
-              <code>["position", "index", "normal"]</code>. This is useful for accessing the data directly through JavaScript.</dd>
-
-         <dt>Array getOutputNames()</dt>
-         <dd>Returns the names of the data fields provided by this data element. </dd>
-      </dl>
-    </section>
-
-<!-- #dataflow -->
-
-    <section>
-      <h4>The <code>dataflow</code> element</h4>
-      <dl class='element'>
-        <dt>Categories:</dt>
-        <dd><a href="#data-elements">Data element</a></dd>
-      </dl>
-
-      <p>The <dfn>dataflow element</dfn> can be thought of as a template for a compute operation consisting of one or more Xflow operators executed in sequence.
-        This template can be defined once and then reused many times in the scene, applying the operations to a different set of input data each time.
-        Consider the following dataflow example which computes <a href="http://en.wikipedia.org/wiki/Skeletal_animation">skeletal animation</a>
-        for a mesh:</p>
-
-       <pre class='example highlight'>
-        &lt;dataflow id="skinning" out="position, normal, boneXform"&gt;
-          &lt;float3 param="true" name="position" &gt;&lt;/float3&gt;
-          &lt;float3 param="true" name="normal" &gt;&lt;/float3&gt;
-          &lt;int4   param="true" name="boneIdx" &gt;&lt;/int4&gt;
-          &lt;float4 param="true" name="boneWeight" &gt;&lt;/float4&gt;
-
-          &lt;int    param="true" name="boneParent" &gt;&lt;/int&gt;
-          &lt;float3 param="true" name="bindTranslation" &gt;&lt;/float3&gt;
-          &lt;float4 param="true" name="bindRotation" &gt;&lt;/float4&gt;
-
-          &lt;float3 param="true" name="translation" &gt;&lt;/float3&gt;
-          &lt;float4 param="true" name="rotation" &gt;&lt;/float4&gt;
-
-          &lt;float  param="true" name="key" &gt;0&lt;/float&gt;
-          &lt;compute&gt;
-            bindPose = xflow.createTransformInv({translation: bindTranslation, rotation: bindRotation});
-            bindPose = xflow.forwardKinematicsInv(boneParent, bindPose);
-
-            rot = xflow.slerpSeq(rotation, key);
-            trans = xflow.lerpSeq(translation, key);
-            pose = xflow.createTransform({translation: trans, rotation: rot});
-            pose = xflow.forwardKinematics(boneParent, pose);
-
-            boneXform = xflow.mul(bindPose, pose);
-
-            normal = xflow.skinDirection(normal, boneIdx, boneWeight, boneXform);
-            position = xflow.skinPosition(position, boneIdx, boneWeight, boneXform);
-          &lt;/compute&gt;
-        &lt;/dataflow&gt;
-        </pre>
-
-      <p>By defining the <code>param</code> attribute of the various <a href="#value-elements">value elements</a> we instruct Xflow to expect them as inputs provided
-        by any element that references this dataflow. The <code>compute</code> element is only found inside dataflows and can be used to define a sequence of Xflow operators
-        that should be applied to the input data. The list of operators will be computed from top to bottom and any new data fields they create (ie. <code>bindPose</code> in
-        this example) can be used as input for operators further down the list.
-      </p>
-
-      <p>To apply this dataflow to a set of data another <a href="#data-elements">data element</a> may reference it in its own <code>compute</code> block or attribute:</p>
-
-      <pre class='example highlight'>
-        &lt;data compute="position, normal = dataflow['#skinning']"&gt;
-          &lt;!-- We assume this file contains all the input data that the 'skinning' dataflow expects --&gt;
-          &lt;data src="myMeshData.xml"&gt;&lt;/data&gt;
-          &lt;float id="myAnimationKey" name="key"&gt;1.0&lt;float&gt;
-        &lt;/data&gt;
-      </pre>
-
-      <p>
-        Conceptually this data element will 'call' the dataflow element with the input 'arguments' from the file <code>myMeshData.xml</code> and then assign the output
-        of the dataflow to the <code>position</code> and <code>normal</code> fields, effectively overwriting the ones found in <code>myMeshData.xml</code>.
-        Note the URI fragment inside the <code>dataflow[]</code> construct. This may also reference an external document containing the dataflow.
-      </p>
-
-      <p>By declaring the <code>key</code> value separately we can control the animation state of this model. Note also that the key is declared <em>after</em> the reference
-      to <code>myMeshData.xml</code> to ensure that it overrides the key value found in the xml file.</p>
-
-
-      <dl title='interface XML3DDataflowElement : HTMLElement' class='idl'>
-        <dt>attribute DOMString out</dt>
-        <dd>A comma-separated list of fields that this dataflow provides as output. If this attribute is not present then all computed fields will be provided as output.</dd>
-        <dt>readonly attribute boolean complete</dt>
-        <dd>Returns true if all external resources required by this dataflow have been loaded, false otherwise.</dd>
-        <dt>XML3DDataResult getResult(Array filter)</dt>
-        <dd>Returns a XML3DDataResult object containing the data for the fields requested by the given filter, eg.
-          <code>["position", "index", "normal"]</code>. This is useful for accessing the data directly through JavaScript.</dd>
-        <dt>Array getOutputNames()</dt>
-        <dd>Returns the names of the data fields provided by this data element. </dd>
-      </dl>
-    </section>
-
-    <section>
-
-<!-- #float -->
-
-        <h4>The <code>float</code>, <code>float2</code>, <code>float3</code>, <code>float4</code>, and
-            <code>float4x4</code> elements</h4>
-        <dl class='element'>
-            <dt>Categories:</dt>
-            <dd><a href="#value-elements">Value element</a></dd>
-        </dl>
-        <p>The <code>float*</code> elements hold a space separated list of floating point values. The tag name determines how this data is interpreted, ie. a <code>float2</code> element
-            will interpret the data as an array of 2D vectors while a <code>float4x4</code> element will interpret it as an array of 4x4 matrices. </p>
-
-        <dl title='interface XML3DFloatValueElement : HTMLElement' class='idl'>
-            <dt>attribute DOMString name</dt>
-            <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
-            <dt>attribute boolean param</dt>
-            <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
-                the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
-                element for example usage.</dd>
-            <dt>attribute float key</dt>
-            <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
-
-            <dt>void setScriptValue(Float32Array value)</dt>
-            <dd>
-                A high performance setter to set the data of this value element directly through JavaScript.
-            </dd>
-        </dl>
-
-
-    </section>
-    <section>
-
-<!-- #int -->
-
-      <h4>The <code>int</code> and <code>int4</code> elements</h4>
-        <dl class='element'>
-            <dt>Categories:</dt>
-            <dd><a href="#value-elements">Value element</a></dd>
-        </dl>
-        <p>The <code>int*</code> elements hold a space separated list of integer values. The tag name determines how this data is interpreted, ie. an <code>int4</code> element
-            will interpret the data as an array of 4-component integer vectors. </p>
-        <dl title='interface XML3DIntValueElement : HTMLElement' class='idl'>
-            <dt>attribute DOMString name</dt>
-            <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
-            <dt>attribute boolean param</dt>
-            <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
-                the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
-                element for example usage.</dd>
-            <dt>attribute float key</dt>
-            <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
-
-            <dt>void setScriptValue(Int16Array value)</dt>
-            <dd>
-                A high performance setter to set the data of this value element directly through JavaScript.
-            </dd>
-        </dl>
-    </section>
-    <section>
-
-<!-- #bool -->
-
-      <h4>The <code>bool</code> element</h4>
-        <dl class='element'>
-            <dt>Categories:</dt>
-            <dd><a href="#value-elements">Value element</a></dd>
-        </dl>
-        <p>The <dfn>bool element</dfn> holds a space separated list of boolean values. The values may be given in string form (<code>true/false</code>) or as integers (<code>1/0</code>). </p>
-
-        <dl title='interface XML3DBoolValueElement : HTMLElement' class='idl'>
-            <dt>attribute DOMString name</dt>
-            <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
-            <dt>attribute boolean param</dt>
-            <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
-                the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
-                element for example usage.</dd>
-            <dt>attribute float key</dt>
-            <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
-
-            <dt>void setScriptValue(Int16Array value)</dt>
-            <dd>
-                A high performance setter to set the data of this value element directly through JavaScript.
-            </dd>
-        </dl>
-    </section>
-
-
-<!-- #texture -->
-    <section>
-      <h4>The <code>texture</code> element</h4>
-      <dl class='element'>
-        <dt>Categories:</dt>
-        <dd><a href="#value-elements">Value element</a></dd>
-        <dt>Content model:</dt>
-        <dd>One or more <code>img</code>, <code>video</code>, or <code>canvas</code> elements</dd>
-      </dl>
-
-      The <dfn>texture element</dfn> represents a texture that can be used as parameter for materials or as input for generic
-      dataflow processing.
-      The image data of the texture is defined by its children.
-      The texture element's attributes determine how samples are derived from the image.
-      <p class="note">
-        Texture sampling attributes configure fixed-function sampling methods on the graphics hardware.
-        Thus these attributes qualify as CSS properties. We have abstained from using CSS properties because we
-        currently cannot define custom CSS properties.
-      </p>
-
-
-      <div>The <dfn id="attr-texture-wrap">wrap</dfn> attribute controls the texture access if the provided texture
-        coordinates are outside range [0;1]. The wrap attribute is a combined enumerated attribute.
-        A valid wrap value is a string that matches the <code>wrap</code> production of the following form:
-      <pre>
-        wrap := &lt;wrap-mode&gt; &lt;wrap-mode&gt;?
-        wrap-mode := repeat | clamp
-      </pre>
-        If two <code>wrap-mode</code> values are given, then the first value defines the wrap mode for s coordinates and
-        the second for t coordinates. Otherwise the wrap mode is applied in all directions.
-        The wrap-mode values correspond to CLAMP_TO_EDGE and REPEAT in OpenGL.
-
-      </div>
-      <br>
-
-      <div>The <dfn id="attr-texture-filter">filter</dfn> attribute controls the filtering of the texture, i.e. which
-        texture pixel access function is used. The <code>wrap</code> attribute is a combined enumerated attribute.
-        A valid filter value is a string that matches the filter production of the following form:
-      <pre>
-        filter := (&lt;min-filter-mode&gt; &lt;mag-filter-mode&gt;) | &lt;mag-filter-mode&gt;
-        min-filter-mode := nearest | linear | nearest-mipmap-nearest | nearest-mipmap-linear | linear-mipmap-nearest | linear-mipmap-linear
-        mag-filter-mode := nearest | linear
-      </pre>
-        If only the <code>mag-filter-mode</code> is given, the specified function is used for both, minifying and
-        magnification. Otherwise, the <code>min-filter-mode</code> is used for minifying and the
-        <code>mag-filter-mode</code> is used for magnification.
-        The functions specified by the filter modes correspond to those in OpenGL (NEAREST, LINEAR,
-        NEAREST_MIPMAP_NEAREST, NEAREST_MIPMAP_LINEAR, LINEAR_MIPMAP_NEAREST, and LINEAR_MIPMAP_LINEAR).
-        The default filter mode is "linear-mipmap-linear linear".
-      </div>
-
-      <p class="note">
-        xml3d.js will automatically resize textures to the nearest power-of-two dimensions when the texture wrap mode is
-        set to "repeat" or filtermin is set to anything other than "nearest" or
-        "linear". See <a
-        href="https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support">WebGL
-        limitations</a> for more information.
-      </p>
-
-      Here is an example of using the <code>wrap</code> and <code>filter</code> attributes to configure the sampling of a texture:
-      <pre class="example highlight">
-&lt;texture name=&quot;diffuseTexture&quot; wrap=&quot;repeat clamp&quot; filter=&quot;nearest linear&quot;&gt;
-  &lt;img src=&quot;../stone.jpg&quot;/&gt;
-&lt;/texture&gt;
-      </pre>
-
-       The <dfn id="attr-texture-type">type</dfn>  attribute is an <a href="http://www.w3.org/TR/html5/single-page.html#enumerated-attribute">enumerated attribute</a> with four states with three explicit keywords:
-       <dl>
-         <dt>The <dfn id="attr-texture-type-1d">1D</dfn> keyword, which maps to the <i>1D</i> state</dt>
-         <dd>The 1D state means the children elements define a 1D texture each.</dt>
-         <dt>The <dfn id="attr-texture-type-2d">2D</dfn> keyword, which maps to the <i>2D</i> state</dt>
-         <dd>The 2D state means the children elements defines a 2D texture.</dd>
-         <dt>The <dfn id="attr-texture-type-3d">3D</dfn> keyword, which maps to the <i>3D</i> state</dt>
-         <dd>The 3D state means the children elements defines a 3D texture.</dd>
-         <dt>The <i>auto</i> state</dt>
-         <dd>The type of the texture is determined by the system based on the texture's children elements.</dd>
-       </dl>
-       <p>The <code><a href="#attr-texture-type" class="internalDFN">type</a></code> attribute's <i>missing value default</i> is the <i>auto</i> state.</p>
-
-
-      <dl title='interface XML3DTextureElement : HTMLElement' class='idl'>
-        <dt>attribute DOMString wrap</dt>
-        <dd>The <code>wrap</code> IDL attribute must reflect the respective content attribute of the same name.</dd>
-        <dt>attribute DOMString filter</dt>
-        <dd>The <code>filter</code> IDL attribute must reflect the respective content attribute of the same name.</dd>
-        <dt>attribute DOMString name</dt>
-        <dd>Required. The name of the texture as defined by the material shader.</dd>
-        <dt>attribute boolean param</dt>
-        <dd>If this element appears inside a DataFlow element the param attribute will mark it as a parameter to be
-          supplied by the Data element referencing the DataFlow.
-        </dd>
-        <dt>attribute DOMString type</dt>
-        <dd>The <code>type</code> IDL attribute must reflect the content attribute of the same name, <a href="http://www.w3.org/TR/html5/single-page.html#limited-to-only-known-values">limited to only known values</a>.</dd>
-      </dl>
-    </section>
-
-
-  </section>
-
-  <section>
     <h3>Assets</h3>
     <p>The XML3D asset format is designed to encompass everything needed to define a complex model consisting of one or more meshes and materials. Conceptually an asset is
     designed to be static and self-enclosed. When referenced from a <a>model element</a> an asset behaves as a single object in the scene,
@@ -1558,6 +1211,406 @@
     </section>
 
   </section>
+
+    <section>
+        <h3>Data and dataflow elements</h3>
+        <section>
+
+            <!-- #data -->
+
+            <h4>The <code>data</code> element</h4>
+            <dl class='element'>
+                <dt>Categories:</dt>
+                <dd><a href="#data-elements">Data element</a></dd>
+            </dl>
+            <p>A <dfn>data element</dfn> is a non-leaf node in an Xflow graph. They act primarily as containers for data but may also modify that data through
+                compute operators and filters. When data elements are nested the data from all child elements is merged, in this sense the parent data element acts as a data
+                aggregator. In the case of two data fields with the same name the data element further down the list in the DOM will have priority. For example:</p>
+
+        <pre class='example highlight'>
+        &lt;data&gt; &lt;!-- At this level "color" will be "0.0 1.0 0.0" --&gt;
+          &lt;data&gt;
+            &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt;
+          &lt;/data&gt;
+          &lt;data&gt;
+            &lt;float3 name="color"&gt;0.0 1.0 0.0&lt;/float3&gt;
+          &lt;/data&gt;
+        &lt;/data&gt;
+        </pre>
+
+            <p>Data elements may also reference other data elements. This can be used to share a common dataset between objects, overwriting certain fields on a
+                per-object basis as required. See the <a href="#data-elements">data elements</a> section for an example.</p>
+
+            <p>One important use for data elements is to dynamically change or generate data, for example to drive an animation or generate a ground mesh from a height map.
+                This can be accomplished with a combination of compute operators and data overrides. The following is an example of a simple compute operator that will add the
+                provided offset to all vertex positions of a mesh:</p>
+
+         <pre class='example highlight'>
+        &lt;mesh&gt;
+           &lt;data compute="position = xflow.add(position, offset)"&gt;
+             &lt;float3 name="offset"&gt;0.5 0.5 0.5 ... &lt;/float3&gt;
+             &lt;data id="originalData"&gt;
+                &lt;float3 name="position"&gt;1.0 0.0 0.0 ... &lt;/float3&gt;
+             &lt;/data&gt;
+           &lt;/data&gt;
+        &lt;/mesh&gt;
+        </pre>
+
+            When using a compute operator with a data element all input arguments must be available to the data element that invokes the operator. In this example the
+            "position" field of the <code>mesh</code> will contain the offset position data, while the data element with id <code>originalData</code> will contain the
+            original positions. If this data element were referenced from another mesh it would also return the original positions:
+
+        <pre class='example highlight'>
+        &lt;mesh&gt;
+            &lt;!-- "positions" contains the original data 1.0 0.0 0.0 ... --&gt;
+           &lt;data src="#originalData"&gt;&lt;/data&gt;
+        &lt;/mesh&gt;
+        </pre>
+
+            Xflow is designed as a reactive framework, meaning operators will only be recomputed if input data has changed and a sink element has requested the
+            output data (eg. during a draw call in a subsequent frame).
+
+            <dl title='interface XML3DDataElement : HTMLElement' class='idl'>
+                <dt>readonly attribute boolean complete</dt>
+                <dd>Returns true if all external resources required by this data have been loaded, false otherwise.</dd>
+                <dt>attribute DOMString compute</dt>
+                <dd>A Javascript-like statement that can invoke an Xflow compute operator on a set of input data. See the <a href="#the-compute-operator">compute operator</a>
+                    section for more information.</dd>
+                <dt>attribute DOMString filter</dt>
+                <dd>May contain a filter (<code>keep</code>, <code>rename</code> or <code>remove</code>) to adjust the data that is provided by this data element. See the
+                    Wiki page <a href="https://github.com/xml3d/xml3d.js/wiki/How-to-use-Xflow">How to use Xflow</a> for more information.</dd>
+                <dt>attribute DOMString src</dt>
+                <dd>Accepts an HTML ID reference to another data element. The other element's data will be included as an implicit first child of this data node. Note that in
+                    cases of duplicate data any child data or value elements will override the data found in the <code>src</code> node.</dd>
+                <dt>XML3DDataResult getResult(Array filter)</dt>
+                <dd>Returns a XML3DDataResult object containing the data for the fields requested by the given filter, eg.
+                    <code>["position", "index", "normal"]</code>. This is useful for accessing the data directly through JavaScript.</dd>
+
+                <dt>Array getOutputNames()</dt>
+                <dd>Returns the names of the data fields provided by this data element. </dd>
+            </dl>
+        </section>
+
+        <!-- #dataflow -->
+
+        <section>
+            <h4>The <code>dataflow</code> element</h4>
+            <dl class='element'>
+                <dt>Categories:</dt>
+                <dd><a href="#data-elements">Data element</a></dd>
+            </dl>
+
+            <p>The <dfn>dataflow element</dfn> can be thought of as a template for a compute operation consisting of one or more Xflow operators executed in sequence.
+                This template can be defined once and then reused many times in the scene, applying the operations to a different set of input data each time.
+                Consider the following dataflow example which computes <a href="http://en.wikipedia.org/wiki/Skeletal_animation">skeletal animation</a>
+                for a mesh:</p>
+
+       <pre class='example highlight'>
+        &lt;dataflow id="skinning" out="position, normal, boneXform"&gt;
+          &lt;float3 param="true" name="position" &gt;&lt;/float3&gt;
+          &lt;float3 param="true" name="normal" &gt;&lt;/float3&gt;
+          &lt;int4   param="true" name="boneIdx" &gt;&lt;/int4&gt;
+          &lt;float4 param="true" name="boneWeight" &gt;&lt;/float4&gt;
+
+          &lt;int    param="true" name="boneParent" &gt;&lt;/int&gt;
+          &lt;float3 param="true" name="bindTranslation" &gt;&lt;/float3&gt;
+          &lt;float4 param="true" name="bindRotation" &gt;&lt;/float4&gt;
+
+          &lt;float3 param="true" name="translation" &gt;&lt;/float3&gt;
+          &lt;float4 param="true" name="rotation" &gt;&lt;/float4&gt;
+
+          &lt;float  param="true" name="key" &gt;0&lt;/float&gt;
+          &lt;compute&gt;
+            bindPose = xflow.createTransformInv({translation: bindTranslation, rotation: bindRotation});
+            bindPose = xflow.forwardKinematicsInv(boneParent, bindPose);
+
+            rot = xflow.slerpSeq(rotation, key);
+            trans = xflow.lerpSeq(translation, key);
+            pose = xflow.createTransform({translation: trans, rotation: rot});
+            pose = xflow.forwardKinematics(boneParent, pose);
+
+            boneXform = xflow.mul(bindPose, pose);
+
+            normal = xflow.skinDirection(normal, boneIdx, boneWeight, boneXform);
+            position = xflow.skinPosition(position, boneIdx, boneWeight, boneXform);
+          &lt;/compute&gt;
+        &lt;/dataflow&gt;
+        </pre>
+
+            <p>By defining the <code>param</code> attribute of the various <a href="#value-elements">value elements</a> we instruct Xflow to expect them as inputs provided
+                by any element that references this dataflow. The <code>compute</code> element is only found inside dataflows and can be used to define a sequence of Xflow operators
+                that should be applied to the input data. The list of operators will be computed from top to bottom and any new data fields they create (ie. <code>bindPose</code> in
+                this example) can be used as input for operators further down the list.
+            </p>
+
+            <p>To apply this dataflow to a set of data another <a href="#data-elements">data element</a> may reference it in its own <code>compute</code> block or attribute:</p>
+
+      <pre class='example highlight'>
+        &lt;data compute="position, normal = dataflow['#skinning']"&gt;
+          &lt;!-- We assume this file contains all the input data that the 'skinning' dataflow expects --&gt;
+          &lt;data src="myMeshData.xml"&gt;&lt;/data&gt;
+          &lt;float id="myAnimationKey" name="key"&gt;1.0&lt;float&gt;
+        &lt;/data&gt;
+      </pre>
+
+            <p>
+                Conceptually this data element will 'call' the dataflow element with the input 'arguments' from the file <code>myMeshData.xml</code> and then assign the output
+                of the dataflow to the <code>position</code> and <code>normal</code> fields, effectively overwriting the ones found in <code>myMeshData.xml</code>.
+                Note the URI fragment inside the <code>dataflow[]</code> construct. This may also reference an external document containing the dataflow.
+            </p>
+
+            <p>By declaring the <code>key</code> value separately we can control the animation state of this model. Note also that the key is declared <em>after</em> the reference
+                to <code>myMeshData.xml</code> to ensure that it overrides the key value found in the xml file.</p>
+
+
+            <dl title='interface XML3DDataflowElement : HTMLElement' class='idl'>
+                <dt>attribute DOMString out</dt>
+                <dd>A comma-separated list of fields that this dataflow provides as output. If this attribute is not present then all computed fields will be provided as output.</dd>
+                <dt>readonly attribute boolean complete</dt>
+                <dd>Returns true if all external resources required by this dataflow have been loaded, false otherwise.</dd>
+                <dt>XML3DDataResult getResult(Array filter)</dt>
+                <dd>Returns a XML3DDataResult object containing the data for the fields requested by the given filter, eg.
+                    <code>["position", "index", "normal"]</code>. This is useful for accessing the data directly through JavaScript.</dd>
+                <dt>Array getOutputNames()</dt>
+                <dd>Returns the names of the data fields provided by this data element. </dd>
+            </dl>
+        </section>
+
+        <section>
+
+            <!-- #float -->
+
+            <h4>The <code>float</code>, <code>float2</code>, <code>float3</code>, <code>float4</code>, and
+                <code>float4x4</code> elements</h4>
+            <dl class='element'>
+                <dt>Categories:</dt>
+                <dd><a href="#value-elements">Value element</a></dd>
+            </dl>
+            <p>The <code>float*</code> elements hold a space separated list of floating point values. The tag name determines how this data is interpreted, ie. a <code>float2</code> element
+                will interpret the data as an array of 2D vectors while a <code>float4x4</code> element will interpret it as an array of 4x4 matrices. </p>
+
+            <dl title='interface XML3DFloatValueElement : HTMLElement' class='idl'>
+                <dt>attribute DOMString name</dt>
+                <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
+                <dt>attribute boolean param</dt>
+                <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
+                    the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
+                    element for example usage.</dd>
+                <dt>attribute float key</dt>
+                <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
+
+                <dt>void setScriptValue(Float32Array value)</dt>
+                <dd>
+                    A high performance setter to set the data of this value element directly through JavaScript.
+                </dd>
+            </dl>
+
+
+        </section>
+        <section>
+
+            <!-- #int -->
+
+            <h4>The <code>int</code> and <code>int4</code> elements</h4>
+            <dl class='element'>
+                <dt>Categories:</dt>
+                <dd><a href="#value-elements">Value element</a></dd>
+            </dl>
+            <p>The <code>int*</code> elements hold a space separated list of integer values. The tag name determines how this data is interpreted, ie. an <code>int4</code> element
+                will interpret the data as an array of 4-component integer vectors. </p>
+            <dl title='interface XML3DIntValueElement : HTMLElement' class='idl'>
+                <dt>attribute DOMString name</dt>
+                <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
+                <dt>attribute boolean param</dt>
+                <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
+                    the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
+                    element for example usage.</dd>
+                <dt>attribute float key</dt>
+                <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
+
+                <dt>void setScriptValue(Int16Array value)</dt>
+                <dd>
+                    A high performance setter to set the data of this value element directly through JavaScript.
+                </dd>
+            </dl>
+        </section>
+        <section>
+
+            <!-- #bool -->
+
+            <h4>The <code>bool</code> element</h4>
+            <dl class='element'>
+                <dt>Categories:</dt>
+                <dd><a href="#value-elements">Value element</a></dd>
+            </dl>
+            <p>The <dfn>bool element</dfn> holds a space separated list of boolean values. The values may be given in string form (<code>true/false</code>) or as integers (<code>1/0</code>). </p>
+
+            <dl title='interface XML3DBoolValueElement : HTMLElement' class='idl'>
+                <dt>attribute DOMString name</dt>
+                <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
+                <dt>attribute boolean param</dt>
+                <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
+                    the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
+                    element for example usage.</dd>
+                <dt>attribute float key</dt>
+                <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
+
+                <dt>void setScriptValue(Int16Array value)</dt>
+                <dd>
+                    A high performance setter to set the data of this value element directly through JavaScript.
+                </dd>
+            </dl>
+        </section>
+         <section>
+
+             <!-- #string -->
+
+            <h4>The <code>string</code> element</h4>
+            <dl class='element'>
+                <dt>Categories:</dt>
+                <dd><a href="#value-elements">Value element</a></dd>
+            </dl>
+            <p>The <dfn>string element</dfn> holds a <em>comma</em> separated list of string values. This inconsistency was chosen to enable space-separated
+                attribute values to be set through Xflow, for example the <a>wrap attribute</a> of the <a>texture element</a>, which may hold a value such as <code>clamp repeat</code>.
+            </p>
+
+            <p>Currently the following string attributes may be set by referencing a <a>data element</a> containing a string field with the matching <code>name</code>:</p>
+            <ul>
+                <li>The <a href="#attr-texture-wrap" class="internalDFN">wrap attribute</a> of the <a>texture element</a></li>
+                <li>The <a href="#attr-texture-filter" class="internalDFN">filter attribute</a> of the <a>texture element</a></li>
+                <li>The <a href="#attr-mesh-type" class="internalDFN">type attribute</a> of the <a>mesh element</a></li>
+                <li>The <a href="#attr-mesh-type" class="internalDFN">type attribute</a> of the <a>assetmesh element</a></li>
+            </ul>
+            <p>Below is an example using a custom Xflow operator to change the type attribute of a <a>mesh element</a>:</p>
+
+      <pre class="example highlight">
+          &lt;!-- The custom xflow operator will output a string field named 'type' --&gt;
+          &lt;data id="meshTypeCompute" compute="type = xflow.selectString(selector, value1, value2)"&gt;
+              &lt;string name="value1"&gt;triangles&lt;/string&gt;
+              &lt;string name="value2"&gt;lines&lt;/string&gt;
+              &lt;int name="selector"&gt;1&lt;/int&gt;
+          &lt;/data&gt;
+
+          &lt;!-- In this case type will evaluate to 'lines' --&gt;
+          &lt;mesh src="#meshdata" type="#meshTypeCompute"&gt;&lt;/mesh&gt;
+      </pre>
+
+            <dl title='interface XML3DStringValueElement : HTMLElement' class='idl'>
+                <dt>attribute DOMString name</dt>
+                <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
+                <dt>attribute boolean param</dt>
+                <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
+                    the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
+                    element for example usage.</dd>
+                <dt>attribute float key</dt>
+                <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
+
+                <dt>void setScriptValue(Array value)</dt>
+                <dd>
+                    A high performance setter to set the data of this value element directly through JavaScript.
+                </dd>
+            </dl>
+        </section>
+
+
+        <!-- #texture -->
+        <section>
+            <h4>The <code>texture</code> element</h4>
+            <dl class='element'>
+                <dt>Categories:</dt>
+                <dd><a href="#value-elements">Value element</a></dd>
+                <dt>Content model:</dt>
+                <dd>One or more <code>img</code>, <code>video</code>, or <code>canvas</code> elements</dd>
+            </dl>
+
+            The <dfn>texture element</dfn> represents a texture that can be used as parameter for materials or as input for generic
+            dataflow processing.
+            The image data of the texture is defined by its children.
+            The texture element's attributes determine how samples are derived from the image.
+            <p class="note">
+                Texture sampling attributes configure fixed-function sampling methods on the graphics hardware.
+                Thus these attributes qualify as CSS properties. We have abstained from using CSS properties because we
+                currently cannot define custom CSS properties.
+            </p>
+
+
+            <div>The <dfn id="attr-texture-wrap">wrap</dfn> attribute controls the texture access if the provided texture
+                coordinates are outside range [0;1]. The wrap attribute is a combined enumerated attribute.
+                A valid wrap value is a string that matches the <code>wrap</code> production of the following form:
+      <pre>
+        wrap := &lt;wrap-mode&gt; &lt;wrap-mode&gt;?
+        wrap-mode := repeat | clamp
+      </pre>
+                If two <code>wrap-mode</code> values are given, then the first value defines the wrap mode for s coordinates and
+                the second for t coordinates. Otherwise the wrap mode is applied in all directions.
+                The wrap-mode values correspond to CLAMP_TO_EDGE and REPEAT in OpenGL.
+
+            </div>
+            <br>
+
+            <div>The <dfn id="attr-texture-filter">filter</dfn> attribute controls the filtering of the texture, i.e. which
+                texture pixel access function is used. The <code>wrap</code> attribute is a combined enumerated attribute.
+                A valid filter value is a string that matches the filter production of the following form:
+      <pre>
+        filter := (&lt;min-filter-mode&gt; &lt;mag-filter-mode&gt;) | &lt;mag-filter-mode&gt;
+        min-filter-mode := nearest | linear | nearest-mipmap-nearest | nearest-mipmap-linear | linear-mipmap-nearest | linear-mipmap-linear
+        mag-filter-mode := nearest | linear
+      </pre>
+                If only the <code>mag-filter-mode</code> is given, the specified function is used for both, minifying and
+                magnification. Otherwise, the <code>min-filter-mode</code> is used for minifying and the
+                <code>mag-filter-mode</code> is used for magnification.
+                The functions specified by the filter modes correspond to those in OpenGL (NEAREST, LINEAR,
+                NEAREST_MIPMAP_NEAREST, NEAREST_MIPMAP_LINEAR, LINEAR_MIPMAP_NEAREST, and LINEAR_MIPMAP_LINEAR).
+                The default filter mode is "linear-mipmap-linear linear".
+            </div>
+
+            <p class="note">
+                xml3d.js will automatically resize textures to the nearest power-of-two dimensions when the texture wrap mode is
+                set to "repeat" or filtermin is set to anything other than "nearest" or
+                "linear". See <a
+                    href="https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support">WebGL
+                limitations</a> for more information.
+            </p>
+
+            Here is an example of using the <code>wrap</code> and <code>filter</code> attributes to configure the sampling of a texture:
+      <pre class="example highlight">
+&lt;texture name=&quot;diffuseTexture&quot; wrap=&quot;repeat clamp&quot; filter=&quot;nearest linear&quot;&gt;
+  &lt;img src=&quot;../stone.jpg&quot;/&gt;
+&lt;/texture&gt;
+      </pre>
+
+            The <dfn id="attr-texture-type">type</dfn>  attribute is an <a href="http://www.w3.org/TR/html5/single-page.html#enumerated-attribute">enumerated attribute</a> with four states with three explicit keywords:
+            <dl>
+                <dt>The <dfn id="attr-texture-type-1d">1D</dfn> keyword, which maps to the <i>1D</i> state</dt>
+                <dd>The 1D state means the children elements define a 1D texture each.</dt>
+                <dt>The <dfn id="attr-texture-type-2d">2D</dfn> keyword, which maps to the <i>2D</i> state</dt>
+                <dd>The 2D state means the children elements defines a 2D texture.</dd>
+                <dt>The <dfn id="attr-texture-type-3d">3D</dfn> keyword, which maps to the <i>3D</i> state</dt>
+                <dd>The 3D state means the children elements defines a 3D texture.</dd>
+                <dt>The <i>auto</i> state</dt>
+                <dd>The type of the texture is determined by the system based on the texture's children elements.</dd>
+            </dl>
+            <p>The <code><a href="#attr-texture-type" class="internalDFN">type</a></code> attribute's <i>missing value default</i> is the <i>auto</i> state.</p>
+
+
+            <dl title='interface XML3DTextureElement : HTMLElement' class='idl'>
+                <dt>attribute DOMString wrap</dt>
+                <dd>The <code>wrap</code> IDL attribute must reflect the respective content attribute of the same name.</dd>
+                <dt>attribute DOMString filter</dt>
+                <dd>The <code>filter</code> IDL attribute must reflect the respective content attribute of the same name.</dd>
+                <dt>attribute DOMString name</dt>
+                <dd>Required. The name of the texture as defined by the material shader.</dd>
+                <dt>attribute boolean param</dt>
+                <dd>If this element appears inside a DataFlow element the param attribute will mark it as a parameter to be
+                    supplied by the Data element referencing the DataFlow.
+                </dd>
+                <dt>attribute DOMString type</dt>
+                <dd>The <code>type</code> IDL attribute must reflect the content attribute of the same name, <a href="http://www.w3.org/TR/html5/single-page.html#limited-to-only-known-values">limited to only known values</a>.</dd>
+            </dl>
+        </section>
+
+
+    </section>
 
 </section>
 

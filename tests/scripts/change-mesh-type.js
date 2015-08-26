@@ -14,3 +14,15 @@ Xflow.registerOperator("xflow.selectString", {
         }
     }
 });
+
+Xflow.registerOperator("xflow.selectStringInArray", {
+    outputs: [  {type: 'string', name: 'result'}],
+    params:  [  {type: 'int', source: 'selector'},
+        {type: 'string', source: 'strings'}],
+    evaluate: function(result, selector, value1, info) {
+        throw new Error("Not used!");
+    },
+    evaluate_core: function(result, selector, strings){
+        result[0] = strings[selector[0]];
+    }
+});

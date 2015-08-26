@@ -44,6 +44,11 @@
             <string id="meshTypeChangeTarget" name="type">triangles</string>
         </data>
 
+        <data id="stringArray" compute="type = xflow.selectStringInArray(selector, strings)">
+            <string name="strings">triangles,tristrips,lines</string>
+            <int id="stringArraySelector" name="selector">1</int>
+        </data>
+
         <data id="meshTypeCompute" compute="type = xflow.selectString(selector, value1, value2)">
             <string name="value1">triangles</string>
             <string name="value2">lines</string>

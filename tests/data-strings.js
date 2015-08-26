@@ -70,6 +70,27 @@ test("Change mesh type through xflow operator", function () {
     test.fin(QUnit.start).done();
 });
 
+test("Mesh type from an array of strings", function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");
+
+    var test = frameLoaded.then(function (doc) {
+        doc.getElementById("meshTypeTest1").setAttribute("type", "#stringArray");
+        return doc.getElementById("xml3dElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
+        deepEqual(actual, [255, 255, 0, 255], "Initial state is correct");
+
+        s.ownerDocument.getElementById("stringArraySelector").textContent = "2";
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
+        deepEqual(actual, [0, 0, 0, 0], "Selected lines type from string array");
+        return s;
+    });
+    test.fin(QUnit.start).done();
+});
+
 test("Change texture wrap mode through xflow operator", function () {
     stop();
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");

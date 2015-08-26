@@ -156,6 +156,9 @@ OperatorList.prototype.allocateOutput = function (programData, async) {
                         case C.DATA_TYPE.BOOL:
                             dataEntry._setValue(new Int32Array(size));
                             break;
+                        case C.DATA_TYPE.STRING:
+                            dataEntry._setValue(new Array(size));
+                            break;
                         default:
                             XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + dataEntry.type);
                     }

@@ -114,6 +114,7 @@ XML3D.createClass(RenderObject, RenderNode, {
 
     setType: function (type) {
         this.object.type = type;
+        this.mesh.typeChanged(type);
         // TODO: this.typeChangedEvent
     },
 

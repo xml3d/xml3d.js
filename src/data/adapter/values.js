@@ -16,6 +16,7 @@ var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var ValueDataAdapter = function (factory, node) {
     NodeAdapter.call(this, factory, node);
     this.xflowInputNode = null;
+    this.type = XC.DATA_TYPE.fromString(node.localName);
 };
 XML3D.createClass(ValueDataAdapter, NodeAdapter);
 
@@ -30,8 +31,10 @@ ValueDataAdapter.prototype.init = function()
         value = this.node.value;
     }
 
-    var type = XC.DATA_TYPE.fromString(this.node.localName);
-    var buffer = new BufferEntry(type, value);
+    if (this.type === XC.DATA_TYPE.STRING) {
+        value = value ? value.split(",") : [];
+    }
+    var buffer = new BufferEntry(this.type, value);
 
     this.xflowInputNode = new InputNode(null);
     this.xflowInputNode.name = this.node.name;
@@ -53,7 +56,11 @@ ValueDataAdapter.prototype.notifyChanged = function (evt) {
         var attr = evt.mutation.attributeName;
         if (!attr) {
             delete this.node._configured.scriptValue;
-            this.xflowInputNode.data.setValue(this.node.value);
+            var value = this.node.value;
+            if (this.type === XC.DATA_TYPE.STRING) {
+                value = value ? value.split(",") : [];
+            }
+            this.xflowInputNode.data.setValue(value);
         }
     }
 };
@@ -71,6 +78,9 @@ ValueDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, 
 
 ValueDataAdapter.prototype.setScriptValue = function (value) {
     // TODO: Add Type check
+    if (this.type === XC.DATA_TYPE.STRING) {
+        value = value ? value.split(",") : [];
+    }
     this.xflowInputNode.data.setValue(value);
 };
 

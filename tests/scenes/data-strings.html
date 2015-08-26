@@ -1,0 +1,80 @@
+<!DOCTYPE html><html><head>
+    <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <script type="text/javascript" src="../scripts/change-mesh-type.js"></script>
+
+    <title>
+        XML3D
+    </title>
+</head>
+<body style="background-color: #FFF;width:500px">
+<xml3d id="xml3dElem" style="background-color: grey; width: 300px; height: 200px;">
+    <defs id="defsElem">
+        <data id="meshdata">
+            <int name="index">0 1 2 1 2 3</int>
+            <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+            <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+            <float2 name="texcoord">0.0 2.0 2.0 2.0 0.0 0.0 2.0 0.0</float2>
+        </data>
+
+        <material id="flatyellow" model="urn:xml3d:material:flat">
+            <float3 name="diffuseColor">
+                1 1 0
+            </float3>
+        </material>
+
+        <material id="textured" model="urn:xml3d:material:phong">
+            <float name="ambientIntensity">
+                1
+            </float>
+            <texture id="textureElement" name="diffuseTexture" wrap="clamp">
+                <img src="textures/bluegreen.png" />
+            </texture>
+        </material>
+
+        <data id="meshTypeTristrips">
+            <string name="type">tristrips</string>
+        </data>
+
+        <data id="meshTypeLines">
+            <string name="type">lines</string>
+        </data>
+
+        <data id="meshTypeDynamic">
+            <string id="meshTypeChangeTarget" name="type">triangles</string>
+        </data>
+
+        <data id="stringArray" compute="type = xflow.selectStringInArray(selector, strings)">
+            <string name="strings">triangles,tristrips,lines</string>
+            <int id="stringArraySelector" name="selector">1</int>
+        </data>
+
+        <data id="meshTypeCompute" compute="type = xflow.selectString(selector, value1, value2)">
+            <string name="value1">triangles</string>
+            <string name="value2">lines</string>
+            <int id="meshTypeSelector" name="selector">0</int>
+        </data>
+
+        <data id="textureWrapCompute" compute="wrap = xflow.selectString(selector, value1, value2)">
+            <string name="value1">repeat clamp</string>
+            <string name="value2">repeat</string>
+            <int id="wrapSelector" name="selector">0</int>
+        </data>
+
+    </defs>
+
+    <view></view>
+
+    <group material="#flatyellow" style="transform: translate3d(-2px, 1px, -5px)">
+        <mesh id="meshTypeTest1" src="#meshdata" type="triangles"></mesh>
+    </group>
+
+    <group material="#textured" style="transform: translate3d(-2px, 1px, -5px)">
+        <mesh id="textureWrapTest1" src="#meshdata" type="triangles" style="display: none"></mesh>
+    </group>
+
+</xml3d>
+
+
+
+</body></html>

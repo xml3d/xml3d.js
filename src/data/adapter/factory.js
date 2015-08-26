@@ -44,6 +44,7 @@ var reg = {
     'int4': ValueDataAdapter,
     'bool': ValueDataAdapter,
     'byte': ValueDataAdapter,
+    'string': ValueDataAdapter,
     'ubyte': ValueDataAdapter,
     'img': Misc.ImgDataAdapter,
     'texture': TextureDataAdapter,

@@ -8,6 +8,7 @@ xml3d|float4x4,
 xml3d|int,
 xml3d|int4,
 xml3d|bool,
+xml3d|string,
 xml3d|script  {
    display: none;
 }

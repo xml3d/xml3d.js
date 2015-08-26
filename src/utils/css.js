@@ -85,7 +85,7 @@ css.convertCssToMat4 = function (cssMatrix, m) {
 
 (function () {
     var styleElement = document.createElement("style");
-    styleElement.textContent = "xml3d * { display: inherit; }" + "float,float2,float3,float4,float4x4,int,int4,bool,texture,compute { display: none; }";
+    styleElement.textContent = "xml3d * { display: inherit; }" + "float,float2,float3,float4,float4x4,int,int4,bool,texture,string,compute { display: none; }";
     document.head.appendChild(styleElement);
 }());
 

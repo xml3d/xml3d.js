@@ -1,4 +1,5 @@
 var SceneElementAdapter = require("./scene-element.js");
+var DOMStringFetcher = require("../../../data/string-fetcher.js");
 
 var Events = require("../../../interface/notification.js");
 var Resource = require("../../../base/resourcemanager.js").Resource;
@@ -8,6 +9,7 @@ var Resource = require("../../../base/resourcemanager.js").Resource;
  */
 var MeshRenderAdapter = function (factory, node) {
     SceneElementAdapter.call(this, factory, node, true, true);
+    this.meshTypeFetcher = new DOMStringFetcher(this, "type", "type");
     this.createRenderNode();
 };
 
@@ -30,12 +32,13 @@ XML3D.createClass(MeshRenderAdapter, SceneElementAdapter, {
     },
 
     getMeshType: function () {
-        return this.node.hasAttribute("type") ? this.node.getAttribute("type") : "triangles";
+        return this.meshTypeFetcher.getValue() || "triangles";
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
         SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
         if (name == "type") {
+            this.meshTypeFetcher.update();
             this.renderNode.setType(this.getMeshType());
         }
     },

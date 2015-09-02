@@ -23,7 +23,7 @@
     "build": "npm install && grunt"
   },
   "dependencies": {
-    "gl-matrix": "http://github.com/toji/gl-matrix/tarball/master",
+    "gl-matrix": "2.3.1",
     "lodash.assign": "^3.1.0",
     "lodash.create": "^3.1.0",
     "lodash.defaults": "^3.1.1",

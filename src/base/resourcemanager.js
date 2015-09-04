@@ -289,13 +289,13 @@ function setDocumentData(httpRequest, url, mimetype) {
         response = JSON.parse(httpRequest.responseText);
     } else if (cleanedMimetype.match(/xml/)) {
         response = httpRequest.responseXML;
-        //Workaround for IE "bug" where external documents always report their document.URL as being identical to window.location.href
-        response._documentURL = url;
         if (!response) {
             XML3D.debug.logError("Invalid external XML document '" + httpRequest._url +
-                "': XML Syntax error");
+                "': XML Syntax error or the request did not succeed.");
             return;
         }
+        //Workaround for IE "bug" where external documents always report their document.URL as being identical to window.location.href
+        response._documentURL = url;
     } else if (cleanedMimetype == "application/octet-stream" || mimetype.match(/text\/plain/)) {
         XML3D.debug.logError("Possibly wrong loading of resource " + url + ". Mimetype is " + mimetype + " but response is not an ArrayBuffer");
         response = httpRequest.response;

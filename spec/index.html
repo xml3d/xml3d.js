@@ -84,11 +84,11 @@
   <section>
     <h3>Motivation</h3>
 
-    <p>The idea adding virtual 3D worlds into the web has a long history:
+    <p>The idea of adding virtual 3D worlds to the web has a long history:
       In 1994, Dave Ragget proposed a platform independent 3D scene description based on web technologies as “mechanisms
       for people to share VR models on a global basis”.
-      Ragget also proposed to describe the structure of the virtual world on a high abstraction level using the
-      experiences from SGML and HTML as basis.
+      Ragget also proposed to describe the structure of the virtual world on a high abstraction level based on the
+      experiences of SGML and HTML.
       In the same year, Pesce et al. proposed extending “HTML to describe both geometry and space”.</p>
 
     <p>However, the developers of the resulting VRML standard decided against designing VRML as an extension to HTML.
@@ -98,20 +98,19 @@
 
     <p>
       Although WebGL is a great technology and paved the way for accelerated 3D graphics in the browser, it also comes
-      with some disadvantages that is addressed by XML3D:
+      with some disadvantages that are addressed by XML3D:
       First, it is only loosely coupled with other W3C technologies such as HTML, CSS, DOM scripting and events.
       As a consequence, web developers need to learn new concepts and WebGL-based libraries can not interoperate with
       HTML and DOM libraries such as jQuery.
       Secondly, WebGL is tied to OpenGL and does not take other algorithms and APIs into account. For instance, the
-      definition of pipeline shaders is too specific and to low-level
-      to use it for ray tracing or global-illumination algorithms.
+      definition of pipeline shaders is too specific and too low-level to use for ray tracing or global-illumination algorithms.
     </p>
 
     <p>
       Thus, XML3D picks up the idea of a platform independent 3D scene description on a higher abstraction level on the
       basis of HTML (and yes, XML3D is a stupid name for that).
       At the same time, it takes the features of modern graphics APIs into account and exposes data processing and
-      shading capabilities to the user, which can be mapped to GPU pipeline.
+      shading capabilities to the user, which can be mapped to the GPU pipeline.
       Despite these capabilities it can still be rendered with arbitrary rendering algorithms.
     </p>
 
@@ -121,7 +120,7 @@
       materials and animations and to easily create stunning 3D web applications.
       Therefore, XML3D is accompanied with a <a href="https://github.com/xml3d/xml3d.js/">reference application</a>, a
       polyfill that uses WebGL and JavaScript to emulate native XML3D support.
-      As a result, XML3D is fully usable already today and various applications already exist.
+      As a result, XML3D is fully usable today and various applications already exist.
     </p>
 
     <p>
@@ -130,7 +129,7 @@
       service in the cloud.
       The higher abstraction level gives implementations opportunities to optimize performance and to provide advanced
       debugging facilities.
-      A native renderer can reason about the scene's content and changes and - as a result - driving VR applications
+      A native renderer can also reason about the scene's content and changes and - as a result - driving VR applications
       would be much easier.
     </p>
   </section>
@@ -145,8 +144,9 @@
       interacting with the 3D scene.
       Similar to HTML5, the concrete syntax of XML3D can be either the [[HTML5]] syntax or the [[XML]] syntax.</p>
 
-    <p>XML3D reuses concepts from HTML5: [[DOM]] scripting and [[UIEvents]] allow creating interactive 3D scenes.
-      [[CSS3]] can be used to define <a href="#h-style">styling properties</a> for XML3D elements.
+    <p>XML3D reuses concepts from HTML5: [[DOM]] scripting and [[UIEvents]] allow easy creation of interactive 3D scenes.
+      [[CSS3]] can be used to define <a href="#h-style">styling properties</a> for XML3D elements such as transformations
+      or visibility.
       Hence, XML3D is tightly integrated into the W3C technology stack.</p>
 
     <p>On the other hand, XML3D introduces some novel concepts.
@@ -181,7 +181,7 @@
       <li>XML3D defines [[DOM]] interfaces for scripting. All XML3D elements derive from the <code>HTMLElement</code>
         DOM interface.
       </li>
-      <li>XML3D leverages [[UIEvents]] as event system and supports all relevant events available in HTML. Additionally,
+      <li>XML3D leverages [[UIEvents]] as its event system and supports all relevant events available in HTML. Additionally,
         it supports all relevant event attributes.
       </li>
       <li>XML3D adopts the <code>&lt;defs&gt;</code> element from [[SVG]].</li>

@@ -1,5 +1,6 @@
 var Set = require("../xflow/utils/utils.js").set;
 var DataNode = require("../xflow/interface/graph.js").DataNode;
+var Base = require("../xflow/base.js");
 
 function AssetError(message, node){
     this.message = message;
@@ -160,6 +161,15 @@ Asset.prototype.addChangeListener = function(listener){
 };
 Asset.prototype.removeChangeListener = function(listener){
     Set.remove(this.listener, listener);
+    if (!this.listener.length) {
+        this.dispose();
+    }
+};
+
+Asset.prototype.dispose = function() {
+    this.assetResult.dispose();
+    this.clearSubAssets();
+    this.clearChildren();
 };
 
 Asset.prototype.getResult = function(){
@@ -361,6 +371,16 @@ AssetResult.prototype.construct = function(asset){
     constructAssetTable(this, asset);
 };
 
+AssetResult.prototype.dispose = function() {
+    for (var i = 0; i < this.allEntries.length; i++) {
+        this.allEntries[i].dispose();
+    }
+
+    for (var i = 0; i < this.allSubResults.length; i++) {
+        this.allSubResults[i].dispose();
+    }
+};
+
 AssetResult.prototype.getDataTree = function(){
     return rec_getDataTree(this);
 };
@@ -552,10 +572,10 @@ function updateAccumulatedNode(table, entry){
         entry.accumulatedXflowNode.setLoading(false);
     }
     else{
-        entry.accumulatedXflowNode = new DataNode(false);
+        entry.accumulatedXflowNode = new AssetDataNode(false);
     }
 
-    var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : new DataNode(false);
+    var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : new AssetDataNode(false);
     for(var i = 0; i < entry.postQueue.length; ++i){
         var includes = entry.postQueue[i].includes;
         for(var j = 0; j < includes.length; ++j){
@@ -568,7 +588,7 @@ function updateAccumulatedNode(table, entry){
     var node = dataNode, parentNode = null;
     for(var i = 0; i < entry.postQueue.length; ++i){
         var postEntry = entry.postQueue[i];
-        if(!node) node = (i == entry.postQueue.length - 1 ? entry.accumulatedXflowNode : new DataNode(false));
+        if(!node) node = (i == entry.postQueue.length - 1 ? entry.accumulatedXflowNode : new AssetDataNode(false));
         node.setCompute(postEntry.compute);
         node.setFilter(postEntry.filter);
         node.dataflowNode = postEntry.dataflow;
@@ -642,6 +662,31 @@ function AssetTableEntry (subData){
 AssetTableEntry.prototype.isMesh = function(){
     return !!this.meshType;
 };
+
+/**
+ * Clears child<->parent relationships for all Xflow nodes that were created for this Asset instance specifically (eg through overrides)
+ */
+AssetTableEntry.prototype.dispose = function() {
+    clearAssetRelatedChildren(this.accumulatedXflowNode);
+    this.accumulatedXflowNode.clearChildren();
+};
+
+/**
+ * This function clears parent->child and dataFlowNode relationships for all xflow nodes
+ * that were generated for the AssetTableEntry that it's called from initially. It won't clear
+ * relationships for any normal DataNodes that are part of non-asset-related Xflow graphs (ie. dataflow graphs)
+ * @param dataNode
+ */
+function clearAssetRelatedChildren(dataNode) {
+    if (dataNode._children === undefined) {
+        return; //Input leaf node, nothing to do here
+    }
+    for (var i = 0; i < dataNode._children.length; i++) {
+        clearAssetRelatedChildren(dataNode._children[i]);
+    }
+    dataNode.isAssetDataNode && dataNode.clearChildren();
+}
+
 
 AssetTableEntry.prototype.pushTableEntry = function(srcEntry){
     this.name = srcEntry.name;
@@ -726,6 +771,19 @@ AssetPickFilter.prototype.check = function(entry){
     }
     return (entry.name && this.names.indexOf(entry.name) != -1);
 };
+
+/**
+ * This is just a small wrapper to identify Xflow nodes that were created by an Asset, eg as part of overrides
+ * that need to be cleaned up later if the corresponding model tag is destroyed
+ * @param isDataFlow
+ * @constructor
+ */
+var AssetDataNode = function(isDataFlow) {
+    DataNode.call(this, isDataFlow);
+    this.isAssetDataNode = true;
+};
+
+Base.createClass(AssetDataNode, DataNode);
 
 module.exports = {
     Asset: Asset,

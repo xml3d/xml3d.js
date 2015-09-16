@@ -221,12 +221,12 @@ function synchronizeChildren(channelNode){
     // Now synchronize all children (either referenced data node, or real children)
     // TODO: Change here if we change behaviour of src attribute
     if(dataNode._sourceNode){
-        dataNode._sourceNode._getOrCreateChannelNode(channelNode.substitution).synchronize();
+        dataNode._sourceNode._getOrCreateChannelNode(channelNode.substitution, channelNode).synchronize();
     }
     else{
         for(var i = 0; i < dataNode._children.length; ++i){
             if(dataNode._children[i]._getOrCreateChannelNode){
-                dataNode._children[i]._getOrCreateChannelNode(channelNode.substitution).synchronize();
+                dataNode._children[i]._getOrCreateChannelNode(channelNode.substitution, channelNode).synchronize();
             }
         }
     }
@@ -240,7 +240,7 @@ function updateInputChannels(channelNode){
     var owner = channelNode.owner;
     // TODO: Change here if we change behaviour of src attribute
     if(owner._sourceNode){
-        channelNode.inputChannels.merge(owner._sourceNode._getOrCreateChannelNode(channelNode.substitution).outputChannels, 0);
+        channelNode.inputChannels.merge(owner._sourceNode._getOrCreateChannelNode(channelNode.substitution, channelNode).outputChannels, 0);
     }
     else{
         var children = owner._children;
@@ -281,7 +281,7 @@ function mergeInputChannelInputNodes(channelNode, children) {
 function mergeInputChannelDataNodes(channelNode, children) {
     for (var i = 0; i < children.length; ++i) {
         if (children[i]._getOrCreateChannelNode) {  // Child is a DataNode
-            channelNode.inputChannels.merge(children[i]._getOrCreateChannelNode(channelNode.substitution).outputChannels, i);
+            channelNode.inputChannels.merge(children[i]._getOrCreateChannelNode(channelNode.substitution, channelNode).outputChannels, i);
         }
     }
 }
@@ -304,7 +304,7 @@ function updateComputedChannels(channelNode){
     }
 
     if(oldDataflowChannelNode && oldDataflowChannelNode != channelNode.dataflowChannelNode){
-        oldDataflowChannelNode.owner._removeSubstitutionNode(oldDataflowChannelNode);
+       // oldDataflowChannelNode.owner._removeSubstitutionNode(oldDataflowChannelNode);
     }
 }
 
@@ -446,7 +446,7 @@ function updateComputedChannelsFromOperator(channelNode){
 function updateDataflowChannelNode(channelNode){
     var owner = channelNode.owner;
     var subSubstitution = new Substitution(owner._dataflowNode, channelNode);
-    channelNode.dataflowChannelNode = owner._dataflowNode._getOrCreateChannelNode(subSubstitution);
+    channelNode.dataflowChannelNode = owner._dataflowNode._getOrCreateChannelNode(subSubstitution, channelNode);
 }
 
 /**

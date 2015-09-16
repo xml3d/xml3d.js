@@ -389,6 +389,14 @@ XML3D.createClass(RenderObject, RenderNode, {
             var composer = this.scene.shaderFactory.createComposerFromMaterialConfiguration(this._actualMaterial);
             this.drawable.setShaderComposer(composer);
         }
+    },
+
+    remove: function() {
+        this.parent.removeChild(this);
+        this.scene.freePageEntry({page: this.page, offset: this.offset, size: this.entrySize});
+        if (this.drawable) {
+            this.drawable.destroy();
+        }
     }
 
 });

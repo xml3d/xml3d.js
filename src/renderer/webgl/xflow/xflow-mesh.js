@@ -393,6 +393,13 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
 
     getProgram: function () {
         return this.shaderClosure;
+    },
+
+    destroy: function() {
+        this.mesh && this.mesh.clear();
+        this.objectShaderRequest && this.objectShaderRequest.clear();
+        this.typeRequest && this.typeRequest.clear();
+        this.setShaderComposer(null);
     }
 
 });

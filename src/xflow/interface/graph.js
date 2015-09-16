@@ -4,6 +4,7 @@ require("../../utils/array.js");
 
 var Base = require("../base.js");
 var ChannelNode = require("../processing/channel-node.js").ChannelNode;
+var Substitution = require("../processing/channel-node.js").Substitution;
 var Utils = require("../utils/utils.js");
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -315,10 +316,9 @@ var DataNode = function(isDataFlow){
     /**
      * Map of cached channel nodes for dataflow instances with varying
      * input arguments (specialized nodes)
-     * TODO: Use WeakMap?
-     * @type {Object.<string, ChannelNode>}
+     * @type {WeakMap}
      */
-    this._substitutionNodes = {};
+    this._substitutionNodes = new WeakMap();
 
     /**
      * Cached version of local param names collected from
@@ -403,11 +403,6 @@ DataNode.prototype.setLoading = function(loading){
         this._loading = loading;
         this._channelNode.setStructureOutOfSync();
         this._channelNode.loading = loading;
-        for (var sub in this._substitutionNodes) {
-            var subNode = this._substitutionNodes[sub];
-            subNode.setStructureOutOfSync();
-            subNode.loading = loading;
-        }
         updateProgressLevel(this);
         Base._flushResultCallbacks();
     }
@@ -712,7 +707,6 @@ DataNode.prototype.notify = function(changeType, senderNode){
             this._paramNames = null;
             this._globalParamNames = null;
             this._channelNode.setStructureOutOfSync();
-            clearSubstitutionNodes(this);
             notifyParentsOnChanged(this, changeType);
             break;
 
@@ -821,45 +815,21 @@ DataNode.prototype._getGlobalParamNames = function(){
 };
 
 /**
- * @param {Substitution} substitution
+ * @param {Substitution} substitutionNode
  * @returns {ChannelNode}
  */
-DataNode.prototype._getOrCreateChannelNode = function(substitution){
+DataNode.prototype._getOrCreateChannelNode = function(substitution, substitutionNode){
     if(!substitution)
         return this._channelNode;
     else{
-        var key = substitution.getKey(this);
-        if(!this._substitutionNodes[key]) {
-            this._substitutionNodes[key] = new ChannelNode(this, substitution);
-        } else {
-            this._substitutionNodes[key].increaseRef();
+        if(!this._substitutionNodes.has(substitutionNode)) {
+            this._substitutionNodes.set(substitutionNode, new ChannelNode(this, substitution));
         }
-        return this._substitutionNodes[key];
+        return this._substitutionNodes.get(substitutionNode);
     }
 };
 
-/**
- * Remove ChannelNode passed as argument from internal substitution nodes
- * Decreases reference counter of substitution node and deletes it if not
- * used by any other node.
- * @param {ChannelNode} substitutionNode
- */
-DataNode.prototype._removeSubstitutionNode = function(substitutionNode){
-    var key = substitutionNode.substitution.getKey(this);
-    if(this._substitutionNodes[key] && this._substitutionNodes[key].decreaseRef())
-        delete this._substitutionNodes[key];
-};
 
-/**
- * Calls clear of all substitutionNodes and clears the map
- * @param {DataNode} dataNode
- */
-function clearSubstitutionNodes(dataNode){
-    for(var name in dataNode._substitutionNodes){
-        dataNode._substitutionNodes[name].clear();
-    }
-    dataNode._substitutionNodes = {};
-}
 
 /**
  * Skips nodes, if it does not contribute to the result (optimization)

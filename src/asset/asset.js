@@ -684,7 +684,10 @@ function clearAssetRelatedChildren(dataNode) {
     for (var i = 0; i < dataNode._children.length; i++) {
         clearAssetRelatedChildren(dataNode._children[i]);
     }
-    dataNode.isAssetDataNode && dataNode.clearChildren();
+    if (dataNode.isAssetDataNode) {
+        dataNode.clearChildren();
+        dataNode._channelNode.setStructureOutOfSync();
+    }
 }
 
 

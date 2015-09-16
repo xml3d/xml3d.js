@@ -123,6 +123,9 @@ ChannelNode.prototype.setStructureOutOfSync = function()
         for(var key in this.requestNodes){
             this.requestNodes[key].setStructureOutOfSync();
         }
+        if(this.dataflowChannelNode) {
+            this.dataflowChannelNode.setStructureOutOfSync();
+        }
     }
 };
 

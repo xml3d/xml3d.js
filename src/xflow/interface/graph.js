@@ -542,6 +542,15 @@ DataNode.prototype.clearChildren = function(){
         removeParent(this, this._children[i]);
     }
     this._children = [];
+    this._dataflowNode && this._dataflowNode.removeParent(this);
+    this._dataflowNode = null;
+    updateProgressLevel(this);
+    this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    Base._flushResultCallbacks();
+};
+
+DataNode.prototype.removeParent = function(parent) {
+    Array.erase(this._parents, parent);
     updateProgressLevel(this);
     this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
     Base._flushResultCallbacks();
@@ -830,6 +839,11 @@ DataNode.prototype._getOrCreateChannelNode = function(substitution, substitution
 };
 
 
+//----------------------------------------------------------------------------------------------------------------------
+// Helpers
+//----------------------------------------------------------------------------------------------------------------------
+
+
 
 /**
  * Skips nodes, if it does not contribute to the result (optimization)
@@ -893,11 +907,6 @@ function updateProgressLevel(node){
             updateProgressLevel(node._parents[i]);
     }
 }
-
-//----------------------------------------------------------------------------------------------------------------------
-// Helpers
-//----------------------------------------------------------------------------------------------------------------------
-
 
 /**
  * @private

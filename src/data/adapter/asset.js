@@ -1,5 +1,6 @@
 var DOMTransformFetcher = require("../transform-fetcher.js");
 var DataAdapter = require("./data.js");
+var Base = require("../../xflow/base.js");
 var DataNode = require("../../xflow/interface/graph.js").DataNode;
 var getComputeDataflowUrl = require("../../xflow/interface/graph.js").getComputeDataflowUrl;
 var Asset = require("../../asset/asset.js").Asset;
@@ -143,6 +144,7 @@ AssetAdapter.prototype.notifyChanged = function (evt) {
 
     } else if (evt.type == Events.THIS_REMOVED) {
         this.clearAdapterHandles();
+        this.asset.removeChangeListener(this);
     }
 };
 
@@ -158,7 +160,7 @@ createClass(AssetDataAdapter, DataAdapter);
 
 AssetDataAdapter.prototype.init = function () {
     DataAdapter.prototype.init.call(this);
-    this.outputXflowNode = new DataNode(false);
+    this.outputXflowNode = new AssetDataNode(false);
     this.assetEntry = new SubData(this.outputXflowNode, this.getXflowNode(), this.node);
     this.assetEntry.setName(this.node.getAttribute("name"));
     updateClassNames(this);
@@ -284,6 +286,19 @@ AssetMeshAdapter.prototype.notifyChanged = function (evt) {
 
     }
 };
+
+/**
+ * This is just a small wrapper to identify Xflow nodes that were created by an Asset, eg as part of overrides
+ * that need to be cleaned up later if the corresponding model tag is destroyed
+ * @param isDataFlow
+ * @constructor
+ */
+var AssetDataNode = function(isDataFlow) {
+    DataNode.call(this, isDataFlow);
+    this.isAssetDataNode = true;
+};
+
+Base.createClass(AssetDataNode, DataNode);
 
 module.exports = {
     AssetAdapter: AssetAdapter, AssetMeshAdapter: AssetMeshAdapter, AssetDataAdapter: AssetDataAdapter

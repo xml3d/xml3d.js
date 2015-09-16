@@ -134,7 +134,9 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         if (index != -1) {
             this.updatePostTransform(this.postTransformRenderGroups[index], request);
         }
-    }, updatePostTransform: function (renderNode, xflowRequest) {
+    },
+
+    updatePostTransform: function (renderNode, xflowRequest) {
         var dataResult = xflowRequest.getResult();
         var transformData = (dataResult.getOutputData("transform") && dataResult.getOutputData("transform").getValue());
         if (!transformData) {
@@ -143,7 +145,9 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
             return;
         }
         renderNode.setLocalMatrix(transformData);
-    }, dispose: function () {
+    },
+
+    dispose: function () {
         this.asset.removeChangeListener(this);
         this.clearModelRenderNodes();
         this.getRenderNode().remove();

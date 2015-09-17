@@ -124,7 +124,7 @@ function updateDataflowXflowNode(adapter, node) {
     // Getting platform and node type information for a Dataflow node
     var platform = node.getAttribute("platform");
 
-    adapter.xflowDataNode.clearChildren();
+    adapter.xflowDataNode.clear();
     adapter.xflowDataNode.setCompute("");
     adapter.clearAdapterHandles();
     adapter.dataflowRefs = [];

@@ -214,7 +214,7 @@ function clearVsConnectNode(connectNode){
     if(!c_vsConnectNodeCount[connectNode.id]){
         var key = c_vsConnectNodeKey[connectNode.id];
         c_vsConnectNodeCache[key] = null;
-        connectNode.clearChildren();
+        connectNode.clear();
     }
 }
 

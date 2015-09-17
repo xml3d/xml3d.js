@@ -565,7 +565,7 @@ function updateAccumulatedNode(table, entry){
         return;
 
     if(entry.accumulatedXflowNode){
-        entry.accumulatedXflowNode.clearChildren();
+        entry.accumulatedXflowNode.clear();
         entry.accumulatedXflowNode.setCompute("");
         entry.accumulatedXflowNode.setFilter("");
         entry.accumulatedXflowNode.dataflowNode = null;
@@ -668,7 +668,7 @@ AssetTableEntry.prototype.isMesh = function(){
  */
 AssetTableEntry.prototype.dispose = function() {
     clearAssetRelatedChildren(this.accumulatedXflowNode);
-    this.accumulatedXflowNode.clearChildren();
+    this.accumulatedXflowNode.clear();
 };
 
 /**
@@ -685,7 +685,7 @@ function clearAssetRelatedChildren(dataNode) {
         clearAssetRelatedChildren(dataNode._children[i]);
     }
     if (dataNode.isAssetDataNode) {
-        dataNode.clearChildren();
+        dataNode.clear();
         dataNode._channelNode.setStructureOutOfSync();
     }
 }

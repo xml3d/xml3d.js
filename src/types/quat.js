@@ -1,12 +1,20 @@
 var quat = require("gl-matrix").quat;
 
-var Quat = function(vec) {
+var Quat = function(vec, y, z, w) {
     if (this instanceof Quat) {
         this.data = quat.create();
+        if (w !== undefined) {
+            this.x = vec;
+            this.y = y;
+            this.z = z;
+            this.w = w;
+        } else
         if (vec) {
             this.data.set(vec.data ? vec.data : vec);
+        } else {
+            this.w = 1;
         }
-    } else return new Quat(vec);
+    } else return new Quat(vec, y, z, w);
 };
 
 Object.defineProperty(Quat.prototype, "x", {

@@ -1,13 +1,21 @@
 var vec4 = require("gl-matrix").vec4;
 var Vec3 = require("./vec3.js");
 
-var AxisAngle = function(vec) {
+var AxisAngle = function(vec, y, z, angle) {
     if (this instanceof AxisAngle) {
         this.data = vec4.create();
+        if (angle !== undefined) {
+            this.data[0] = vec;
+            this.data[1] = y;
+            this.data[2] = z;
+            this.data[3] = angle;
+        } else
         if (vec) {
             this.data.set(vec.data ? vec.data : vec);
+        } else {
+            this.z = 1;
         }
-    } else return new AxisAngle(vec);
+    } else return new AxisAngle(vec, y, z, angle);
 };
 
 

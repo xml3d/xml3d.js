@@ -2419,6 +2419,15 @@
       <dt>DOMString toDOMString(Vec2 vec)</dt>
       <dd>Converts a Vec2 into the space-seperated string representation used in XML3D element attributes.</dd>
 
+      <dt>Constructor ()</dt>
+      <dd>Creates a new identity Vec2 <code>[0,0]</code></dd>
+      <dt>Constructor (float x, float y)</dt>
+      <dd>Creates a new Vec2 from the given values.</dd>
+      <dt>Constructor (Float32Array other)</dt>
+      <dd>Creates a new Vec2 which is a copy of the values in the passed array.</dd>
+      <dt>Constructor (Vec2 other)</dt>
+      <dd>Creates a new Vec2 which is a copy of the given Vec2.</dd>
+
       <dt>Vec2 add(Vec2 other)</dt>
       <dd>Returns the component wise addition of the two vectors as a new Vec2.</dd>
       <dt>Vec2 clone()</dt>
@@ -2487,6 +2496,15 @@
       <dd>Creates a new Vec3 object from the space-separated string representation as used in XML3D element attributes.</dd>
       <dt>DOMString toDOMString(Vec3 vec)</dt>
       <dd>Converts a Vec3 into the space-seperated string representation used in XML3D element attributes.</dd>
+
+      <dt>Constructor ()</dt>
+      <dd>Creates a new identity Vec3 <code>[0,0,0]</code></dd>
+      <dt>Constructor (float x, float y, float z)</dt>
+      <dd>Creates a new Vec3 from the given values.</dd>
+      <dt>Constructor (Float32Array other)</dt>
+      <dd>Creates a new Vec3 which is a copy of the values in the passed array.</dd>
+      <dt>Constructor (Vec3 other)</dt>
+      <dd>Creates a new Vec3 which is a copy of the given Vec3.</dd>
 
       <dt>Vec3 add(Vec3 other)</dt>
       <dd>Returns the component wise addition of the two vectors as a new Vec3.</dd>
@@ -2565,6 +2583,15 @@
       <dt>DOMString toDOMString(Vec4 vec)</dt>
       <dd>Converts a Vec4 into the space-seperated string representation used in XML3D element attributes.</dd>
 
+      <dt>Constructor ()</dt>
+      <dd>Creates a new identity Vec4 <code>[0,0,0,0]</code></dd>
+      <dt>Constructor (float x, float y, float z, float w)</dt>
+      <dd>Creates a new Vec4 from the given values.</dd>
+      <dt>Constructor (Float32Array other)</dt>
+      <dd>Creates a new Vec4 which is a copy of the values in the passed array.</dd>
+      <dt>Constructor (Vec4 other)</dt>
+      <dd>Creates a new Vec4 which is a copy of the given Vec4.</dd>
+
       <dt>Vec4 add(Vec4 other)</dt>
       <dd>Returns the component wise addition of the two vectors as a new Vec4.</dd>
       <dt>Vec4 clone()</dt>
@@ -2632,6 +2659,15 @@
       <dt>DOMString toDOMString(AxisAngle vec)</dt>
       <dd>Converts a AxisAngle into the space-seperated string representation used in XML3D element attributes.</dd>
 
+      <dt>Constructor ()</dt>
+      <dd>Creates a new identity AxisAngle <code>[0,0,1,0]</code></dd>
+      <dt>Constructor (float x, float y, float z, float angle)</dt>
+      <dd>Creates a new AxisAngle from the given values.</dd>
+      <dt>Constructor (Float32Array other)</dt>
+      <dd>Creates a new AxisAngle which is a copy of the values in the passed array.</dd>
+      <dt>Constructor (AxisAngle other)</dt>
+      <dd>Creates a new AxisAngle which is a copy of the given AxisAngle.</dd>
+
       <dt>AxisAngle clone()</dt>
       <dd>Returns a new copy of this AxisAngle.</dd>
       <dt>static AxisAngle fromValues(float x, float y, float z, float angleInRadians)</dt>
@@ -2666,6 +2702,15 @@
       <dd>Creates a new Quat object from a space-separated string representation.</dd>
       <dt>DOMString toDOMString(Quat vec)</dt>
       <dd>Converts a Quat into a space-seperated string representation.</dd>
+
+      <dt>Constructor ()</dt>
+      <dd>Creates a new identity Quat <code>[0,0,0,1]</code></dd>
+      <dt>Constructor (float x, float y, float z, float w)</dt>
+      <dd>Creates a new Quat from the given values.</dd>
+      <dt>Constructor (Float32Array other)</dt>
+      <dd>Creates a new Quat which is a copy of the values in the passed array.</dd>
+      <dt>Constructor (Quat other)</dt>
+      <dd>Creates a new Quat which is a copy of the given Quat.</dd>
 
       <dt>Quat add(Quat other)</dt>
       <dd>Returns the addition of the two quaternions as a new Quat.</dd>
@@ -2742,6 +2787,13 @@
       <dt>attribute float m22</dt>
       <dd>Provides mutable access to the second column of the second row of this matrix.</dd>
 
+      <dt>Constructor ()</dt>
+      <dd>Creates a new identity Mat2.</dd>
+      <dt>Constructor (Float32Array other)</dt>
+      <dd>Creates a new Mat2 which is a copy of the values in the passed array.</dd>
+      <dt>Constructor (Mat2 other)</dt>
+      <dd>Creates a new Mat2 which is a copy of the given Mat2.</dd>
+
       <dt>Mat2 adjoint()</dt>
       <dd>Computes the adjugate of this matrix as a new Mat2.</dd>
       <dt>Mat2 clone()</dt>
@@ -2790,6 +2842,13 @@
       <dd>Provides mutable access to the second column of the third row of this matrix.</dd>
       <dt>attribute float m33</dt>
       <dd>Provides mutable access to the third column of the third row of this matrix.</dd>
+
+      <dt>Constructor ()</dt>
+      <dd>Creates a new identity Mat3.</dd>
+      <dt>Constructor (Float32Array other)</dt>
+      <dd>Creates a new Mat3 which is a copy of the values in the passed array.</dd>
+      <dt>Constructor (Mat3 other)</dt>
+      <dd>Creates a new Mat3 which is a copy of the given Mat3.</dd>
 
       <dt>Mat3 adjoint()</dt>
       <dd>Computes the adjugate of this matrix as a new Mat3.</dd>
@@ -2862,6 +2921,13 @@
       <dt>attribute float m44</dt>
       <dd>Provides mutable access to the fourth column of the fourth row of this matrix.</dd>
 
+      <dt>Constructor ()</dt>
+      <dd>Creates a new identity Mat4.</dd>
+      <dt>Constructor (Float32Array other)</dt>
+      <dd>Creates a new Mat4 which is a copy of the values in the passed array.</dd>
+      <dt>Constructor (Mat4 other)</dt>
+      <dd>Creates a new Mat4 which is a copy of the given Mat4.</dd>
+
       <dt>Mat4 adjoint()</dt>
       <dd>Computes the adjugate of this matrix as a new Mat4.</dd>
       <dt>Mat4 clone()</dt>
@@ -2917,6 +2983,11 @@
       <dd>Mutable accessor to the minimum point of this bounding box.</dd>
       <dt>attribute Vec3 max</dt>
       <dd>Mutable accessor to the maximum point of this bounding box.</dd>
+
+      <dt>Constructor ()</dt>
+      <dd>Creates a new empty Box with <code>min</code> set to <code>MAX_VALUE</code> and <code>max</code> set to <code>MIN_VALUE</code>.</dd>
+      <dt>Constructor (Box other)</dt>
+      <dd>Creates a new Box which is a copy of the given Box.</dd>
 
       <dt>Box clone()</dt>
       <dd>Returns a new clone of this bounding box.</dd>
@@ -2974,6 +3045,11 @@
       <dd>Mutable accessor to the origin point of this ray.</dd>
       <dt>attribute Vec3 direction</dt>
       <dd>Mutable accessor to the direction of this ray. Assignments should always be normalized.</dd>
+
+      <dt>Constructor ()</dt>
+      <dd>Creates a new Ray with origin <code>[0,0,0]</code> and direction <code>[0,0,-1]</code></dd>
+      <dt>Constructor (Ray other)</dt>
+      <dd>Creates a new Ray which is a copy of the given Ray.</dd>
 
       <dt>Ray clone()</dt>
       <dd>Returns a new clone of this ray.</dd>

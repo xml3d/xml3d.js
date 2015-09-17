@@ -1,13 +1,16 @@
 var vec2 = require("gl-matrix").vec2;
 
-var Vec2 = function(vec) {
+var Vec2 = function(vec, y) {
     if (this instanceof Vec2) {
         this.data = vec2.create();
+        if (y !== undefined) {
+            this.x = vec;
+            this.y = y;
+        } else
         if (vec) {
             this.data.set(vec.data ? vec.data : vec);
         }
-        Object.freeze(this);
-    } else return new Vec2(vec);
+    } else return new Vec2(vec, y);
 };
 
 Object.defineProperty(Vec2.prototype, "x", {

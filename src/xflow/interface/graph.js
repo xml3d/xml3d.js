@@ -540,13 +540,23 @@ DataNode.prototype.insertBefore = function(child, beforeNode){
 };
 
 /**
- * remove all children of the DataNode
+ * clear all references and remove children
  */
-DataNode.prototype.clearChildren = function(){
+DataNode.prototype.clear = function(){
     for(var i =0; i < this._children.length; ++i){
         removeParent(this, this._children[i]);
     }
     this._children = [];
+    this._dataflowNode && this._dataflowNode.removeParent(this);
+    this._dataflowNode = null;
+    clearSubstitutionNodes(this);
+    updateProgressLevel(this);
+    this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    Base._flushResultCallbacks();
+};
+
+DataNode.prototype.removeParent = function(parent) {
+    Array.erase(this._parents, parent);
     updateProgressLevel(this);
     this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
     Base._flushResultCallbacks();
@@ -855,11 +865,22 @@ DataNode.prototype._removeSubstitutionNode = function(substitutionNode){
  * @param {DataNode} dataNode
  */
 function clearSubstitutionNodes(dataNode){
-    for(var name in dataNode._substitutionNodes){
+    if (!dataNode._substitutionNodes) {
+        return;
+    }
+    for(var name in dataNode._substitutionNodes) {
         dataNode._substitutionNodes[name].clear();
     }
     dataNode._substitutionNodes = {};
+    for (var i in dataNode._children) {
+        clearSubstitutionNodes(dataNode._children[i]);
+    }
 }
+//----------------------------------------------------------------------------------------------------------------------
+// Helpers
+//----------------------------------------------------------------------------------------------------------------------
+
+
 
 /**
  * Skips nodes, if it does not contribute to the result (optimization)
@@ -923,11 +944,6 @@ function updateProgressLevel(node){
             updateProgressLevel(node._parents[i]);
     }
 }
-
-//----------------------------------------------------------------------------------------------------------------------
-// Helpers
-//----------------------------------------------------------------------------------------------------------------------
-
 
 /**
  * @private

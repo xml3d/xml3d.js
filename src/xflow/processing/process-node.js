@@ -145,6 +145,9 @@ ProcessNode.prototype.clear = function(){
     for(var name in this.inputChannels){
         this.inputChannels[name] && this.inputChannels[name].removeListener(this);
     }
+    for (var i = 0; i < this.children.length; i++) {
+        this.children[i].clear();
+    }
 };
 
 ProcessNode.prototype.updateState = function(){

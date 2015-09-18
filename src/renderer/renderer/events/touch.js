@@ -11,6 +11,7 @@ var TouchEventHandler = function (defaultTarget, canvasHandler) {
 
 
 var EVENTS = ["touchstart", "touchmove", "touchend", "touchcancel"];
+var ua = /iPhone|iP[oa]d/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'PC';
 
 TouchEventHandler.prototype = {
 
@@ -57,7 +58,7 @@ TouchEventHandler.prototype = {
         }
 
         if (touchEvent && touchEvent.initTouchEvent) {
-            if (touchEvent.initTouchEvent.length == 0) { //chrome
+            if (touchEvent.initTouchEvent.length == 0 && ua !== "iOS") { //chrome
                 touchEvent.initTouchEvent(data.touches, data.targetTouches, data.changedTouches, data.type, data.view, data.screenX, data.screenY, data.clientX, data.clientY);
             } else if (touchEvent.initTouchEvent.length == 12) { //firefox
                 touchEvent.initTouchEvent(data.type, data.bubbles, data.cancelable, data.view, data.detail, data.ctrlKey, data.altKey, data.shiftKey, data.metaKey, data.touches, data.targetTouches, data.changedTouches);

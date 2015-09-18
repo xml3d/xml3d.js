@@ -227,7 +227,7 @@ function mapFunctionOnXML3DElements(elementList, fun) {
             // These elements are leaf nodes (eg. TEXT) so we can ignore them
             return;
         }
-        if (element.tagName === "xml3d") {
+        if (element.tagName.toLowerCase() === "xml3d") {
             fun(element);
             // An XML3D element can't have further XML3D elements as children
             return;
@@ -249,8 +249,12 @@ function clearObserver(){
     }
 }
 
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    onLoad();
+} else {
+    document.addEventListener('DOMContentLoaded', onLoad, false);
+}
 
-document.addEventListener('DOMContentLoaded', onLoad, false);
 window.addEventListener('unload', onUnload, false);
 window.addEventListener('reload', onUnload, false);
 

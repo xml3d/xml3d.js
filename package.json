@@ -2,7 +2,7 @@
   "name": "xml3d.js",
   "description": "XML3D implementation based on JS and WebGL",
   "homepage": "http://ww.xml3d.org",
-  "version": "4.9.3",
+  "version": "4.9.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/xml3d/xml3d.js"

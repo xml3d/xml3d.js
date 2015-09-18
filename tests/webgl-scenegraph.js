@@ -616,23 +616,26 @@ test("Add a mesh dynamically", 3, function () {
 
 });
 
-test("Add xml3d element inside a div", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-    var h = getHandler(x);
-
-    x.parentNode.removeChild(x);
-
-    var div = this.doc.createElement("div");
-    var xml3d = this.doc.createElementNS(XML3D.xml3dNS, "xml3d");
-    xml3d.setAttribute("style", "background-color:green; width: 200px; height: 200px;");
-    xml3d.addEventListener("framedrawn", function() {
-        start();
-        ok(true, "New XML3D element was rendered");
-    });
-    div.appendChild(xml3d);
-    this.doc.getElementById("somebody").appendChild(xml3d);
-
+test("Add xml3d element inside a div", 2, function() {
     stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering01.html");
+
+    var test = frameLoaded.then(function (doc) {
+        var x = doc.getElementById("xml3DElem");
+        x.parentNode.removeChild(x);
+
+        var div = doc.createElement("div");
+        var xml3d = doc.createElementNS(XML3D.xml3dNS, "xml3d");
+        xml3d.setAttribute("style", "background-color:green; width: 200px; height: 200px;");
+        div.appendChild(xml3d);
+        doc.querySelector("body").appendChild(xml3d);
+
+        xml3d.addEventListener("framedrawn", function() {
+            ok(true, "New XML3D element was initialized");
+        });
+
+        return xml3d;
+    });
+    test.fin(QUnit.start).done();
 });
 

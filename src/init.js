@@ -263,7 +263,8 @@ XML3D.flushCSSChanges = function(){
     if(observer){
         resolveMutations(observer.takeRecords());
     }
-}
+};
+
 function clearObserver(){
     if(observer){
         observer.takeRecords();

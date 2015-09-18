@@ -393,7 +393,7 @@ XML3D.createClass(RenderObject, RenderNode, {
 
     remove: function() {
         this.parent.removeChild(this);
-        this.scene.freePageEntry({page: this.page, offset: this.offset, size: this.entrySize});
+        this.scene.pager.freePageEntry({page: this.page, offset: this.offset, size: this.entrySize});
         if (this.drawable) {
             this.drawable.destroy();
         }

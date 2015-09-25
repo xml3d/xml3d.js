@@ -5,19 +5,19 @@ test("Change mesh type with new data element", function () {
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");
 
     var test = frameLoaded.then(function (doc) {
-        doc.getElementById("meshTypeTest1").setAttribute("type", "#meshTypeTristrips");
+        doc.getElementById("meshTypeTest1").setAttribute("type", "derived");
         return doc.getElementById("xml3dElem");
     }).then(promiseSceneRendered).then(function (s) {
         var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
         deepEqual(actual, [255, 255, 0, 255], "Tristrips mesh type from local data element");
 
-        s.ownerDocument.getElementById("meshTypeTest1").setAttribute("type", "#meshTypeLines");
+        s.ownerDocument.querySelector("#meshTypeTest1 data").setAttribute("src", "#meshTypeLines");
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
         deepEqual(actual, [0, 0, 0, 0], "Lines type from another local data element");
 
-        s.ownerDocument.getElementById("meshTypeTest1").setAttribute("type", "xml/data.xml#meshTypeTriangles");
+        s.ownerDocument.querySelector("#meshTypeTest1 data").setAttribute("src", "xml/data.xml#meshTypeTriangles");
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
@@ -33,7 +33,8 @@ test("Change mesh type in data element", function () {
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");
 
     var test = frameLoaded.then(function (doc) {
-        doc.getElementById("meshTypeTest1").setAttribute("type", "#meshTypeDynamic");
+        doc.querySelector("#meshTypeTest1 data").setAttribute("src", "#meshTypeDynamic");
+        doc.getElementById("meshTypeTest1").setAttribute("type", "derived");
         return doc.getElementById("xml3dElem");
     }).then(promiseSceneRendered).then(function (s) {
         var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
@@ -54,7 +55,8 @@ test("Change mesh type through xflow operator", function () {
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");
 
     var test = frameLoaded.then(function (doc) {
-        doc.getElementById("meshTypeTest1").setAttribute("type", "#meshTypeCompute");
+        doc.querySelector("#meshTypeTest1 data").setAttribute("src", "#meshTypeCompute");
+        doc.getElementById("meshTypeTest1").setAttribute("type", "derived");
         return doc.getElementById("xml3dElem");
     }).then(promiseSceneRendered).then(function (s) {
         var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);
@@ -75,7 +77,8 @@ test("Mesh type from an array of strings", function () {
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");
 
     var test = frameLoaded.then(function (doc) {
-        doc.getElementById("meshTypeTest1").setAttribute("type", "#stringArray");
+        doc.querySelector("#meshTypeTest1 data").setAttribute("src", "#stringArray");
+        doc.getElementById("meshTypeTest1").setAttribute("type", "derived");
         return doc.getElementById("xml3dElem");
     }).then(promiseSceneRendered).then(function (s) {
         var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 150);

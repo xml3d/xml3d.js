@@ -2,7 +2,7 @@
 <xml3d xmlns="http://www.xml3d.org/2009/xml3d" >
 
     <data id="meshTypeTriangles">
-        <string name="meshType">triangles</string>
+        <string name="type">triangles</string>
     </data>
 
 </xml3d>

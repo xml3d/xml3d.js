@@ -208,7 +208,7 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
         var renderNode = adapter.getScene().createRenderObject({
             parent: groupNode,
             node: meshSets[i].refNode || adapter.node,
-            object: {
+            configuration: {
                 data: meshSets[i].xflowNode, type: meshSets[i].type
             },
             name: adapter.node.id,

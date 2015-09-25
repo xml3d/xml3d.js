@@ -1,45 +1,47 @@
 var SceneElementAdapter = require("./scene-element.js");
-var DOMStringFetcher = require("../../../data/string-fetcher.js");
 
 var Events = require("../../../interface/notification.js");
 var Resource = require("../../../base/resourcemanager.js").Resource;
+
+var DEFAULT_PRIMITIVE_TYPE = "triangles";
 
 /**
  * @constructor
  */
 var MeshRenderAdapter = function (factory, node) {
     SceneElementAdapter.call(this, factory, node, true, true);
-    this.meshTypeFetcher = new DOMStringFetcher(this, "type", "type");
     this.createRenderNode();
 };
 
 XML3D.createClass(MeshRenderAdapter, SceneElementAdapter, {
 
     createRenderNode: function () {
-        var dataAdapter = Resource.getAdapter(this.node, "data");
-
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();
 
         this.renderNode = this.getScene().createRenderObject({
-            parent: parentNode, node: this.node, object: {
-                data: dataAdapter.getXflowNode(), type: this.getMeshType()
-            }, name: this.node.id
+            parent: parentNode,
+            node: this.node,
+            configuration: this.createMeshConfiguration(),
+            name: this.node.id
         });
         this.updateVisibility();
         this.updateLocalMatrix();
         this.updateMaterialHandler();
     },
 
-    getMeshType: function () {
-        return this.meshTypeFetcher.getValue() || "triangles";
+    createMeshConfiguration: function () {
+        return {
+            data: Resource.getAdapter(this.node, "data").getXflowNode(),
+            type: this.node.hasAttribute("type") ? this.node.getAttribute("type") : DEFAULT_PRIMITIVE_TYPE
+        }
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
         SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
         if (name == "type") {
-            this.meshTypeFetcher.update();
-            this.renderNode.setType(this.getMeshType());
+            this.renderNode.remove();
+            this.createRenderNode();
         }
     },
 

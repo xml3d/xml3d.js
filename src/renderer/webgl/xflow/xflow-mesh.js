@@ -5,6 +5,7 @@ var EVENT_TYPE = require("../../renderer/scene/constants.js").EVENT_TYPE;
 var MaterialEvents = require("../materials/events.js");
 var XC = require("../../../xflow/interface/constants.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
+var assert = require("assert");
 
 var CHANGE_STATE = {
     NOTHING_CHANGED: 0,
@@ -20,43 +21,42 @@ var SHADER_CLOSURE_NEEDS_UPDATE = CHANGE_STATE.STRUCTURE_CHANGED | CHANGE_STATE.
 var READY_STATE = DrawableClosure.READY_STATE;
 
 
-var MESH_PARAMETERS = {};
-
-MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES] = {
-    attributeData: {"position": XC.DATA_TYPE.FLOAT3}, typeData: {
-        "index": XC.DATA_TYPE.INT, "solid": XC.DATA_TYPE.BOOL, "vertexCount": XC.DATA_TYPE.INT
+var MESH_PARAMETERS = {
+    attributeData: {"position": XC.DATA_TYPE.FLOAT3},
+    typeData: {
+        "index": XC.DATA_TYPE.INT, "solid": XC.DATA_TYPE.BOOL, "vertexCount": XC.DATA_TYPE.INT, "type": XC.DATA_TYPE.STRING
     }, bboxFix: {
         "boundingBox": XC.DATA_TYPE.FLOAT3
     }, bboxCompute: {
         "position": XC.DATA_TYPE.FLOAT3
     }
 };
-MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
-MESH_PARAMETERS[WebGLRenderingContext.LINES] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
-MESH_PARAMETERS[WebGLRenderingContext.POINTS] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
-MESH_PARAMETERS[WebGLRenderingContext.TRIANGLE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
 
 
 /**
  * Class that synchronizes data changes from Xflow with a GLMesh instance
  *
  * @param {GLContext} context
- * @param {Xflow.DataNode} dataNode
- * @param {string} type
+ * @param {object} meshConfig
  * @param {object} opt
  * @extends {DrawableClosure}
  * @constructor
  */
-var XflowMesh = function (context, dataNode, type, opt) {
+var XflowMesh = function (context, meshConfig, opt) {
     DrawableClosure.call(this, context, DrawableClosure.TYPES.MESH);
+    assert(meshConfig.data);
+    assert(meshConfig.type);
     opt = opt || {};
-    this.mesh = new GLMesh(context, type);
+
+    this.mesh = new GLMesh(context);
 
     /**
      * Data Node of the renderObject
      * @type {Xflow.DataNode}
      */
-    this.dataNode = dataNode;
+    this.dataNode = meshConfig.data;
+
+    this.primitiveType = meshConfig.type;
 
     /**
      * Shader Composer that will provide ShaderClosure and Program
@@ -216,10 +216,6 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         return this.mesh;
     },
 
-    getMeshType: function () {
-        return this.mesh.glType;
-    },
-
     updateObjectShaderRequest: function () {
         if (this.objectShaderRequest) this.objectShaderRequest.clear();
         this.objectShaderRequest = null;
@@ -268,6 +264,8 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         if (!this.typeDataValid && !(this.changeState & CHANGE_STATE.STRUCTURE_CHANGED)) {
             return; // only if structure has changed, it can't get valid after update
         }
+        // Be pessimistic. We set this to true if mesh passes all checks;
+        this.typeDataValid = false;
 
         this.updateTypeRequest();
 
@@ -277,6 +275,26 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
 
         var entry = dataResult.getOutputData("vertexCount");
         this.mesh.setVertexCount(entry && entry.getValue() ? entry.getValue() : null);
+
+        var primitiveType = this.primitiveType;
+        if(primitiveType == "derived") {
+            entry = dataResult.getOutputData("type");
+            primitiveType =  entry ? entry.getValue()[0] : null;
+        }
+
+        var glType = getGLTypeFromString(primitiveType);
+        if(glType == undefined) {
+            if (this.primitiveType == "derived") {
+                if (this.dataNode.isSubtreeLoading()) {
+                    return; // There might be a type coming
+                }
+                if (primitiveType == null) {
+                    throw new Error("Could not derive primitive type");
+                }
+            }
+            throw new Error("Unknown primitive type: " + primitiveType);
+        }
+        this.mesh.setPrimitiveType(glType);
         this.typeDataValid = true;
     },
 
@@ -335,13 +353,7 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
      *
      */
     updateTypeRequest: function () {
-        var meshConfig = MESH_PARAMETERS[this.getMeshType()];
-        if (!meshConfig) {
-            XML3D.debug.logError("Unsupported Mesh request: ", this.mesh, this.getMeshType());
-            this.typeDataValid = false;
-            return;
-        }
-        var requestNames = this.getTypeRequestNames(meshConfig);
+        var requestNames = this.getTypeRequestNames(MESH_PARAMETERS);
 
         if (!this.typeRequest || this.typeRequest.filter != requestNames) {
             if (this.typeRequest) this.typeRequest.clear();
@@ -403,6 +415,29 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
     }
 
 });
+
+/**
+ * @param {string} typeName
+ */
+var getGLTypeFromString = function (typeName) {
+    var GL = window.WebGLRenderingContext;
+    if (typeName && typeName.toLowerCase)
+        typeName = typeName.toLowerCase();
+    switch (typeName) {
+        case "triangles":
+            return GL.TRIANGLES;
+        case "tristrips":
+            return GL.TRIANGLE_STRIP;
+        case "points":
+            return GL.POINTS;
+        case "lines":
+            return GL.LINES;
+        case "linestrips":
+            return GL.LINE_STRIP;
+        default:
+            return undefined;
+    }
+};
 
 module.exports = XflowMesh;
 

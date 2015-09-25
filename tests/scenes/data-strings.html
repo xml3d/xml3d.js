@@ -66,7 +66,9 @@
     <view></view>
 
     <group material="#flatyellow" style="transform: translate3d(-2px, 1px, -5px)">
-        <mesh id="meshTypeTest1" src="#meshdata" type="triangles"></mesh>
+        <mesh id="meshTypeTest1" src="#meshdata" type="lines">
+          <data src="#meshTypeTristrips"></data>
+        </mesh>
     </group>
 
     <group material="#textured" style="transform: translate3d(-2px, 1px, -5px)">

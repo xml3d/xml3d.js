@@ -1,5 +1,4 @@
 var DOMTransformFetcher = require("../transform-fetcher.js");
-var DOMStringFetcher = require("../string-fetcher.js");
 var DataAdapter = require("./data.js");
 var Base = require("../../xflow/base.js");
 var DataNode = require("../../xflow/interface/graph.js").DataNode;
@@ -262,7 +261,6 @@ function setMaterialUrl(adapter, dest) {
 
 var AssetMeshAdapter = function (factory, node) {
     AssetDataAdapter.call(this, factory, node);
-    this.meshTypeFetcher = new DOMStringFetcher(this, "type", "type");
     this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
 };
 createClass(AssetMeshAdapter, AssetDataAdapter, {
@@ -270,13 +268,9 @@ createClass(AssetMeshAdapter, AssetDataAdapter, {
     init: function () {
         AssetDataAdapter.prototype.init.call(this);
         setMaterialUrl(this, this.assetEntry);
-        this.assetEntry.setMeshType(this.getMeshType());
+        this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles");
         this.assetEntry.setMatchFilter(this.node.getAttribute("match"));
         this.transformFetcher.update();
-    },
-
-    getMeshType: function() {
-        return this.meshTypeFetcher.getValue() || "triangles";
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
@@ -293,8 +287,7 @@ createClass(AssetMeshAdapter, AssetDataAdapter, {
                 this.transformFetcher.update();
                 break;
             case "type":
-                this.meshTypeFetcher.update();
-                this.assetEntry.setMeshType(this.getMeshType());
+                this.assetEntry.setMeshType(newValue || "triangles")
         }
     },
 

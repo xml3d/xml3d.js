@@ -3,10 +3,9 @@
 /**
  *
  * @param context
- * @param type
  * @constructor
  */
-var GLMesh = function (context, type) {
+var GLMesh = function (context) {
     this.context = context;
     this.buffers = {};
     this.uniformOverride = {};
@@ -16,7 +15,8 @@ var GLMesh = function (context, type) {
     this.vertexCount = null;
     this.minAttributeCount = -1;
     this.context.getStatistics().meshes++;
-    this.typeChanged(type);
+    this.glType = null;
+    this.multiDraw = false;
 };
 
 XML3D.extend(GLMesh.prototype, {
@@ -25,8 +25,8 @@ XML3D.extend(GLMesh.prototype, {
         this.maxIndex = maxIndex;
     },
 
-    typeChanged: function(type) {
-        this.glType = getGLTypeFromString(type);
+    setPrimitiveType: function(type) {
+        this.glType = type;
         this.multiDraw = (this.glType == WebGLRenderingContext.LINE_STRIP || this.glType == WebGLRenderingContext.TRIANGLE_STRIP);
     },
 
@@ -183,28 +183,5 @@ XML3D.extend(GLMesh.prototype, {
 
 
 });
-
-/**
- * @param {string} typeName
- */
-var getGLTypeFromString = function (typeName) {
-    var GL = window.WebGLRenderingContext;
-    if (typeName && typeName.toLoweGLase)
-        typeName = typeName.toLowerCase();
-    switch (typeName) {
-        case "triangles":
-            return GL.TRIANGLES;
-        case "tristrips":
-            return GL.TRIANGLE_STRIP;
-        case "points":
-            return GL.POINTS;
-        case "lines":
-            return GL.LINES;
-        case "linestrips":
-            return GL.LINE_STRIP;
-        default:
-            throw new Error("Unknown primitive type: " + typeName);
-    }
-};
 
 module.exports = GLMesh;

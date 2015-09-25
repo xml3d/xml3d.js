@@ -59,7 +59,7 @@ var RenderObject = function (scene, pageEntry, opt) {
      * Object related data
      * @type {{data: DataNode|null, type: string}}
      */
-    this.object = opt.object || {data: null, type: "triangles"};
+    this.configuration = opt.configuration || {data: null, type: "triangles"};
 
     /**
      * Can we rely on current WorldMatrix?
@@ -110,20 +110,6 @@ XML3D.createClass(RenderObject, RenderNode, {
             })
         }
         return result;
-    },
-
-    setType: function (type) {
-        this.object.type = type;
-        this.mesh.typeChanged(type);
-        // TODO: this.typeChangedEvent
-    },
-
-    getType: function () {
-        return this.object.type;
-    },
-
-    getDataNode: function () {
-        return this.object ? this.object.data : null;
     },
 
     getLocalMatrix: function (dest) {

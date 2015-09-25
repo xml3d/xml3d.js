@@ -1,16 +1,12 @@
-module("Xflow Bugs", {
-	setup : function() {
-		stop();
-		var that = this;
-		loadDocument("scenes/xflow_caching.html", function () {
-			// forceTestFail set by scene document
-			that.failed = document.getElementById("xml3dframe").contentWindow.forceTestFail;
-			start();
-		});
-	}
-});
+module("Xflow Bugs", {});
 
 test("Check cannot read property channeling of undefined", function() {
-	ok(!this.failed);
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/xflow_caching.html");
+    frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function(scene) {
+        ok(!scene.ownerDocument.defaultView.forceTestFail);
+        return scene;
+
+    }).fin(QUnit.start).done();
 });
 

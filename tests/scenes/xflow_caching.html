@@ -1,5 +1,4 @@
-<html>
-<head>
+<html><head>
     <title>Cannot Read Channeling of Undefined / Wrong parameter passing in Xflow for Vertex Shader requests because of buggy cache key generation</title>
     <script type="text/javascript" src="../../build/output/xml3d.js"></script>
     <script type="text/javascript" src="../scripts/shade.js"></script>
@@ -37,6 +36,7 @@
             }
         });
         XML3D.debug.logError = function() {
+            console.log("Error here", arguments);
             window.forceTestFail = true;
         };
     </script>
@@ -54,8 +54,8 @@
 					return Shade.emissive(env.color.mul(env.same));
 				}
 			</script>
-    <shader id="shader1" script="#shader1-script">
-    </shader>
+    <material id="shader1" model="#shader1-script">
+    </material>
 
 
     <dataflow id="dataflow2" out="position, normal, same">
@@ -73,20 +73,21 @@
 				}
 			</script>
 
-    <shader id="shader2" script="#shader2-script">
-    </shader>
+    <material id="shader2" model="#shader2-script">
+    </material>
 
-    <mesh type="triangles" shader="#shader1">
+    <mesh type="triangles" material="#shader1">
         <data name="config" compute="dataflow['#dataflow1']"></data>
     </mesh>
 
-    <mesh type="triangles" shader="#shader2">
+    <mesh type="triangles" material="#shader2">
         <data name="config" compute="dataflow['#dataflow2']"></data>
     </mesh>
 
     <!-- View with camera positioning -->
-    <view position="3 5 10" orientation="1 0 0 -0.3854"></view>
+    <view style="transform: translate3d(3px, 5px, 10px) rotate3d(1, 0, 0, -22.1deg)"></view>
 </xml3d>
-</body>
 
-</html>
+
+
+</body></html>

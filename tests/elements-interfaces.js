@@ -296,17 +296,18 @@ test("Enumeration interface tests", function() {
 test("Typed Array interface tests", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float");
     notEqual(e.value, null, "Value must not be null");
-    equal(e.value.toString(), "[object Float32Array]", "<float> has Float32Array");
+    console.dir(e.value);
+    ok(e.value instanceof Float32Array, "<float> has Float32Array");
     equal(e.value.length, 0, "Initial length is zero.");
 
     e = document.createElementNS(XML3D.xml3dNS, "int");
     notEqual(e.value, null, "Value must not be null");
-    equal(e.value.toString(), "[object Int32Array]", "<int> has Int32Array");
+    ok(e.value instanceof Int32Array,  "<int> has Int32Array");
     equal(e.value.length, 0, "Initial length is zero.");
 
     e = document.createElementNS(XML3D.xml3dNS, "bool");
     notEqual(e.value, null, "Value must not be null");
-    equal(e.value.toString(), "[object Uint8Array]", "<bool> has Uint8Array");
+    ok(e.value instanceof Uint8Array,"<bool> has Uint8Array");
     equal(e.value.length, 0, "Initial length is zero.");
 });
 

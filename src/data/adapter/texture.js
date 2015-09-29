@@ -3,7 +3,6 @@ var InputNode = require("../../xflow/interface/graph.js").InputNode;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
-var DOMStringFetcher = require("../string-fetcher.js");
 
 var defaults = require('lodash.defaults');
 var assign = require('lodash.assign');
@@ -16,30 +15,20 @@ var TextureDataAdapter = function (factory, node) {
 XML3D.createClass(TextureDataAdapter, NodeAdapter, {
 
     init: function () {
-        this.wrapFetcher = new DOMStringFetcher(this, "wrap", "wrap");
-        this.filterFetcher = new DOMStringFetcher(this, "filter", "filter");
         this.xflowInputNode = this.createXflowNode();
         this.xflowInputNode.data = this.createTextureEntry();
     },
 
     createTextureEntry: function () {
+        var node = this.node;
         var entry = new TextureEntry(null);
-        this.setTextureParams(entry);
+        initTextureSamplingParameters(entry.getSamplerConfig(), node.getAttribute("wrap"), node.getAttribute("filter"), node.getAttribute("anisotropy"));
 
         var imageAdapter = this.factory.getAdapter(this.node.firstElementChild);
         if (imageAdapter) {
             imageAdapter.setTextureEntry(entry);
         }
         return entry;
-    },
-
-    setTextureParams: function(entry) {
-        var wrap = this.wrapFetcher.getValue();
-        var filter = this.filterFetcher.getValue();
-        initTextureSamplingParameters(entry.getSamplerConfig(), wrap, filter, this.node.getAttribute("anisotropy"));
-        for (var index in entry.userData.webglData) {
-            entry.userData.webglData[index].texture.updateFromTextureEntry(entry);
-        }
     },
 
     shouldGenerateMipMaps: shouldGenerateMipMaps,
@@ -82,15 +71,9 @@ XML3D.createClass(TextureDataAdapter, NodeAdapter, {
                 this.xflowInputNode.key = newValue;
                 break;
             case "wrap":
-                this.wrapFetcher.update();
-                this.setTextureParams(this.xflowInputNode.data);
-                break;
             case "filter":
-                this.filterFetcher.update();
-                this.setTextureParams(this.xflowInputNode.data);
-                break;
             case "samples":
-                this.setTextureParams(this.xflowInputNode.data);
+                this.xflowInputNode.data = this.createTextureEntry();
                 break;
         }
     },

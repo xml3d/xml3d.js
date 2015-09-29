@@ -38,10 +38,6 @@ AxisAngle.prototype.clone = function() {
    return new AxisAngle(this);
 };
 
-AxisAngle.fromValues = function(x, y, z, angle) {
-    return new AxisAngle(vec4.fromValues(x,y,z,angle));
-};
-
 AxisAngle.fromQuat = function(q) {
     var out = new AxisAngle();
     out.data.set(XML3D.math.vec4.fromQuat(q.data ? q.data : q));

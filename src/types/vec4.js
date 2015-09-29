@@ -51,8 +51,8 @@ Vec4.prototype.clone = function() {
    return new Vec4(this);
 };
 
-Vec4.prototype.dist = Vec4.prototype.distance = function() {
-    return vec4.dist(this.data);
+Vec4.prototype.dist = Vec4.prototype.distance = function(b) {
+    return vec4.dist(this.data, b.data ? b.data : b);
 };
 
 Vec4.prototype.divide = function(b) {
@@ -63,10 +63,6 @@ Vec4.prototype.divide = function(b) {
 
 Vec4.prototype.dot = function(b) {
     return vec4.dot(this.data, b.data ? b.data : b);
-};
-
-Vec4.fromValues = function(x, y, z, w) {
-    return new Vec4(vec4.fromValues(x,y,z,w));
 };
 
 Vec4.prototype.len = Vec4.prototype.length = function() {

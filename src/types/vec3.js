@@ -49,8 +49,8 @@ Vec3.prototype.cross = function(b) {
     return out;
 };
 
-Vec3.prototype.dist = Vec3.prototype.distance = function() {
-    return vec3.dist(this.data);
+Vec3.prototype.dist = Vec3.prototype.distance = function(b) {
+    return vec3.dist(this.data, b.data ? b.data : b);
 };
 
 Vec3.prototype.divide = function(b) {
@@ -61,10 +61,6 @@ Vec3.prototype.divide = function(b) {
 
 Vec3.prototype.dot = function(b) {
     return vec3.dot(this.data, b.data ? b.data : b);
-};
-
-Vec3.fromValues = function(x, y, z) {
-    return new Vec3(vec3.fromValues(x,y,z));
 };
 
 Vec3.prototype.len = Vec3.prototype.length = function() {

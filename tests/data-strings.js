@@ -93,26 +93,3 @@ test("Mesh type from an array of strings", function () {
     });
     test.fin(QUnit.start).done();
 });
-
-test("Change texture wrap mode through xflow operator", function () {
-    stop();
-    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/data-strings.html");
-
-    var test = frameLoaded.then(function (doc) {
-        doc.getElementById("textureWrapTest1").setAttribute("style", "display: block");
-        doc.getElementById("meshTypeTest1").setAttribute("style", "display: none");
-        doc.getElementById("textureElement").setAttribute("wrap", "#textureWrapCompute");
-        return doc.getElementById("xml3dElem");
-    }).then(promiseSceneRendered).then(function (s) {
-        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 130);
-        deepEqual(actual, [0, 255, 0, 255], "Initial operator returned 'repeat clamp'");
-
-        s.ownerDocument.getElementById("wrapSelector").textContent = "1";
-        return s;
-    }).then(promiseSceneRendered).then(function (s) {
-        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 20, 130);
-        deepEqual(actual, [0, 0, 255, 255], "Changing operator input caused wrap 'repeat'");
-        return s;
-    });
-    test.fin(QUnit.start).done();
-});

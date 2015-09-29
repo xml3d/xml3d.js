@@ -23,15 +23,6 @@
             </float3>
         </material>
 
-        <material id="textured" model="urn:xml3d:material:phong">
-            <float name="ambientIntensity">
-                1
-            </float>
-            <texture id="textureElement" name="diffuseTexture" wrap="clamp">
-                <img src="textures/bluegreen.png" />
-            </texture>
-        </material>
-
         <data id="meshTypeTristrips">
             <string name="type">tristrips</string>
         </data>
@@ -55,12 +46,6 @@
             <int id="meshTypeSelector" name="selector">0</int>
         </data>
 
-        <data id="textureWrapCompute" compute="wrap = xflow.selectString(selector, value1, value2)">
-            <string name="value1">repeat clamp</string>
-            <string name="value2">repeat</string>
-            <int id="wrapSelector" name="selector">0</int>
-        </data>
-
     </defs>
 
     <view></view>
@@ -69,10 +54,6 @@
         <mesh id="meshTypeTest1" src="#meshdata" type="lines">
           <data src="#meshTypeTristrips"></data>
         </mesh>
-    </group>
-
-    <group material="#textured" style="transform: translate3d(-2px, 1px, -5px)">
-        <mesh id="textureWrapTest1" src="#meshdata" type="triangles" style="display: none"></mesh>
     </group>
 
 </xml3d>

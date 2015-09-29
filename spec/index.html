@@ -995,11 +995,20 @@
         <pre class='example highlight'>
             &lt;!-- This mesh will be rendered with a blue diffuseColor even though the material specifies a red one --&gt;
             &lt;mesh src="myMesh.xml#myDataElement" type="triangles" material="#myRedMaterial"&gt;
-                &lt;float3 name="diffuseColor"&gt;0.0 0.0 1.0&lt;float3&gt;
+                &lt;float3 name="diffuseColor"&gt;0.0 0.0 1.0&lt;/float3&gt;
             &lt;/mesh&gt;
         </pre>
 
-        <p>In addition to the <code>transform</code> attribute, a transformation matrix for this mesh may also be defined in a <code>float4x4</code> element. This option is
+        <p>The mesh type can also be set using the generic attribute system, setting the mesh type to <code>derived</code></p>
+        <pre class='example highlight'>
+            &lt;!-- The mesh data will be interpreted as lines --&gt;
+            &lt;mesh src="teapot.json" type="derived"&gt;
+                &lt;string name="type"&gt;lines&lt;/string&gt;
+            &lt;/mesh&gt;
+        </pre>
+
+
+        <p>FIXME(ksons) This is outdated, right?: In addition to the <code>transform</code> attribute, a transformation matrix for this mesh may also be defined in a <code>float4x4</code> element. This option is
         described in more detail in the section on the <a>assetmesh element</a>. This approach actually uses the same Xflow data overriding
         mechanism described above to override the internally computed mesh transformation matrix.</p>
 
@@ -1009,7 +1018,7 @@
 
             <dt>attribute DOMString type</dt>
             <dd>The primitive type that this mesh uses. Supported values are <code>triangles</code>, <code>tristrips</code>,
-                <code>points</code>, <code>lines</code> and <code>linestrips</code>.</dd>
+                <code>points</code>, <code>lines</code>, <code>linestrips</code> and <code>derived</code>.</dd>
 
             <dt>attribute DOMString src</dt>
             <dd>URI reference to another data element containing the data for this mesh. Can be a reference to an external document.</dd>
@@ -1310,7 +1319,7 @@
         <dd>A space separated list of names corresponding to other <code>assetmesh</code> or <a href="#the-assetdata-element" class="internalDFN">assetdata</a>
             elements that this one should extend.</dd>
         <dt>attribute DOMString type</dt>
-        <dd>The primitive type of this <code>assetmesh</code>. Supported values are <code>triangles</code>, <code>tristrips</code>, <code>points</code>, <code>lines</code> and <code>linestrips</code></dd>
+        <dd>The primitive type of this <code>assetmesh</code>. Supported values are <code>triangles</code>, <code>tristrips</code>, <code>points</code>, <code>lines</code>, <code>linestrips</code>, and <code>derived</code></dd>
         <dt>attribute DOMString material</dt>
         <dd>URI reference to a <a>material element</a>. </dd>
         <dt>attribute DOMString transform</dt>
@@ -1579,14 +1588,11 @@
                 <dt>Categories:</dt>
                 <dd><a href="#value-elements">Value element</a></dd>
             </dl>
-            <p>The <dfn>string element</dfn> holds a <em>comma</em> separated list of string values. This inconsistency was chosen to enable space-separated
-                attribute values to be set through Xflow, for example the <a>wrap attribute</a> of the <a>texture element</a>, which may hold a value such as <code>clamp repeat</code>.
+            <p>The <dfn>string element</dfn> holds a <em>comma</em> separated list of string values.
             </p>
 
             <p>Currently the following string attributes may be set by referencing a <a>data element</a> containing a string field with the matching <code>name</code>:</p>
             <ul>
-                <li>The <a href="#attr-texture-wrap" class="internalDFN">wrap attribute</a> of the <a>texture element</a></li>
-                <li>The <a href="#attr-texture-filter" class="internalDFN">filter attribute</a> of the <a>texture element</a></li>
                 <li>The <a href="#attr-mesh-type" class="internalDFN">type attribute</a> of the <a>mesh element</a></li>
                 <li>The <a href="#attr-mesh-type" class="internalDFN">type attribute</a> of the <a>assetmesh element</a></li>
             </ul>
@@ -1598,10 +1604,11 @@
               &lt;string name="value1"&gt;triangles&lt;/string&gt;
               &lt;string name="value2"&gt;lines&lt;/string&gt;
               &lt;int name="selector"&gt;1&lt;/int&gt;
+              &lt;data src="#meshdata"&gt;1&lt;/data&gt;
           &lt;/data&gt;
 
           &lt;!-- In this case type will evaluate to 'lines' --&gt;
-          &lt;mesh src="#meshdata" type="#meshTypeCompute"&gt;&lt;/mesh&gt;
+          &lt;mesh src="#meshdata" type="derived"&gt;&lt;/mesh&gt;
       </pre>
 
             <dl title='interface XML3DStringValueElement : HTMLElement' class='idl'>
@@ -1880,6 +1887,22 @@
 
       <p>Points are drawn from a list of vertex positions, which each position being drawn as a single point.</p>
       <div class="note">Currently to change the size of the drawn points, or to draw them as textured sprites, it is necessary to define a custom material shader.</div>
+    </section>
+
+     <section>
+      <h2>Derived</h2>
+      <p>Attribute name: <code>derived</code></p>
+
+      <p>The special primitive type derived delegates the evaluation of the primitive type to the generic data model.
+        The requested parameter has the name <code>type</code>. The contained value needs to match one of the primitive types above.
+      </p>
+        <pre class="example highlight">
+      &lt;mesh type="derived"&gt;
+        &lt;string name="type"&gt;triangles&lt;/string&gt;
+        ...
+      &lt;/mesh&gt;
+      </pre>
+
     </section>
 
   </section>

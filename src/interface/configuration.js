@@ -14,6 +14,8 @@ MeshTypes["linestrips"] = 3;
 MeshTypes[3] = "linestrips";
 MeshTypes["points"] = 4;
 MeshTypes[4] = "points";
+MeshTypes["derived"] = 5;
+MeshTypes[5] = "derived";
 // TextureTypes
 var TextureTypes = {};
 TextureTypes["2d"] = 0;

@@ -184,8 +184,8 @@ XML3D.extend(GLMesh.prototype, {
  * @param {string} typeName
  */
 var getGLTypeFromString = function (typeName) {
+    if (typeName && typeName.toLowerCase)
     var GL = window.WebGLRenderingContext;
-    if (typeName && typeName.toLoweGLase)
         typeName = typeName.toLowerCase();
     switch (typeName) {
         case "triangles":

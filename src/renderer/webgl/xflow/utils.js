@@ -1,4 +1,5 @@
 var XC = require("../../../xflow/interface/constants.js");
+var GL = require("../constants.js");
 
 function convertToJSArray(value) {
     var jsArray = [value.length];
@@ -16,17 +17,17 @@ function convertToJSArray(value) {
 var createElementBuffer = function (context, data, maxIndex) {
     var gl = context.gl;
     var bufferData = data;
-    var glType = gl.UNSIGNED_INT;
+    var glType = GL.UNSIGNED_INT;
 
     if (maxIndex < (1 << 8)) {
-        glType = gl.UNSIGNED_BYTE;
+        glType = GL.UNSIGNED_BYTE;
         bufferData = new Uint8Array(data);
     } else if (maxIndex < (1 << 16)) {
-        glType = gl.UNSIGNED_SHORT;
+        glType = GL.UNSIGNED_SHORT;
         bufferData = new Uint16Array(data);
     } else if (!context.extensions["OES_element_index_uint"]) {
         XML3D.debug.logError("Trying to use index data with indices larger than 65535, but this is not supported on your platform. Indexing errors will occur.");
-        glType = gl.UNSIGNED_SHORT;
+        glType = GL.UNSIGNED_SHORT;
         bufferData = new Uint16Array(data);
     }
 
@@ -55,7 +56,6 @@ var createArrayBuffer = function (context, data) {
 };
 
 var getGLTypeFromArray = function (array) {
-    var GL = window.WebGLRenderingContext;
     if (array instanceof Int8Array)
         return GL.BYTE;
     if (array instanceof Uint8Array)

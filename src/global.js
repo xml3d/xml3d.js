@@ -117,7 +117,6 @@ XML3D.webgl.ForwardRenderPass = require("./renderer/webgl/render-passes/forward.
 XML3D.webgl.BaseRenderTree = require("./renderer/webgl/render-trees/base.js");
 XML3D.extend(XML3D.webgl, require("./renderer/webgl/base/rendertarget.js"));
 
-
 require("./xflow/operator/default");
 
 module.exports = {

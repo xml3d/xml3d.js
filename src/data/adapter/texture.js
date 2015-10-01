@@ -3,27 +3,28 @@ var InputNode = require("../../xflow/interface/graph.js").InputNode;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
+var GL = require("../../renderer/webgl/constants.js");
 
 var clampToGL = function (modeStr) {
     if (modeStr == "clamp")
-        return WebGLRenderingContext.CLAMP_TO_EDGE;
+        return GL.CLAMP_TO_EDGE;
     if (modeStr == "repeat")
-        return WebGLRenderingContext.REPEAT;
+        return GL.REPEAT;
 };
 
 var filterToGL = function (modeStr) {
     if (modeStr == "nearest")
-        return WebGLRenderingContext.NEAREST;
+        return GL.NEAREST;
     if (modeStr == "linear")
-        return WebGLRenderingContext.LINEAR;
+        return GL.LINEAR;
     if (modeStr == "nearest-mipmap-nearest")
-        return WebGLRenderingContext.NEAREST_MIPMAP_NEAREST;
+        return GL.NEAREST_MIPMAP_NEAREST;
     if (modeStr == "linear-mipmap-nearest")
-        return WebGLRenderingContext.LINEAR_MIPMAP_NEAREST;
+        return GL.LINEAR_MIPMAP_NEAREST;
     if (modeStr == "nearest-mipmap-linear")
-        return WebGLRenderingContext.NEAREST_MIPMAP_LINEAR;
+        return GL.NEAREST_MIPMAP_LINEAR;
     if (modeStr == "linear-mipmap-linear")
-        return WebGLRenderingContext.LINEAR_MIPMAP_LINEAR;
+        return GL.LINEAR_MIPMAP_LINEAR;
 };
 
 var TextureDataAdapter = function (factory, node) {
@@ -55,7 +56,7 @@ TextureDataAdapter.prototype.createTextureEntry = function () {
 };
 
 TextureDataAdapter.prototype.shouldGenerateMipMaps = function (minFilter, magFilter) {
-    return (minFilter != WebGLRenderingContext.NEAREST && minFilter != WebGLRenderingContext.LINEAR) || (magFilter != WebGLRenderingContext.NEAREST && magFilter != WebGLRenderingContext.LINEAR);
+    return (minFilter != GL.NEAREST && minFilter != GL.LINEAR) || (magFilter != GL.NEAREST && magFilter != GL.LINEAR);
 };
 
 TextureDataAdapter.prototype.createXflowNode = function () {

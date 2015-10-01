@@ -4,6 +4,7 @@ var GLCubeMap = require("./texture.js").GLCubeMap;
 var GLCanvasTarget = require("./rendertarget.js").GLCanvasTarget;
 var ProgramFactory = require("./../shader/programfactory.js");
 var XC = require("../../../xflow/interface/constants.js");
+var GL = require("../constants.js");
 
 var CONTEXT_OPTIONS = {
     alpha: true, premultipliedAlpha: false, antialias: true, stencil: true, preserveDrawingBuffer: true
@@ -31,7 +32,7 @@ var GLContext = function (canvas, id) {
     this.id = id;
     this.canvasTarget = new GLCanvasTarget(this, canvas.clientWidth, canvas.clientHeight);
     this.programFactory = new ProgramFactory(this);
-    this.textureManager = new TextureManager({ units: this.gl.getParameter(WebGLRenderingContext.MAX_COMBINED_TEXTURE_IMAGE_UNITS )});
+    this.textureManager = new TextureManager({ units: this.gl.getParameter(GL.MAX_COMBINED_TEXTURE_IMAGE_UNITS )});
     this.stats = {
         materials: 0, meshes: 0
     };

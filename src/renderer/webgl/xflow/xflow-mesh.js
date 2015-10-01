@@ -5,6 +5,7 @@ var EVENT_TYPE = require("../../renderer/scene/constants.js").EVENT_TYPE;
 var MaterialEvents = require("../materials/events.js");
 var XC = require("../../../xflow/interface/constants.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
+var GL = require("../constants.js");
 
 var CHANGE_STATE = {
     NOTHING_CHANGED: 0,
@@ -22,7 +23,7 @@ var READY_STATE = DrawableClosure.READY_STATE;
 
 var MESH_PARAMETERS = {};
 
-MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES] = {
+MESH_PARAMETERS[GL.TRIANGLES] = {
     attributeData: {"position": XC.DATA_TYPE.FLOAT3}, typeData: {
         "index": XC.DATA_TYPE.INT, "solid": XC.DATA_TYPE.BOOL, "vertexCount": XC.DATA_TYPE.INT
     }, bboxFix: {
@@ -31,10 +32,10 @@ MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES] = {
         "position": XC.DATA_TYPE.FLOAT3
     }
 };
-MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
-MESH_PARAMETERS[WebGLRenderingContext.LINES] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
-MESH_PARAMETERS[WebGLRenderingContext.POINTS] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
-MESH_PARAMETERS[WebGLRenderingContext.TRIANGLE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
+MESH_PARAMETERS[GL.LINE_STRIP] = MESH_PARAMETERS[GL.TRIANGLES];
+MESH_PARAMETERS[GL.LINES] = MESH_PARAMETERS[GL.TRIANGLES];
+MESH_PARAMETERS[GL.POINTS] = MESH_PARAMETERS[GL.TRIANGLES];
+MESH_PARAMETERS[GL.TRIANGLE_STRIP] = MESH_PARAMETERS[GL.TRIANGLES];
 
 
 /**

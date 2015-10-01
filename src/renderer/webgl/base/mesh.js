@@ -1,5 +1,4 @@
-
-
+var GL = require("../constants.js");
 /**
  *
  * @param context
@@ -17,7 +16,7 @@ var GLMesh = function (context, type) {
     this.vertexCount = null;
     this.minAttributeCount = -1;
     this.context.getStatistics().meshes++;
-    this.multiDraw = (this.glType == WebGLRenderingContext.LINE_STRIP || this.glType == WebGLRenderingContext.TRIANGLE_STRIP);
+    this.multiDraw = (this.glType == GL.LINE_STRIP || this.glType == GL.TRIANGLE_STRIP);
 };
 
 XML3D.extend(GLMesh.prototype, {
@@ -184,8 +183,7 @@ XML3D.extend(GLMesh.prototype, {
  * @param {string} typeName
  */
 var getGLTypeFromString = function (typeName) {
-    var GL = window.WebGLRenderingContext;
-    if (typeName && typeName.toLoweGLase)
+    if (typeName && typeName.toLowerCase)
         typeName = typeName.toLowerCase();
     switch (typeName) {
         case "triangles":

@@ -87,7 +87,25 @@ Vec3.prototype.min = function(b) {
 
 Vec3.prototype.mul = Vec3.prototype.multiply = function(b) {
     var out = new Vec3();
-    vec3.mul(out.data, this.data, b.data ? b.data : b);
+    var c = b.data ? b.data : b;
+
+    switch (c.length) {
+        case 3:
+            vec3.mul(out.data, this.data, c);
+            break;
+        case 4:
+            vec3.transformQuat(out.data, this.data, c);
+            break;
+        case 9:
+            vec3.transformMat3(out.data, this.data, c);
+            break;
+        case 16:
+            vec3.transformMat4(out.data, this.data, c);
+            break;
+        default:
+            console.error("Invalid input to Vec3.multiply "+b);
+    }
+
     return out;
 };
 
@@ -130,24 +148,6 @@ Vec3.prototype.sub = Vec3.prototype.subtract = function(b) {
 Vec3.prototype.transformDirection = function(m) {
     var out = new Vec3();
     XML3D.math.vec3.transformDirection(out.data, this.data, m.data ? m.data : m);
-    return out;
-};
-
-Vec3.prototype.transformMat3 = function(m) {
-    var out = new Vec3();
-    vec3.transformMat3(out.data, this.data, m.data ? m.data : m);
-    return out;
-};
-
-Vec3.prototype.transformMat4 = function(m) {
-    var out = new Vec3();
-    vec3.transformMat4(out.data, this.data, m.data ? m.data : m);
-    return out;
-};
-
-Vec3.prototype.transformQuat = function(q) {
-    var out = new Vec3();
-    vec3.transformQuat(out.data, this.data, q.data ? q.data : q);
     return out;
 };
 

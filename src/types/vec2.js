@@ -74,7 +74,25 @@ Vec2.prototype.min = function(b) {
 
 Vec2.prototype.mul = Vec2.prototype.multiply = function(b) {
     var out = new Vec2();
-    vec2.mul(out.data, this.data, b.data ? b.data : b);
+    var c = b.data ? b.data : b;
+
+    switch (c.length) {
+        case 2:
+            vec2.mul(out.data, this.data, c);
+            break;
+        case 4:
+            vec2.transformMat2(out.data, this.data, c);
+            break;
+        case 9:
+            vec2.transformMat3(out.data, this.data, c);
+            break;
+        case 16:
+            vec2.transformMat4(out.data, this.data, c);
+            break;
+        default:
+            console.error("Invalid input to Vec2.multiply "+b);
+    }
+
     return out;
 };
 
@@ -105,24 +123,6 @@ Vec2.prototype.scale = function(s) {
 Vec2.prototype.sub = Vec2.prototype.subtract = function(b) {
     var out = new Vec2();
     vec2.sub(out.data, this.data, b.data ? b.data : b);
-    return out;
-};
-
-Vec2.prototype.transformMat2 = function(m) {
-    var out = new Vec2();
-    vec2.transformMat2(out.data, this.data, m.data ? m.data : m);
-    return out;
-};
-
-Vec2.prototype.transformMat3 = function(m) {
-    var out = new Vec2();
-    vec2.transformMat3(out.data, this.data, m.data ? m.data : m);
-    return out;
-};
-
-Vec2.prototype.transformMat4 = function(m) {
-    var out = new Vec2();
-    vec2.transformMat4(out.data, this.data, m.data ? m.data : m);
     return out;
 };
 

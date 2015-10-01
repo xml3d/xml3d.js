@@ -89,7 +89,19 @@ Vec4.prototype.min = function(b) {
 
 Vec4.prototype.mul = Vec4.prototype.multiply = function(b) {
     var out = new Vec4();
-    vec4.mul(out.data, this.data, b.data ? b.data : b);
+    var c = b.data ? b.data : b;
+
+    switch (c.length) {
+        case 4:
+            vec4.mul(out.data, this.data, c);
+            break;
+        case 16:
+            vec4.transformMat4(out.data, this.data, c);
+            break;
+        default:
+            console.error("Invalid input to Vec4.multiply "+b);
+    }
+
     return out;
 };
 
@@ -120,12 +132,6 @@ Vec4.prototype.scale = function(s) {
 Vec4.prototype.sub = Vec4.prototype.subtract = function(b) {
     var out = new Vec4();
     vec4.sub(out.data, this.data, b.data ? b.data : b);
-    return out;
-};
-
-Vec4.prototype.transformMat4 = function(m) {
-    var out = new Vec4();
-    vec4.transformMat4(out.data, this.data, m.data ? m.data : m);
     return out;
 };
 

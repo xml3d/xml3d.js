@@ -681,6 +681,8 @@
         returning the first view in the scene. If no view is available, the system must append a view element as first child of the xml3d element.
       </p>
 
+      <p>The background color of the 3D canvas may be set through CSS using the <code>background-color</code> property on the xml3d element.</p>
+
       <dl title='interface XML3DXml3dElement : HTMLElement' class='idl'>
         <dt>attribute unsigned long width</dt>
         <dd>Horizontal dimension</dd>
@@ -2461,8 +2463,6 @@
       <dd>Returns the component wise division of the two vectors as a new Vec2.</dd>
       <dt>float dot(Vec2 other)</dt>
       <dd>The dot product of this and the given vector.</dd>
-      <dt>static Vec2 fromValues(float x, float y)</dt>
-      <dd>Creates a new Vec2 from the given values.</dd>
       <dt>float length()</dt>
       <dd>Returns the length of this vector.</dd>
       <dt>Vec2 lerp()</dt>
@@ -2480,6 +2480,12 @@
       <dd>Returns a new Vec2 that contains the component wise minimum of the two vectors.</dd>
       <dt>Vec2 mul(Vec2 other)</dt>
       <dd>Returns the component wise multiplication of the two vectors as a new Vec2.</dd>
+      <dt>Vec2 mul(Mat2 other)</dt>
+      <dd>Returns the transformation of this vector with the given 2x2 matrix as a new Vec2.</dd>
+      <dt>Vec2 mul(Mat3 other)</dt>
+      <dd>Returns the transformation of this vector with the given 3x3 matrix as a new Vec2. The third vector component is implicitly '1'. </dd>
+      <dt>Vec2 mul(Mat4 other)</dt>
+      <dd>Returns the transformation of this vector with the given 4x4 matrix as a new Vec2. The third vector component is implicitly '0', the fourth '1'. </dd>
       <dt>Vec2 negate()</dt>
       <dd>Returns the component wise negation of this vector as a new Vec2.</dd>
       <dt>Vec2 normalize()</dt>
@@ -2490,12 +2496,7 @@
       <dd>Returns the scaled vector as a new Vec2.</dd>
       <dt>Vec2 sub(Vec2 other)</dt>
       <dd>Returns the component wise subtraction of the two vectors as a new Vec2.</dd>
-      <dt>Vec2 transformMat2(Mat2 mat)</dt>
-      <dd>Returns the transformation of this vector with the given 2x2 matrix as a new Vec2.</dd>
-      <dt>Vec2 transformMat3(Mat3 mat)</dt>
-      <dd>Returns the transformation of this vector with the given 3x3 matrix as a new Vec2. The third vector component is implicitly '1'. </dd>
-      <dt>Vec2 transformMat4(Mat4 mat)</dt>
-      <dd>Returns the transformation of this vector with the given 4x4 matrix as a new Vec2. The third vector component is implicitly '0', the fourth '1'. </dd>
+
       <dt>static Vec2 wrap(Float32Array data)</dt>
       <dd>Returns a new Vec2 wrapper around the given Float32Array. Note: Changes to the returned Vec2 will also change the data in the array!</dd>
     </dl>
@@ -2541,8 +2542,6 @@
       <dd>Returns the component wise division of the two vectors as a new Vec3.</dd>
       <dt>float dot(Vec3 other)</dt>
       <dd>The dot product of this and the given vector.</dd>
-      <dt>static Vec3 fromValues(float x, float y, float z)</dt>
-      <dd>Creates a new Vec3 from the given values.</dd>
       <dt>float length()</dt>
       <dd>Returns the length of this vector.</dd>
       <dt>Vec3 lerp()</dt>
@@ -2559,7 +2558,14 @@
       <dt>Vec3 min(Vec3 other)</dt>
       <dd>Returns a new Vec3 that contains the component wise minimum of the two vectors.</dd>
       <dt>Vec3 mul(Vec3 other)</dt>
-      <dd>Returns the component wise multiplication of the two vectors as a new Vec3.</dd>
+      <dd>Returns the component wise multiplication of the two vectors as a new Vec3.
+      <dt>Vec3 mul(Mat3 other)</dt>
+      <dd>Returns the transformation of this vector with the given 3x3 matrix as a new Vec3.</dd>
+      <dt>Vec3 mul(Mat4 other)</dt>
+      <dd>Returns the transformation of this vector with the given 4x4 matrix as a new Vec3. The fourth vector component is implicitly '1'</dd>
+      <dt>Vec3 mul(Quat q)</dt>
+      <dd>Returns the transformation of this vector with the given quaternion as a new Vec3.</dd>
+
       <dt>Vec3 negate()</dt>
       <dd>Returns the component wise negation of this vector as a new Vec3.</dd>
       <dt>Vec3 normalize()</dt>
@@ -2572,14 +2578,10 @@
       <dd>Returns the scaled vector as a new Vec3.</dd>
       <dt>Vec3 sub(Vec3 other)</dt>
       <dd>Returns the component wise subtraction of the two vectors as a new Vec3.</dd>
-      <dt>Vec3 transformMat3(Mat3 mat)</dt>
-      <dd>Returns the transformation of this vector with the given 3x3 matrix as a new Vec3.</dd>
-      <dt>Vec3 transformMat4(Mat4 mat)</dt>
-      <dd>Returns the transformation of this vector with the given 4x4 matrix as a new Vec3. The fourth vector component is implicitly '1'</dd>
+
       <dt>Vec3 transformDirection(Mat4 mat)</dt>
       <dd>Returns the transformation of this vector with the given 4x4 matrix as a new Vec3. The fourth vector component is implicitly '0'</dd>
-      <dt>Vec3 transformQuat(Quat q)</dt>
-      <dd>Returns the transformation of this vector with the given quaternion as a new Vec3.</dd>
+
       <dt>static Vec3 wrap(Float32Array data)</dt>
       <dd>Returns a new Vec3 wrapper around the given Float32Array. Note: Changes to the returned Vec3 will also change the data in the array!</dd>
     </dl>
@@ -2625,8 +2627,6 @@
       <dd>Returns the component wise division of the two vectors as a new Vec4.</dd>
       <dt>float dot(Vec4 other)</dt>
       <dd>The dot product of this and the given vector.</dd>
-      <dt>static Vec4 fromValues(float x, float y, float z, float w)</dt>
-      <dd>Creates a new Vec4 from the given values.</dd>
       <dt>float length()</dt>
       <dd>Returns the length of this vector.</dd>
       <dt>Vec4 lerp()</dt>
@@ -2644,6 +2644,8 @@
       <dd>Returns a new Vec4 that contains the component wise minimum of the two vectors.</dd>
       <dt>Vec4 mul(Vec4 other)</dt>
       <dd>Returns the component wise multiplication of the two vectors as a new Vec4.</dd>
+      <dt>Vec4 mul(Mat4 other)</dt>
+      <dd>Returns the transformation of this vector with the given 4x4 matrix as a new Vec4.</dd>
       <dt>Vec4 negate()</dt>
       <dd>Returns the component wise negation of this vector as a new Vec4.</dd>
       <dt>Vec4 normalize()</dt>
@@ -2654,8 +2656,7 @@
       <dd>Returns the scaled vector as a new Vec4.</dd>
       <dt>Vec4 sub(Vec4 other)</dt>
       <dd>Returns the component wise subtraction of the two vectors as a new Vec4.</dd>
-      <dt>Vec4 transformMat4(Mat4 mat)</dt>
-      <dd>Returns the transformation of this vector with the given 4x4 matrix as a new Vec4.</dd>
+
       <dt>Vec4 transformQuat(Quat q)</dt>
       <dd>Returns the transformation of this vector with the given quaternion as a new Vec4.</dd>
       <dt>static Vec4 wrap(Float32Array data)</dt>
@@ -2693,8 +2694,6 @@
 
       <dt>AxisAngle clone()</dt>
       <dd>Returns a new copy of this AxisAngle.</dd>
-      <dt>static AxisAngle fromValues(float x, float y, float z, float angleInRadians)</dt>
-      <dd>Creates a new AxisAngle from the given values.</dd>
       <dt>static AxisAngle fromQuat(Quat q)</dt>
       <dd>Creates a new axis-angle representation of the given quaternion's rotation.</dd>
       <dt>Quat toQuat()</dt>

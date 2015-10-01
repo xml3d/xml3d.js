@@ -557,11 +557,11 @@
     });
     TransformInterface.prototype.__defineGetter__("direction", function() {
         var dir = new XML3D.Vec3(0, 0, -1);
-        return dir.transformQuat(this.orientation);
+        return dir.mul(this.orientation);
     });
     TransformInterface.prototype.__defineGetter__("upVector", function() {
         var up = new XML3D.Vec3(0, 1, 0);
-        return up.transformQuat(this.orientation);
+        return up.mul(this.orientation);
     });
     TransformInterface.prototype.__defineGetter__("fieldOfView", function() {
         var fovh = this.element.querySelector("float[name=fovHorizontal]");
@@ -584,14 +584,14 @@
             var aa = XML3D.AxisAngle.fromQuat(q0);
             var axis = this.inverseTransformOf(aa.axis);
             tmpQuat = XML3D.Quat.fromAxisAngle(axis, aa.angle);
-            this.position = this.position.subtract(p0).transformQuat(tmpQuat).add(p0);
+            this.position = this.position.subtract(p0).mul(tmpQuat).add(p0);
         }
     })();
 
     TransformInterface.prototype.lookAround = function(rotSide, rotUp, upVector) {
         var check = rotUp.mul(this.orientation);
 
-        var tmp = new XML3D.Vec3(0,0,-1).transformQuat(check);
+        var tmp = new XML3D.Vec3(0,0,-1).mul(check);
         var rot = rotSide.clone();
         if (Math.abs(upVector.dot(tmp)) <= 0.95) {
             rot = rot.mul(rotUp);
@@ -610,7 +610,7 @@
     };
 
     TransformInterface.prototype.inverseTransformOf = function(vec) {
-        return vec.transformQuat(this.orientation);
+        return vec.mul(this.orientation);
     };
 
     TransformInterface.prototype.lookAt = function(point) {
@@ -619,7 +619,7 @@
         var orientation = this.orientation;
         var basisX = new XML3D.Vec3(dir).cross(up);
         if (!basisX.length()) {
-            basisX = new XML3D.Vec3(1,0,0).transformQuat(orientation);
+            basisX = new XML3D.Vec3(1,0,0).mul(orientation);
         }
         var basisY = basisX.clone().cross(dir);
         var basisZ = new XML3D.Vec3(dir).negate();

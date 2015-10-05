@@ -126,7 +126,7 @@ test("Hierarchy", function() {
     QUnit.closeMatrix(child2.getWorldMatrix(), parent.getWorldMatrix(), EPSILON, "New child2 global matrix");
 
     var t = this.doc.getElementById("t_rotation3");
-    t.translation = XML3D.Vec3.fromValues(1,2,3);
+    t.translation = new XML3D.Vec3(1,2,3);
     mat = new XML3D.Mat4();
     QUnit.closeMatrix(parent.getLocalMatrix(), mat.translate([1,2,3]).rotateZ(Math.PI/2.0), EPSILON, "New parent local matrix");
     mat = parent.getLocalMatrix();

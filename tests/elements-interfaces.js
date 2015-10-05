@@ -226,7 +226,7 @@ test("Vec3 interface tests", function() {
     // Set via interface
         QUnit.closeArray(e.scale.data, [1,1,1], EPSILON, "transform.scale is '1 1 1' initially.");
 
-        e.scale = XML3D.Vec3.fromValues(1,0,0);
+        e.scale = new XML3D.Vec3(1,0,0);
         QUnit.closeArray(e.scale.data, [1,0,0], EPSILON, "transform.scale changed after set");
 
         // Attribute is synced

@@ -35,7 +35,7 @@ test("Ray::accessors", function()  {
     QUnit.closeArray(ray.data, [1,5,0,0,-5,0], EPSILON, "Changing the returned vectors also changes the ray's data");
 
     ray.origin = [5,5,5];
-    ray.direction = XML3D.Vec3.fromValues(1,0,0);
+    ray.direction = new XML3D.Vec3(1,0,0);
     QUnit.closeArray(ray.data, [5,5,5,1,0,0], EPSILON, "Setters work with arrays and Vec3 objects");
 });
 
@@ -106,7 +106,7 @@ test("Box::accessors", function() {
     QUnit.closeArray(box.data, [-15, 10, 3, 15, 11, 15], EPSILON, "Changing the returned vectors also changes the box's data");
 
     box.min = [0,0,0];
-    box.max = XML3D.Vec3.fromValues(10,10,10);
+    box.max = new XML3D.Vec3(10,10,10);
     QUnit.closeArray(box.data, [0,0,0,10,10,10], EPSILON, "Setters work with arrays and Vec3 objects");
 });
 

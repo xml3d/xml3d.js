@@ -1,4 +1,5 @@
 var XC = require("../../../xflow/interface/constants.js");
+var GL = require("../constants.js");
 
 function convertToJSArray(value) {
     var jsArray = [value.length];
@@ -55,7 +56,6 @@ var createArrayBuffer = function (context, data) {
 };
 
 var getGLTypeFromArray = function (array) {
-    var GL = window.WebGLRenderingContext;
     if (array instanceof Int8Array)
         return GL.BYTE;
     if (array instanceof Uint8Array)

@@ -6,6 +6,7 @@ var MaterialEvents = require("../materials/events.js");
 var XC = require("../../../xflow/interface/constants.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 var assert = require("assert");
+var GL = require("../constants.js");
 
 var CHANGE_STATE = {
     NOTHING_CHANGED: 0,
@@ -420,7 +421,6 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
  * @param {string} typeName
  */
 var getGLTypeFromString = function (typeName) {
-    var GL = window.WebGLRenderingContext;
     if (typeName && typeName.toLowerCase)
         typeName = typeName.toLowerCase();
     switch (typeName) {

@@ -1,5 +1,5 @@
 // Note: This context should only be used to access GL constants
-var GL = window.WebGLRenderingContext;
+var GL = require("./constants.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
 
 /**

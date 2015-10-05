@@ -1,4 +1,4 @@
-
+var GL = require("../constants.js");
 
 /**
  *
@@ -27,7 +27,7 @@ XML3D.extend(GLMesh.prototype, {
 
     setPrimitiveType: function(type) {
         this.glType = type;
-        this.multiDraw = (this.glType == WebGLRenderingContext.LINE_STRIP || this.glType == WebGLRenderingContext.TRIANGLE_STRIP);
+        this.multiDraw = (this.glType == GL.LINE_STRIP || this.glType == GL.TRIANGLE_STRIP);
     },
 
     checkBufferCompatible: function (name, xflowDataBuffer) {

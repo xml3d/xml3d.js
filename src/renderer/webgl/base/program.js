@@ -1,6 +1,7 @@
 
 var utils = require("./utils.js");
 var SystemNotifier = require("../system/system-notifier.js");
+var GL = require("../constants.js");
 
 //noinspection JSValidateJSDoc
 /**
@@ -14,10 +15,10 @@ var createWebGLShaderFromSource = function (gl, type, shaderSource) {
     gl.shaderSource(shader, shaderSource);
     gl.compileShader(shader);
 
-    if (gl.getShaderParameter(shader, WebGLRenderingContext.COMPILE_STATUS) == 0) {
+    if (gl.getShaderParameter(shader, GL.COMPILE_STATUS) == 0) {
         var message = gl.getShaderInfoLog(shader);
         var errorString = "";
-        if (type == WebGLRenderingContext.VERTEX_SHADER)
+        if (type == GL.VERTEX_SHADER)
             errorString = "Vertex shader failed to compile: \n"; else
             errorString = "Fragment shader failed to compile: \n";
 
@@ -27,7 +28,7 @@ var createWebGLShaderFromSource = function (gl, type, shaderSource) {
         gl.getError();
         SystemNotifier.sendEvent('glsl', {
                 glslType: "compile_error",
-                shaderType: type == WebGLRenderingContext.VERTEX_SHADER ? "vertex" : "fragment",
+                shaderType: type == GL.VERTEX_SHADER ? "vertex" : "fragment",
                 code: shaderSource,
                 message: message
             });
@@ -49,12 +50,12 @@ var createProgramFromSources = function (gl, vertexSources, fragmentSources) {
     var shaders = [];
     for (s in vertexSources) {
         src = vertexSources[s];
-        shd = createWebGLShaderFromSource(gl, WebGLRenderingContext.VERTEX_SHADER, src);
+        shd = createWebGLShaderFromSource(gl, GL.VERTEX_SHADER, src);
         shaders.push(shd);
     }
     for (s in fragmentSources) {
         src = fragmentSources[s];
-        shd = createWebGLShaderFromSource(gl, WebGLRenderingContext.FRAGMENT_SHADER, src);
+        shd = createWebGLShaderFromSource(gl, GL.FRAGMENT_SHADER, src);
         shaders.push(shd);
     }
     return createProgramFromShaders(gl, shaders);
@@ -73,7 +74,7 @@ var createProgramFromShaders = function (gl, shaders) {
         gl.attachShader(program, shader);
     }
     gl.linkProgram(program);
-    if (gl.getProgramParameter(program, WebGLRenderingContext.LINK_STATUS) == 0) {
+    if (gl.getProgramParameter(program, GL.LINK_STATUS) == 0) {
         var message = gl.getProgramInfoLog(program);
         var errorString = "Shader linking failed: \n";
         errorString += message;

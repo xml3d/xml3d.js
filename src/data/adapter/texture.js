@@ -3,6 +3,7 @@ var InputNode = require("../../xflow/interface/graph.js").InputNode;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
+var GL = require("../../renderer/webgl/constants.js");
 
 var defaults = require('lodash.defaults');
 var assign = require('lodash.assign');
@@ -91,21 +92,21 @@ XML3D.createClass(TextureDataAdapter, NodeAdapter, {
 });
 
 var wrapToGL = {
-    "clamp":  WebGLRenderingContext.CLAMP_TO_EDGE,
-    "repeat": WebGLRenderingContext.REPEAT
+    "clamp":  GL.CLAMP_TO_EDGE,
+    "repeat": GL.REPEAT
 };
 
 var filterToGL = {
-    "nearest": WebGLRenderingContext.NEAREST,
-    "linear": WebGLRenderingContext.LINEAR,
-    "nearest-mipmap-nearest": WebGLRenderingContext.NEAREST_MIPMAP_NEAREST,
-    "linear-mipmap-nearest": WebGLRenderingContext.LINEAR_MIPMAP_NEAREST,
-    "nearest-mipmap-linear": WebGLRenderingContext.NEAREST_MIPMAP_LINEAR,
-    "linear-mipmap-linear": WebGLRenderingContext.LINEAR_MIPMAP_LINEAR
+    "nearest": GL.NEAREST,
+    "linear": GL.LINEAR,
+    "nearest-mipmap-nearest": GL.NEAREST_MIPMAP_NEAREST,
+    "linear-mipmap-nearest": GL.LINEAR_MIPMAP_NEAREST,
+    "nearest-mipmap-linear": GL.NEAREST_MIPMAP_LINEAR,
+    "linear-mipmap-linear": GL.LINEAR_MIPMAP_LINEAR
 };
 
 function shouldGenerateMipMaps(minFilter, magFilter) {
-    return (minFilter != WebGLRenderingContext.NEAREST && minFilter != WebGLRenderingContext.LINEAR) || (magFilter != WebGLRenderingContext.NEAREST && magFilter != WebGLRenderingContext.LINEAR);
+    return (minFilter != GL.NEAREST && minFilter != GL.LINEAR) || (magFilter != GL.NEAREST && magFilter != GL.LINEAR);
 }
 
 function parseTextureSamplingParameters(wrap, filter, anisotropy) {
@@ -139,10 +140,10 @@ function parseTextureSamplingParameters(wrap, filter, anisotropy) {
 function initTextureSamplingParameters(config, wrap, filter, samples) {
     var params = parseTextureSamplingParameters(wrap, filter, samples);
     defaults(params, {
-        wrapS: WebGLRenderingContext.CLAMP_TO_EDGE,
-        wrapT: WebGLRenderingContext.CLAMP_TO_EDGE,
-        minFilter: WebGLRenderingContext.LINEAR_MIPMAP_LINEAR,
-        magFilter: WebGLRenderingContext.LINEAR,
+        wrapS: GL.CLAMP_TO_EDGE,
+        wrapT: GL.CLAMP_TO_EDGE,
+        minFilter: GL.LINEAR_MIPMAP_LINEAR,
+        magFilter: GL.LINEAR,
         textureType: XC.TEX_TYPE.TEXTURE_2D,
         anisotropy: 1
     });

@@ -1,3 +1,4 @@
+
 module.exports = {
     /**
      * Set uniforms for active program

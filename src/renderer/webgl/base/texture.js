@@ -3,6 +3,7 @@ var StateMachine = require("../../../contrib/state-machine.js");
 var SamplerConfig = require("../../../xflow/interface/data.js").SamplerConfig;
 var XC = require("../../../xflow/interface/constants.js");
 var uniqueObjectId = utils.getUniqueCounter();
+var GL = require("../constants.js");
 
 //noinspection JSValidateJSDoc
 /**
@@ -58,8 +59,8 @@ var getOrCreateFallbackTexture = (function () {
             for (var i = 0; i < texels.length; i++) {
                 texels[i] = 128;
             }
-            c_fallbackTexture.createTex2DFromData(WebGLRenderingContext.RGB, size, size, WebGLRenderingContext.RGB, WebGLRenderingContext.UNSIGNED_BYTE, {
-                texels: texels, wrapS: WebGLRenderingContext.REPEAT, wrapT: WebGLRenderingContext.REPEAT, minFilter: WebGLRenderingContext.LINEAR, magFilter: WebGLRenderingContext.LINEAR
+            c_fallbackTexture.createTex2DFromData(GL.RGB, size, size, GL.RGB, GL.UNSIGNED_BYTE, {
+                texels: texels, wrapS: GL.REPEAT, wrapT: GL.REPEAT, minFilter: GL.LINEAR, magFilter: GL.LINEAR
             });
         }
         return c_fallbackTexture;
@@ -164,7 +165,7 @@ XML3D.extend(GLTexture.prototype, {
      * @returns {boolean}
      */
     needsScale: function (width, height) {
-        return (this.generateMipMap || this.wrapS != WebGLRenderingContext.CLAMP_TO_EDGE || this.wrapT != WebGLRenderingContext.CLAMP_TO_EDGE) && (!isPowerOfTwo(width) || !isPowerOfTwo(height))
+        return (this.generateMipMap || this.wrapS != GL.CLAMP_TO_EDGE || this.wrapT != GL.CLAMP_TO_EDGE) && (!isPowerOfTwo(width) || !isPowerOfTwo(height))
     },
 
 
@@ -175,7 +176,7 @@ XML3D.extend(GLTexture.prototype, {
         if (unit == -2) {
             XML3D.debug.logError("All available texture units are full.");
         } else {
-            gl.activeTexture(WebGLRenderingContext.TEXTURE0 + unit);
+            gl.activeTexture(GL.TEXTURE0 + unit);
             gl.bindTexture(this.textureType, this.handle);
         }
         return unit;

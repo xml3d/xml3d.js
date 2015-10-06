@@ -253,8 +253,10 @@ function mapFunctionOnXML3DElements(elementList, fun) {
             // An XML3D element can't have further XML3D elements as children
             return;
         }
-        // For cases where an XML3D element might inside the subtree of the added node
-        var xml3dElems = element.getElementsByTagNameNS(XML3D.xml3dNS, "xml3d");
+        // For cases where an XML3D element might be inside the subtree of the added node
+        var xml3dElems = element.getElementsByTagName("xml3d");
+        xml3dElems = xml3dElems.length ? xml3dElems : element.getElementsByTagNameNS(XML3D.xml3dNS, "xml3d");
+
         Array.forEach(xml3dElems, fun);
     });
 }

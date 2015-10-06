@@ -625,10 +625,10 @@ test("Add xml3d element inside a div", 2, function() {
         x.parentNode.removeChild(x);
 
         var div = doc.createElement("div");
-        var xml3d = doc.createElementNS(XML3D.xml3dNS, "xml3d");
+        var xml3d = doc.createElement("xml3d");
         xml3d.setAttribute("style", "background-color:green; width: 200px; height: 200px;");
         div.appendChild(xml3d);
-        doc.querySelector("body").appendChild(xml3d);
+        doc.querySelector("body").appendChild(div);
 
         xml3d.addEventListener("framedrawn", function() {
             ok(true, "New XML3D element was initialized");

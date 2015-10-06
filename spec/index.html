@@ -440,6 +440,9 @@
       <dd>All other values do not affect the rendering of the element.
       </dd>
     </dl>
+
+    A 'display' value of <code>none</code> will hide all descendant elements regardless of their local properties, as it does in HTML.
+
     Here are some examples for the 'display' property:
     <pre class="example highlight">
       mesh.hidden { display: none } /* do not display meshes with hidden class */
@@ -489,7 +492,7 @@
     </div>
 
     <p>[[CSS3-transforms]] can be used to specify 3D transformations for any transformable element. The transform property may hold any number and combination of
-    values, which will be combined from left to right.</p>
+    values, which will be combined from left to right. Transformations also apply to all descendant scene elements, building a transformation hierarchy. </p>
 
     <div class="note">Some transform functions (eg. <code>translate3d</code>) require a unit of measurement to be valid. Because browsers do not yet support units that make sense
     for a 3D scene these values should be given in 'px'. For example, <code>translate3d(10px, 5px, 0px)</code>. Internally these transformations will of course be in the units that
@@ -526,6 +529,8 @@
 
           <div class="note">In cases where both a CSS transform and a <code>transform</code> attribute are given the CSS transform will take precedence.</div>
 
+          <p>The following example shows four different ways of defining the same transformation on a <a>group element</a>.</p>
+
           <pre class="example highlight">
             &lt;!-- Using a CSS3 transform --&gt;
             &lt;group style="transform: translate3d(0px, 0px, 10px)"&gt;&lt;/group&gt;
@@ -538,7 +543,7 @@
             &lt;data id="myDataTransform"&gt;
               &lt;float4x4 name="transform"&gt;1 0 0 0 0 1 0 0 0 0 1 10 0 0 0 1&lt;/float4x4&gt;
             &lt;/data&gt;
-            &lt;group transform="#myDataTransform"&gt;&lt;/group&gt;
+            &lt;group transform="derived"&gt;&lt;/group&gt;
 
             &lt;!-- Computing the transformation matrix with an Xflow operator --&gt;
             &lt;data id="myComputeTransform" compute="transform = xflow.createTransform(translation)"&gt;
@@ -546,8 +551,6 @@
             &lt;/data&gt;
             &lt;group transform="#myComputeTransform"&gt;&lt;/group&gt;
           </pre>
-
-          <p>The above example shows four different ways of defining the same transformation on a <a>group element</a>.</p>
 
       </section>
       <section>
@@ -779,34 +782,8 @@
         <a href="#data-elements">data elements</a> and cannot be referenced by other <code>group</code> elements. This means that
         unlike data elements, groups build a tree structure rather than a graph. Each group may only have a single parent.</p>
 
-        <p>Most properties of groups will be inherited by child elements. Each property is inherited differently, as summed up in this table:</p>
-        <div class="attributes">
-        <table>
-            <tbody>
-            <tr>
-                <th>Property</th>
-                <th>Behavior if absent</th>
-                <th>Behavior if present</th>
-            </tr>
-            <tr>
-                <td>material</td>
-                <td>Inherited from parent group</td>
-                <td>Overrides the value from the parent group</td>
-            </tr>
-            <tr>
-                <td>transform</td>
-                <td>Inherited from parent group</td>
-                <td>Multiplied with parent transformation</td>
-            </tr>
-            <tr>
-                <td>display</td>
-                <td>Inherited from parent group</td>
-                <td><code>parent.style.display</code> equals <code>none</code> then <code>none</code> else <code>display</code></td>
-            </tr>
-            </tbody>
-        </table>
-        </div>
-      <div class="issue">Move property behavior descriptions to the relevant concept section</div>
+        <p>Group elements inherit properties such as transformations, visibility and materials from their parent group. </p>
+
         <pre class="example highlight">
             &lt;group style="display: none;" material="#blueMaterial"&gt;
                 &lt;group style="display: block;"&gt;
@@ -1080,6 +1057,9 @@
                &lt;assetmesh name="hat" material="#aNewMaterialDefinedLocally"&gt;&lt;/assetmesh&gt;
             &lt;/model&gt;
           </pre>
+
+      <div class="note">Materials inside the asset will always override those assigned to the <code>model</code>. To assign a material from outside the
+      asset either remove all inner materials entirely or override each <code>assetmesh</code> individually as shown above.</div>
 
       This behavior is especially useful in driving animations inside the instantiated asset. Each instance of the <code>model</code> element can have its
       own animation state, even if all reference the same asset. Typically this is done by exposing the animation key through its own <code>assetdata</code>, which
@@ -3126,7 +3106,6 @@
   </section>
   <section>
     <h3>FrameDrawn</h3>
-    <div class="issue">Adapt IDL to the new stats object</div>
     <dl title='interface FrameDrawn : CustomEvent' class='idl'>
       <dt>attribute float detail.timeStart</dt>
       <dd>The system time at the beginning of the frame draw.</dd>

@@ -7,7 +7,7 @@ module("Perspective", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/perspective.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/perspective.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

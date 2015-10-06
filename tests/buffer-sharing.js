@@ -7,7 +7,7 @@ module("Buffer Sharing tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/buffer-sharing.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/buffer-sharing.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

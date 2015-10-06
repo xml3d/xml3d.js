@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
 <title>XML3D External References</title>
 <link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
@@ -8,12 +7,12 @@
 </head>
 <body style="background-color: #fff;width:500px">
 
-    <xml3d id="xml3dTest" width="320px" height="240px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc">
+    <xml3d id="xml3dTest" width="320px" height="240px" style="background-color: #ccc">
       <defs>
-        <transform id="t_object1" translation="-3 2.5 0"/>
-        <transform id="t_object2" translation="0 2.5 0"/>
-        <transform id="t_object3" translation="-3 0 0" />
-        <transform id="t_object4" translation="0 0 0" />
+        <transform id="t_object1" translation="-3 2.5 0"></transform>
+        <transform id="t_object2" translation="0 2.5 0"></transform>
+        <transform id="t_object3" translation="-3 0 0" ></transform>
+        <transform id="t_object4" translation="0 0 0" ></transform>
         <data id="simplePlane1">
           <int id="indices" name="index">0 1 2 1 2 3</int>
           <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
@@ -30,23 +29,23 @@
         </material>
 
       </defs>
-    <view id="myView" />
-    <light id="myLight"/>
+    <view id="myView" ></view>
+    <light id="myLight"></light>
     
     <group id="referCorrect" transform="#t_object1" material="#black" >
-        <mesh type="triangles" src="#simplePlane1" />
+        <mesh type="triangles" src="#simplePlane1" ></mesh>
     </group>
 
     <group id="referWrong" transform="#t_object2" material="#green42" >
-        <mesh type="triangles" src="#simplePlane1" />
+        <mesh type="triangles" src="#simplePlane1" ></mesh>
     </group>
 
     <group id="referLater" transform="#t_object3" material="#blue" >
-        <mesh type="triangles" src="#simplePlane1" />
+        <mesh type="triangles" src="#simplePlane1" ></mesh>
     </group>
 
     <group id="referNonExisting" transform="#t_object4" material="#notThere" >
-        <mesh type="triangles" src="#simplePlane1" />
+        <mesh type="triangles" src="#simplePlane1" ></mesh>
     </group>
 
     <material id="blue" model="urn:xml3d:material:flat" >

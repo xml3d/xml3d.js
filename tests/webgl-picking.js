@@ -2,7 +2,7 @@ module("WebGL Picking tests", {});
 
 test("Check current pick object (internal)", 9, function () {
     stop();
-    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-picking.xhtml");
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-picking.html");
 
     var test = frameLoaded.then(function (doc) {
         return doc.getElementById("xml3DElem");
@@ -30,7 +30,7 @@ test("Check current pick object (internal)", 9, function () {
 
 test("Simple picking with getElementByRay", 4, function () {
     stop();
-    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-picking.xhtml");
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-picking.html");
 
     var test = frameLoaded.then(function (doc) {
         return doc.getElementById("xml3DElem");
@@ -67,7 +67,7 @@ module("WebGL Picking tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-picking.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/webgl-picking.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

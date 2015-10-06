@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
 <title>XML3D Basic Scene</title>
 <link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
 <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
-  <xml3d id="myXml3d" width="300" height="200" xmlns="http://www.xml3d.org/2009/xml3d" style="background: #ddd">
+  <xml3d id="myXml3d" width="300" height="200" style="background: #ddd">
     <defs>
       <data id="rectangle" >
         <int id="indices" name="index">0 1 2 1 2 3</int>
@@ -18,12 +17,12 @@
       </data>
     </defs>
     <group id="meshGroup" style="transform: translateZ(-8px)" >
-      <mesh id="myMesh01" src="#rectangle" />
+      <mesh id="myMesh01" src="#rectangle" ></mesh>
       <group style="transform: translateX(2.5px)" >
-        <mesh id="myMesh02" src="#rectangle" />
+        <mesh id="myMesh02" src="#rectangle" ></mesh>
       </group>
       <group style="transform: translateX(-2.5px)" >
-        <mesh id="myMesh03" src="#rectangle" />
+        <mesh id="myMesh03" src="#rectangle" ></mesh>
       </group>
     </group>
   </xml3d>

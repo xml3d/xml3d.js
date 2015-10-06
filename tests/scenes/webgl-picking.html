@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+ <html >
+  <head>
+     <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+   <title>
+    XML3D
+   </title>
+  </head>
+  <body style="background-color: #FFF;width:500px">
+   <xml3d id="xml3DElem" style="background-color: grey; width: 300px; height: 200px;">
+            <defs>
+               <transform id="t1" translation="-2.5 2 -10"></transform>
+               <transform id="t2" translation="0 2 -10"></transform>
+               <transform id="t3" translation="2.5 2 -10"></transform>
+               <transform id="t3_back" translation="2.5 2 -10"></transform>
+               <transform id="t4" translation="-2.5 -2 -10"></transform>
+               <transform id="t5" translation="0 -2 -10"></transform>
+               <transform id="t6" translation="2.5 -2 -10"></transform>
+               <transform id="t7" translation="6 -4 -10"></transform>
+               <transform id="t8" translation="0 0 -10" rotation="0 1 0 1.57"></transform>
+               <transform id="t9" translation="-1 0 -10" rotation="0 1 0 1.57"></transform>
+               <transform id="t10" translation="-4.5 0 -9"></transform>
+               <transform id="t11" translation="0 0 -1"></transform>
+
+               <material id="material_diffuse" model="urn:xml3d:material:diffuse">
+                  <float3 name="diffuseColor">1 0.2 0.3</float3>
+                  <float name="ambientIntensity">0.8</float>
+               </material>
+                <material id="material_diffuse_yellow" model="urn:xml3d:material:diffuse">
+                    <float3 name="diffuseColor">1 1 0</float3>
+                    <float name="ambientIntensity">0.8</float>
+                </material>
+                 <material id="material_diffuse2" model="urn:xml3d:material:diffuse">
+                  <float3 name="diffuseColor">1 0.2 1</float3>
+                  <float name="ambientIntensity">0.8</float>
+               </material>
+               <material id="material_diffuse_texture" model="urn:xml3d:material:diffuse">
+                  <float3 name="diffuseColor">0.5 1 1</float3>
+                  <float name="ambientIntensity">0.5</float>
+                  <texture id="tex1" name="diffuseTexture">
+                    <img id="tex1img" src="textures/yellow.png"/>
+                  </texture>
+               </material>
+               <material id="material_diffuse_vertexcolors" model="urn:xml3d:material:diffuse">
+                  <bool name="useVertexColor">true</bool>
+                  <float name="ambientIntensity">0.9</float>
+                  <float3 name="diffuseColor">0.4 0.8 0.8</float3>
+               </material>
+               <material id="material_phong" model="urn:xml3d:material:phong">
+                  <float3 name="diffuseColor">1 0.2 0.3</float3>
+                  <float name="ambientIntensity">0.8</float>
+               </material>
+               <material id="material_phong_texture" model="urn:xml3d:material:phong">
+                  <float3 name="diffuseColor">0.5 1 1</float3>
+                  <float name="ambientIntensity">0.5</float>
+                  <texture id="tex1" name="diffuseTexture">
+                    <img id="tex1img" src="textures/yellow.png"/>
+                  </texture>
+               </material>
+               <material id="material_phong_vertexcolors" model="urn:xml3d:material:phong">
+                  <bool name="useVertexColor">true</bool>
+                  <float name="ambientIntensity">0.9</float>
+                  <float3 name="diffuseColor">0.4 0.8 0.8</float3>
+               </material>
+
+               <data id="mySimpleMesh">
+                  <int name="index">0 1 2 1 2 3</int>
+                  <float3 name="position">-1.0 -1.0 0.0
+                         1.0 -1.0 0.0
+                        -1.0  1.0 0.0
+                         1.0  1.0 0.0</float3>
+                  <float3 name="normal">
+                    0.0 0.0 1.0
+                    0.0 0.0 1.0
+                    0.0 0.0 1.0
+                    0.0 0.0 1.0</float3>
+                  <float2 name="texcoord">0.0 1.0
+                    1.0 1.0
+                    0.0 0.0
+                    1.0 0.0
+                </float2>
+                  <float3 name="color">
+                    1.0 0.5 0.25
+                    1.0 0.5 0.25
+                    1.0 0.5 0.25
+                    1.0 0.5 0.25
+                </float3>
+               </data>
+
+               <data id="square_donut">
+                   <int name="index">0 1 2 0 2 3 4 0 3 4 3 5 1 6 7 1 7 2 5 3 8 5 8 9 2 7 10 2 10 11 9 8 12 9 12 13 11 10 14 11 14 15 8 11 15 8 15 12</int>
+                   <float3 name="position">-0.333333 -1.000000 0.000000 0.333333 -1.000000 0.000000 0.333333 -0.333333 0.000000 -0.333333 -0.333333 0.000000 -1.000000 -1.000000 0.000000 -1.000000 -0.333333 0.000000 1.000000 -1.000000 0.000000 1.000000 -0.333333 0.000000 -0.333333 0.333333 0.000000 -1.000000 0.333333 0.000000 1.000000 0.333333 0.000000 0.333333 0.333333 0.000000 -0.333333 1.000000 0.000000 -1.000000 1.000000 0.000000 1.000000 1.000000 0.000000 0.333333 1.000000 0.000000</float3>
+                   <float3 name="normal">0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000</float3>
+               </data>
+            </defs>
+            <view></view>
+            <group onmouseover="console.log(evt.x, evt.y);" onmousemove="console.log(evt.x, evt.y);">
+                <group material="#material_diffuse" transform="#t1">
+                    <mesh id="pickingMesh1" src="#mySimpleMesh"></mesh>
+                </group>
+                <group material="#material_diffuse_texture" transform="#t2">
+                   <mesh id="pickingMesh2" src="#mySimpleMesh"></mesh>
+                </group>
+                <group material="#material_diffuse_vertexcolors" transform="#t3"  style="display: none;">
+                   <mesh id="pickingMesh3" src="#mySimpleMesh"></mesh>
+                </group>
+                <group material="#material_diffuse2" transform="#t3_back">
+                    <mesh id="pickingMesh_back" src="#mySimpleMesh"></mesh>
+                </group>
+                <group material="#material_phong" transform="#t4">
+                    <mesh id="pickingMesh4" src="#mySimpleMesh"></mesh>
+                </group>
+                <group material="#material_phong_texture" transform="#t5">
+                   <mesh id="pickingMesh5" src="#mySimpleMesh"></mesh>
+                </group>
+            </group>
+			<group id="many" material="#material_diffuse">
+                <mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh><mesh src="#mySimpleMesh"></mesh>
+			</group>
+			<group material="#material_phong_vertexcolors" transform="#t6">
+			   <mesh id="pickingMesh6" src="#mySimpleMesh"></mesh>
+			</group>
+           <group material="#material_diffuse" transform="#t7">
+               <mesh id="pickingMesh7" src="#mySimpleMesh"></mesh>
+           </group>
+
+           <group material="#material_diffuse_yellow" transform="#t8">
+               <mesh id="pickingMesh8" src="#mySimpleMesh"></mesh>
+           </group>
+
+           <group material="#material_diffuse_yellow" transform="#t9">
+               <mesh id="pickingMesh9" src="#mySimpleMesh"></mesh>
+           </group>
+
+           <group material="#material_diffuse2" transform="#t10">
+               <mesh id="pickingMesh10" src="#square_donut"></mesh>
+               <group material="#material_diffuse" transform="#t11">
+                   <mesh id="pickingMesh11" src="#mySimpleMesh"></mesh>
+               </group>
+           </group>
+
+         </xml3d>
+  </body>
+ </html>

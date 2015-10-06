@@ -254,7 +254,7 @@ module("Multiple XML3D nodes", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/multiple-canvas.xhtml" + window.location.search, this.cb);
+        loadDocument("scenes/multiple-canvas.html" + window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -279,7 +279,7 @@ module("WebGL: Ambient term", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-ambient.xhtml" + window.location.search, this.cb);
+        loadDocument("scenes/webgl-ambient.html" + window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
     <title>XML3D Loading Test Scene</title>
     <link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
@@ -17,29 +16,29 @@
     }
 </script>
 
-<xml3d id="myXml3d_1" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" onload="onloadHandler()">
+<xml3d id="myXml3d_1" width="1000px" height="300px" onload="onloadHandler()">
     <defs></defs>
 </xml3d>
 
-<xml3d id="myXml3d_2" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" onload="onloadHandler()">
+<xml3d id="myXml3d_2" width="1000px" height="300px" onload="onloadHandler()">
     <defs>
-        <transform id="t_identity"/>
-        <transform id="t_regular"/>
-        <transform id="t_translation" translation="1 2 3"/>
-        <transform id="t_rotation" rotation="1 0 0 1.57079632679489"/>
-        <transform id="t_rotation2" rotation="0 1 0 1.57079632679489"/>
-        <transform id="t_rotation3" rotation="0 0 1 1.57079632679489"/>
-        <transform id="t_scale" scale="1 2 3"/>
-        <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708"  translation="1 2 3"/>
+        <transform id="t_identity"></transform>
+        <transform id="t_regular"></transform>
+        <transform id="t_translation" translation="1 2 3"></transform>
+        <transform id="t_rotation" rotation="1 0 0 1.57079632679489"></transform>
+        <transform id="t_rotation2" rotation="0 1 0 1.57079632679489"></transform>
+        <transform id="t_rotation3" rotation="0 0 1 1.57079632679489"></transform>
+        <transform id="t_scale" scale="1 2 3"></transform>
+        <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708"  translation="1 2 3"></transform>
     </defs>
     <group id="viewParent">
-        <view id="myView" fieldofview="0.5"/>
+        <view id="myView" fieldofview="0.5"></view>
     </group>
     <group id="lightParent">
-        <light id="myLight"/>
+        <light id="myLight"></light>
     </group>
     <group id="myGroup" visible="false">
-        <mesh id="myMesh01" type="lines" onclick="alert('Hallo');"/>
+        <mesh id="myMesh01" type="lines" onclick="alert('Hallo');"></mesh>
     </group>
     <group id="meshGroup" transform="#t_regular">
         <mesh id="myMesh02">
@@ -53,12 +52,12 @@
     <group id="transformedGroup" transform="#t_mixed">
     </group>
     <group id="parentGroup" transform="#t_rotation">
-        <group id="child01" transform="#t_identity"/>
-        <group id="child02" transform="#t_identity"/>
+        <group id="child01" transform="#t_identity"></group>
+        <group id="child02" transform="#t_identity"></group>
     </group>
 </xml3d>
 
-<xml3d id="myXml3d_3" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" onload="onloadHandler()">
+<xml3d id="myXml3d_3" width="1000px" height="300px" onload="onloadHandler()">
     <defs></defs>
 </xml3d>
 

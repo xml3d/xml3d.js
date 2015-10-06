@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
 <title>XML3D Basic Scene</title>
 <link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
 <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
-  <xml3d id="myXml3d" width="600px" height="400px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: #ddd">
+  <xml3d id="myXml3d" width="600px" height="400px" style="background: #ddd">
 
     <defs>
       <data id="pointData" >
@@ -22,7 +21,7 @@
 
     <group style="transform: translateZ(-15px)" >
         <group material="#pointColormaterial" >
-            <mesh type="points" src="#pointData" />
+            <mesh type="points" src="#pointData" ></mesh>
         </group>
     </group>
 

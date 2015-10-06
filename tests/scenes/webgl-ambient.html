@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
- <html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+ <html>
   <head>
      <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
     <script type="text/javascript" src="../../build/output/xml3d.js"></script>
@@ -8,14 +8,14 @@
    </title>
   </head>
   <body style="background-color: #FFF;width:500px">
-   <xml3d xmlns="http://www.xml3d.org/2009/xml3d" id="xml3DElem" style="background-color: grey; width: 300px; height: 200px;">
+   <xml3d id="xml3DElem" style="background-color: grey; width: 300px; height: 200px;">
             <defs>
-               <transform id="t1" translation="-2.5 2 0"/>
-               <transform id="t2" translation="0 2 0"/>
-               <transform id="t3" translation="2.5 2 0"/>
-               <transform id="t4" translation="-2.5 -2 0"/>
-               <transform id="t5" translation="0 -2 0"/>
-               <transform id="t6" translation="2.5 -2 0"/>
+               <transform id="t1" translation="-2.5 2 0"></transform>
+               <transform id="t2" translation="0 2 0"></transform>
+               <transform id="t3" translation="2.5 2 0"></transform>
+               <transform id="t4" translation="-2.5 -2 0"></transform>
+               <transform id="t5" translation="0 -2 0"></transform>
+               <transform id="t6" translation="2.5 -2 0"></transform>
                
                <material id="material_diffuse" model="urn:xml3d:material:diffuse">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
@@ -74,25 +74,25 @@
                 </float3>
                </data>
             </defs>
-            <view/>
+            <view></view>
             <group onmouseover="console.log(evt.x, evt.y);" onmousemove="console.log(evt.x, evt.y);">
                 <group material="#material_diffuse" transform="#t1">
-                    <mesh id="pickingMesh1" src="#mySimpleMesh"/>
+                    <mesh id="pickingMesh1" src="#mySimpleMesh"></mesh>
                 </group>
                 <group material="#material_diffuse_texture" transform="#t2">
-                   <mesh id="pickingMesh2" src="#mySimpleMesh"/>
+                   <mesh id="pickingMesh2" src="#mySimpleMesh"></mesh>
                 </group>
                 <group material="#material_diffuse_vertexcolors" transform="#t3">
-                   <mesh id="pickingMesh3" src="#mySimpleMesh"/>
+                   <mesh id="pickingMesh3" src="#mySimpleMesh"></mesh>
                 </group>
                 <group material="#material_phong" transform="#t4">
-                    <mesh id="pickingMesh4" src="#mySimpleMesh"/>
+                    <mesh id="pickingMesh4" src="#mySimpleMesh"></mesh>
                 </group>
                 <group material="#material_phong_texture" transform="#t5">
-                   <mesh id="pickingMesh5" src="#mySimpleMesh"/>
+                   <mesh id="pickingMesh5" src="#mySimpleMesh"></mesh>
                 </group>
                 <group material="#material_phong_vertexcolors" transform="#t6">
-                   <mesh id="pickingMesh6" src="#mySimpleMesh"/>
+                   <mesh id="pickingMesh6" src="#mySimpleMesh"></mesh>
                 </group>
             </group>
          </xml3d>
@@ -100,7 +100,7 @@
     function getPixelValue(canvas, x,y) {
         var pixels = new Uint8Array(4), a = new Array(4);
         canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
-        for(var i=0;i&lt;4;i++)
+        for(var i=0;i<4;i++)
             a[i] = pixels[i];
         return a;
     }

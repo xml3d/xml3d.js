@@ -7,7 +7,7 @@ module("Script Value", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/script-value.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/script-value.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

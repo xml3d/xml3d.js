@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
   <head>
     <title>Transform</title>
     <link rel="stylesheet" type="text/css" media="all" href="frame.css" />
@@ -8,8 +8,8 @@
   </head>
   <body>
     <div style="color: mediumblue;">
-      <xml3d id="xml3DElem" style="width: 300px; height: 200px; border: 0px solid black; position: absolute; left: 200px" xmlns="http://www.xml3d.org/2009/xml3d" view="#defaultView">
-        <view id="defaultView" position="0 0 10" />
+      <xml3d id="xml3DElem" style="width: 300px; height: 200px; border: 0px solid black; position: absolute; left: 200px" view="#defaultView">
+        <view id="defaultView" position="0 0 10" ></view>
         <defs>
           <data id="mySimpleMesh">
             <int name="index">0 1 2 1 2 3</int>
@@ -18,21 +18,21 @@
             <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
           </data>
           <!-- transformations -->
-          <transform id="left4" translation="-4 0 0" />
-          <transform id="right4" translation="4 0 0" />
-          <transform id="scale2" scale="1.5 2 2" />
-          <transform id="rotate90" rotation="0 0 1 0.785398163" />
+          <transform id="left4" translation="-4 0 0" ></transform>
+          <transform id="right4" translation="4 0 0" ></transform>
+          <transform id="scale2" scale="1.5 2 2" ></transform>
+          <transform id="rotate90" rotation="0 0 1 0.785398163" ></transform>
         </defs>
         <group>
           <group transform="#scale2">
-            <mesh type="triangles" src="#mySimpleMesh" />
+            <mesh type="triangles" src="#mySimpleMesh" ></mesh>
           </group>
           <group transform="#right4">
-            <mesh type="triangles" src="#mySimpleMesh" />
+            <mesh type="triangles" src="#mySimpleMesh" ></mesh>
           </group>
           <group transform="#left4">
             <group transform="#rotate90">
-              <mesh type="triangles" src="#mySimpleMesh" />
+              <mesh type="triangles" src="#mySimpleMesh" ></mesh>
             </group>
           </group>
         </group>

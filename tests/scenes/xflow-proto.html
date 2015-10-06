@@ -1,20 +1,19 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
 <title>XML3D Basic Scene</title>
 <link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
 <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
-  <xml3d id="myXml3d" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+  <xml3d id="myXml3d" width="1000px" height="300px">
     <defs>
       <dataflow id="morphDouble" out="position" >
-        <float3 param="true" name="position" />
-        <float3 param="true" name="posAdd1" />
-        <float3 param="true" name="posAdd2" />
-        <float3 param="true" name="weight1" />
-        <float3 param="true" name="weight2" />
+        <float3 param="true" name="position" ></float3>
+        <float3 param="true" name="posAdd1" ></float3>
+        <float3 param="true" name="posAdd2" ></float3>
+        <float3 param="true" name="weight1" ></float3>
+        <float3 param="true" name="weight2" ></float3>
         <compute>
             position = xflow.morph(position, posAdd1, weight1);
             position = xflow.morph(position, posAdd2, weight2);
@@ -33,7 +32,7 @@
 
 
       <mesh id="myMesh02" proto="#morphDouble" >
-        <data src="#rectangle" />
+        <data src="#rectangle" ></data>
         <float name="weight1" >4.0</float>
         <float name="weight2" >0.5</float>
       </mesh>
@@ -41,7 +40,7 @@
 
       <group style="transform: translate3d(-10px, 0,0)" >
         <mesh id="myMesh03" proto="#morphDouble" >
-          <data src="#rectangle" />
+          <data src="#rectangle" ></data>
           <float name="weight1" >0.5</float>
           <float name="weight2" >1.0</float>
         </mesh>

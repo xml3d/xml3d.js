@@ -8,7 +8,7 @@ module("Canvas configuration tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/canvas.xhtml", this.cb);
+        loadDocument("scenes/canvas.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

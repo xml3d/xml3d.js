@@ -62,7 +62,7 @@ module("Event tests", {
             that.xml3dEl = that.doc.getElementById("myXml3d");
             start();
         };
-        loadDocument("scenes/basic-event.xhtml", this.cb);
+        loadDocument("scenes/basic-event.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

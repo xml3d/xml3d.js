@@ -7,7 +7,7 @@ module("ID Changes", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/id-changes.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/id-changes.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

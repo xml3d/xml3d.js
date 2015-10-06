@@ -7,7 +7,7 @@ module("Scene Loading", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/scene-loading.xhtml", this.cb);
+        loadDocument("scenes/scene-loading.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

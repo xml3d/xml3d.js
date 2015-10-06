@@ -8,7 +8,7 @@ module("Transformations", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/transformations.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/transformations.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

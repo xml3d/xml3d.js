@@ -62,7 +62,7 @@ test("Modify asset pick", 5, function () {
 
 test("Recursive external assets and data", 2, function () {
     stop();
-    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/asset-recursive.xhtml");
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/asset-recursive.html");
 
     var test = frameLoaded.then(function (doc) {
         return doc.getElementById("xml3dTest");

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>XML3D Canvas Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+<style>
+.canvas {
+    width: 20px;
+    height: 40px;
+    left: 80px;
+    top: 40px;
+    position: absolute;
+}
+xml3d, canvas {
+    background-color: red;
+    border: 1px solid blue;
+}
+
+</style>
+</head>
+<body style="background-color: #FFF;width:500px">
+  <xml3d id="default">
+  </xml3d>
+  <xml3d id="attributes" width="50px" height="30px">
+  </xml3d>
+  <xml3d id="css-style" style="width: 40px; height: 20px;">
+  </xml3d>
+  <xml3d id="css-class" class="canvas">
+  </xml3d>
+  <xml3d id="attributes-vs-css" class="canvas" style="width: 40px; height: 20px;" width="50px" height="30px">
+  </xml3d>
+  <xml3d id="positioning-css-style" style="width: 40px; height: 20px; left: 30px; top: 50px;">
+  </xml3d>
+  <xml3d id="positioning-css-class" class="canvas" style="width: 40px; height: 20px;">
+  </xml3d>
+  
+</body>
+</html>

@@ -627,7 +627,7 @@
             &lt;data id="myDataTransform"&gt;
               &lt;float4x4 name="transform"&gt;1 0 0 0 0 1 0 0 0 0 1 10 0 0 0 1&lt;/float4x4&gt;
             &lt;/data&gt;
-            &lt;group transform="derived"&gt;&lt;/group&gt;
+            &lt;group transform="#myDataTransform"&gt;&lt;/group&gt;
 
             &lt;!-- Computing the transformation matrix with an Xflow operator --&gt;
             &lt;data id="myComputeTransform" compute="transform = xflow.createTransform(translation)"&gt;
@@ -1176,12 +1176,8 @@
         </pre>
 
 
-            <p>FIXME(ksons) This is outdated, right?: In addition to the <code>transform</code> attribute, a
-                transformation matrix for this mesh may also be defined in a <code>float4x4</code> element. This option
-                is
-                described in more detail in the section on the <a>assetmesh element</a>. This approach actually uses the
-                same Xflow data overriding
-                mechanism described above to override the internally computed mesh transformation matrix.</p>
+            <p>Different ways of assigning transformations to meshes are described in the
+                <a href="#transformable-elements">transformable elements</a> section.</p>
 
             <dl title='interface XML3DMeshElement : HTMLElement' class='idl'>
                 <dt>readonly attribute boolean complete</dt>

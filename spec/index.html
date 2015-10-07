@@ -734,7 +734,7 @@
           returns null. Unlike <code>getElementByPoint</code> this function is not dependent on the currently active view. This makes it useful for, for example,
           finding the surface normal of an object at a particular point regardless of whether or not that object is currently visible to the active camera.
             <dl class='parameters'>
-                <dt>ray ray</dt>
+                <dt>Ray ray</dt>
                 <dd></dd>
                 <dt>optional Vec3 hitPoint</dt>
                 <dd>If provided this vector will be filled with the position of the hit point in world space.</dd>
@@ -750,7 +750,7 @@
         <dt>Box getWorldBoundingBox()</dt>
         <dd>Returns the bounding box of the scene in world space.</dd>
 
-        <dt>ray generateRay()</dt>
+        <dt>Ray generateRay()</dt>
         <dd>
             Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new ray from the given x,y <b>window</b> coordinates.
             <dl class='parameters'>
@@ -1455,7 +1455,7 @@
 
             <p>
                 Conceptually this data element will 'call' the dataflow element with the input 'arguments' from the file <code>myMeshData.xml</code> and then assign the output
-                of the dataflow to the <code>position</code> and <code>normal</code> fields, effectively overwriting the ones found in <code>myMeshData.xml</code>.
+                of the dataflow to the <code>position</code> and <code>normal</code> fields, effectively overriding the ones found in <code>myMeshData.xml</code>.
                 Note the URI fragment inside the <code>dataflow[]</code> construct. This may also reference an external document containing the dataflow.
             </p>
 
@@ -1573,7 +1573,7 @@
             <p>The <dfn>string element</dfn> holds a <em>comma</em> separated list of string values.
             </p>
 
-            <p>Currently the following string attributes may be set by referencing a <a>data element</a> containing a string field with the matching <code>name</code>:</p>
+            <p>Currently the following string attributes may be supplied by including a string element with the matching <code>name</code>:</p>
             <ul>
                 <li>The <a href="#attr-mesh-type" class="internalDFN">type attribute</a> of the <a>mesh element</a></li>
                 <li>The <a href="#attr-mesh-type" class="internalDFN">type attribute</a> of the <a>assetmesh element</a></li>
@@ -1585,12 +1585,13 @@
           &lt;data id="meshTypeCompute" compute="type = xflow.selectString(selector, value1, value2)"&gt;
               &lt;string name="value1"&gt;triangles&lt;/string&gt;
               &lt;string name="value2"&gt;lines&lt;/string&gt;
-              &lt;int name="selector"&gt;1&lt;/int&gt;
-              &lt;data src="#meshdata"&gt;1&lt;/data&gt;
+              &lt;int name="selector"&gt;2&lt;/int&gt;
           &lt;/data&gt;
 
           &lt;!-- In this case type will evaluate to 'lines' --&gt;
-          &lt;mesh src="#meshdata" type="derived"&gt;&lt;/mesh&gt;
+          &lt;mesh src="#meshdata" type="derived"&gt;
+            &lt;data src="#meshTypeCompute"&gt;&lt;/data&gt;
+          &lt;/mesh&gt;
       </pre>
 
             <dl title='interface XML3DStringValueElement : HTMLElement' class='idl'>
@@ -2391,8 +2392,6 @@
         XML mesh file      model/vnd.xml3d.mesh+xml
 
         XML asset file     model/vnd.xml3d.model+xml
-
-        BLAST binary       model/vnd.xml3d.[model|mesh]+blast
     </pre>
     <p>The response should include a <code>Content-Type</code> header with the same content-type <b>or</b> the appropriate standard type
     <code>application/json</code>, <code>application/xml</code> or <code>application/octet-stream</code>. </p>

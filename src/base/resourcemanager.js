@@ -291,7 +291,7 @@ function setDocumentData(httpRequest, url, mimetype) {
         response = httpRequest.responseXML;
         if (!response) {
             XML3D.debug.logError("Invalid external XML document '" + httpRequest._url +
-                "': XML Syntax error or the request did not succeed.");
+                "': XML Syntax error or the request did not succeed or the document was truncated for being too large.");
             return;
         }
         //Workaround for IE "bug" where external documents always report their document.URL as being identical to window.location.href

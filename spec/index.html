@@ -2813,6 +2813,90 @@
 </section>
 
 <section>
+    <h2>Global options</h2>
+    <p>XML3D provides a set of global options through the <code>XML3D.options</code> interface. These options are shared between
+    all XML3D elements on a page.</p>
+    <dl title="interface options" class="idl" id="idl-def-options">
+        <dt>string getValue(string key)</dt>
+        <dd>Returns the current value of the option with the matching key.</dd>
+        <dt>void setValue(string key, string value)</dt>
+        <dd>Set the option with the given key to the given value.</dd>
+        <dt>Array getKeys()</dt>
+        <dd>Returns an array of all available option keys.</dd>
+        <dt>void addObserver(string key, function observer)</dt>
+        <dd>Adds a change observer to the option with the given key. Supports the '*' wildcard to observe all options.</dd>
+        <dt>void removeObserver(function observer)</dt>
+        <dd>Removes the given change observer from all keys.</dd>
+        <dt>void resetValue(string key)</dt>
+        <dd>Resets the value of the option with the matching key to the default value.</dd>
+        <dt>void setOptionsFromQuery()</dt>
+        <dd>Parses the page URL for option keys and values in the standard query form, eg. <code>?loglevel=debug</code></dd>
+    </dl>
+
+    <p>Currently the following options are available in xml3d.js, the default is shown in bold:</p>
+    <div class="attributes">
+        <table>
+            <tbody>
+            <tr>
+                <th>Key</th>
+                <th>Values</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>loglevel</td>
+                <td>all, debug, info, warning, <span class="default_option">error</span>, exception</td>
+                <td>Controls the level of logging to the console.</td>
+            </tr>
+            <tr>
+                <td>resource-crossorigin-attribute</td>
+                <td><span class="default_option">anonymous</span>, use-credentials</td>
+                <td>This value will be assigned to the <code>crossOrigin</code> field of requested resources such as
+                    <code>img</code> or <code>video</code>.</td>
+            </tr>
+            <tr>
+                <td>renderer-faceculling</td>
+                <td>back, front, both, <span class="default_option">none</span></td>
+                <td>Controls which faces are culled during rendering. Corresponds to WebGL's <code>cullFace</code> function.</td>
+            </tr>
+            <tr>
+                <td>renderer-frontface</td>
+                <td>cw, <span class="default_option">ccw</span></td>
+                <td>Controls the handedness of face construction during rendering. Corresponds to WebGL's <code>frontFace</code> function.</td>
+            </tr>
+            <tr>
+                <td>renderer-frustumCulling</td>
+                <td><span class="default_option">true</span>, false</td>
+                <td>Toggles <a href="http://www.lighthouse3d.com/tutorials/view-frustum-culling/">view frustum culling</a> during rendering.</td>
+            </tr>
+            <tr>
+                <td>renderer-mousemove-picking</td>
+                <td><span class="default_option">true</span>, false</td>
+                <td>Enable object picking for mousemove events. Ex: The XML3D standard camera disables mousemove picking between the
+                mousedown and mouseup events of a camera rotation.</td>
+            </tr>
+            <tr>
+                <td>renderer-movement-aware-click-handler</td>
+                <td>true, <span class="default_option">false</span></td>
+                <td>When true, disregard click events where the mouse has moved between the mousedown and mouseup events.</td>
+            </tr>
+            <tr>
+                <td>renderer-continuous</td>
+                <td>true, <span class="default_option">false</span></td>
+                <td>Toggle continuous rendering. If false a frame will only be drawn if XML3D detects a scene change that requires it.</td>
+            </tr>
+            <tr>
+                <td>renderer-ssao</td>
+                <td>true, <span class="default_option">false</span></td>
+                <td>Toggle screen space ambient occlusion. Note: This is an experimental feature!</td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+<section>
     <h2>Content-Types</h2>
 
     <p>XML3D specifies the following content-types for external resources:</p>

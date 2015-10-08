@@ -2830,7 +2830,7 @@
         <dt>void resetValue(string key)</dt>
         <dd>Resets the value of the option with the matching key to the default value.</dd>
         <dt>void setOptionsFromQuery()</dt>
-        <dd>Parses the page URL for option keys and values in the standard query form, eg. <code>?loglevel=debug</code></dd>
+        <dd>Parses the page URL for option keys and values in the standard query form. Done once automatically on page load.</dd>
     </dl>
 
     <p>Currently the following options are available in xml3d.js, the default is shown in bold:</p>
@@ -2892,6 +2892,10 @@
 
             </tbody>
         </table>
+    </div>
+
+    <div class="note">
+        These options can also be set through URL queries by appending <code>xml3d-</code>, like so: <code>?xml3d-loglevel=debug</code>
     </div>
 
 </section>

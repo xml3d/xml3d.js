@@ -343,6 +343,7 @@ XML3D.extend(GLRenderer.prototype, {
             this.scene.shaderFactory.setShaderRecompile();
             this.createDefaultPipelines();
         }
+        this.requestRedraw("global option changed");
     }
 });
 

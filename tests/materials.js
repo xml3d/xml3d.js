@@ -130,7 +130,7 @@ test("Change transparency", 5, function () {
 
     var checkTransparencyChange = checkOpaquematerialChange.then(changeFunction("makeOpaqueTransparent")).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 256, 256);
-        QUnit.closeArray(pick, [127.5, 0, 127.5, 255], PIXEL_EPSILON, "Make the opaque object transparent by changing its transparency value. Should be half blue, half red now.");
+        QUnit.closeArray(pick, [127.5, 0, 127.5, 255], PIXEL_EPSILON, "Make the opaque object transparent by changing its opacity value. Should be half blue, half red now.");
         return s;
     });
 

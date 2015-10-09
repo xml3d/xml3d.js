@@ -34,7 +34,7 @@ XML3D.materials.register("point", {
 
     fragment : [
         "uniform vec3 diffuseColor;",
-        "uniform float transparency;",
+        "uniform float opacity;",
         "uniform mat4 viewMatrix;",
         "uniform bool useVertexColor;",
         "uniform vec2 texCoordOffset;",
@@ -51,7 +51,7 @@ XML3D.materials.register("point", {
         "varying vec3 fragVertexColor;",
 
         "void main(void) {",
-        "  float alpha =  max(0.0, 1.0 - transparency);",
+        "  float alpha =  max(0.0, opacity);",
         "  vec3 objDiffuse = diffuseColor;",
         "  if(useVertexColor)",
         "    objDiffuse *= fragVertexColor;",
@@ -70,15 +70,15 @@ XML3D.materials.register("point", {
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
     },
     hasTransparency: function(params) {
-        return params.transparency && params.transparency.getValue()[0] > 0.001;
+        return params.opacity && params.opacity.getValue()[0] < 1;
     },
     uniforms: {
-        diffuseColor: [1.0, 1.0, 1.0],
-        texCoordOffset: [0, 0],
-        texCoordSize: [1, 1],
-        transparency: 0.0,
-        useVertexColor: false,
-        pointSize: 1.0
+        diffuseColor    : [1.0, 1.0, 1.0],
+        texCoordOffset  : [0, 0],
+        texCoordSize    : [1, 1],
+        opacity         : 1.0,
+        useVertexColor  : false,
+        pointSize       : 1.0
     },
     samplers: {
         diffuseTexture: null

@@ -43,7 +43,7 @@ XML3D.materials.register("phong", {
         "uniform vec3 emissiveColor;",
         "uniform float shininess;",
         "uniform vec3 specularColor;",
-        "uniform float transparency;",
+        "uniform float opacity;",
         "uniform mat4 viewMatrix;",
         "uniform bool useVertexColor;",
 		"uniform vec3 coords;",
@@ -146,7 +146,7 @@ XML3D.materials.register("phong", {
         "    }",
         "#endif",
 
-        "  float alpha =  max(0.0, 1.0 - transparency);",
+        "  float alpha =  max(0.0, opacity);",
         "  vec3 objDiffuse = diffuseColor;",
         "  if(useVertexColor)",
         "    objDiffuse *= fragVertexColor;",
@@ -302,13 +302,13 @@ XML3D.materials.register("phong", {
         directives.push("HAS_SSAOMAP " + (XML3D.options.getValue("renderer-ssao") ? "1" : "0"));
     },
     hasTransparency: function(params) {
-        return params.transparency && params.transparency.getValue()[0] > 0.001;
+        return params.opacity && params.opacity.getValue()[0] < 1;
     },
     uniforms: {
         diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0],
         specularColor   : [0.0, 0.0, 0.0],
-        transparency    : 0.0,
+        opacity         : 1.0,
         shininess       : 0.2,
         ambientIntensity: 0.0,
         useVertexColor : false

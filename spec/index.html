@@ -2363,10 +2363,10 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>transparency</td>
+                        <td>opacity</td>
                         <td>float</td>
-                        <td>0</td>
-                        <td>The transparency of the object, with 0 being opaque and 1 being fully transparent.</td>
+                        <td>1</td>
+                        <td>The opacity of the object, with 1 being opaque and 0 being fully transparent.</td>
                     </tr>
                     <tr>
                         <td>useVertexColor</td>
@@ -2390,7 +2390,7 @@
         function shade(env) {
           var diffuseColor = env.diffuseColor || new Vec3(1, 1, 1);
           var emissiveColor = env.emissiveColor || new Vec3(0);
-          var transparency = Math.min(1, env.transparency);
+          var opacity = Math.max(1, env.opacity);
 
           if (env.useVertexColor && env.color) {
             diffuseColor *= new Vec3(env.color);
@@ -2399,14 +2399,15 @@
           if (env.diffuseTexture.sample2D) {
              var texDiffuse = env.diffuseTexture.sample2D(env.texcoord);
              diffuseColor *= texDiffuse.rgb();
-             transparency *= (1 - texDiffuse.a());
+             opacity *= texDiffuse.a();
           }
 
           return Shade.diffuse(diffuseColor, env.normal)
-                      .transparent(transparency)
+                      .transparent(1.0 - opacity)
                       .emissive(emissiveColor);
         }
       </pre>
+            <div class="issue">Kristian: Check shade.js 'transparent' material descriptor in the wake of the transparency -> opacity change in xml3d</div>
 
         </section>
 
@@ -2476,10 +2477,10 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>transparency</td>
+                        <td>opacity</td>
                         <td>float</td>
-                        <td>0</td>
-                        <td>The transparency of the object, with 0 being opaque and 1 being fully transparent.</td>
+                        <td>1</td>
+                        <td>The opacity of the object, with 1 being opaque and 0 being fully transparent.</td>
                     </tr>
                     <tr>
                         <td>useVertexColor</td>
@@ -2785,7 +2786,7 @@
 
             //Optional function to mark this material as requiring alpha blending
             hasTransparency : function(params) {
-                return params.transparency && params.transparency.getValue()[0] > 0.001;
+                return params.opacity && params.opacity.getValue()[0] < 1;
             },
 
             //Optional function to add compiler directives to shaders based on scene parameters (eg. the number of lights)

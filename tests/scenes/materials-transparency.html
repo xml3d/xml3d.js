@@ -15,15 +15,15 @@
   <defs>
     <material id="opaque" model="urn:xml3d:material:phong">
       <float3 name="emissiveColor">0 0 1</float3>
-      <float name="transparency">0.0</float>
+      <float name="opacity">1.0</float>
     </material>
     <material id="red" model="urn:xml3d:material:phong">
       <float3 name="emissiveColor">1 0 0</float3>
-      <float name="transparency">0.0</float>
+      <float name="opacity">1.0</float>
     </material>
     <material id="semi-transparent" model="urn:xml3d:material:phong">
       <float3 name="emissiveColor">0 1 0</float3>
-      <float name="transparency">0.50</float>
+      <float name="opacity">0.50</float>
     </material>
   </defs>
   <view id="v_view"></view>
@@ -41,8 +41,8 @@
 <script>
   var group = document.querySelector("#Plane");
   var setOpaque = function () {
-    var trans = document.querySelector("#opaque float[name=transparency]");
-    trans.textContent = "0";
+    var opacity = document.querySelector("#opaque float[name=opacity]");
+    opacity.textContent = "1";
     group.setAttribute("material", "#opaque");
   };
 
@@ -51,8 +51,8 @@
   };
 
   var makeOpaqueTransparent = function() {
-    var trans = document.querySelector("#opaque float[name=transparency]");
-    trans.textContent = "0.5";
+    var opacity = document.querySelector("#opaque float[name=opacity]");
+    opacity.textContent = "0.5";
     group.setAttribute("material", "#opaque");
   }
 

@@ -36,17 +36,17 @@ test("ProgramObject.hastransparency is set correctly", function () {
         ok(material, "Found #matte material");
         if (material) equal(material.hasTransparency(), false, "Matte material is always opaque");
 
-        var transparencyAttribute = doc.getElementById("change_transparencyAttribute");
+        var opacityAttribute = doc.getElementById("change_transparencyAttribute");
 
         material = shaderFactory.getTemplateById(getWebGLAdapter(doc.getElementById("change"))._materialConfiguration.id).shaderClosures[0];
 
         ok(material, "Found #change material");
         equal(material.hasTransparency(), false, "Initially opaque");
-        transparencyAttribute.textContent = "0.5";
+        opacityAttribute.textContent = "0.5";
 
         return scene;
     }).then(promiseSceneRendered).then(function (s) {
-        equal(material.hasTransparency(), true, "Changed after setting transparency parameter to 0.5");
+        equal(material.hasTransparency(), true, "Changed after setting opacity parameter to 0.5");
     });
 
     test.fin(QUnit.start).done();

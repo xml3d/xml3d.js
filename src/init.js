@@ -145,7 +145,7 @@ function destroyXML3DElement(xml3dElement)
     if(!grandParentNode)
         return; // subtree containing canvas is not attached, can't remove it
 
-    if(!canvas || canvas.tagName !== "canvas")
+    if(!canvas || canvas.tagName.toLowerCase() !== "canvas")
         return; // an element we didn't create, skip deletion
 
     grandParentNode.removeChild(xml3dElement.parentNode);

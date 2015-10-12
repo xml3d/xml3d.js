@@ -137,14 +137,14 @@ XML3D.extend(GLRenderer.prototype, {
         this.width = width;
         this.height = height;
         this.context.handleResizeEvent(width, height);
-        this.createDefaultPipelines();
+        this.createDefaultTree();
         this.scene.handleResizeEvent(width, height);
         this.needsDraw = this.needsPickingDraw = true;
     },
 
-    createDefaultPipelines: function () {
-        var pipeline = new ForwardRenderTree(this.renderInterface, Options.getValue(OPTION_SSAO));
-        this.renderInterface.setRenderPipeline(pipeline);
+    createDefaultTree: function () {
+        var tree = new ForwardRenderTree(this.renderInterface, Options.getValue(OPTION_SSAO));
+        this.renderInterface.setRenderTree(tree);
 
         var pickTarget = new GLScaledRenderTarget(this.context, MAX_PICK_BUFFER_DIMENSION, {
             width: this.context.canvasTarget.width,
@@ -255,8 +255,8 @@ XML3D.extend(GLRenderer.prototype, {
 
     renderToCanvas: function () {
         this.prepareRendering();
-        this.renderInterface.getRenderPipeline().render(this.scene);
-        var stats = this.renderInterface.getRenderPipeline().getRenderStats();
+        this.renderInterface.getRenderTree().render(this.scene);
+        var stats = this.renderInterface.getRenderTree().getRenderStats();
         this.needsDraw = false; //Set this late, because redraw might be triggered during rendering (TODO: avoid that!)
         XML3D.debug.logDebug("Rendered to Canvas");
         return stats;
@@ -341,7 +341,7 @@ XML3D.extend(GLRenderer.prototype, {
     onFlagsChange: function (key) {
         if (key == OPTION_SSAO) {
             this.scene.shaderFactory.setShaderRecompile();
-            this.createDefaultPipelines();
+            this.createDefaultTree();
         }
         this.requestRedraw("global option changed");
     }

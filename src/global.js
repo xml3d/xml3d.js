@@ -75,6 +75,10 @@ XML3D.extend(Xflow, require("./xflow/interface/graph.js"));
 XML3D.extend(Xflow, require("./xflow/interface/data.js"));
 Xflow.ComputeRequest = require("./xflow/interface/request.js").ComputeRequest;
 
+XML3D.webgl = {};
+XML3D.extend(XML3D.webgl, require("./renderer/webgl/render-trees/base.js"));
+XML3D.extend(XML3D.webgl, require("./renderer/webgl/render-passes/base.js"));
+
 require("./xflow/operator/default");
 
 module.exports = {

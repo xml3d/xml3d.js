@@ -458,8 +458,17 @@ handlers.CanvasClassHandler = function(id) {
 
     this.desc = {
         // TODO: Should we not strip the _xml3d class here?
-        get: function() { return this._configured.canvas.className; },
-        set: function(value) { this._configured.canvas.className = value; }
+        get: function() {
+            if (!this._configured) {
+                return "";
+            }
+            return this._configured.canvas.className;
+        },
+        set: function(value) {
+            if (this._configured) {
+                this._configured.canvas.className = value;
+            }
+        }
     };
 };
 

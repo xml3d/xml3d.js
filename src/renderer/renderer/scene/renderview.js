@@ -150,6 +150,10 @@ XML3D.extend(RenderView.prototype, {
         near = Math.max(near - expand, expand, CLIPPLANE_NEAR_MIN);
         far = Math.max(far + expand, near + expand);
         return {near: near, far: far};
+    },
+
+    remove: function() {
+        this.camera.destroy();
     }
 });
 

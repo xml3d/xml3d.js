@@ -7,6 +7,7 @@ var RendererFactory = function () {
         var canvasHandler = new GLCanvasHandler(xml3dElement, canvas);
         var renderer = new GLRenderer(xml3dElement, canvasHandler);
         canvasHandler.setRenderer(renderer);
+        xml3dElement._configured.canvasHandler = canvasHandler;
         window.requestAnimationFrame(canvasHandler.tick);
         return renderer;
     }

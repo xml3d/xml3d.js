@@ -324,6 +324,7 @@ var delegateProperties = ["clientHeight", "clientLeft", "clientTop", "clientWidt
     "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth"];
 function delegateProp(name, elem, canvas) {
     var desc = {
+        configurable : true,
         get : function() {
             return canvas[name];
         }
@@ -341,6 +342,7 @@ var XML3DHandler = function(elem) {
     c.width = 800;
     c.height = 600;
     this.canvas = c;
+    this.canvasHandler = { destroy:function() {} };
 
     for(var i in delegateProperties) {
         delegateProp(delegateProperties[i], elem, c);
@@ -349,6 +351,13 @@ var XML3DHandler = function(elem) {
     elem.getBoundingClientRect = function() {
         return c.getBoundingClientRect();
     };
+
+    this.destroy = function() {
+        for(var i in delegateProperties) {
+            delete elem[delegateProperties[i]];
+        }
+        this.canvasHandler.destroy();
+    }
 };
 
 XML3D.createClass(XML3DHandler, ElementHandler);

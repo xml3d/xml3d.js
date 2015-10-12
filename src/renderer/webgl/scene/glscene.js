@@ -71,6 +71,7 @@ XML3D.extend(GLScene.prototype, {
     clear: function () {
         this.ready = [];
         this.queue = [];
+        this.activeView.remove();
     },
 
     moveFromQueueToReady: function (obj) {

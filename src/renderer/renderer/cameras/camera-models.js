@@ -62,6 +62,11 @@ AbstractCameraModel.prototype = {
         if (changeType) {
             this.owner.viewFrustumChanged(changeType);
         }
+    },
+
+    destroy: function() {
+        this.cameraParameterRequest.clear();
+        this.dataNode.clear();
     }
 };
 

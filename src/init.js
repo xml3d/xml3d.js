@@ -134,6 +134,7 @@ function destroyXML3DElement(xml3dElement)
     if(-1 < curXML3DInitElements.indexOf(xml3dElement))
         return;
 
+    xml3dElement._configured.destroy();
     xml3dElement._configured = undefined;
 
     if(!xml3dElement.parentNode)
@@ -148,7 +149,6 @@ function destroyXML3DElement(xml3dElement)
     if(!canvas || canvas.tagName.toLowerCase() !== "canvas")
         return; // an element we didn't create, skip deletion
 
-    grandParentNode.removeChild(xml3dElement.parentNode);
     grandParentNode.removeChild(canvas);
 }
 

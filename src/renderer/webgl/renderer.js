@@ -161,7 +161,6 @@ XML3D.extend(GLRenderer.prototype, {
 
     createRenderInterface: function () {
         return new RenderInterface(this.context, this.scene);
-        //TODO need to provide an interface for creating shaders, buffers and so on
     },
 
     requestRedraw: function (reason) {

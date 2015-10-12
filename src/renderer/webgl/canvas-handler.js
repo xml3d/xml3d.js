@@ -180,5 +180,10 @@ GLCanvasHandler.prototype.getMousePosition = function (evt) {
     };
 };
 
+GLCanvasHandler.prototype.destroy = function() {
+    this.renderer.dispose();
+    this.renderer = null;
+};
+
 module.exports =  GLCanvasHandler;
 

@@ -73,6 +73,7 @@ GLCanvasHandler.prototype.configureCanvas = function () {
     var parent = xml3dElement.parentNode;
     // Place xml3dElement inside an invisble div
     var hideDiv = parent.ownerDocument.createElement('div');
+    hideDiv.setAttribute("class", "_xml3d_hideDiv");
     //hideDiv.style.display = "none";
     parent.insertBefore(hideDiv, xml3dElement);
     hideDiv.appendChild(xml3dElement);

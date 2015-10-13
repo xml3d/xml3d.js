@@ -89,7 +89,7 @@ var curXML3DInitElements = [];
  * @param {Element} xml3dElement
  */
 function initXML3DElement(xml3dElement) {
-    if(-1 < curXML3DInitElements.indexOf(xml3dElement))
+    if(curXML3DInitElements.indexOf(xml3dElement) > -1)
         return;
 
     curXML3DInitElements.push(xml3dElement);
@@ -132,25 +132,22 @@ function initXML3DElement(xml3dElement) {
  */
 function destroyXML3DElement(xml3dElement)
 {
-    if(-1 < curXML3DInitElements.indexOf(xml3dElement))
+    if(curXML3DInitElements.indexOf(xml3dElement) > -1)
         return;
+
+    var canvas = xml3dElement._configured.canvas;
 
     xml3dElement._configured.destroy();
     xml3dElement._configured = undefined;
 
-    if(!xml3dElement.parentNode)
-        return; // already removed
-
-    var canvas = xml3dElement.parentNode.previousElementSibling;
-
-    var grandParentNode = xml3dElement.parentNode.parentNode;
-    if(!grandParentNode)
-        return; // subtree containing canvas is not attached, can't remove it
-
     if(!canvas || !Util.elementIs(canvas, "canvas"))
         return; // an element we didn't create, skip deletion
 
-    grandParentNode.removeChild(canvas);
+    var div = canvas.nextElementSibling;
+    if (Util.elementIs(div, "div") && div.getAttribute("class") == "_xml3d_hideDiv") {
+        div.parentNode && div.parentNode.removeChild(div);
+    }
+    canvas.parentNode && canvas.parentNode.removeChild(canvas);
 }
 
 /**

@@ -96,9 +96,6 @@
             }
         };
 
-    var __autoCreatedViewId = 0;
-
-
     var tmpCanvas, tmpContext;
 
     exports.toImageData = function(imageData) {
@@ -124,6 +121,10 @@
             newImageData.data[i] = v;
         }
         return newImageData;
+    };
+
+    exports.elementIs = function(elem, name) {
+        return elem && elem.tagName.toLowerCase() === name;
     };
 
 }(module.exports));

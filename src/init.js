@@ -5,6 +5,7 @@ var Options = require("./utils/options.js");
 var CSS = require("./utils/css.js");
 var ConfigureRenderer = require("./renderer/renderer/configure.js");
 var WebglSupported = require("./renderer/webgl/base/utils.js").supported;
+var Util = require("./utils/misc.js");
 require("./interface/dom.js");
 require("./utils/debug.js");
 
@@ -146,7 +147,7 @@ function destroyXML3DElement(xml3dElement)
     if(!grandParentNode)
         return; // subtree containing canvas is not attached, can't remove it
 
-    if(!canvas || canvas.tagName.toLowerCase() !== "canvas")
+    if(!canvas || !Util.elementIs(canvas, "canvas"))
         return; // an element we didn't create, skip deletion
 
     grandParentNode.removeChild(canvas);
@@ -157,7 +158,7 @@ function destroyXML3DElement(xml3dElement)
  */
 function onNodeInserted(evt) {
 
-    if(evt.target.tagName === "xml3d") {
+    if(Util.elementIs(evt.target, "xml3d")) {
         initXML3DElement(evt.target);
     }
 }
@@ -167,7 +168,7 @@ function onNodeInserted(evt) {
  */
 function onNodeRemoved(evt) {
 
-    if(evt.target.tagName === "xml3d") {
+    if(Util.elementIs(evt.target, "xml3d")) {
         destroyXML3DElement(evt.target);
     }
 }
@@ -248,7 +249,7 @@ function mapFunctionOnXML3DElements(elementList, fun) {
             // These elements are leaf nodes (eg. TEXT) so we can ignore them
             return;
         }
-        if (element.tagName.toLowerCase() === "xml3d") {
+        if (Util.elementIs(element, "xml3d")) {
             fun(element);
             // An XML3D element can't have further XML3D elements as children
             return;

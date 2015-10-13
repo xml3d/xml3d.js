@@ -1,6 +1,7 @@
 var AbstractCanvasHandler = require("../renderer/canvas-handler.js");
 var Options = require("../../utils/options.js");
 var xml3dFormatHandler = require("../../base/formathandler.js").xml3dFormatHandler;
+var Util = require("../../utils/misc.js");
 
 var MAXFPS = 30;
 
@@ -71,15 +72,20 @@ GLCanvasHandler.prototype.configureCanvas = function () {
     var canvas = this._canvas;
 
     var parent = xml3dElement.parentNode;
-    // Place xml3dElement inside an invisble div
-    var hideDiv = parent.ownerDocument.createElement('div');
-    hideDiv.setAttribute("class", "_xml3d_hideDiv");
-    //hideDiv.style.display = "none";
-    parent.insertBefore(hideDiv, xml3dElement);
-    hideDiv.appendChild(xml3dElement);
+    if (!Util.elementIs(parent, "div") || parent.getAttribute("class") !== "_xml3d_hideDiv") {
+        // Place xml3dElement inside an invisble div
+        var hideDiv = parent.ownerDocument.createElement('div');
+        hideDiv.setAttribute("class", "_xml3d_hideDiv");
+        //hideDiv.style.display = "none";
+        parent.insertBefore(hideDiv, xml3dElement);
+        hideDiv.appendChild(xml3dElement);
 
-    // Create canvas and append it where the xml3d element was before
-    parent.insertBefore(canvas, hideDiv);
+        // Create canvas and append it where the xml3d element was before
+        parent.insertBefore(canvas, hideDiv);
+    } else {
+        // The invisible div already exists (probably from an earlier configuration)
+        parent.parentNode.insertBefore(canvas, parent);
+    }
 
     var style = canvas.ownerDocument.defaultView.getComputedStyle(xml3dElement);
     if (!canvas.style.backgroundColor) {

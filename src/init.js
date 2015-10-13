@@ -135,6 +135,10 @@ function destroyXML3DElement(xml3dElement)
     if(curXML3DInitElements.indexOf(xml3dElement) > -1)
         return;
 
+    if (!xml3dElement._configured) {
+        return; //Already destroyed or never initialized
+    }
+
     var canvas = xml3dElement._configured.canvas;
 
     xml3dElement._configured.destroy();
@@ -143,10 +147,15 @@ function destroyXML3DElement(xml3dElement)
     if(!canvas || !Util.elementIs(canvas, "canvas"))
         return; // an element we didn't create, skip deletion
 
-    var div = canvas.nextElementSibling;
-    if (Util.elementIs(div, "div") && div.getAttribute("class") == "_xml3d_hideDiv") {
-        div.parentNode && div.parentNode.removeChild(div);
+    if (!xml3dElement.parentNode) {
+        // The xml3d element was removed directly rather than as a result of a parent container being removed,
+        // here we should also remove the hiding div
+        var div = canvas.nextElementSibling;
+        if (Util.elementIs(div, "div") && div.getAttribute("class") == "_xml3d_hideDiv") {
+            div.parentNode && div.parentNode.removeChild(div);
+        }
     }
+
     canvas.parentNode && canvas.parentNode.removeChild(canvas);
 }
 

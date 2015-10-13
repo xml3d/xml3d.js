@@ -7,7 +7,7 @@ var Options = require("../../../utils/options.js");
 var ShadowMapService = require("../materials/shadowmap-service");
 var mat4 = require("gl-matrix").mat4;
 
-var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
+var OPTION_FRUSTUM_CULLING = "renderer-frustum-culling";
 var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
 var OPTION_SHADEJS_TRANSFORM_SPACES = "shadejs-transformSpaces";
 var OPTION_SHADEJS_CACHE = "shadejs-cache";

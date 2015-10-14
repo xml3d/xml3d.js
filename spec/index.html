@@ -161,7 +161,7 @@
 
         <p>XML3D reuses concepts from HTML5: [[DOM]] scripting and [[UIEvents]] allow easy creation of interactive 3D
             scenes.
-            [[CSS3]] can be used to define <a href="#h-style">styling properties</a> for XML3D elements such as
+            [[CSS2]] can be used to define <a href="#h-style">styling properties</a> for XML3D elements such as
             transformations
             or visibility.
             Hence, XML3D is tightly integrated into the W3C technology stack.</p>
@@ -199,7 +199,7 @@
         <ul>
             <li>XML3D is an extension to [[HTML5]].</li>
             <li>XML3D reuses [[HTML5]] elements, e.g. the <code>&lt;img&gt;</code> element to define texture data.</li>
-            <li>XML3D content can be styled with [[CSS3]], i.e. XML3D supports all <a>relevant style properties</a>.
+            <li>XML3D content can be styled with [[CSS2]], i.e. XML3D supports all <a>relevant style properties</a>.
             </li>
             <li>XML3D defines [[DOM]] interfaces for scripting. All XML3D elements derive from the
                 <code>HTMLElement</code>
@@ -221,16 +221,149 @@
 <section>
     <h2>Concepts</h2>
 
-    <div class="issue">Kristian: Fill out concepts section</div>
     <section>
         <h3>Generic data model</h3>
-    </section>
-    <section>
-        <h3>Dataflow graph</h3>
-        <section>
+        HTML elements can be parametrized using HTML attributes or CSS properties. In graphics we need, however, the possibility to define sets of arbitrarily named and typed parameters.
+        Additionally, these parameters may be very long, for instance the positions of a mesh. Hence, we introduce a generic data model for XML3D, which is used consistency throughout XML3D's
+        abstract model.
+
+        <p>XML3D generic data model provides means to share and compose data between data consumers such as the <a>mesh element</a>, <a>light element</a>, <a>view element</a>, and <a>material element</a>.
+        It is also the basis for the <a href="#dataflow-graph">dataflow graph</a> concept and for programmable materials with shade.js, which both require arbritraily typed and named parameters.</p>
+
+
+       All <a href="#data-elements">data elements</a> output a table of named entries. This table is composed from
+          <ul>
+            <li>from mark-up, i.e. from <a href="#value-elements">value elements</a> and </li>
+            <li>from references to an
+            <ul>
+              <li>intra-document <a>data element</a></li>
+              <li>external resources</li>
+            </ul>
+            </li>
+          </ul>
+      <div class="note">
+        To not spoil the user experience, large parameter sets (e.g. mesh data) should never be defined inside the web page. Instead, this kind of data should be defined
+        in a external resources which are loaded asynchronously, e.g. in a JSON file or, more efficiently, using a container in <a href="http://xml3d.org/xml3d/papers/blast/">Blast format</a>.
+      </div>
+
+      <section>
+        <h4>Mark-up</h4>
+        The <a href="#value-elements">value elements</a> can be used to define data table entries directly in mark-up. This is useful for all parameters that need
+        to be modified during runtime using the DOM API. <a href="#value-elements">Value elements</a> can be used to construct a reusable data source using the <a>data element</a>,
+        or to parametrize a consumer element, e.g. a <a>mesh element</a>, directly.
+          <pre class='example highlight'>
+                &lt;data id="parameter-set"&gt;     &lt;!-- generic data container --&gt;
+                    &lt;float3 name="parameter-1"&gt;1.0 0.0 0.0&lt;/float3&gt;
+                    &lt;float name="parameter-2"&gt;0.5&lt;/float&gt;
+                &lt;/data&gt;
+
+                &lt;material id="material1" model="..."&gt;     &lt;!-- parameterized consumer --&gt;
+                    &lt;float3 name="parameter-1"&gt;1.0 0.0 0.0&lt;/float3&gt;
+                    &lt;float name="parameter-2"&gt;0.5&lt;/float&gt;
+                &lt;/material&gt;
+          </pre>
+
+
+      </section>
+      <section>
+        <h4>Sequences</h4>
+
+        <p>The generic data model allows arbitrarily long sequences of data to be defined using the <code>key</code> attribute on <a
+          href="#value-elements">value elements</a>. This is useful,
+          for example, to define the base data for mesh animations to be driven by Xflow <a
+            href="#the-compute-operator">compute operators</a>.
+        </p>
+        <pre class="example highlight">
+          &lt;data id="keyFrameData"&gt;
+            &lt;float3 name="position" key="0" &gt;-5 0 5 ... &lt;/float3&gt;
+            &lt;float3 name="normal" key="0" &gt;0 -1 0 ... &lt;/float3&gt;
+
+            &lt;float3 name="position" key="0.1" &gt;-2.886751 2.113249 2.886751 ... &lt;/float3&gt;
+            &lt;float3 name="normal" key="0.1"&gt;-0.554395 -0.620718 0.554395 ... &lt;/float3&gt;
+
+            &lt;float3 name="position" key="0.2"&gt;-1.341089 4.649148 1.341089 ... &lt;/float3&gt;
+            &lt;float3 name="normal" key="0.2"&gt;-0.696886 0.169412 0.696886 ... &lt;/float3&gt;
+
+            &lt;float3 name="position" key="0.3" &gt;-6.158403 1.408833 6.158403 ... &lt;/float3&gt;
+            &lt;float3 name="normal" key="0.3"&gt;-0.141341 -0.979819 0.141341 ... &lt;/float3&gt;
+
+            ...
+          &lt;/data&gt;
+        </pre>
+        <p>The above sequence of data represents the keyframes of a mesh animation. Typically a compute operator
+          would then be used to interpolate between keyframes, or to
+          otherwise map the sequences of data to a definite set of <code>position</code> and <code>normal</code>
+          data to be rendered.</p>
+      </section>
+
+      <section>
+        <h4>External resources</h4>
+
+        For external data resources, a mapping to a data table needs to be defined which is identified via the
+        [[media-type]] of the resource. XML3D comes with mappings for external XML3D files, and JSON files in XML3D
+        format.
+        In xml3d.js, additional mappings can be provide via a plug-in mechanism.
+        <div class="note">
+          A STL file consists of vertex positions and face normals. A mapping could define that the vertex positions are
+          mapped to an entry named <code>position</code> and to per-vertex normals (requires processing) named
+          <code>normal</code>, both of type <code>float3</code>. Then a <a>mesh element</a> can reference STL
+          files directly:
+        <pre class="highlight">
+        &lt;mesh src="printable-teapot.stl"&gt;&lt;/mesh&gt;
+        </pre>
+          Note that defining this mapping is possible in xml3d.js via a plug-in. A plug-in for STL files is available <a
+          href="https://github.com/xml3d/xml3d-stl-plugin">here</a>.
+        </div>
+      </section>
+
+     <section>
+        <h4>Data compositing</h4>
+       Data can be shared and composed from multiple internal and external sources.
+       A set of overriding rules handles cases, where entries with the same name and sequence key exits.
+       <ol>
+         <li>A subsequent <a href="#value-elements">value element</a> overrides previous ones.</li>
+         <li>Local <a href="#value-elements">value elements</a> override referenced data sources.</li>
+         <li>Entries in the output of a referenced data table override entries of a previously referenced data table.</li>
+         <li>The output of a referenced data table gets evaluated with the same set of overriding rules before it is taken into account.</li>
+       </ol>
+       The overriding rules can be exploited to specialize more general data sources.
+
+       <pre class="example highlight">
+       &lt;data id=&quot;specularTerm&quot;&gt;
+         &lt;float3 name=&quot;specularColor&quot;&gt;0.1 0.2 0.3&lt;/float3&gt;
+         &lt;float name=&quot;ambientIntensity&quot;&gt;0.1&lt;/float&gt;
+         &lt;float name=&quot;shininess&quot;&gt;0.2&lt;/float&gt;
+         &lt;float name=&quot;shininess&quot;&gt;0.6&lt;/float&gt; &lt;!-- shininess is 0.6 according to rule 1 --&gt;
+       &lt;/data&gt;
+
+       &lt;data id=&quot;diffuseTerm&quot;&gt;
+         &lt;float3 name=&quot;diffuseColor&quot;&gt;0.1 0.2 0.3&lt;/float3&gt;
+         &lt;float name=&quot;ambientIntensity&quot;&gt;0.9&lt;/float&gt;
+       &lt;/data&gt;
+
+       &lt;material id=&quot;composedMaterial&quot;&gt; &lt;!-- Composing a material from multiple sources --&gt;
+         &lt;data src=&quot;path/to/external/resource.xml#textureData&quot;&gt;&lt;/data&gt;
+         &lt;data src=&quot;#specularTerm&quot;&gt;&lt;/data&gt;  &lt;!-- shininess is 0.6 according to rule 4 --&gt;
+         &lt;data src=&quot;#diffuseTerm&quot;&gt;&lt;/data&gt;   &lt;!-- ambientIntensity is 0.9 according to rule 3 --&gt;
+
+       &lt;/material&gt;
+
+       &lt;material id=&quot;specializedMaterial&quot;&gt;
+         &lt;data src=&quot;#specularTerm&quot;&gt;&lt;/data&gt;  &lt;!-- Reuse data from #specularTerm --&gt;
+         &lt;float name=&quot;shininess&quot;&gt;0.4&lt;/float&gt; &lt;!-- shininess is 0.3 according to rule 2 --&gt;
+       &lt;/material&gt;
+         </pre>
+
+
+
+
+
+
+      </section>
+      <section>
             <h4>Filters</h4>
 
-            <p>Xflow defines three filters that may be applied to data through the <code>filter</code> attribute on the
+            <p>The generic data model defines three filters that may be applied to data through the <code>filter</code> attribute on the
                 <a>data element</a> and the
                 <a>dataflow element</a>. </p>
 
@@ -240,12 +373,12 @@
       </pre>
 
             <p>A filter does not change the data itself but rather influences how that data is made available to other
-                Xflow elements. For example, using a <code>remove</code>
-                filter does not actually remove the data from the Xflow element, it simply hides it from parent
+                elements. For example, using a <code>remove</code>
+                filter does not actually remove the data from the element, it simply hides it from parent
                 elements. </p>
 
-            <p>An Xflow element may only have one filter, if multiple filters are needed they can be applied with nested
-                Xflow elements. </p>
+            <p>An data element may only have one filter, if multiple filters are needed they can be applied with nested
+                data elements. </p>
 
       <pre class="example highlight">
         &lt;data filter="keep(A,D)"&gt;
@@ -282,6 +415,11 @@
       </pre>
 
         </section>
+
+    </section>
+    <section>
+        <h3>Dataflow graph (Xflow)</h3>
+      <div class="issue">Kristian: Some general words on Xflow.</div>
         <section>
             <h4>The compute operator</h4>
 
@@ -416,36 +554,6 @@
 
         </section>
 
-        <section>
-            <h4>Sequences</h4>
-
-            <p>Xflow allows arbitrarily long sequences of data to be defined using the <code>key</code> attribute on <a
-                    href="#value-elements">value elements</a>. This is useful,
-                for example, to define the base data for mesh animations to be driven by Xflow <a
-                        href="#the-compute-operator">compute operators</a>.
-            </p>
-        <pre class="example highlight">
-          &lt;data id="keyFrameData"&gt;
-            &lt;float3 name="position" key="0" &gt;-5 0 5 ... &lt;/float3&gt;
-            &lt;float3 name="normal" key="0" &gt;0 -1 0 ... &lt;/float3&gt;
-
-            &lt;float3 name="position" key="0.1" &gt;-2.886751 2.113249 2.886751 ... &lt;/float3&gt;
-            &lt;float3 name="normal" key="0.1"&gt;-0.554395 -0.620718 0.554395 ... &lt;/float3&gt;
-
-            &lt;float3 name="position" key="0.2"&gt;-1.341089 4.649148 1.341089 ... &lt;/float3&gt;
-            &lt;float3 name="normal" key="0.2"&gt;-0.696886 0.169412 0.696886 ... &lt;/float3&gt;
-
-            &lt;float3 name="position" key="0.3" &gt;-6.158403 1.408833 6.158403 ... &lt;/float3&gt;
-            &lt;float3 name="normal" key="0.3"&gt;-0.141341 -0.979819 0.141341 ... &lt;/float3&gt;
-
-            ...
-          &lt;/data&gt;
-        </pre>
-            <p>The above sequence of data represents the keyframes of a mesh animation. Typically a compute operator
-                would then be used to interpolate between keyframes, or to
-                otherwise map the sequences of data to a definite set of <code>position</code> and <code>normal</code>
-                data to be rendered.</p>
-        </section>
     </section>
 </section>
 

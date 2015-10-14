@@ -98,7 +98,7 @@
                 XML3D.debug && XML3D.debug.logError(e);
             }
         });
-    }
+    };
 
     ns.exports = GlobalOptions;
 

@@ -73,6 +73,14 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
+5.0 - 17.10.2015 ([Not backwards compatible!](https://github.com/xml3d/xml3d.js/wiki/Migrate-to-XML3D-5.0))
+* New specification and API description - [link](http://xml3d.org/spec/)
+* Support for CSS 'display' property - [demo](http://xml3d.github.io/xml3d-examples/examples/cssDisplay/index.html)
+* Improved math types - [doc](http://xml3d.org/spec/#datatypes)
+* Simplified light definitions - [111](https://github.com/xml3d/xml3d.js/issues/111)
+* New 'string' data type in Xflow - [doc](http://xml3d.org/spec/#the-string-element)
+* Various API changes - [doc](https://github.com/xml3d/xml3d.js/wiki/Migrate-to-XML3D-5.0)
+
 4.9 - 31.03.2015
 * External Xflow Operators - [demo](http://xml3d.github.io/xml3d-examples/examples/facemorph/facemorph.html), [doc](https://github.com/xml3d/xml3d.js/wiki/External-resources#External_Xflow_Operators)
 * [IE 11 Support](https://github.com/xml3d/xml3d.js/issues/97)

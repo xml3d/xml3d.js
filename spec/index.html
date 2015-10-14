@@ -2503,10 +2503,15 @@
             diffuseColor *= new Vec3(env.color);
           }
 
-          if (env.diffuseTexture.sample2D) {
+          if (env.diffuseTexture && env.diffuseTexture.sample2D) {
              var texDiffuse = env.diffuseTexture.sample2D(env.texcoord);
              diffuseColor *= texDiffuse.rgb();
              opacity *= texDiffuse.a();
+          }
+
+          if (env.emissiveTexture && env.emissiveTexture.sample2D) {
+             var texEmissive = env.emissiveTexture.sample2D(env.texcoord);
+             emissiveColor *= texEmissive.rgb();
           }
 
           return Shade.diffuse(diffuseColor, env.normal)
@@ -2601,9 +2606,46 @@
                     </tbody>
                 </table>
             </div>
-            <p>
-                TODO
-            </p>
+          <p>
+            The phong material extends the <a>Diffuse</a> surface model by the specular term from the Phong reflection
+            model. The additional parameters are specularColor, specularTexture and shininess.
+            This is the logic of the phong material model in JavaScript/shade.js pseudo code:
+          </p>
+          <pre class="highlight">
+        function shade(env) {
+          var diffuseColor = env.diffuseColor || new Vec3(1, 1, 1);
+          var specularColor = env.specularColor || new Vec3(0, 0, 0);
+          var emissiveColor = env.emissiveColor || new Vec3(0);
+          var opacity = Math.max(1, env.opacity);
+          var shininess = env.shininess != undefined ? env.shininess : 0.5;
+
+          if (env.useVertexColor && env.color) {
+            diffuseColor *= new Vec3(env.color);
+          }
+
+          if (env.diffuseTexture && env.diffuseTexture.sample2D) {
+             var texDiffuse = env.diffuseTexture.sample2D(env.texcoord);
+             diffuseColor *= texDiffuse.rgb();
+             opacity *= texDiffuse.a();
+          }
+
+          if (env.specularTexture && env.specularTexture.sample2D) {
+             var texSpecular = env.specularTexture.sample2D(env.texcoord);
+             diffuseColor *= texSpecular.rgb();
+          }
+
+          if (env.emissiveTexture && env.emissiveTexture.sample2D) {
+             var texEmissive = env.emissiveTexture.sample2D(env.texcoord);
+             emissiveColor *= texEmissive.rgb();
+          }
+
+
+          return Shade.diffuse(diffuseColor, env.normal)
+                      .phong(specularColor, env.normal, shininess)
+                      .transparent(1.0 - opacity)
+                      .emissive(emissiveColor);
+        }
+      </pre>
         </section>
     </section>
 

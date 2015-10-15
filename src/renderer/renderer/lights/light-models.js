@@ -236,6 +236,10 @@ XML3D.createClass(PointLightModel, LightModel, {
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
 
+        if (nf.far < 1.0) {
+            nf.far = 110;
+        }
+
         entry.parameters["nearFar"][0] = 1.0;
         entry.parameters["nearFar"][1] = nf.far;
 
@@ -280,6 +284,10 @@ XML3D.createClass(SpotLightModel, LightModel, {
         };
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
+
+        if (nf.far < 1.0) {
+            nf.far = 110;
+        }
 
         return new Frustum(1.0, nf.far, 0, this.fovy, aspect, false);
     },
@@ -328,6 +336,10 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
                     far:  -sceneBoundingBox.min.z};
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
+
+        if (nf.far < 1.0) {
+            nf.far = 110;
+        }
 
         return new Frustum(1.0, nf.far, 0, this.fovy, aspect, orthogonal);
     },

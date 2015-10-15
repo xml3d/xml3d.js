@@ -13,7 +13,7 @@ var AxisAngle = function(vec, y, z, angle) {
         if (vec) {
             this.data.set(vec.data ? vec.data : vec);
         } else {
-            this.z = 1;
+            this.data[2] = 1;
         }
     } else return new AxisAngle(vec, y, z, angle);
 };

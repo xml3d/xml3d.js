@@ -8,7 +8,8 @@ xml3d.js
 xml3d.js is a [XML3D](http://www.xml3d.org) implementation based on WebGL and JavaScript. The aim of XML3D is to make the development of 3D-Web applications as easy
 as developing web pages. Every web developer who knows how to use the DOM (or jQuery) should also be able to use XML3D.
 
-XML3D is also an evaluation platform of the W3C Community Group [Declarative 3D for the Web](http://www.w3.org/community/declarative3d/)
+XML3D is also an evaluation platform of the W3C Community Group [Declarative 3D for the Web](http://www.w3.org/community/declarative3d/) and 
+a [FI-WARE Generic Enabler](http://catalogue.fiware.org/enablers/3d-ui-xml3d).
 
 #### Examples ####
 Here you can find [small examples](https://github.com/xml3d/xml3d-examples) of individual features. Below are some more complete demos:

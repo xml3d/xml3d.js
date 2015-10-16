@@ -300,7 +300,7 @@
         <h4>External resources</h4>
 
         For external data resources, a mapping to a data table needs to be defined which is identified via the
-        [[media-type]] of the resource. XML3D comes with mappings for external XML3D files, and JSON files in XML3D
+        internet media type [[rfc2045]] of the resource. XML3D comes with mappings for external XML3D files, and JSON files in XML3D
         format.
         In xml3d.js, additional mappings can be provide via a plug-in mechanism.
         <div class="note">
@@ -2509,10 +2509,9 @@
                 </table>
             </div>
             <p>
-                Material model for diffuse surfaces that reflects light equally in all directions. Additionally, the
-                surface has
-                an optional emissive and ambient component.
-                This is the logic of the diffuse material model in JavaScript/shade.js pseudo code:
+              The <dfn>diffuse material model</dfn> describes a diffuse surfaces that reflects light equally in all
+              directions. Additionally, the surface has an optional emissive and ambient component. This is the logic
+              of the diffuse material model in JavaScript/shade.js pseudo code:
             </p>
       <pre class="highlight">
         function shade(env) {
@@ -2636,7 +2635,7 @@
                 </table>
             </div>
           <p>
-            The phong material extends the <a>Diffuse</a> surface model by the specular term from the Phong reflection
+            The <dfn>phong material model</dfn> extends the <a>diffuse material model</a> by the specular term from the Phong reflection
             model. The additional parameters are specularColor, specularTexture and shininess.
             This is the logic of the phong material model in JavaScript/shade.js pseudo code:
           </p>

@@ -418,8 +418,26 @@
 
     </section>
     <section>
-        <h3>Dataflow graph (Xflow)</h3>
-      <div class="issue">Kristian: Some general words on Xflow.</div>
+      <h3>Dataflow graph (Xflow)</h3>
+
+      <p>XML3D comes with a lean set of <a href="h-scene elements">scene elements</a>, in particular if compared to
+        other scene descriptions.
+        To describe dynamic effects in the scene XML3D provides a dataflow graph approach (Xflow), that allows arranging
+        data processing operations as a graph of operations. This way, it is possible to describe complex dynamic data
+        processing from basic blocks.</p>
+
+      <p>Xflow is powerful enough to describe all common dynamic effects usually implemented in fixed-function entities
+        including skinning, morphing, augmented reality functionality, etc.
+        The basic principle of Xflow is a small addition to the general data model: It allows attaching an operator to a
+        <a href="#data-elements">data element</a>
+        using the <code>compute</code> attribute. A data element with such an <a href="#h-the-compute-operator">compute
+          operator</a>
+        attached, composes the data table as usual. This data tabe is the input of the compute operator. The output of
+        the compute operator (i.e. the result) is merged with original data table.
+        In this merge, entries from the result table override entries with the same name from the input table.
+      </p>
+
+
         <section>
             <h4>The compute operator</h4>
 
@@ -2385,7 +2403,6 @@
     <section>
         <h3>Predefined material models</h3>
 
-        <div class="issue">Kristian: Finish TODOs in this section</div>
         <section>
             <h2>Matte</h2>
 
@@ -2446,8 +2463,11 @@
                     <tr>
                         <td>diffuseTexture</td>
                         <td>texture</td>
-                        <td>-</td>
-                        <td>TODO</td>
+                        <td><i>undefined</i></td>
+                        <td>Texture to read the diffuse color component and opacity (alpha) from. Accessed based on <code>texcoord</code> per-vertex attribute.
+                          If <i>diffuseTexture</i> is defined, the rgb channel of the <i>diffuseTexture</i> gets multiplied with the current <code>diffuseColor</code> and the the alpha channel
+                          gets multiples with the current <code>opacity</code>.
+                        </td>
                     </tr>
 
                     <tr>
@@ -2459,8 +2479,10 @@
                     <tr>
                         <td>emissiveTexture</td>
                         <td>texture</td>
-                        <td>-</td>
-                        <td>TODO</td>
+                        <td><i>undefined</i></td>
+                        <td>Texture to read the emissive color component from. Accessed based on <code>texcoord</code> per-vertex attribute.
+                          If <i>emissiveTexture</i> is defined, the <code>emissiveColor</code> gets multiplied with the color accessed from the texture.
+                        </td>
                     </tr>
                     <tr>
                         <td>ambientIntensity</td>
@@ -2479,9 +2501,8 @@
                         <td>useVertexColor</td>
                         <td>bool</td>
                         <td>false</td>
-                        <td>Setting <i>useVertexColor</i> to 'true', the vertex attribute 'color' will be multiplied to
-                            the diffuse
-                            color component.
+                        <td>Setting <i>useVertexColor</i> to 'true', the vertex attribute <code>color</code> will be multiplied to
+                            the diffuse color component (before the <code>diffuseTexture</code> gets applied).
                         </td>
                     </tr>
                     </tbody>
@@ -2543,10 +2564,15 @@
                         <td>The object's RGB diffuse color component.</td>
                     </tr>
                     <tr>
-                        <td>diffuseTexture</td>
-                        <td>texture</td>
-                        <td>-</td>
-                        <td>TODO</td>
+                      <td>diffuseTexture</td>
+                      <td>texture</td>
+                      <td><i>undefined</i></td>
+                      <td>Texture to read the diffuse color component and opacity (alpha) from. Accessed based on <code>texcoord</code>
+                        per-vertex attribute.
+                        If <i>diffuseTexture</i> is defined, the rgb channel of the <i>diffuseTexture</i> gets
+                        multiplied with the current <code>diffuseColor</code> and the the alpha channel
+                        gets multiples with the current <code>opacity</code>.
+                      </td>
                     </tr>
                     <tr>
                         <td>specularColor</td>
@@ -2557,8 +2583,10 @@
                     <tr>
                         <td>specularTexture</td>
                         <td>texture</td>
-                        <td>-</td>
-                        <td>TODO</td>
+                        <td><i>undefined</i></td>
+                        <td>Texture to read the specular color component from. Accessed based on <code>texcoord</code> per-vertex attribute.
+                          If <i>specularTexture</i> is defined, the <code>specularColor</code> gets multiplied with the rgb-color accessed from the texture.
+                        </td>
                     </tr>
                     <tr>
                         <td>shininess</td>
@@ -2577,8 +2605,10 @@
                     <tr>
                         <td>emissiveTexture</td>
                         <td>texture</td>
-                        <td>-</td>
-                        <td>TODO</td>
+                        <td><i>undefined</i></td>
+                        <td>Texture to read the emissive color component from. Accessed based on <code>texcoord</code> per-vertex attribute.
+                          If <i>emissiveTexture</i> is defined, the <code>emissiveColor</code> gets multiplied with the rgb-color accessed from the texture.
+                        </td>
                     </tr>
                     <tr>
                         <td>ambientIntensity</td>

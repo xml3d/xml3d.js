@@ -75,15 +75,15 @@ We have an overview documentation in each subfolder of the project:
 * [tests](tests/) - The test suite
 * [tools](tools/) - Several tools that can be used optionally with xml3d.js
 
-In addition a full [specification and API description](http://xml3d.org/spec/) is provided.
+In addition a full [specification and API description](http://xml3d.org/xml3d/specification/5.0) is provided.
 
 ### Change log ###
 5.0 - 16.10.2015 ([Not backwards compatible!](https://github.com/xml3d/xml3d.js/wiki/Migrate-to-XML3D-5.0))
-* New specification and API description - [link](http://xml3d.org/spec/)
-* Support for CSS 'display' property - [demo](http://xml3d.github.io/xml3d-examples/examples/cssDisplay/index.html), [doc](http://xml3d.org/spec/#the-display-property)
-* Improved math types - [doc](http://xml3d.org/spec/#datatypes)
+* New specification and API description - [link](http://xml3d.org/xml3d/specification/5.0)
+* Support for CSS 'display' property - [demo](http://xml3d.github.io/xml3d-examples/examples/cssDisplay/index.html), [doc](http://xml3d.org/xml3d/specification/5.0/#the-display-property)
+* Improved math types - [doc](http://xml3d.org/xml3d/specification/5.0/#datatypes)
 * Simplified light definitions - [111](https://github.com/xml3d/xml3d.js/issues/111)
-* New 'string' data type in Xflow - [doc](http://xml3d.org/spec/#the-string-element)
+* New 'string' data type in Xflow - [doc](http://xml3d.org/xml3d/specification/5.0/#the-string-element)
 * Various API changes - [doc](https://github.com/xml3d/xml3d.js/wiki/Migrate-to-XML3D-5.0)
 
 ----

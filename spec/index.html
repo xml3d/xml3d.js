@@ -2960,6 +2960,19 @@
         generally easier to use
         and is able to generate cross platform materials that may be used outside of XML3D as well.</p>
 
+    <div class="note">
+        Be careful with materials that modify the vertex positions of a mesh. These objects will not be pickable and may have
+        incorrect bounding boxes, which can lead to incorrect clipping planes and frustum culling in the camera.
+        If your material falls into this category you should always provide a reasonable bounding box for the object manually:
+
+    <pre class="example highlight">
+    &lt;mesh src="myMesh.xml" material="#my-material"&gt;
+        &lt;float3 name="boundingBox"&gt;-10 -10 -10 5 5 5&lt;/float3&gt; &lt;!-- min max points of the bounding box --&gt;
+    &lt;/mesh&gt;
+    </pre>
+
+    </div>
+
 </section>
 
 <section>

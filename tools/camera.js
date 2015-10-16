@@ -20,6 +20,20 @@
     /*                                                                       */
     /*************************************************************************/
 
+    /**
+     * This simple camera controller provides two interaction modes:
+     *      examine : The camera revolves around the examinePoint
+     *      fly     : The camera has free movement through the scene
+     *
+     * Available options are:
+     *      {string} mode The interaction mode as described above. Defaults to 'examine'
+     *      {Vec3} examinePoint The point the camera revolves around if in examine mode
+     *      {number} rotateSpeed The rotation speed! Default: 3
+     *      {number} zoomSpeed The zoom speed in some arbitrary units, Default: 20
+     *      {bool} useKeys Toggle WSAD keyboard control, Default: false
+     *
+     */
+
     if(!XML3D)
         throw("XML3D not found, please ensure the camera script is included after xml3d.js");
 
@@ -31,7 +45,7 @@
      * @constructor
      */
     XML3D.StandardCamera = function(element, opt) {
-        if (!element) {
+        if (!element || !element.tagName) {
             throw("Must provide an element to control when initializing the StandardCamera!");
         }
         if (element.hasAttribute("style")) {
@@ -43,7 +57,7 @@
 
         this.mode = opt.mode || "examine";
         this.touchTranslateMode = opt.touchTranslateMode || "twofinger";
-        //Note: The examine point is relative to the element's parent coordinate space.
+
         this.examinePoint = opt.examinePoint || this.getInverseTranslationOfParent(element);
         this.rotateSpeed = opt.rotateSpeed || 3;
         this.zoomSpeed = opt.zoomSpeed || 20;

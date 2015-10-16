@@ -46,7 +46,7 @@ We have an extensive [test suite](http://xml3d.github.com/xml3d.js/tests/) and s
 #### How to build ####
 
 ##### Dependencies #####
-You will need [node.js](http://nodejs.org/). Then install grunt:
+You will need [node.js](http://nodejs.org/). Then install the grunt cli:
 ```bash
 npm install -g grunt-cli
 ```
@@ -68,19 +68,23 @@ The built version of xml3d.js will be put in the `build/output/` subdirectory. A
 ### Documentation ###
 We have an overview documentation in each subfolder of the project:
 * [build](build/) - The build system of xml3d.js.
+* [spec](spec/) - The specification for XML3D in re-spec form
 * [src](src/) - The actual source code of the xml3d.js library
 * [tests](tests/) - The test suite
 * [tools](tools/) - Several tools that can be used optionally with xml3d.js
 
+In addition a full [specification and API description](http://xml3d.org/spec/) is provided.
 
 ### Change log ###
-5.0 - 17.10.2015 ([Not backwards compatible!](https://github.com/xml3d/xml3d.js/wiki/Migrate-to-XML3D-5.0))
+5.0 - 16.10.2015 ([Not backwards compatible!](https://github.com/xml3d/xml3d.js/wiki/Migrate-to-XML3D-5.0))
 * New specification and API description - [link](http://xml3d.org/spec/)
-* Support for CSS 'display' property - [demo](http://xml3d.github.io/xml3d-examples/examples/cssDisplay/index.html)
+* Support for CSS 'display' property - [demo](http://xml3d.github.io/xml3d-examples/examples/cssDisplay/index.html), [doc](http://xml3d.org/spec/#the-display-property)
 * Improved math types - [doc](http://xml3d.org/spec/#datatypes)
 * Simplified light definitions - [111](https://github.com/xml3d/xml3d.js/issues/111)
 * New 'string' data type in Xflow - [doc](http://xml3d.org/spec/#the-string-element)
 * Various API changes - [doc](https://github.com/xml3d/xml3d.js/wiki/Migrate-to-XML3D-5.0)
+
+----
 
 4.9 - 31.03.2015
 * External Xflow Operators - [demo](http://xml3d.github.io/xml3d-examples/examples/facemorph/facemorph.html), [doc](https://github.com/xml3d/xml3d.js/wiki/External-resources#External_Xflow_Operators)

@@ -23,7 +23,7 @@ Here you can find [small examples](https://github.com/xml3d/xml3d-examples) of i
 <a href="http://xml3d.github.com/xml3d-examples/examples/gangnam/style.html"><img src="http://www.xml3d.org/xml3d/demos/thumbs/gangnam.jpg"/></a>
 <a href="http://xml3d.github.io/xml3d-examples/examples/xflowAR/ar_flying_teapot.html"><img src="http://www.xml3d.org/xml3d/demos/thumbs/ar.jpg"/></a>
 <a href="http://xml3d.github.io/xml3d-examples/examples/shade-tv/index.html"><img src="http://xml3d.org/xml3d/demos/thumbs/shade-js-tv.png"/></a>
-<a href="http://xml3d.github.io/xml3d-examples/examples/lines/edf-vtk.html"><img src="http://xml3d.org/xml3d/demos/thumbs/edf.png"/></a>
+<a href="http://xml3d.github.io/xml3d-examples/examples/strips/edf-vtk.html"><img src="http://xml3d.org/xml3d/demos/thumbs/edf.png"/></a>
 
 #### Usage ####
 

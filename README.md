@@ -14,10 +14,11 @@ a [FI-WARE Generic Enabler](http://catalogue.fiware.org/enablers/3d-ui-xml3d).
 #### Examples ####
 Here you can find [small examples](https://github.com/xml3d/xml3d-examples) of individual features. Below are some more complete demos:
 
-<a href="http://www.xml3d.org/xml3d/demos/19_RubiksCube/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/rubik.jpg"/></a>
-<a href="http://www.xml3d.org/xml3d/demos/25_Chess/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/chess.png"/></a>
-<a href="http://www.xml3d.org/xml3d/demos/12_MarsCity/marscity.xhtml"><img src="http://www.xml3d.org/xml3d/demos/thumbs/marscity.jpg?s"/></a>
-<a href="http://www.xml3d.org/xml3d/demos/32_WorldBank/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/worldbank.jpg"/></a>
+<a href="http://www.xml3d.org/xml3d/demos/rubikscube/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/rubik.jpg"/></a>
+<a href="http://www.xml3d.org/xml3d/demos/chess/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/chess.png"/></a>
+<a href="http://www.xml3d.org/xml3d/demos/marscity/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/marscity.jpg?s"/></a>
+<a href="http://www.xml3d.org/xml3d/demos/worldbank/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/worldbank.jpg"/></a>
+<a href="http://www.xml3d.org/xml3d/scenes/magnifi/"><img src="http://xml3d.org/xml3d/scenes/magnifi/thumbnail.png"/></a>
 <a href="http://xml3d.github.com/xml3d-museum/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/museum.jpg"/></a>
 <a href="http://xml3d.github.com/xml3d-examples/examples/gangnam/style.html"><img src="http://www.xml3d.org/xml3d/demos/thumbs/gangnam.jpg"/></a>
 <a href="http://xml3d.github.io/xml3d-examples/examples/xflowAR/ar_flying_teapot.html"><img src="http://www.xml3d.org/xml3d/demos/thumbs/ar.jpg"/></a>

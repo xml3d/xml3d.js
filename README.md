@@ -68,6 +68,7 @@ The built version of xml3d.js will be put in the `build/output/` subdirectory. A
 ### Documentation ###
 We have an overview documentation in each subfolder of the project:
 * [build](build/) - The build system of xml3d.js.
+* [doc](doc/) - Documentation related to FIWARE
 * [spec](spec/) - The specification for XML3D in re-spec form
 * [src](src/) - The actual source code of the xml3d.js library
 * [tests](tests/) - The test suite

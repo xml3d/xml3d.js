@@ -134,6 +134,11 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     handleResizeEvent: function (width, height) {
+        if (width <= 0 || height <= 0) {
+            XML3D.debug.logWarning("xml3d element has invalid width or height! Ensure you're not using 'display: none' and that width and height are greater than 0.");
+            width = 800;
+            height = 600;
+        }
         this.width = width;
         this.height = height;
         this.context.handleResizeEvent(width, height);

@@ -224,26 +224,26 @@
     <section>
         <h3>Generic data model</h3>
         HTML elements can be parametrized using HTML attributes or CSS properties. In graphics we need, however, the possibility to define sets of arbitrarily named and typed parameters.
-        Additionally, these parameters may be very long, for instance the positions of a mesh. Hence, we introduce a generic data model for XML3D, which is used consistency throughout XML3D's
+        Additionally, these parameters may be very long, for instance the positions of a mesh. Hence, we introduce a generic data model for XML3D, which is used consistently throughout XML3D's
         abstract model.
 
-        <p>XML3D generic data model provides means to share and compose data between data consumers such as the <a>mesh element</a>, <a>light element</a>, <a>view element</a>, and <a>material element</a>.
+        <p>XML3D's generic data model provides means to share and compose data between data consumers such as the <a>mesh element</a>, <a>light element</a>, <a>view element</a>, and <a>material element</a>.
         It is also the basis for the <a href="#dataflow-graph">dataflow graph</a> concept and for programmable materials with shade.js, which both require arbritraily typed and named parameters.</p>
 
 
-       All <a href="#data-elements">data elements</a> output a table of named entries. This table is composed from
+       All <a href="#data-elements">data elements</a> output a table of named entries. This table is composed
           <ul>
             <li>from mark-up, i.e. from <a href="#value-elements">value elements</a> and </li>
             <li>from references to an
             <ul>
               <li>intra-document <a>data element</a></li>
-              <li>external resources</li>
+              <li>external resource</li>
             </ul>
             </li>
           </ul>
       <div class="note">
         To not spoil the user experience, large parameter sets (e.g. mesh data) should never be defined inside the web page. Instead, this kind of data should be defined
-        in a external resources which are loaded asynchronously, e.g. in a JSON file or, more efficiently, using a container in <a href="http://xml3d.org/xml3d/papers/blast/">Blast format</a>.
+        in external resources which are loaded asynchronously, e.g. in a JSON file or, more efficiently, using a container in <a href="http://xml3d.org/xml3d/papers/blast/">Blast format</a>.
       </div>
 
       <section>
@@ -430,9 +430,9 @@
         including skinning, morphing, augmented reality functionality, etc.
         The basic principle of Xflow is a small addition to the general data model: It allows attaching an operator to a
         <a href="#data-elements">data element</a>
-        using the <code>compute</code> attribute. A data element with such an <a href="#h-the-compute-operator">compute
+        using the <code>compute</code> attribute. A data element with such a <a href="#h-the-compute-operator">compute
           operator</a>
-        attached, composes the data table as usual. This data tabe is the input of the compute operator. The output of
+        attached first composes the data table as usual. This data tabe is then used as the input of the compute operator. The output of
         the compute operator (i.e. the result) is merged with original data table.
         In this merge, entries from the result table override entries with the same name from the input table.
       </p>
@@ -648,6 +648,11 @@
       $("#myMesh").hide();
       $(".walls").toggle();
     </pre>
+
+        <div class="note">
+            Be careful when assigning <code>display: none</code> to the xml3d element itself (or a parent of it). In HTML,
+            elements with <code>display: none</code> have a width and height of 0 and this may cause XML3D to be initialized improperly.
+        </div>
 
 
     </section>

@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Loading Data</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="http://requirejs.org/docs/release/2.1.20/minified/require.js"></script>
+  <script type="text/javascript">
+      requirejs.config({
+          paths: {
+              helpers: 'scripts/helpers',
+              xml3d: '../../build/output/xml3d',
+              myxflow: 'scripts/myxflow'
+          }
+      });
+
+      function simpleXML3D() {
+          requirejs(['helpers','xml3d', 'myxflow'], function () {
+              $('body').append('<xml3d id="myxml3d" width="500px" height="300px">');
+              window.scriptsLoaded = true;
+          });
+      }
+
+      function xml3dWithObject() {
+          requirejs(['helpers','xml3d', 'myxflow'], function () {
+              $('body').append('<xml3d id="myxml3d" width="500px" height="300px"> <defs> <data id="inlineData"> <int name="index">0 1 2 1 2 3</int> <float3 name="position">-1.0 -1.0 -10.0  1.0 -1.0 -10.0  -1.0 1.0 -10.0  1.0 1.0 -10.0</float3> <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3> </data> <material id="testmaterial" src="#originalmaterialData" model="urn:xml3d:material:flat"></material> <data id="originalmaterialData"> <float3 name="diffuseColor">1.0 1 0</float3> <float name="ambientIntensity">1</float> </data> <data id="swapData"> <texture name="diffuseTexture" id="testTex"> <img id="swapImg" src="textures/blue.png"> </texture> </data> </defs> <mesh type="triangles" id="testMesh" material="#testmaterial" src="#inlineData"></mesh> </xml3d>');
+              window.scriptsLoaded = true;
+          });
+      }
+
+  </script>
+
+</head>
+<body style="background-color: #fff;width:500px">
+
+
+</body></html>

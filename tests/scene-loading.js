@@ -166,3 +166,56 @@ test("Check Asset Loading", function() {
         img.addEventListener('load', startAssetTest);
     }
 });
+
+module("Requirejs", {
+
+});
+
+function promiseScriptsLoaded(doc) {
+    var deferred = Q.defer();
+
+    var interval = window.setInterval(function() {
+        if (doc.defaultView.scriptsLoaded) {
+            window.clearInterval(interval);
+            deferred.resolve(doc);
+        }
+    }, 100);
+
+    return deferred.promise;
+}
+
+test("Simple XML3D element", function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/requirejs.html");
+
+    var test = frameLoaded.then(function (doc) {
+        doc.defaultView.simpleXML3D();
+        return doc;
+    }).then(promiseScriptsLoaded).then(function (doc) {
+        var xml3d = doc.getElementById("myxml3d");
+        ok(xml3d.complete, "Element was dynamically added and rendered");
+    });
+
+    test.fin(QUnit.start).done();
+
+});
+
+test("XML3D element with objects", function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/requirejs.html");
+
+    var test = frameLoaded.then(function (doc) {
+        doc.defaultView.xml3dWithObject();
+        return doc;
+    }).then(promiseScriptsLoaded).then(function(doc) {
+        return doc.getElementById("myxml3d");
+    }).then(promiseSceneRendered).then( function (xml3d) {
+        ok(true, "Element was dynamically added and rendered");
+
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(xml3d), 250, 150);
+        QUnit.closePixel(actual, [ 255, 255, 0, 255 ], 1, "Yellow square was rendered");
+    });
+
+    test.fin(QUnit.start).done();
+
+});

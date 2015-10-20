@@ -544,63 +544,98 @@
         return this.createTransformForView(element);
     };
 
-    TransformInterface.prototype.createTransformForView = (function() {
-        var elementCount = 0;
-        return function(element) {
-            var transform = document.createElement("transform");
-            var tid = "Generated_Camera_Transform_" + elementCount++;
-            transform.setAttribute("id", tid);
-            element.parentElement.appendChild(transform);
-            element.setAttribute("transform", "#"+tid);
-            return transform;
-        }
-    })();
+    var elementCount = 0;
+    TransformInterface.prototype.createTransformForView = function(element) {
+        var transform = document.createElement("transform");
+        var tid = "Generated_Camera_Transform_" + elementCount++;
+        transform.setAttribute("id", tid);
+        element.parentElement.appendChild(transform);
+        element.setAttribute("transform", "#"+tid);
+        return transform;
+    };
 
-    TransformInterface.prototype.__defineGetter__("orientation", function() {
-        return XML3D.Quat.fromAxisAngle(this.transform.rotation);
-    });
-    TransformInterface.prototype.__defineGetter__("position", function() {
-        return this.transform.translation;
-    });
-    TransformInterface.prototype.__defineSetter__("orientation", function(orientation) {
-        var aa = XML3D.AxisAngle.fromQuat(orientation);
-        this.transform.setAttribute("rotation", aa.toDOMString());
-    });
-    TransformInterface.prototype.__defineSetter__("position", function(position) {
-        this.transform.setAttribute("translation", position.toDOMString());
-    });
-    TransformInterface.prototype.__defineGetter__("direction", function() {
-        var dir = new XML3D.Vec3(0, 0, -1);
-        return dir.mul(this.orientation);
-    });
-    TransformInterface.prototype.__defineGetter__("upVector", function() {
-        var up = new XML3D.Vec3(0, 1, 0);
-        return up.mul(this.orientation);
-    });
-    TransformInterface.prototype.__defineGetter__("fieldOfView", function() {
-        var fovh = this.element.querySelector("float[name=fovHorizontal]");
-        if (fovh) {
-            var h = fovh.getValue();
-            return 2 * Math.atan(Math.tan(h / 2.0) * this.xml3d.width / this.xml3d.height);
+    Object.defineProperty(TransformInterface.prototype, "orientation", {
+        get: function() {
+            return XML3D.Quat.fromAxisAngle(this.transform.rotation);
+        },
+
+        set: function(orientation) {
+            var aa = XML3D.AxisAngle.fromQuat(orientation);
+            this.transform.setAttribute("rotation", aa.toDOMString());
         }
-        var fovv = this.element.querySelector("float[name=fovVertical]");
-        if (fovv) {
-            return fovv.getValue();
-        }
-        return (45 * Math.PI / 180); //Default FOV
     });
 
-    TransformInterface.prototype.rotateAroundPoint = (function() {
-        var tmpQuat = new XML3D.Quat();
+    Object.defineProperty(TransformInterface.prototype, "position", {
+        get: function() {
+            return this.transform.translation;
+        },
 
-        return function(q0, p0) {
-            this.orientation = this.orientation.mul(q0).normalize();
-            var aa = XML3D.AxisAngle.fromQuat(q0);
-            var axis = this.inverseTransformOf(aa.axis);
-            tmpQuat = XML3D.Quat.fromAxisAngle(axis, aa.angle);
-            this.position = this.position.subtract(p0).mul(tmpQuat).add(p0);
+        set: function(position) {
+            this.transform.setAttribute("translation", position.toDOMString());
         }
-    })();
+    });
+
+    Object.defineProperty(TransformInterface.prototype, "direction", {
+        get: function() {
+            var dir = new XML3D.Vec3(0, 0, -1);
+            return dir.mul(this.orientation);
+        },
+
+        set: function(dir) {
+            throw("Direction cannot be set directly.");
+        }
+    });
+
+    Object.defineProperty(TransformInterface.prototype, "upVector", {
+        get: function() {
+            var up = new XML3D.Vec3(0, 1, 0);
+            return up.mul(this.orientation);
+        },
+
+        set: function(up) {
+            throw("Up vector cannot be set directly");
+        }
+    });
+
+    /**
+     *  This is always the VERTICAL field of view in radians
+     */
+    Object.defineProperty(TransformInterface.prototype, "fieldOfView", {
+        get: function() {
+            var fovh = this.element.querySelector("float[name=fovHorizontal]");
+            if (fovh) {
+                var h = fovh.getValue();
+                return 2 * Math.atan(Math.tan(h / 2.0) * this.xml3d.width / this.xml3d.height);
+            }
+            var fovv = this.element.querySelector("float[name=fovVertical]");
+            if (fovv) {
+                return fovv.getValue();
+            }
+            return (45 * Math.PI / 180); //Default FOV
+        },
+
+        set: function(fov) {
+            var fovh = this.element.querySelector("float[name=fovHorizontal]");
+            if (fovh) {
+                fovh.parentNode.removeChild(fovh);
+            }
+            var fovv = this.element.querySelector("float[name=fovVertical]");
+            if (!fovv) {
+                fovv = document.createElement("float");
+                fovv.setAttribute("name", "fovVertical");
+                this.element.appendChild(fovv);
+            }
+            fovv.setValue(fov);
+        }
+    });
+
+    TransformInterface.prototype.rotateAroundPoint = function(q0, p0) {
+        this.orientation = this.orientation.mul(q0).normalize();
+        var aa = XML3D.AxisAngle.fromQuat(q0);
+        var axis = this.inverseTransformOf(aa.axis);
+        var tmpQuat = XML3D.Quat.fromAxisAngle(axis, aa.angle);
+        this.position = this.position.subtract(p0).mul(tmpQuat).add(p0);
+    };
 
     TransformInterface.prototype.lookAround = function(rotSide, rotUp, upVector) {
         var check = rotUp.mul(this.orientation);

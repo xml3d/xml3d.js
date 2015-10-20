@@ -85,6 +85,7 @@ In addition a full [specification and API description](http://xml3d.org/xml3d/sp
 * Simplified light definitions - [111](https://github.com/xml3d/xml3d.js/issues/111)
 * New 'string' data type in Xflow - [doc](http://xml3d.org/xml3d/specification/5.0/#the-string-element)
 * Various API changes - [doc](https://github.com/xml3d/xml3d.js/wiki/Migrate-to-XML3D-5.0)
+* Improved standard camera controller (camera.js) - [link](tools/camera.js)
 
 ----
 

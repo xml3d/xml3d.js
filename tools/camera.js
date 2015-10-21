@@ -63,6 +63,7 @@
         this.zoomSpeed = opt.zoomSpeed || 20;
         this.useKeys = opt.useKeys !== undefined ? opt.useKeys : false;
         this.mousemovePicking = true;
+        this.activeKeys = {};
 
         this.transformInterface = new TransformInterface(this.element, this.xml3d);
         this.prevPos = {x: -1, y: -1};
@@ -481,66 +482,62 @@
     // key movement
     // -----------------------------------------------------
 
-    XML3D.StandardCamera.prototype.keyHandling = (function() {
-        var activeKeys = {};
-
-        return function(e, action) {
-            var KeyID = e.keyCode;
-            if (KeyID == 0) {
-                switch (e.which) {
-                    case 119:
-                        KeyID = 87;
-                        break; // w
-                    case 100:
-                        KeyID = 68;
-                        break; // d
-                    case 97:
-                        KeyID = 65;
-                        break; // a
-                    case 115:
-                        KeyID = 83;
-                        break; // s
-                }
+    XML3D.StandardCamera.prototype.keyHandling = function(e, action) {
+        var KeyID = e.keyCode;
+        if (KeyID == 0) {
+            switch (e.which) {
+                case 119:
+                    KeyID = 87;
+                    break; // w
+                case 100:
+                    KeyID = 68;
+                    break; // d
+                case 97:
+                    KeyID = 65;
+                    break; // a
+                case 115:
+                    KeyID = 83;
+                    break; // s
             }
-
-            if (action === "up") {
-                clearInterval(activeKeys[KeyID]);
-                delete activeKeys[KeyID];
-                this.stopEvent(e);
-                return;
-            } else if (activeKeys[KeyID] !== undefined) {
-                this.stopEvent(e);
-                return;
-            }
-
-            //This is a new key press so we need to start a camera animation interval for it
-            var xml3d = this.xml3d;
-            if (xml3d) {
-                switch (KeyID) {
-                    case 38: // up
-                    case 87: // w
-                        activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "forward"), 17);
-                        break;
-                    case 39: // right
-                    case 68: // d
-                        activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "right"), 17);
-                        break;
-                    case 37: // left
-                    case 65: // a
-                        activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "left"), 17);
-                        break;
-                    case 40: // down
-                    case 83: // s
-                        activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "backward"), 17);
-                        break;
-
-                    default:
-                        return;
-                }
-            }
-            this.stopEvent(e);
         }
-    })();
+
+        if (action === "up") {
+            clearInterval(this.activeKeys[KeyID]);
+            delete this.activeKeys[KeyID];
+            this.stopEvent(e);
+            return;
+        } else if (this.activeKeys[KeyID] !== undefined) {
+            this.stopEvent(e);
+            return;
+        }
+
+        //This is a new key press so we need to start a camera animation interval for it
+        var xml3d = this.xml3d;
+        if (xml3d) {
+            switch (KeyID) {
+                case 38: // up
+                case 87: // w
+                    this.activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "forward"), 17);
+                    break;
+                case 39: // right
+                case 68: // d
+                    this.activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "right"), 17);
+                    break;
+                case 37: // left
+                case 65: // a
+                    this.activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "left"), 17);
+                    break;
+                case 40: // down
+                case 83: // s
+                    this.activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "backward"), 17);
+                    break;
+
+                default:
+                    return;
+            }
+        }
+        this.stopEvent(e);
+    };
 
     XML3D.StandardCamera.prototype.moveTick = function(dirString) {
         var elementDir = this.transformInterface.direction;

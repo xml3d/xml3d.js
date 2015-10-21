@@ -484,79 +484,69 @@
 
     XML3D.StandardCamera.prototype.keyHandling = function(e, action) {
         var KeyID = e.keyCode;
-        if (KeyID == 0) {
-            switch (e.which) {
-                case 119:
-                    KeyID = 87;
-                    break; // w
-                case 100:
-                    KeyID = 68;
-                    break; // d
-                case 97:
-                    KeyID = 65;
-                    break; // a
-                case 115:
-                    KeyID = 83;
-                    break; // s
-            }
+        switch (KeyID) {
+            case 38:
+            case 87:
+            case 39:
+            case 68:
+            case 37:
+            case 65:
+            case 40:
+            case 83:
+                break;
+            default:
+                return; //Not a key we're interested in
         }
 
         if (action === "up") {
-            clearInterval(this.activeKeys[KeyID]);
             delete this.activeKeys[KeyID];
-            this.stopEvent(e);
             return;
         } else if (this.activeKeys[KeyID] !== undefined) {
-            this.stopEvent(e);
+            //Already animating this direction
             return;
         }
 
         //This is a new key press so we need to start a camera animation interval for it
-        var xml3d = this.xml3d;
-        if (xml3d) {
-            switch (KeyID) {
-                case 38: // up
-                case 87: // w
-                    this.activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "forward"), 17);
-                    break;
-                case 39: // right
-                case 68: // d
-                    this.activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "right"), 17);
-                    break;
-                case 37: // left
-                case 65: // a
-                    this.activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "left"), 17);
-                    break;
-                case 40: // down
-                case 83: // s
-                    this.activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "backward"), 17);
-                    break;
-
-                default:
-                    return;
-            }
-        }
-        this.stopEvent(e);
+        this.activeKeys[KeyID] = Date.now();
+        window.requestAnimationFrame(this.moveTick.bind(this, KeyID));
     };
 
-    XML3D.StandardCamera.prototype.moveTick = function(dirString) {
+    XML3D.StandardCamera.prototype.moveTick = function(keyID) {
+        if (this.activeKeys[keyID] === undefined) {
+            //This key was released, returning without requesting a new animation frame will stop movement in this direction
+            return;
+        }
+
         var elementDir = this.transformInterface.direction;
         var np = this.transformInterface.position;
-        switch(dirString) {
-            case "forward":
+
+        switch (keyID) {
+            case 38: // up
+            case 87: // w
+
                 break;
-            case "right":
+            case 39: // right
+            case 68: // d
                 elementDir = elementDir.cross(new XML3D.Vec3(0, 1, 0));
                 break;
-            case "left":
+            case 37: // left
+            case 65: // a
                 elementDir = elementDir.cross(new XML3D.Vec3(0, -1, 0));
                 break;
-            case "backward":
+            case 40: // down
+            case 83: // s
                 elementDir = elementDir.negate();
                 break;
+
+            default:
+                return;
         }
-        np = np.add(elementDir.scale(this.zoomSpeed * 0.02));
+        var timeScale = (Date.now() - this.activeKeys[keyID]) / 16.67; //try to keep the same movement speed over time regardless of framerate
+        np = np.add(elementDir.scale(this.zoomSpeed * 0.02 * timeScale));
         this.transformInterface.position = np;
+
+        this.activeKeys[keyID] = Date.now();
+        window.requestAnimationFrame(this.moveTick.bind(this, keyID));
     };
 
 

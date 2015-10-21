@@ -116,6 +116,14 @@
     };
 
     /**
+     * Sets the examine point of the camera. This has no effect if the camera is in "fly" mode.
+     * @param p The new examine point
+     */
+    XML3D.StandardCamera.prototype.setExaminePoint = function(p) {
+        this.examinePoint = p;
+    };
+
+    /**
      * Orient the camera to look at the given point
      *
      * @param {XML3D.Vec3} point
@@ -133,7 +141,8 @@
         this._evt_mouseup = function(e) {self.mouseReleaseEvent(e);};
         this._evt_mousemove = function(e) {self.mouseMoveEvent(e);};
         this._evt_contextmenu = function(e) {self.stopEvent(e);};
-        this._evt_keydown = function(e) {self.keyHandling(e);};
+        this._evt_keydown = function(e) {self.keyHandling.call(self, e, "down");};
+        this._evt_keyup = function(e) {self.keyHandling.call(self, e, "up");};
 
         this._evt_touchstart = function(e) {self.touchStartEvent(e);};
         this._evt_touchmove = function(e) {self.touchMoveEvent(e);};
@@ -151,8 +160,10 @@
         document.addEventListener("touchcancel", this._evt_touchend, false);
 
         this.xml3d.addEventListener("contextmenu", this._evt_contextmenu, false);
-        if (this.useKeys)
+        if (this.useKeys) {
             document.addEventListener("keydown", this._evt_keydown, false);
+            document.addEventListener("keyup", this._evt_keyup, false);
+        }
     };
 
     /**
@@ -169,8 +180,10 @@
         document.removeEventListener("touchcancel", this._evt_touchend, false);
 
         this.xml3d.removeEventListener("contextmenu", this._evt_contextmenu, false);
-        if (this.useKeys)
+        if (this.useKeys) {
             document.removeEventListener("keydown", this._evt_keydown, false);
+            document.removeEventListener("keyup", this._evt_keyup, false);
+        }
     };
 
 
@@ -468,65 +481,85 @@
     // key movement
     // -----------------------------------------------------
 
-    XML3D.StandardCamera.prototype.keyHandling = function(e) {
-        var KeyID = e.keyCode;
-        if (KeyID == 0) {
-            switch (e.which) {
-            case 119:
-                KeyID = 87;
-                break; // w
-            case 100:
-                KeyID = 68;
-                break; // d
-            case 97:
-                KeyID = 65;
-                break; // a
-            case 115:
-                KeyID = 83;
-                break; // s
+    XML3D.StandardCamera.prototype.keyHandling = (function() {
+        var activeKeys = {};
+
+        return function(e, action) {
+            var KeyID = e.keyCode;
+            if (KeyID == 0) {
+                switch (e.which) {
+                    case 119:
+                        KeyID = 87;
+                        break; // w
+                    case 100:
+                        KeyID = 68;
+                        break; // d
+                    case 97:
+                        KeyID = 65;
+                        break; // a
+                    case 115:
+                        KeyID = 83;
+                        break; // s
+                }
             }
-        }
 
-        var xml3d = this.xml3d;
-        var element = this.transformInterface;
-        var dir = element.direction;
-        var np;
-        if (xml3d) {
-            switch (KeyID) {
-            case 38: // up
-            case 87: // w
-                np = element.position;
-                np.z += dir.z * this.zoomSpeed * 0.05;
-                np.x += dir.x * this.zoomSpeed * 0.05;
-                element.position = np;
-                break;
-            case 39: // right
-            case 68: // d
-                np = element.position;
-                np.x -= dir.z * this.zoomSpeed * 0.05;
-                np.z += dir.x * this.zoomSpeed * 0.05;
-                element.position = np;
-                break;
-            case 37: // left
-            case 65: // a
-                np = element.position;
-                np.x += dir.z * this.zoomSpeed * 0.05;
-                np.z -= dir.x * this.zoomSpeed * 0.05;
-                element.position = np;
-                break;
-            case 40: // down
-            case 83: // s
-                np = element.position;
-                np.z -= dir.z * this.zoomSpeed * 0.05;
-                np.x -= dir.x * this.zoomSpeed * 0.05;
-                element.position = np;
-                break;
-
-            default:
+            if (action === "up") {
+                clearInterval(activeKeys[KeyID]);
+                delete activeKeys[KeyID];
+                this.stopEvent(e);
+                return;
+            } else if (activeKeys[KeyID] !== undefined) {
+                this.stopEvent(e);
                 return;
             }
+
+            //This is a new key press so we need to start a camera animation interval for it
+            var xml3d = this.xml3d;
+            if (xml3d) {
+                switch (KeyID) {
+                    case 38: // up
+                    case 87: // w
+                        activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "forward"), 17);
+                        break;
+                    case 39: // right
+                    case 68: // d
+                        activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "right"), 17);
+                        break;
+                    case 37: // left
+                    case 65: // a
+                        activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "left"), 17);
+                        break;
+                    case 40: // down
+                    case 83: // s
+                        activeKeys[KeyID] = setInterval(this.moveTick.bind(this, "backward"), 17);
+                        break;
+
+                    default:
+                        return;
+                }
+            }
+            this.stopEvent(e);
         }
-        this.stopEvent(e);
+    })();
+
+    XML3D.StandardCamera.prototype.moveTick = function(dirString) {
+        var elementDir = this.transformInterface.direction;
+        var np = this.transformInterface.position;
+        switch(dirString) {
+            case "forward":
+                break;
+            case "right":
+                elementDir = elementDir.cross(new XML3D.Vec3(0, 1, 0));
+                break;
+            case "left":
+                elementDir = elementDir.cross(new XML3D.Vec3(0, -1, 0));
+                break;
+            case "backward":
+                elementDir = elementDir.negate();
+                break;
+        }
+        np = np.add(elementDir.scale(this.zoomSpeed * 0.02));
+        this.transformInterface.position = np;
     };
 
 

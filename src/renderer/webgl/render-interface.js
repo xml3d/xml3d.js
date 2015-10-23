@@ -54,8 +54,8 @@ XML3D.extend(GLRenderInterface.prototype, {
         return new FullScreenQuad(this.context);
     },
 
-    createSceneRenderPass: function(enableSSAO) {
-        return new ForwardRenderPass(this.context, enableSSAO);
+    createSceneRenderPass: function(target) {
+        return new ForwardRenderPass(this, target || this.context.canvasTarget);
     }
 });
 

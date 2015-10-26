@@ -53,8 +53,8 @@
         }
         if (XML3D.StandardCamera.Instance) {
             XML3D.StandardCamera.Instance.detach();
-            delete XML3D.StandardCamera.Instance;
         }
+        XML3D.StandardCamera.Instance = false; // Prevent the camera from self-initializing
 
         opt = opt || {};
         this.element = element;
@@ -701,7 +701,16 @@
 
 // Automatically creates a camera instance using the first view element on the page
 window.addEventListener("load", function() {
-    var view = document.querySelector("view");
-    if (view)
-        XML3D.StandardCamera.Instance = new XML3D.StandardCamera(view, {mode:"fly", useKeys:true});
+    var xml3d = document.querySelector("xml3d");
+    var init = function() {
+        var view = document.querySelector("view");
+        if (view && XML3D.StandardCamera.Instance !== false)
+            XML3D.StandardCamera.Instance = new XML3D.StandardCamera(view, {mode: "fly", useKeys: true});
+    };
+    if (xml3d) {
+        if (xml3d.complete)
+            init();
+        else
+            xml3d.addEventListener("load", init);
+    }
 });

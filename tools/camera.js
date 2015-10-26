@@ -51,6 +51,11 @@
         if (element.hasAttribute("style")) {
             XML3D.debug.logWarning("This camera controller does not support CSS transforms, unexpected things may happen! Try using a <transform> element instead.");
         }
+        if (XML3D.StandardCamera.Instance) {
+            XML3D.StandardCamera.Instance.detach();
+            delete XML3D.StandardCamera.Instance;
+        }
+
         opt = opt || {};
         this.element = element;
         this.xml3d = this.getXML3DForElement(element);
@@ -485,14 +490,14 @@
     XML3D.StandardCamera.prototype.keyHandling = function(e, action) {
         var KeyID = e.keyCode;
         switch (KeyID) {
-            case 38:
-            case 87:
-            case 39:
-            case 68:
-            case 37:
-            case 65:
-            case 40:
-            case 83:
+            case 38: //up
+            case 87: //w
+            case 39: //right
+            case 68: //d
+            case 37: //left
+            case 65: //a
+            case 40: //down
+            case 83: //s
                 break;
             default:
                 return; //Not a key we're interested in
@@ -523,7 +528,6 @@
         switch (keyID) {
             case 38: // up
             case 87: // w
-
                 break;
             case 39: // right
             case 68: // d
@@ -537,7 +541,6 @@
             case 83: // s
                 elementDir = elementDir.negate();
                 break;
-
             default:
                 return;
         }
@@ -695,3 +698,10 @@
         this.orientation = XML3D.Quat.fromBasis(basisX, basisY, basisZ);
     };
 })();
+
+// Automatically creates a camera instance using the first view element on the page
+window.addEventListener("load", function() {
+    var view = document.querySelector("view");
+    if (view)
+        XML3D.StandardCamera.Instance = new XML3D.StandardCamera(view, {mode:"fly", useKeys:true});
+});

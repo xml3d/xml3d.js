@@ -36,7 +36,7 @@ XML3D.extend(ForwardRenderPass.prototype, {
             scene.getActiveView().getViewToWorldMatrix(c_viewToWorldMatrix);
             scene.getActiveView().getProjectionMatrix(c_projectionMatrix, aspect);
 
-            var sorted = this.sorter.sortScene(scene, c_worldToViewMatrix);
+            var sorted = this.sorter.sortObjects(scene.ready, c_worldToViewMatrix);
 
             systemUniforms["viewMatrix"] = c_worldToViewMatrix;
             systemUniforms["viewInverseMatrix"] = c_viewToWorldMatrix;
@@ -48,21 +48,31 @@ XML3D.extend(ForwardRenderPass.prototype, {
                 systemUniforms["ssaoMap"] = [this.inputs.ssaoMap.colorTarget.handle];
 
             //Render opaque objects
-            for (var program in sorted.opaque) {
-                this.renderObjectsToActiveBuffer(sorted.opaque[program], scene, target, systemUniforms, c_programSystemUniforms, {
-                    transparent: false,
-                    stats: count
-                });
+            for (var i in sorted.zLayers) {
+                var zLayer = sorted.zLayers[i];
+                gl.clear(gl.DEPTH_BUFFER_BIT);
+                for (var program in sorted.opaque[zLayer]) {
+                    this.renderObjectsToActiveBuffer(sorted.opaque[zLayer][program], scene, target, systemUniforms, c_programSystemUniforms, {
+                        transparent: false,
+                        stats: count
+                    });
+                }
+                if (sorted.transparent[zLayer].length) {
+                    this.renderObjectsToActiveBuffer(sorted.transparent[zLayer], scene, target, systemUniforms, c_programSystemUniforms, {
+                        transparent: true,
+                        stats: count
+                    });
+                }
             }
 
             //Render transparent objects
-            for (var k = 0; k < sorted.transparent.length; k++) {
-                var objectArray = [sorted.transparent[k]];
-                this.renderObjectsToActiveBuffer(objectArray, scene, target, systemUniforms, c_programSystemUniforms, {
-                    transparent: true,
-                    stats: count
-                });
-            }
+            //for (var k = 0; k < sorted.transparent.length; k++) {
+            //    var objectArray = [sorted.transparent[k]];
+            //    this.renderObjectsToActiveBuffer(objectArray, scene, target, systemUniforms, c_programSystemUniforms, {
+            //        transparent: true,
+            //        stats: count
+            //    });
+            //}
             scene.lights.changed = false;
             target.unbind();
             this.lastRenderStats.count = count;

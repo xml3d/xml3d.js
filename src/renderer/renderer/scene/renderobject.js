@@ -81,6 +81,7 @@ var RenderObject = function (scene, pageEntry, opt) {
     this.drawable = this.createDrawable();
 
     this._material = opt.material || null;
+    this._zIndex = opt.zIndex || "0";
     this._actualMaterial = null;
     this.initMaterial();
 
@@ -350,6 +351,10 @@ XML3D.createClass(RenderObject, RenderNode, {
             this._actualMaterial = this.parent.getMaterial();
         }
         this.materialChanged();
+    },
+
+    setZIndex: function(zIndex){
+        this._zIndex = zIndex;
     },
 
     parentMaterialChanged: function () {

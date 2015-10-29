@@ -34,6 +34,7 @@ XML3D.createClass(ModelRenderAdapter, SceneElementAdapter, {
         this.renderNode.setLocalMatrix(c_IDENTITY);
         this.createModelRenderNodes();
         this.updateVisibility();
+        this.updateZIndex();
 
     },
 

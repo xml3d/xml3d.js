@@ -1,8 +1,10 @@
 var BaseRenderPass = require("./base.js");
 var mat4 = require("gl-matrix").mat4;
+var ObjectSorter = require("../../renderer/tools/objectsorter.js");
 
 var PickObjectRenderPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
+    this.sorter = new ObjectSorter();
 };
 XML3D.createClass(PickObjectRenderPass, BaseRenderPass);
 
@@ -17,6 +19,7 @@ XML3D.extend(PickObjectRenderPass.prototype, {
         return function (objects, viewMatrix, projMatrix) {
             var gl = this.renderInterface.context.gl, target = this.output;
             target.bind();
+            var sortedObjects = this.sorter.sortObjects(objects, viewMatrix);
 
             gl.enable(gl.DEPTH_TEST);
             gl.disable(gl.CULL_FACE);
@@ -25,32 +28,42 @@ XML3D.extend(PickObjectRenderPass.prototype, {
 
             var program = this.renderInterface.context.programFactory.getPickingObjectIdProgram();
             program.bind();
-            for (var j = 0, n = objects.length; j < n; j++) {
-                var obj = objects[j];
-                var mesh = obj.mesh;
+            var objCount = 0;
+            for (var j = 0, n = sortedObjects.zLayers.length; j < n; j++) {
+                var zLayer = sortedObjects.zLayers[j];
+                gl.clear(gl.DEPTH_BUFFER_BIT);
+                for (var ind in sortedObjects.opaque[zLayer]) {
+                    var objs = sortedObjects.opaque[zLayer][ind];
+                    for (var i=0; i < objs.length; i++) {
+                        var obj = objs[i];
+                        var mesh = obj.mesh;
 
-                if (!obj.visible)
-                    continue;
+                        if (!obj.visible)
+                            continue;
 
-                if (viewMatrix && projMatrix) {
-                    obj.updateModelViewMatrix(viewMatrix);
-                    obj.updateModelViewProjectionMatrix(projMatrix);
+                        if (viewMatrix && projMatrix) {
+                            obj.updateModelViewMatrix(viewMatrix);
+                            obj.updateModelViewProjectionMatrix(projMatrix);
+                        }
+
+                        obj.getModelViewProjectionMatrix(c_mvp);
+
+                        var objId = ++objCount;
+                        obj.pickId = objId;
+                        var c1 = objId & 255;
+                        objId = objId >> 8;
+                        var c2 = objId & 255;
+                        objId = objId >> 8;
+                        var c3 = objId & 255;
+
+                        c_uniformCollection.sysBase["id"] = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
+                        c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_mvp;
+
+                        program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
+                        mesh.draw(program);
+                    }
                 }
 
-                obj.getModelViewProjectionMatrix(c_mvp);
-
-                var objId = j + 1;
-                var c1 = objId & 255;
-                objId = objId >> 8;
-                var c2 = objId & 255;
-                objId = objId >> 8;
-                var c3 = objId & 255;
-
-                c_uniformCollection.sysBase["id"] = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
-                c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_mvp;
-
-                program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
-                mesh.draw(program);
             }
             program.unbind();
             target.unbind();
@@ -75,8 +88,12 @@ XML3D.extend(PickObjectRenderPass.prototype, {
         var objId = data[0] * 65536 + data[1] * 256 + data[2];
 
         if (objId > 0) {
-            var pickedObj = objects[objId - 1];
-            result = pickedObj;
+            for (var i=0; i < objects.length; i++) {
+                if (objects[i].pickId === objId) {
+                    result = objects[i];
+                    break;
+                }
+            }
         }
         return result;
     }

@@ -83,17 +83,22 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
         this.renderNode.setLocalVisible(!(none || hidden));
     },
 
+    updateZIndex: function() {
+        if (this.renderNode.setZIndex) {
+            var zIndex = this.style.getPropertyValue("z-index");
+            this.renderNode.setZIndex(zIndex);
+        }
+    },
+
     dispose: function() {
         this.getRenderNode().remove();
         this.clearAdapterHandles();
     },
 
-
-
     styleChangedCallback: function() {
+        this.updateZIndex();
         this.updateVisibility();
     },
-
 
     updateLocalMatrix: function () {
         this.transformFetcher && this.transformFetcher.update();

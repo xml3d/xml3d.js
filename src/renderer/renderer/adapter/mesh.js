@@ -25,6 +25,7 @@ XML3D.createClass(MeshRenderAdapter, SceneElementAdapter, {
             configuration: this.createMeshConfiguration(),
             name: this.node.id
         });
+        this.updateZIndex();
         this.updateVisibility();
         this.updateLocalMatrix();
         this.updateMaterialHandler();

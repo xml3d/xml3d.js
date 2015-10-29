@@ -268,11 +268,13 @@ XML3D.extend(GLRenderer.prototype, {
 
     getRenderObjectFromPickingBuffer: function (x, y) {
         y = canvasToGlY(this._canvasHandler.getCanvas(), y);
+        var worldToViewMatrix = mat4.create();
         if (this.needsPickingDraw) {
             this.needsPickingDraw = false;
             this.prepareRendering();
             this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight());
-            this.pickObjectPass.render(this.scene.ready);
+            this.scene.getActiveView().getWorldToViewMatrix(worldToViewMatrix);
+            this.pickObjectPass.render(this.scene.ready, worldToViewMatrix);
             XML3D.debug.logDebug("Rendered Picking Buffer");
         }
         this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene.ready);

@@ -89,7 +89,7 @@ XML3D.extend(PickObjectRenderPass.prototype, {
 
         if (objId > 0) {
             for (var i=0; i < objects.length; i++) {
-                if (objects[i].pickId === objId) {
+                if (objects[i].inFrustum && objects[i].pickId === objId) {
                     result = objects[i];
                     break;
                 }

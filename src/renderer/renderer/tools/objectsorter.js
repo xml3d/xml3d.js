@@ -19,6 +19,7 @@ XML3D.extend(ObjectSorter.prototype, {
     sortObjects: function (sourceObjectArray, viewMatrix) {
         var presortOpaque = {}, presortTransparent = {};
 
+        // Sort by transparency and z-index
         var obj;
         for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
             obj = sourceObjectArray[i];
@@ -40,11 +41,13 @@ XML3D.extend(ObjectSorter.prototype, {
             }
         }
 
+        // Separate the scene into z-layers according to z-index
         var zLayers = Object.keys(presortOpaque).concat(Object.keys(presortTransparent));
         zLayers.sort(function(a,b) {
             return parseInt(a) - parseInt(b);
         });
 
+        // Sort opaque z-buckets by shader
         var opaque = {};
         for (var i=0; i<zLayers.length; i++) {
             var key = zLayers[i];
@@ -57,8 +60,7 @@ XML3D.extend(ObjectSorter.prototype, {
             }
         }
 
-        // Sort opaque objects from front to back in order
-        // to have earlier z-fails
+        // Sort opaque shader buckets by depth for early z fails
         for (var zLayer in zLayers) {
             for (var progId in opaque[zLayer]) {
                 var withinShader = opaque[zLayer][progId];
@@ -81,7 +83,7 @@ XML3D.extend(ObjectSorter.prototype, {
             }
         }
 
-        //Sort transparent objects from back to front
+        //Sort transparent z-buckets back to front
         var transparent = {};
         for (var ind in zLayers) {
             var zLayer = zLayers[ind];
@@ -105,6 +107,7 @@ XML3D.extend(ObjectSorter.prototype, {
             transparent[zLayer] = tlayer;
         }
 
+        // zLayers contains all unique z-index values in the scene, partitioning it into z-buckets
         return {
             opaque: opaque, transparent: transparent, zLayers : zLayers
         }

@@ -83,6 +83,7 @@ var RenderObject = function (scene, pageEntry, opt) {
     this._material = opt.material || null;
     this._zIndex = opt.zIndex || "0";
     this._actualMaterial = null;
+    this.pickId = -1;
     this.initMaterial();
 
     /** {Object?} **/

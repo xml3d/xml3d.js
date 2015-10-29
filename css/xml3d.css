@@ -13,6 +13,12 @@ xml3d|script  {
    display: none;
 }
 
+xml3d|mesh,
+xml3d|group,
+xml3d|model {
+	position: relative;
+}
+
 .xml3d-canvas-style {
 	cursor: default;
 	display: block;

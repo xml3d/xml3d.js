@@ -65,14 +65,6 @@ XML3D.extend(ForwardRenderPass.prototype, {
                 }
             }
 
-            //Render transparent objects
-            //for (var k = 0; k < sorted.transparent.length; k++) {
-            //    var objectArray = [sorted.transparent[k]];
-            //    this.renderObjectsToActiveBuffer(objectArray, scene, target, systemUniforms, c_programSystemUniforms, {
-            //        transparent: true,
-            //        stats: count
-            //    });
-            //}
             scene.lights.changed = false;
             target.unbind();
             this.lastRenderStats.count = count;

@@ -17,11 +17,10 @@ XML3D.extend(ObjectSorter.prototype, {
      * @param {XML3D.Mat4?} viewMatrix Matrix to apply to objects world space extend before sorting
      */
     sortObjects: function (sourceObjectArray, viewMatrix) {
-        var presortOpaque = {}, presortTransparent = {};
+        var presortOpaque = {}, presortTransparent = {}, obj, zLayer, i, l, n;
 
         // Sort by transparency and z-index
-        var obj;
-        for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
+        for (i = 0, l = sourceObjectArray.length; i < l; i++) {
             obj = sourceObjectArray[i];
             if (obj.inFrustum === false) {
                 continue;
@@ -49,19 +48,19 @@ XML3D.extend(ObjectSorter.prototype, {
 
         // Sort opaque z-buckets by shader
         var opaque = {};
-        for (var i=0; i<zLayers.length; i++) {
-            var key = zLayers[i];
-            opaque[key] = {};
-            for (var index in presortOpaque[key]) {
-                var obj = presortOpaque[key][index];
+        for (i=0; i<zLayers.length; i++) {
+            zLayer = zLayers[i];
+            opaque[zLayer] = {};
+            for (n in presortOpaque[zLayer]) {
+                obj = presortOpaque[zLayer][n];
                 var program = obj.getProgram();
-                opaque[key][program.id] = opaque[key][program.id] || [];
-                opaque[key][program.id].push(obj);
+                opaque[zLayer][program.id] = opaque[zLayer][program.id] || [];
+                opaque[zLayer][program.id].push(obj);
             }
         }
 
         // Sort opaque shader buckets by depth for early z fails
-        for (var zLayer in zLayers) {
+        for (zLayer in zLayers) {
             for (var progId in opaque[zLayer]) {
                 var withinShader = opaque[zLayer][progId];
                 var sortedArray = new Array(withinShader.length);
@@ -86,10 +85,10 @@ XML3D.extend(ObjectSorter.prototype, {
         //Sort transparent z-buckets back to front
         var transparent = {};
         for (var ind in zLayers) {
-            var zLayer = zLayers[ind];
+            zLayer = zLayers[ind];
             var tlayer = [];
-            for (var index in presortTransparent[zLayer]) {
-                var obj = presortTransparent[zLayer][index];
+            for (n in presortTransparent[zLayer]) {
+                obj = presortTransparent[zLayer][n];
                 obj.getWorldSpaceBoundingBox(c_bbox);
                 c_bbox.center(c_center);
                 viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
@@ -100,7 +99,7 @@ XML3D.extend(ObjectSorter.prototype, {
                 return a[1] - b[1];
             });
 
-            for (var i = 0; i < tlayer.length; i++) {
+            for (i = 0; i < tlayer.length; i++) {
                 tlayer[i] = tlayer[i][0];
             }
 

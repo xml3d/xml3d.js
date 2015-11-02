@@ -84,8 +84,18 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     },
 
     updateZIndex: function() {
+        var zIndex = this.style.getPropertyValue("z-index");
+        zIndex = sanitizeZIndex(zIndex);
+
+        var parent = this.node.parentNode;
+        while (parent && parent.tagName.toLowerCase() !== "xml3d") {
+            var style = window.getComputedStyle(parent);
+            var parentZ = style.getPropertyValue("z-index");
+            parentZ = sanitizeZIndex(parentZ);
+            zIndex = parentZ + ":" + zIndex;
+            parent = parent.parentNode;
+        }
         if (this.renderNode.setZIndex) {
-            var zIndex = this.style.getPropertyValue("z-index");
             this.renderNode.setZIndex(zIndex);
         }
     },
@@ -144,6 +154,13 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
         }
     }
 });
+
+function sanitizeZIndex(zIndex) {
+    if (zIndex === "auto") zIndex = "0";
+    zIndex = "0000000000" + zIndex;
+    zIndex = zIndex.slice(zIndex.length - 10);
+    return zIndex;
+}
 
 function getMaterialURI(node) {
     var materialURI = node.getAttribute("material");

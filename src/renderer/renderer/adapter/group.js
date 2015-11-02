@@ -15,7 +15,6 @@ XML3D.createClass(GroupRenderAdapter, SceneElementAdapter, {
         this.renderNode = this.getScene().createRenderGroup({
             parent: parentNode, name: this.node.id
         });
-        this.updateZIndex();
         this.updateLocalMatrix();
         this.updateMaterialHandler();
         this.updateVisibility();

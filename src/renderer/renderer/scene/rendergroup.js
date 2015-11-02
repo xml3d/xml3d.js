@@ -36,7 +36,6 @@ var RenderGroup = function (scene, pageEntry, opt) {
      * @type {MaterialConfiguration|null}
      */
     this._material = opt.material || null;
-    this._zIndex = opt.zIndex || "0";
     this.boundingBoxDirty = false;
     this.setWorldSpaceBoundingBox(XML3D.Box.EMPTY_BOX);
 };
@@ -148,10 +147,6 @@ XML3D.extend(RenderGroup.prototype, {
         this.children.forEach(function (obj) {
             obj.parentMaterialChanged && obj.parentMaterialChanged();
         });
-    },
-
-    setZIndex: function(zIndex){
-        this._zIndex = zIndex;
     },
 
     parentMaterialChanged: function () {

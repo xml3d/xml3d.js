@@ -84,20 +84,23 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     },
 
     updateZIndex: function() {
-        var zIndex = this.style.getPropertyValue("z-index");
-        zIndex = sanitizeZIndex(zIndex);
+        if (!this.renderNode.setZIndex) {
+            // Only leaf nodes need to worry about this, they will be informed through NodeAdapter.traverse
+            return;
+        }
+        var zIndex = this.node.style.getPropertyValue("z-index");
+        zIndex = sanitizeZIndex(zIndex, true);
 
-        var parent = this.node.parentNode;
+        var parent = this.node.parentElement;
         while (parent && parent.tagName.toLowerCase() !== "xml3d") {
-            var style = window.getComputedStyle(parent);
-            var parentZ = style.getPropertyValue("z-index");
-            parentZ = sanitizeZIndex(parentZ);
-            zIndex = parentZ + ":" + zIndex;
-            parent = parent.parentNode;
+            var parentZ = parent.style.getPropertyValue("z-index");
+            parentZ = sanitizeZIndex(parentZ, false);
+            if (parentZ != "")
+                zIndex = parentZ + ":" + zIndex;
+            parent = parent.parentElement;
         }
-        if (this.renderNode.setZIndex) {
-            this.renderNode.setZIndex(zIndex);
-        }
+
+        this.renderNode.setZIndex(zIndex);
     },
 
     dispose: function() {
@@ -155,8 +158,14 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     }
 });
 
-function sanitizeZIndex(zIndex) {
-    if (zIndex === "auto") zIndex = "0";
+function sanitizeZIndex(zIndex, isLeafNode) {
+    if (zIndex === "auto" || zIndex === "") {
+        if (isLeafNode) {
+            zIndex = "0"; // Always give leaf nodes an implicit z-index of 0 to ensure they compare properly with negative z-index leaf nodes
+        } else {
+            return "";
+        }
+    }
     zIndex = "0000000000" + zIndex;
     zIndex = zIndex.slice(zIndex.length - 10);
     return zIndex;

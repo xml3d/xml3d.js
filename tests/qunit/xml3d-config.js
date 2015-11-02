@@ -266,10 +266,9 @@ function promiseIFrameLoaded(url) {
     v.addEventListener("load", f, true);
     v.src = url +window.location.search;
     return deferred.promise;
-};
+}
 
 function displayMousePosition(e) {
-    console.log(e.clientX + ", " + e.clientY);
     var pointerPosElement = document.getElementById("pointerPosElement");
     if (pointerPosElement) {
         pointerPosElement.textContent = "GLCoords: "+ e.clientX+", "+ (this.height - e.clientY);

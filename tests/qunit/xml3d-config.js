@@ -257,12 +257,24 @@ function promiseIFrameLoaded(url) {
     var f = function(e) {
         deferred.resolve(v.contentDocument);
         v.removeEventListener("load", f, true);
+        var xml3ds = v.contentDocument.querySelectorAll("xml3d");
+        for (var i=0; i<xml3ds.length; i++) {
+            xml3ds[i].addEventListener("mousemove", displayMousePosition);
+        }
     };
     // TODO: Loading failed
     v.addEventListener("load", f, true);
     v.src = url +window.location.search;
     return deferred.promise;
 };
+
+function displayMousePosition(e) {
+    console.log(e.clientX + ", " + e.clientY);
+    var pointerPosElement = document.getElementById("pointerPosElement");
+    if (pointerPosElement) {
+        pointerPosElement.textContent = "GLCoords: "+ e.clientX+", "+ (this.height - e.clientY);
+    }
+}
 
 function promiseOneSceneCompleteAndRendered(xml3dElement) {
     if(xml3dElement.complete) {

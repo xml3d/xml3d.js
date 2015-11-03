@@ -20,7 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-@version: 5.0.0
+@version: 5.0.1
 **/
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
@@ -12614,7 +12614,7 @@ var Xflow = Xflow || {};
 window.XML3D = XML3D;
 window.Xflow = Xflow;
 
-XML3D.version = '5.0.0';
+XML3D.version = '5.0.1';
 /** @const */
 XML3D.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
 /** @const */
@@ -12680,8 +12680,8 @@ XML3D.extend(Xflow, require("./xflow/interface/data.js"));
 Xflow.ComputeRequest = require("./xflow/interface/request.js").ComputeRequest;
 
 XML3D.webgl = {};
-XML3D.extend(XML3D.webgl, require("./renderer/webgl/render-trees/base.js"));
-XML3D.extend(XML3D.webgl, require("./renderer/webgl/render-passes/base.js"));
+XML3D.webgl.BaseRenderTree = require("./renderer/webgl/render-trees/base.js");
+XML3D.webgl.BaseRenderPass = require("./renderer/webgl/render-passes/base.js");
 
 require("./xflow/operator/default");
 
@@ -16820,11 +16820,6 @@ MouseEventHandler.prototype =  {
                 this.dispatchMouseEvent(this.createMouseEvent("mouseout", {
                     clientX: pos.x, clientY: pos.y, button: evt.button
                 }), this.lastPickObj);
-                if (!curObj) { // Nothing picked, this means we enter the xml3d canvas
-                    this.dispatchMouseEvent(this.createMouseEvent("mouseover", {
-                        clientX: pos.x, clientY: pos.y, button: evt.button
-                    }), this._defaultTarget);
-                }
             }
             if (curObj) {
                 // The mouse is now over a different object, so call the new
@@ -16832,11 +16827,6 @@ MouseEventHandler.prototype =  {
                 this.dispatchMouseEvent(this.createMouseEvent("mouseover", {
                     clientX: pos.x, clientY: pos.y, button: evt.button
                 }), curObj);
-                if (!this.lastPickObj) { // Nothing was picked before, this means we leave the xml3d canvas
-                    this.dispatchMouseEvent(this.createMouseEvent("mouseout", {
-                        clientX: pos.x, clientY: pos.y, button: evt.button
-                    }), this._defaultTarget);
-                }
             }
 
             this.lastPickObj = curObj;
@@ -23622,8 +23612,8 @@ XML3D.extend(GLRenderInterface.prototype, {
         return new FullScreenQuad(this.context);
     },
 
-    createSceneRenderPass: function(enableSSAO) {
-        return new ForwardRenderPass(this.context, enableSSAO);
+    createSceneRenderPass: function(target) {
+        return new ForwardRenderPass(this, target || this.context.canvasTarget);
     }
 });
 
@@ -24681,6 +24671,10 @@ var BaseRenderTree = function (renderInterface) {
 XML3D.extend(BaseRenderTree.prototype, {
     render: function (scene) {
         this.mainRenderPass.renderTree(scene);
+    },
+
+    getRenderStats: function() {
+        return {};
     }
 });
 

@@ -229,11 +229,6 @@ MouseEventHandler.prototype =  {
                 this.dispatchMouseEvent(this.createMouseEvent("mouseout", {
                     clientX: pos.x, clientY: pos.y, button: evt.button
                 }), this.lastPickObj);
-                if (!curObj) { // Nothing picked, this means we enter the xml3d canvas
-                    this.dispatchMouseEvent(this.createMouseEvent("mouseover", {
-                        clientX: pos.x, clientY: pos.y, button: evt.button
-                    }), this._defaultTarget);
-                }
             }
             if (curObj) {
                 // The mouse is now over a different object, so call the new
@@ -241,11 +236,6 @@ MouseEventHandler.prototype =  {
                 this.dispatchMouseEvent(this.createMouseEvent("mouseover", {
                     clientX: pos.x, clientY: pos.y, button: evt.button
                 }), curObj);
-                if (!this.lastPickObj) { // Nothing was picked before, this means we leave the xml3d canvas
-                    this.dispatchMouseEvent(this.createMouseEvent("mouseout", {
-                        clientX: pos.x, clientY: pos.y, button: evt.button
-                    }), this._defaultTarget);
-                }
             }
 
             this.lastPickObj = curObj;

@@ -166,6 +166,7 @@ function sanitizeZIndex(zIndex, isLeafNode) {
             return "";
         }
     }
+    // Pad with enough zeros to cover the maximum/minimum values (2147483647) for correct string compare results in the sorting step
     zIndex = "0000000000" + zIndex;
     zIndex = zIndex.slice(zIndex.length - 10);
     return zIndex;

@@ -95,7 +95,30 @@
             <mesh src="#meshdata" material="#flatpurple" style="transform: translate3d(-1px, 0px, 0px)"></mesh>
         </group>
         <group id="layer1e_2b">
-            <mesh id="blah" src="#meshdata" material="#flatyellow" style="z-index: -44; transform: translate3d(0px, 0px, 0px);"></mesh>
+            <mesh src="#meshdata" material="#flatyellow" style="z-index: -44; transform: translate3d(0px, 0px, 0px);"></mesh>
+        </group>
+    </group>
+
+    <!-- same as above this time with models instead of simple meshes -->
+    <group id="layer1f">
+        <group id="layer1f_2">
+            <model id="model1" src="assets/cube.xml#Cube" material="#flatpurple" style="transform: translate3d(3px, 0px, 0px)"></model>
+        </group>
+        <group id="layer1f_2b">
+            <model id="model2" src="assets/cube.xml#Cube" material="#flatyellow" style="z-index: -44; transform: translate3d(4px, 0px, 0px);"></model>
+        </group>
+    </group>
+
+
+<!-- BOTTOM ROW -->
+
+    <!--  -->
+    <group id="layer1g">
+        <group id="layer1f_2">
+            <model src="assets/cube.xml#Cube" material="#flatpurple" style="transform: translate3d(-5px, -3px, 0px)"></model>
+        </group>
+        <group id="layer1f_2b">
+            <model src="assets/cube.xml#Cube" material="#flatyellow" style="transform: translate3d(-4px, -3px, 0px);"></model>
         </group>
     </group>
 

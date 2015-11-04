@@ -127,4 +127,18 @@
         return elem && elem.tagName.toLowerCase() === name;
     };
 
+    exports.encodeZIndex = function(zIndex, isLeafNode) {
+        if (zIndex === "auto" || zIndex === "") {
+            if (isLeafNode) {
+                zIndex = "0"; // Always give leaf nodes an implicit z-index of 0 to ensure they compare properly with negative z-index leaf nodes
+            } else {
+                return "";
+            }
+        }
+        // Pad with enough zeros to cover the maximum/minimum values (2147483647) for correct string compare results in the sorting step
+        zIndex = "0000000000" + zIndex;
+        zIndex = zIndex.slice(zIndex.length - 10);
+        return zIndex;
+    }
+
 }(module.exports));

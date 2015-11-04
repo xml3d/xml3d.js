@@ -22,7 +22,12 @@ test("Basic z-index functionality", function () {
         pick = XML3DUnit.getPixelValue(getContextForXml3DElement(scene), 277, 226);
         QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Negative z-index should be drawn below an implicit '0'");
 
+        doc.getElementById("model1").setAttribute("style", "transform: translate3d(3px, 0, 0);");
+
         return scene;
+    }).then(promiseSceneRendered).then(function(scene) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(scene), 451, 211);
+        QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Negative z-index on a model should be drawn below implicit '0'");
     });
     test.fin(QUnit.start).done();
 
@@ -65,6 +70,14 @@ test("Changing z-index", function() {
         // Opposite of the second .then above, changing 'auto' to '3' should create a new stacking context and reverse the rendering order
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(scene), 82, 226);
         QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Creating a new stacking context by changing 'auto' to '3' ");
+
+        var layer1f = scene.ownerDocument.getElementById("layer1f_2b");
+        layer1f.setAttribute("style", "z-index: 3");
+        return scene;
+    }).then(promiseSceneRendered).then(function(scene) {
+        // Opposite of the second .then above, changing 'auto' to '3' should create a new stacking context and reverse the rendering order
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(scene), 451, 211);
+        QUnit.closeArray(pick, [255, 255, 0, 255], PIXEL_EPSILON, "Cube model is moved above other by new stacking context");
 
     });
     test.fin(QUnit.start).done();

@@ -2,6 +2,7 @@ var SceneElementAdapter = require("./scene-element.js");
 
 var Events = require("../../../interface/notification.js");
 var Resource = require("../../../base/resourcemanager.js").Resource;
+var encodeZIndex = require("../../../utils/misc.js").encodeZIndex;
 
 var DEFAULT_PRIMITIVE_TYPE = "triangles";
 
@@ -44,6 +45,22 @@ XML3D.createClass(MeshRenderAdapter, SceneElementAdapter, {
             this.renderNode.remove();
             this.createRenderNode();
         }
+    },
+
+    updateZIndex: function() {
+        var zIndex = this.node.style.getPropertyValue("z-index");
+        zIndex = encodeZIndex(zIndex, true);
+
+        var parent = this.node.parentElement;
+        while (parent && parent.tagName.toLowerCase() !== "xml3d") {
+            var parentZ = parent.style.getPropertyValue("z-index");
+            parentZ = encodeZIndex(parentZ, false);
+            if (parentZ != "")
+                zIndex = parentZ + ":" + zIndex;
+            parent = parent.parentElement;
+        }
+
+        this.renderNode.setZIndex(zIndex);
     },
 
     /**

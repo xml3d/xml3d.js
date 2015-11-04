@@ -83,24 +83,9 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
         this.renderNode.setLocalVisible(!(none || hidden));
     },
 
+
     updateZIndex: function() {
-        if (!this.renderNode.setZIndex) {
-            // Only leaf nodes need to worry about this, they will be informed through NodeAdapter.traverse
-            return;
-        }
-        var zIndex = this.node.style.getPropertyValue("z-index");
-        zIndex = sanitizeZIndex(zIndex, true);
-
-        var parent = this.node.parentElement;
-        while (parent && parent.tagName.toLowerCase() !== "xml3d") {
-            var parentZ = parent.style.getPropertyValue("z-index");
-            parentZ = sanitizeZIndex(parentZ, false);
-            if (parentZ != "")
-                zIndex = parentZ + ":" + zIndex;
-            parent = parent.parentElement;
-        }
-
-        this.renderNode.setZIndex(zIndex);
+        //This function is overridden by the leaf nodes (mesh, model), otherwise it should do nothing
     },
 
     dispose: function() {
@@ -158,19 +143,7 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     }
 });
 
-function sanitizeZIndex(zIndex, isLeafNode) {
-    if (zIndex === "auto" || zIndex === "") {
-        if (isLeafNode) {
-            zIndex = "0"; // Always give leaf nodes an implicit z-index of 0 to ensure they compare properly with negative z-index leaf nodes
-        } else {
-            return "";
-        }
-    }
-    // Pad with enough zeros to cover the maximum/minimum values (2147483647) for correct string compare results in the sorting step
-    zIndex = "0000000000" + zIndex;
-    zIndex = zIndex.slice(zIndex.length - 10);
-    return zIndex;
-}
+
 
 function getMaterialURI(node) {
     var materialURI = node.getAttribute("material");

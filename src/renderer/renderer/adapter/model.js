@@ -3,6 +3,7 @@ var ComputeRequest = require("../../../xflow/interface/request.js").ComputeReque
 var Events = require("../../../interface/notification.js");
 var Resource = require("../../../base/resourcemanager.js").Resource;
 var AdapterHandle = require("../../../base/adapterhandle.js");
+var encodeZIndex = require("../../../utils/misc.js").encodeZIndex;
 var mat4 = require("gl-matrix").mat4;
 
 var ModelRenderAdapter = function (factory, node) {
@@ -34,8 +35,6 @@ XML3D.createClass(ModelRenderAdapter, SceneElementAdapter, {
         this.renderNode.setLocalMatrix(c_IDENTITY);
         this.createModelRenderNodes();
         this.updateVisibility();
-        this.updateZIndex();
-
     },
 
     clearModelRenderNodes: function () {
@@ -58,6 +57,7 @@ XML3D.createClass(ModelRenderAdapter, SceneElementAdapter, {
                 var assetResult = this.asset.getResult();
                 var dataTree = assetResult.getDataTree();
                 rec_createRenderNodes(this, this.renderNode, dataTree);
+                this.updateZIndex();
             } catch (e) {
                 XML3D.debug.logError("Asset Error: " + e.message, e.node || this.node);
                 this.clearModelRenderNodes();
@@ -97,6 +97,30 @@ XML3D.createClass(ModelRenderAdapter, SceneElementAdapter, {
         var propagate = function(node) {
             if (node.setLocalVisible) {
                  node.setLocalVisible(visible)
+            }
+            if (node.children) {
+                node.children.forEach(propagate);
+            }
+        };
+        propagate(this.renderNode);
+    },
+
+    updateZIndex: function() {
+        var zIndex = this.node.style.getPropertyValue("z-index");
+        zIndex = encodeZIndex(zIndex, true);
+
+        var parent = this.node.parentElement;
+        while (parent && parent.tagName.toLowerCase() !== "xml3d") {
+            var parentZ = parent.style.getPropertyValue("z-index");
+            parentZ = encodeZIndex(parentZ, false);
+            if (parentZ != "")
+                zIndex = parentZ + ":" + zIndex;
+            parent = parent.parentElement;
+        }
+
+        var propagate = function(node) {
+            if (node.setZIndex) {
+                node.setZIndex(zIndex);
             }
             if (node.children) {
                 node.children.forEach(propagate);

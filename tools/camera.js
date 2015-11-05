@@ -146,7 +146,7 @@
         this._evt_mousedown = function(e) {self.mousePressEvent(e);};
         this._evt_mouseup = function(e) {self.mouseReleaseEvent(e);};
         this._evt_mousemove = function(e) {self.mouseMoveEvent(e);};
-        this._evt_contextmenu = function(e) {self.stopEvent(e);};
+        this._evt_contextmenu = function(e) {e.preventDefault();e.stopPropagation();};
         this._evt_keydown = function(e) {self.keyHandling.call(self, e, "down");};
         this._evt_keyup = function(e) {self.keyHandling.call(self, e, "up");};
 
@@ -195,9 +195,16 @@
 
     //---------- End public API ----------------
 
-
-    XML3D.StandardCamera.prototype.__defineGetter__("width", function() { return this.xml3d.width;});
-    XML3D.StandardCamera.prototype.__defineGetter__("height", function() { return this.xml3d.height;});
+    Object.defineProperty(XML3D.StandardCamera.prototype, "width", {
+        get : function() {
+            return this.xml3d.width;
+        }
+    });
+    Object.defineProperty(XML3D.StandardCamera.prototype, "height", {
+        get : function() {
+            return this.xml3d.height;
+        }
+    });
 
     XML3D.StandardCamera.prototype.getXML3DForElement = function(element) {
         var node = element.parentNode;
@@ -219,14 +226,6 @@
         return new XML3D.Vec3(tmat.m41, tmat.m42, tmat.m43);
     };
 
-    XML3D.StandardCamera.prototype.stopEvent = function(ev) {
-        if (ev.preventDefault)
-            ev.preventDefault();
-        if (ev.stopPropagation)
-            ev.stopPropagation();
-        ev.returnValue = false;
-    };
-
     XML3D.StandardCamera.prototype.NO_MOUSE_ACTION = "no_action";
     XML3D.StandardCamera.prototype.TRANSLATE = "translate";
     XML3D.StandardCamera.prototype.DOLLY = "dolly";
@@ -234,7 +233,9 @@
     XML3D.StandardCamera.prototype.LOOKAROUND = "lookaround";
 
     XML3D.StandardCamera.prototype.mousePressEvent = function(event) {
+        // This listener captures events on the XML3D element only
         var ev = event || window.event;
+        event.preventDefault(); // Prevent text dragging
 
         switch (ev.button) {
             case 0:
@@ -261,24 +262,19 @@
             this.mousemovePicking = XML3D.options.getValue("renderer-mousemove-picking");
             XML3D.options.setValue("renderer-mousemove-picking", false);
         }
-
-        this.stopEvent(event);
-        return false;
     };
 
     XML3D.StandardCamera.prototype.mouseReleaseEvent = function(event) {
-        this.stopEvent(event);
-
         if (this.action !== this.NO_MOUSE_ACTION) {
             XML3D.options.setValue("renderer-mousemove-picking", this.mousemovePicking);
         }
 
         this.action = this.NO_MOUSE_ACTION;
-        return false;
     };
 
-    XML3D.StandardCamera.prototype.mouseMoveEvent = function(event, camera) {
+    XML3D.StandardCamera.prototype.mouseMoveEvent = function(event) {
         var ev = event || window.event;
+
         if (!this.action)
             return;
         var dx, dy, mx, my;
@@ -319,10 +315,7 @@
         {
             this.prevPos.x = ev.pageX;
             this.prevPos.y = ev.pageY;
-            event.returnValue = false;
         }
-        this.stopEvent(event);
-        return false;
     };
 
 
@@ -331,11 +324,9 @@
     // -----------------------------------------------------
 
     XML3D.StandardCamera.prototype.touchStartEvent = function(event) {
-        if (event.target.nodeName.toLowerCase() == "xml3d") {
-            this.stopEvent(event);
-        }
-
+        // This listener captures events on the XML3D element only
         var ev = event || window.event;
+
         switch (ev.touches.length) {
             case 1:
                 if(this.mode == "examine")
@@ -358,16 +349,11 @@
                 touchPositions[i] = {x: ev.touches[i].pageX, y: ev.touches[i].pageY};
         }
         this.prevTouchPositions = touchPositions;
-
-        return false;
     };
 
     XML3D.StandardCamera.prototype.touchEndEvent = function(event) {
-        if (event.target.nodeName.toLowerCase() == "xml3d") {
-            this.stopEvent(event);
-        }
-
         var ev = event || window.event;
+
         switch (ev.touches.length) {
             case 1:
                 this.prevZoomVectorLength = null;
@@ -391,18 +377,16 @@
                 touchPositions[i] = {x: ev.touches[i].pageX, y: ev.touches[i].pageY};
         }
         this.prevTouchPositions = touchPositions;
-
-        return false;
     };
 
-    XML3D.StandardCamera.prototype.touchMoveEvent = function(event, camera) {
-        if (event.target.nodeName.toLowerCase() == "xml3d") {
-            this.stopEvent(event);
-        }
-
+    XML3D.StandardCamera.prototype.touchMoveEvent = function(event) {
         var ev = event || window.event;
+
         if (!this.action)
             return;
+
+        event.preventDefault(); // Prevent a mouse event from also being dispatched
+
         var f, dx, dy, dv, trans, mx, my;
         switch(this.action) {
             case(this.TRANSLATE):
@@ -476,10 +460,7 @@
                 touchPositions[i] = {x: ev.touches[i].pageX, y: ev.touches[i].pageY};
             }
             this.prevTouchPositions = touchPositions;
-            event.returnValue = false;
         }
-
-        return false;
     };
 
 

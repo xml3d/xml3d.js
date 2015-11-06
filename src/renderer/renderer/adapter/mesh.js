@@ -48,16 +48,18 @@ XML3D.createClass(MeshRenderAdapter, SceneElementAdapter, {
     },
 
     updateZIndex: function() {
-        var zIndex = this.node.style.getPropertyValue("z-index");
+        var zIndex = this.style.getPropertyValue("z-index");
         zIndex = encodeZIndex(zIndex, true);
 
-        var parent = this.node.parentElement;
-        while (parent && parent.tagName.toLowerCase() !== "xml3d") {
-            var parentZ = parent.style.getPropertyValue("z-index");
-            parentZ = encodeZIndex(parentZ, false);
-            if (parentZ != "")
-                zIndex = parentZ + ":" + zIndex;
-            parent = parent.parentElement;
+        var parent = this.getParentRenderAdapter();
+        while (parent) {
+            if (parent.style) {
+                var parentZ = parent.style.getPropertyValue("z-index");
+                parentZ = encodeZIndex(parentZ, false);
+                if (parentZ != "")
+                    zIndex = parentZ + ":" + zIndex;
+            }
+            parent = parent.getParentRenderAdapter();
         }
 
         this.renderNode.setZIndex(zIndex);

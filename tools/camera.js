@@ -608,12 +608,12 @@
         get: function() {
             var fovh = this.element.querySelector("float[name=fovHorizontal]");
             if (fovh) {
-                var h = fovh.getValue();
+                var h = fovh.value[0];
                 return 2 * Math.atan(Math.tan(h / 2.0) * this.xml3d.width / this.xml3d.height);
             }
             var fovv = this.element.querySelector("float[name=fovVertical]");
             if (fovv) {
-                return fovv.getValue();
+                return fovv.value[0];
             }
             return (45 * Math.PI / 180); //Default FOV
         },
@@ -629,7 +629,7 @@
                 fovv.setAttribute("name", "fovVertical");
                 this.element.appendChild(fovv);
             }
-            fovv.setValue(fov);
+            fovv.textContent = fov;
         }
     });
 

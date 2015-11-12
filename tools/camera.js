@@ -284,7 +284,9 @@
                 dx = f*(ev.pageX - this.prevPos.x) * this.zoomSpeed;
                 dy = f*(ev.pageY - this.prevPos.y) * this.zoomSpeed;
                 var trans = new XML3D.Vec3(-dx, dy, 0.0);
-                this.transformInterface.translate(this.transformInterface.inverseTransformOf(trans));
+                trans = this.transformInterface.inverseTransformOf(trans);
+                this.transformInterface.translate(trans);
+                this.examinePoint = this.examinePoint.add(trans);
                 break;
             case(this.DOLLY):
                 dy = this.zoomSpeed * (ev.pageY - this.prevPos.y) / this.height;
@@ -395,7 +397,9 @@
                     dx = f*(ev.touches[0].pageX - this.prevTouchPositions[0].x);
                     dy = f*(ev.touches[0].pageY - this.prevTouchPositions[0].y);
                     trans = new XML3D.Vec3(-dx*this.zoomSpeed, dy*this.zoomSpeed, 0.0);
-                    this.transformInterface.translate(this.transformInterface.inverseTransformOf(trans));
+                    trans = this.transformInterface.inverseTransformOf(trans);
+                    this.transformInterface.translate(trans);
+                    this.examinePoint = this.examinePoint.add(trans);
                 }
                 break;
             case(this.DOLLY):

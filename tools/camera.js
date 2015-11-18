@@ -32,6 +32,9 @@
      *      {number} zoomSpeed The zoom speed in some arbitrary units, Default: 20
      *      {bool} useKeys Toggle WSAD keyboard control, Default: false
      *
+     * More documentation here:
+     * https://github.com/xml3d/xml3d.js/wiki/StandardCamera-(camera.js)
+     *
      */
 
     if(!XML3D)
@@ -688,7 +691,12 @@
 window.addEventListener("load", function() {
     var xml3d = document.querySelector("xml3d");
     var init = function() {
-        var view = document.querySelector("view");
+        var view;
+        if (xml3d.hasAttribute("view")) {
+            view = document.querySelector(xml3d.getAttribute("view"));
+        } else {
+            view = document.querySelector("view");
+        }
         if (view && XML3D.StandardCamera.Instance !== false)
             XML3D.StandardCamera.Instance = new XML3D.StandardCamera(view, {mode: "fly", useKeys: true});
     };

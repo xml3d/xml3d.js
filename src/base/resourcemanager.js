@@ -321,7 +321,7 @@ function setDocumentData(httpRequest, url, mimetype) {
         else{
             invalidateDocumentHandles(url);
         }
-    } );
+    }, url );
 
 }
 

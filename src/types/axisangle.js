@@ -1,5 +1,6 @@
 var vec4 = require("gl-matrix").vec4;
 var Vec3 = require("./vec3.js");
+var Quat = require("./quat.js");
 
 var AxisAngle = function(vec, y, z, angle) {
     if (this instanceof AxisAngle) {

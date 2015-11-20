@@ -17,15 +17,13 @@ var RequestAbortedException = function(url) {
 };
 
 var Resource = {};
-Resource.fetch = function(uri, opt) {
+Resource.fetch = function(uriString, opt) {
     opt = initOptions(opt);
+    var uri = new URI(uriString);
 
     var result = new Promise(function(resolve, reject) {
         for (var i=0; i < c_requestHooks.length; i++) {
-            var hook = c_requestHooks[i];
-            if (uri.match(hook.pattern)) {
-                hook.callback(uri, opt);
-            }
+            c_requestHooks[i](uri, opt);
         }
 
         if (opt.abort) {
@@ -33,7 +31,7 @@ Resource.fetch = function(uri, opt) {
             return;
         }
 
-        fetch(uri, opt)
+        fetch(uri.toString(), opt)
         .then(function(response) {
             resolve(response);
         }).catch(function (exception) {
@@ -45,14 +43,9 @@ Resource.fetch = function(uri, opt) {
     return result;
 };
 
-Resource.onRequest = function(pattern, callback) {
-    var hook = {
-        pattern : pattern,
-        callback : callback
-    };
-    c_requestHooks.push(hook);
+Resource.onRequest = function(callback) {
+    c_requestHooks.push(callback);
 };
-
 
 
 var initOptions = function(opt) {
@@ -62,10 +55,12 @@ var initOptions = function(opt) {
 };
 
 // Add a hook to check for file:// requests to warn the user that a server is needed to use XML3D
-Resource.onRequest(/(file:)\/+([A-Z]:\/)/, function(url, opt) {
-    XML3D.debug.logError("Encountered a filesystem request: '"+url+"'. A local server is needed to use XML3D. More " +
-        "information can be found at https://github.com/xml3d/xml3d.js/issues/162");
-    opt.abort = true;
+Resource.onRequest(function(uri, opt) {
+    if (uri.toString().match(/(file:)\/+([A-Z]:\/)/)) {
+        XML3D.debug.logError("Encountered a filesystem request: '" + uri + "'. A local server is needed to use XML3D. More " +
+            "information can be found at https://github.com/xml3d/xml3d.js/issues/162");
+        opt.abort = true;
+    }
 });
 
 module.exports = Resource;

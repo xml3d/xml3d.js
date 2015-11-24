@@ -14,7 +14,15 @@ var RequestAbortedException = function(url) {
     this.message = "Request was aborted.";
     this.url = url;
     this.toString = function() {
-        return "Failed to load "+url+": "+this.message;
+        return "Failed to load "+this.url+": "+this.message;
+    }
+};
+
+var ResponseBodyUsedException = function(response) {
+    this.message = "The body of the Response was read prematurely.";
+    this.url = response.url;
+    this.toString = function() {
+        return "Failed to process "+this.url+": "+this.message;
     }
 };
 
@@ -73,16 +81,20 @@ Resource.parseResponse = function(response) {
     return new Promise(function(resolve, reject) {
         for (var ind in c_formatHandlers) {
             var fh = c_formatHandlers[ind];
-            if (fh.isFormatSupported(response)) {
+            var isSupported = fh.isFormatSupported(response);
+
+            if (response.bodyUsed) {
+                XML3D.debug.logError("FormatHandlers should not access the response body in the isFormatSupported function!");
+                reject(new ResponseBodyUsedException(response));
+            }
+
+            if (isSupported) {
                 c_cachedDocuments[response.originalURL].handler = fh;
                 fh.getFormatData(response, resolve);
                 break;
             }
         }
-    }).catch(function(exception) {
-        XML3D.debug.logError("Could not parse document at '"+response.url+"'. Reason: "+exception);
-        reject(exception);
-    });
+    })
 };
 
 Resource.onRequest = function(callback) {

@@ -7,6 +7,7 @@ var Options = require("../utils/options.js");
 //Options.register(OPTION_RESOURCE_CORS, "anonymous");
 
 var c_requestHooks = [];
+var c_formatHandlers = [];
 
 var RequestAbortedException = function(url) {
     this.message = "Request was aborted.";
@@ -14,6 +15,11 @@ var RequestAbortedException = function(url) {
     this.toString = function() {
         return "Failed to load "+url+": "+this.message;
     }
+};
+
+var registerFormat = function(formatHandler) {
+    if (formatHandler)
+        c_formatHandlers.push(formatHandler);
 };
 
 var Resource = {};
@@ -63,4 +69,7 @@ Resource.onRequest(function(uri, opt) {
     }
 });
 
-module.exports = Resource;
+module.exports = {
+    Resource : Resource,
+    registerFormat: registerFormat
+};

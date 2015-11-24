@@ -3,7 +3,7 @@ var InputNode = require("../../../xflow/interface/graph.js").InputNode;
 var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
 var Resource = require("../../../base/resourcemanager.js").Resource;
-var registerFormat = require("../../../base/resourcemanager.js").registerFormat;
+var registerFormat = require("../../../resource/resourcefetcher.js").registerFormat;
 var JSONFormatHandler = require("../../../base/formathandler.js").JSONFormatHandler;
 var AdapterFactory = require("../../../base/adapter.js").AdapterFactory;
 
@@ -12,20 +12,26 @@ var XML3DJSONFormatHandler = function() {
 };
 XML3D.createClass(XML3DJSONFormatHandler, JSONFormatHandler);
 
-XML3DJSONFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
-    return mimetype === "application/json" && response.format == "xml3d-json" && response.version == "0.4.0";
+XML3DJSONFormatHandler.prototype.isFormatSupported = function(response) {
+    if (response.headers.has("Content-Type")) {
+        return response.headers.get("Content-Type") === "application/json";
+    }
+    if (response.url.match(/\.json/)) {
+        return true;
+    }
 };
 
 
-XML3DJSONFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
-    try{
-        var xflowNode = createXflowNode(response);
-        callback(true, xflowNode);
-    } catch (e) {
-        XML3D.debug.logException(e, "Failed to process XML3D json file");
-        callback(false);
-    }
-
+XML3DJSONFormatHandler.prototype.getFormatData = function(response, callback) {
+    response.json().then(function(json) {
+        try {
+            var xflowNode = createXflowNode(json);
+            callback(xflowNode);
+        } catch (e) {
+            XML3D.debug.logException(e, "Failed to process XML3D json file");
+            callback(new DataNode(false));
+        }
+    });
 };
 
 var xml3dJSonFormatHandler = new XML3DJSONFormatHandler();

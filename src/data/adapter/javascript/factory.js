@@ -1,4 +1,4 @@
-var registerFormat = require("../../../base/resourcemanager.js").registerFormat;
+var registerFormat = require("../../../resource/resourcefetcher.js").registerFormat;
 var FormatHandler = require("../../../base/formathandler.js").FormatHandler;
 var AdapterFactory = require("../../../base/adapter.js").AdapterFactory;
 
@@ -7,13 +7,13 @@ var JavaScriptFormatHandler = function () {
 };
 XML3D.createClass(JavaScriptFormatHandler, FormatHandler);
 
-JavaScriptFormatHandler.prototype.isFormatSupported = function (response, responseType, mimetype) {
-    return mimetype === "application/javascript" || mimetype === "text/javascript";
+JavaScriptFormatHandler.prototype.isFormatSupported = function (response) {
+    return response.headers.get("Content-Type") === "application/javascript" || response.url.match(/\.js/);
 };
 
 
-JavaScriptFormatHandler.prototype.getFormatData = function (response, responseType, mimetype, callback) {
-    callback(true, response);
+JavaScriptFormatHandler.prototype.getFormatData = function (response, callback) {
+    response.text().then(callback);
 };
 
 var javaScriptFormatHandler = new JavaScriptFormatHandler();

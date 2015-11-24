@@ -1,5 +1,5 @@
 var AdapterFactory = require("./adapter.js").AdapterFactory;
-var registerFormat = require("./resourcemanager.js").registerFormat;
+var registerFormat = require("../resource/resourcefetcher.js").registerFormat;
 var config = require("../interface/elements.js").config;
 
 /**
@@ -46,11 +46,9 @@ FormatHandler.prototype.getFactory = function (aspect, canvasId) {
  *
  * @override
  * @param {Object} response
- * @param {string} responseType
- * @param {string} mimetype
  * @return {Boolean}
  */
-FormatHandler.prototype.isFormatSupported = function (response, responseType, mimetype) {
+FormatHandler.prototype.isFormatSupported = function (response) {
     return false;
 };
 
@@ -60,13 +58,11 @@ FormatHandler.prototype.isFormatSupported = function (response, responseType, mi
  *
  * @override
  * @param {Object} response
- * @param {string} responseType
- * @param {string} mimetype
  * @param {function} callback
  * @return {Object}
  */
-FormatHandler.prototype.getFormatData = function (response, responseType, mimetype, callback) {
-    callback(true, response);
+FormatHandler.prototype.getFormatData = function (response, callback) {
+    callback(response);
 };
 
 /**
@@ -93,12 +89,17 @@ var XMLFormatHandler = function () {
 };
 XML3D.createClass(XMLFormatHandler, FormatHandler);
 
-XMLFormatHandler.prototype.isFormatSupported = function (response, responseType, mimetype) {
-    return response && response.nodeType === 9 && (mimetype.match(/xml/));
+XMLFormatHandler.prototype.isFormatSupported = function (response) {
+    if (response.headers.has("Content-Type")) {
+        return response.headers.get("Content-Type") === "application/xml";
+    }
+    if (response.url.match(/\.xml/)) {
+        return true;
+    }
 };
 
-XMLFormatHandler.prototype.getFormatData = function (response, responseType, mimetype, callback) {
-    callback(true, response);
+XMLFormatHandler.prototype.getFormatData = function (response, callback) {
+    callback(response);
 };
 
 XMLFormatHandler.prototype.getFragmentData = function (documentData, fragment) {
@@ -116,25 +117,17 @@ var XML3DFormatHandler = function () {
 };
 XML3D.createClass(XML3DFormatHandler, XMLFormatHandler);
 
-XML3DFormatHandler.prototype.isFormatSupported = function (response, responseType, mimetype) {
-    var xml3ds = [];
-    if (response instanceof XMLDocument) {
-        xml3ds = response.getElementsByTagName("xml3d");
-        if (!xml3ds.length) {
-            // Also check cases where the XML3D element may have been fitted with a NS prefix (eg. ns1:xml3d)
-            xml3ds = response.getElementsByTagNameNS(XML3D.xml3dNS, "xml3d");
-        }
-    }
-    return xml3ds.length !== 0;
-};
+XML3DFormatHandler.prototype.getFormatData = function (response, callback) {
+    response.text().then(function(responseText) {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(responseText, "text/xml");
 
-XML3DFormatHandler.prototype.getFormatData = function (response, responseType, mimetype, callback) {
-    // Configure all xml3d elements:
-    var xml3dElements = response.querySelectorAll("xml3d");
-    for (var i = 0; i < xml3dElements.length; ++i) {
-        config.element(xml3dElements[i]);
-    }
-    callback(true, response);
+        var xml3dElements = doc.querySelectorAll("xml3d");
+        for (var i = 0; i < xml3dElements.length; ++i) {
+            config.element(xml3dElements[i]);
+        }
+        callback(doc);
+    });
 };
 
 /**
@@ -146,8 +139,13 @@ var JSONFormatHandler = function () {
 };
 XML3D.createClass(JSONFormatHandler, FormatHandler);
 
-JSONFormatHandler.prototype.isFormatSupported = function (response, responseType, mimetype) {
-    return mimetype === "application/json";
+JSONFormatHandler.prototype.isFormatSupported = function (response) {
+    if (response.headers.has("Content-Type")) {
+        return response.headers.get("Content-Type") === "application/json";
+    }
+    if (response.url.match(/\.json/)) {
+        return true;
+    }
 };
 
 var xml3dFormatHandler = new XML3DFormatHandler();

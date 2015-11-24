@@ -62,7 +62,7 @@ var initOptions = function(opt) {
 
 // Add a hook to check for file:// requests to warn the user that a server is needed to use XML3D
 Resource.onRequest(function(uri, opt) {
-    if (uri.toString().match(/(file:)\/+([A-Z]:\/)/)) {
+    if (uri.toString().match(/(file:)\/+([A-z]:\/)/)) {
         XML3D.debug.logError("Encountered a filesystem request: '" + uri + "'. A local server is needed to use XML3D. More " +
             "information can be found at https://github.com/xml3d/xml3d.js/issues/162");
         opt.abort = true;

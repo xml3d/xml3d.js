@@ -8,7 +8,7 @@ var Options = require("../utils/options.js");
 var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
 Options.register(OPTION_RESOURCE_CORS, "anonymous");
 
-var c_cachedDocuments = {};
+//var c_cachedDocuments = {};
 var c_factories = {};
 var c_cachedAdapterHandles = {};
 var c_canvasIdCounters = {};
@@ -312,10 +312,9 @@ function setDocumentData(httpRequest, url, mimetype) {
         invalidateDocumentHandles(url);
         return;
     }
-    docCache.format = formatHandler;
+
     formatHandler.getFormatData(response, httpRequest.responseType, cleanedMimetype, function(success, result){
         if(success){
-            docCache.response = result;
             updateDocumentHandles(url)
         }
         else{
@@ -359,9 +358,8 @@ function invalidateDocumentHandles(url) {
  */
 function updateExternalHandles(url, fragment) {
 
-    var response = c_cachedDocuments[url].response;
-    var mimetype = c_cachedDocuments[url].mimetype;
-    var format = c_cachedDocuments[url].format;
+    var response = c_cachedDocuments[url].document;
+    var format = c_cachedDocuments[url].handler;
 
     var fullUrl = url + (fragment ? "#" + fragment : "");
     if (!response) {
@@ -523,17 +521,23 @@ Resource.getAdapterHandle = function(baseURI, uri, adapterType, canvasId, nodeNa
 
         var docURI = uri.toStringWithoutFragment();
         var docData = c_cachedDocuments[docURI];
-        if (docData && docData.response) {
+        if (docData && docData.document) {
             updateExternalHandles(docURI, uri.fragment);
         } else {
             if (!docData) {
                 var acceptType = getAcceptTypeForNode(nodeName, docURI);
-                loadDocument(docURI, acceptType);
-                c_cachedDocuments[docURI] = docData = {
-                    fragments: []
-                };
+                XML3D.resource.getDocument(docURI, {"Accept" : acceptType}).then(function(doc) {
+                    if (doc) {
+                        docData = c_cachedDocuments[docURI];
+                        docData.fragments.push(uri.fragment);
+                        updateDocumentHandles(docURI);
+                    } else {
+                        invalidateDocumentHandles(docURI);
+                    }
+                });
+
             }
-            docData.fragments.push(uri.fragment);
+
         }
     }
     return handle;

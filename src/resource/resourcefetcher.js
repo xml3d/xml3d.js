@@ -8,6 +8,7 @@ var Options = require("../utils/options.js");
 
 var c_requestHooks = [];
 var c_formatHandlers = [];
+window.c_cachedDocuments = {}; //TODO: Currently global during refactoring, make local when ResourceManager is refactored
 
 var RequestAbortedException = function(url) {
     this.message = "Request was aborted.";
@@ -27,26 +28,61 @@ Resource.fetch = function(uriString, opt) {
     opt = initOptions(opt);
     var uri = new URI(uriString);
 
-    var result = new Promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
         for (var i=0; i < c_requestHooks.length; i++) {
             c_requestHooks[i](uri, opt);
         }
-
         if (opt.abort) {
             reject(new RequestAbortedException(uri));
             return;
         }
 
         fetch(uri.toString(), opt)
-        .then(function(response) {
-            resolve(response);
-        }).catch(function (exception) {
-            XML3D.debug.logError("Could not retrieve document at '"+uri.toString()+"'. Reason: "+exception);
-            reject(exception);
-        });
+            .then(function(response) {
+                resolve(response);
+            }).catch(function (exception) {
+                XML3D.debug.logError("Could not retrieve document at '"+uri.toString()+"'. Reason: "+exception);
+                reject(exception);
+            });
     });
+};
 
-    return result;
+Resource.getDocument = function(urlString, opt) {
+    return new Promise(function(resolve, reject) {
+        Resource.fetch(urlString, opt)
+            .then(function(response) {
+                response.originalURL = urlString;
+                if (c_cachedDocuments[urlString] && c_cachedDocuments[urlString].document) { //TODO: better handling of concurrent requests to same document before parsing is done
+                    resolve(c_cachedDocuments[urlString].document);
+                } else {
+                    c_cachedDocuments[urlString] = { fragments : [] };
+                    return Resource.parseResponse(response);
+                }
+            })
+            .then(function(doc) {
+                doc._documentURL = urlString;
+                c_cachedDocuments[urlString].document = doc;
+                resolve(doc);
+            }).catch(function(exception) {
+                reject(exception);
+            });
+    });
+};
+
+Resource.parseResponse = function(response) {
+    return new Promise(function(resolve, reject) {
+        for (var ind in c_formatHandlers) {
+            var fh = c_formatHandlers[ind];
+            if (fh.isFormatSupported(response)) {
+                c_cachedDocuments[response.originalURL].handler = fh;
+                fh.getFormatData(response, resolve);
+                break;
+            }
+        }
+    }).catch(function(exception) {
+        XML3D.debug.logError("Could not parse document at '"+response.url+"'. Reason: "+exception);
+        reject(exception);
+    });
 };
 
 Resource.onRequest = function(callback) {

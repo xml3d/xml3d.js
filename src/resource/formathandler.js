@@ -1,11 +1,11 @@
-var AdapterFactory = require("./adapter.js").AdapterFactory;
-var registerFormat = require("../resource/resourcefetcher.js").registerFormat;
+var AdapterFactory = require("./../base/adapter.js").AdapterFactory;
+var registerFormat = require("./resourcefetcher.js").registerFormat;
 var config = require("../interface/elements.js").config;
 
 /**
  * A format handler is provide functionality for detecting format of resources
  * and providing format-specific services.
- * FormatHandlers are registered with XML3D.base.registerFormat() function.
+ * FormatHandlers are registered with XML3D.resource.registerFormat() function.
  * @constructor
  */
 var FormatHandler = function() {
@@ -40,9 +40,8 @@ FormatHandler.prototype.getFactory = function (aspect, canvasId) {
 //noinspection JSUnusedLocalSymbols
 /**
  * Returns true if response data format is supported.
- * response, responseType, and mimetype values are returned by XMLHttpRequest.
- * Data type of the response is one of ArrayBuffer, Blob, Document, String, Object.
- * responseType is one of "", "arraybuffer", "blob", "document", "json", "text"
+ * response is a Response object as defined by the Fetch API.
+ * This function should not read the body of the response without cloning it first.
  *
  * @override
  * @param {Object} response
@@ -79,33 +78,6 @@ FormatHandler.prototype.getFragmentData = function (documentData, fragment) {
     return null;
 };
 
-/**
- * XMLFormatHandler supports all XML and HTML-based documents.
- * @constructor
- * @extends FormatHandler
- */
-var XMLFormatHandler = function () {
-    FormatHandler.call(this);
-};
-XML3D.createClass(XMLFormatHandler, FormatHandler);
-
-XMLFormatHandler.prototype.isFormatSupported = function (response) {
-    if (response.headers.has("Content-Type")) {
-        return response.headers.get("Content-Type") === "application/xml";
-    }
-    if (response.url.match(/\.xml/)) {
-        return true;
-    }
-};
-
-XMLFormatHandler.prototype.getFormatData = function (response, callback) {
-    callback(response);
-};
-
-XMLFormatHandler.prototype.getFragmentData = function (documentData, fragment) {
-    return documentData.querySelectorAll("*[id='" + fragment + "']")[0];
-};
-
 
 /**
  *
@@ -113,9 +85,18 @@ XMLFormatHandler.prototype.getFragmentData = function (documentData, fragment) {
  * @extends FormatHandler
  */
 var XML3DFormatHandler = function () {
-    XMLFormatHandler.call(this);
+    FormatHandler.call(this);
 };
-XML3D.createClass(XML3DFormatHandler, XMLFormatHandler);
+XML3D.createClass(XML3DFormatHandler, FormatHandler);
+
+XML3DFormatHandler.prototype.isFormatSupported = function (response) {
+    if (response.headers.has("Content-Type")) {
+        return response.headers.get("Content-Type") === "application/xml";
+    }
+    if (response.url.match(/\.xml/)) {
+        return true;
+    }
+};
 
 XML3DFormatHandler.prototype.getFormatData = function (response, callback) {
     response.text().then(function(responseText) {
@@ -130,33 +111,16 @@ XML3DFormatHandler.prototype.getFormatData = function (response, callback) {
     });
 };
 
-/**
- * @constructor
- * @extends FormatHandler
- */
-var JSONFormatHandler = function () {
-    FormatHandler.call(this);
-};
-XML3D.createClass(JSONFormatHandler, FormatHandler);
-
-JSONFormatHandler.prototype.isFormatSupported = function (response) {
-    if (response.headers.has("Content-Type")) {
-        return response.headers.get("Content-Type") === "application/json";
-    }
-    if (response.url.match(/\.json/)) {
-        return true;
-    }
+XML3DFormatHandler.prototype.getFragmentData = function (documentData, fragment) {
+    return documentData.querySelectorAll("*[id='" + fragment + "']")[0];
 };
 
 var xml3dFormatHandler = new XML3DFormatHandler();
 registerFormat(xml3dFormatHandler);
 XML3D.xml3dFormatHandler = xml3dFormatHandler;
 XML3D.resource.FormatHandler = FormatHandler;
-XML3D.resource.JSONFormatHandler = JSONFormatHandler;
 
 module.exports = {
-    JSONFormatHandler: JSONFormatHandler,
-    XMLFormatHandler: XMLFormatHandler,
     XML3DFormatHandler: XML3DFormatHandler,
     FormatHandler: FormatHandler,
     xml3dFormatHandler: xml3dFormatHandler

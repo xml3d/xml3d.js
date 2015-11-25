@@ -1,6 +1,6 @@
 var AbstractCanvasHandler = require("../renderer/canvas-handler.js");
 var Options = require("../../utils/options.js");
-var xml3dFormatHandler = require("../../base/formathandler.js").xml3dFormatHandler;
+var xml3dFormatHandler = require("../../resource/formathandler.js").xml3dFormatHandler;
 var Util = require("../../utils/misc.js");
 
 var MAXFPS = 30;

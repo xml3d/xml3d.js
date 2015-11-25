@@ -4,13 +4,13 @@ var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
 var Resource = require("../../../base/resourcemanager.js").Resource;
 var registerFormat = require("../../../resource/resourcefetcher.js").registerFormat;
-var JSONFormatHandler = require("../../../base/formathandler.js").JSONFormatHandler;
+var FormatHandler = require("../../../resource/formathandler.js").FormatHandler;
 var AdapterFactory = require("../../../base/adapter.js").AdapterFactory;
 
 var XML3DJSONFormatHandler = function() {
-    JSONFormatHandler.call(this);
+    FormatHandler.call(this);
 };
-XML3D.createClass(XML3DJSONFormatHandler, JSONFormatHandler);
+XML3D.createClass(XML3DJSONFormatHandler, FormatHandler);
 
 XML3DJSONFormatHandler.prototype.isFormatSupported = function(response) {
     if (response.headers.has("Content-Type")) {

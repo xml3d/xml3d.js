@@ -1,5 +1,5 @@
 var registerFormat = require("../../../resource/resourcefetcher.js").registerFormat;
-var FormatHandler = require("../../../base/formathandler.js").FormatHandler;
+var FormatHandler = require("../../../resource/formathandler.js").FormatHandler;
 var AdapterFactory = require("../../../base/adapter.js").AdapterFactory;
 
 var JavaScriptFormatHandler = function () {

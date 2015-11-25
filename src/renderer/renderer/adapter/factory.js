@@ -1,6 +1,6 @@
 var NodeAdapterFactory = require("../../../base/adapter.js").NodeAdapterFactory;
 var DataAdapterFactory = require("../../../data/adapter/factory.js");
-require("../../../base/formathandler.js").xml3dFormatHandler.registerFactoryClass(DataAdapterFactory);
+require("../../../resource/formathandler.js").xml3dFormatHandler.registerFactoryClass(DataAdapterFactory);
 
 /**
  * @constructor

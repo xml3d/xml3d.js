@@ -3432,7 +3432,8 @@
         <h3>Quat</h3>
         <dl class='element'>
         </dl>
-        <p>Quat represents a rotation as a quaternion of the form [x, y, z, w]. </p>
+        <p>Quat represents a rotation as a quaternion of the form [x, y, z, w]. The provided functions and accessors
+            do not automatically normalize the quaternion unless otherwise stated.</p>
 
         <dl title='interface Quat' class='idl'>
             <dt>attribute Float32Array data</dt>
@@ -3501,15 +3502,15 @@
             <dt>Quat scale(float scale)</dt>
             <dd>Returns the scaled quaternion as a new Quat. This is identical to <a>Vec4</a>.scale.</dd>
             <dt>static Quat fromAxisAngle(AxisAngle a)</dt>
-            <dd>Generates a quaternion representation of the given AxisAngle.</dd>
+            <dd>Generates a normalized quaternion representation of the given AxisAngle.</dd>
             <dt>static Quat fromBasis(Vec3 x, Vec3 y, Vec3 z)</dt>
-            <dd>Generates a quaternion from the given basis vectors, defined as the rotation between the coordinate
+            <dd>Generates a normalized quaternion from the given basis vectors, defined as the rotation between the coordinate
                 space defined by these vectors and the standard space.
             </dd>
             <dt>static Quat fromMat3(Mat3 mat)</dt>
-            <dd>Generates a quaternion from the given rotation matrix.</dd>
+            <dd>Generates a normalized quaternion from the given rotation matrix.</dd>
             <dt>static Quat fromRotationTo(Vec3 from, Vec3 to)</dt>
-            <dd>Generates a quaternion representing the shortest rotation from one vector to another.</dd>
+            <dd>Generates a normalized quaternion representing the shortest rotation from one vector to another.</dd>
             <dt>Quat slerp()</dt>
             <dd>Returns a spherical linear interpolation between the two quaternions as a new Quat.
                 <dl class='parameters'>

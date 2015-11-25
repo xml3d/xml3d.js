@@ -71,17 +71,6 @@ methods.xml3dGenerateRay = function(x, y) {
     return new XML3D.Ray();
 };
 
-methods.groupGetLocalMatrix = function() {
-    XML3D.flushDOMChanges();
-    var adapters = this._configured.adapters || {};
-    for ( var adapter in adapters) {
-        if (adapters[adapter].getLocalMatrix) {
-            return adapters[adapter].getLocalMatrix();
-        }
-    }
-    return new Mat4();
-};
-
 /**
  * return the bounding box of the owning space in world space
  */
@@ -132,6 +121,17 @@ methods.XML3DGraphTypeGetWorldMatrix = function() {
     for (var adapter in adapters) {
         if (adapters[adapter].getWorldMatrix) {
             return adapters[adapter].getWorldMatrix();
+        }
+    }
+    return new Mat4();
+};
+
+methods.XML3DGraphTypeGetLocalMatrix = function() {
+    XML3D.flushDOMChanges();
+    var adapters = this._configured.adapters || {};
+    for ( var adapter in adapters) {
+        if (adapters[adapter].getLocalMatrix) {
+            return adapters[adapter].getLocalMatrix();
         }
     }
     return new Mat4();

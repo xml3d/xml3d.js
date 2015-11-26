@@ -40,6 +40,10 @@ test("mesh interface test", function() {
     deepEqual(node.getWorldMatrix().data, XML3D.math.mat4.create(),
             "mesh::getWorldMatrix returns identity matrix if not in hierarchy.");
 
+    ok(node.getLocalMatrix().data instanceof Float32Array, "mesh::getLocalMatrix returns XML3D.Mat4");
+    deepEqual(node.getLocalMatrix().data, XML3D.math.mat4.create(),
+        "mesh::getLocalMatrix returns identity matrix if not in hierarchy.");
+
     ok(node.getLocalBoundingBox().data instanceof Float32Array, "mesh::getLocalBoundingBox returns ");
     ok(node.getLocalBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
 
@@ -50,6 +54,10 @@ test("light interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "light");
     ok(node);
 
+    ok(node.getLocalMatrix().data instanceof Float32Array, "light::getLocalMatrix returns XML3D.Mat4");
+    deepEqual(node.getLocalMatrix().data, XML3D.math.mat4.create(),
+        "light::getLocalMatrix returns identity matrix if not in hierarchy.");
+
     ok(node.getWorldMatrix().data instanceof Float32Array, "light::getWorldMatrix returns XML3D.Mat4");
     deepEqual(node.getWorldMatrix().data, XML3D.math.mat4.create(),
             "light::getWorldMatrix returns identity matrix if not in hierarchy.");
@@ -58,12 +66,36 @@ test("view interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
     ok(node);
 
+    ok(node.getLocalMatrix().data instanceof Float32Array, "view::getLocalMatrix returns XML3D.Mat4");
+    deepEqual(node.getLocalMatrix().data, XML3D.math.mat4.create(),
+        "view::getLocalMatrix returns identity matrix if not in hierarchy.");
+
     ok(node.getWorldMatrix().data instanceof Float32Array, "view::getWorldMatrix returns XML3D.Mat4");
     deepEqual(node.getWorldMatrix().data, XML3D.math.mat4.create(),
             "view::getWorldMatrix returns identity matrix if not in hierarchy.");
 
     ok(node.getViewMatrix().data instanceof Float32Array, "view::getViewMatrix returns XML3D.Mat4");
     deepEqual(node.getViewMatrix().data, XML3D.math.mat4.create(), "view::getViewMatrix returns with default parameters.");
+
+});
+
+test("model interface test", function() {
+    var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "model");
+    ok(node);
+
+    ok(node.getLocalMatrix().data instanceof Float32Array, "model::getLocalMatrix returns XML3D.Mat4");
+    deepEqual(node.getLocalMatrix().data, XML3D.math.mat4.create(),
+        "model::getLocalMatrix returns identity matrix if not in hierarchy.");
+
+    ok(node.getWorldMatrix().data instanceof Float32Array, "model::getWorldMatrix returns XML3D.Mat4");
+    deepEqual(node.getWorldMatrix().data, XML3D.math.mat4.create(),
+        "model::getWorldMatrix returns identity matrix if not in hierarchy.");
+
+    ok(node.getLocalBoundingBox().data instanceof Float32Array, "model::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty model delivers empty BoundingBox");
+
+    ok(node.getWorldBoundingBox().data instanceof Float32Array, "model::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty model delivers empty BoundingBox");
 
 });
 test("data interface test", function() {

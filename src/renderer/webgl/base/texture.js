@@ -3,6 +3,10 @@ var StateMachine = require("../../../contrib/state-machine.js");
 var SamplerConfig = require("../../../xflow/interface/data.js").SamplerConfig;
 var XC = require("../../../xflow/interface/constants.js");
 var uniqueObjectId = utils.getUniqueCounter();
+
+/**
+ * @type {WebGLRenderingContext}
+ */
 var GL = require("../constants.js");
 
 //noinspection JSValidateJSDoc
@@ -210,6 +214,7 @@ XML3D.extend(GLTexture.prototype, {
         var gl = this.context.gl;
         this._bind();
 
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
         gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_S, this.wrapS);
         gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_T, this.wrapT);
         gl.texParameteri(this.textureType, gl.TEXTURE_MIN_FILTER, this.minFilter);
@@ -266,7 +271,7 @@ XML3D.extend(GLTexture.prototype, {
         this.handle = gl.createTexture();
         this._bind();
 
-        // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, opt.flipY);
         gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_S, opt.wrapS);
         gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_T, opt.wrapT);
         gl.texParameteri(this.textureType, gl.TEXTURE_MIN_FILTER, opt.minFilter);

@@ -127,24 +127,28 @@ Quat.fromAxisAngle = function(axis, rad) {
     } else {
         quat.setAxisAngle(out.data, axis.data ? axis.data : axis, rad);
     }
+    quat.normalize(out.data, out.data);
     return out;
 };
 
 Quat.fromBasis = function(x, y, z) {
     var out = new Quat();
     XML3D.math.quat.setFromBasis(out.data, x.data ? x.data : x, y.data ? y.data : y, z.data ? z.data : z);
+    quat.normalize(out.data, out.data);
     return out;
 };
 
 Quat.fromMat3 = function(m) {
     var out = new Quat();
     quat.fromMat3(out.data, m.data ? m.data : m);
+    quat.normalize(out.data, out.data);
     return out;
 };
 
 Quat.fromRotationTo = function(from, to) {
     var out = new Quat();
     quat.rotationTo(out.data, from.data ? from.data : from, to.data ? to.data : to);
+    quat.normalize(out.data, out.data);
     return out;
 };
 

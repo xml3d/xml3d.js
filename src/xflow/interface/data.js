@@ -1,5 +1,6 @@
 var Base = require("../base.js");
 var C = require("./constants.js");
+var assign = require('lodash.assign');
 require("../../utils/array.js");
 
 /**
@@ -15,53 +16,31 @@ require("../../utils/array.js");
 // SamplerConfig
 //----------------------------------------------------------------------------------------------------------------------
 
+var SAMPLER_DEFAULTS = {
+    minFilter : C.TEX_FILTER_TYPE.LINEAR,
+    magFilter : C.TEX_FILTER_TYPE.LINEAR,
+    wrapS : C.TEX_WRAP_TYPE.CLAMP,
+    wrapT : C.TEX_WRAP_TYPE.CLAMP,
+    textureType : C.TEX_TYPE.TEXTURE_2D,
+    flipY: true,
+    anisotropy : 1, // number of max samples for anisotropic filtering
+    generateMipMap : 0
+};
 
 /**
  * SamplerConfig is used to define sampler properties of a TextureEntry or ImageDataTextureEntry
  * @constructor
  */
 var SamplerConfig = function(){
-    this.minFilter = 0;
-    this.magFilter = 0;
-    this.mipFilter = 0;
-    this.wrapS = 0;
-    this.wrapT = 0;
-    this.wrapU = 0;
-    this.textureType = 0;
-    this.colorR = 0;
-    this.colorG = 0;
-    this.colorB = 0;
-    this.anisotropy = 0; // number of max samples for anisotropic filtering
-    this.generateMipMap = 0;
+    this.setDefaults();
 };
 
 SamplerConfig.prototype.setDefaults = function() {
-    this.minFilter = C.TEX_FILTER_TYPE.LINEAR;
-    this.magFilter = C.TEX_FILTER_TYPE.LINEAR;
-    this.mipFilter = C.TEX_FILTER_TYPE.NEAREST;
-    this.wrapS = C.TEX_WRAP_TYPE.CLAMP;
-    this.wrapT = C.TEX_WRAP_TYPE.CLAMP;
-    this.wrapU = C.TEX_WRAP_TYPE.CLAMP;
-    this.textureType = C.TEX_TYPE.TEXTURE_2D;
-    this.colorR = 0;
-    this.colorG = 0;
-    this.colorB = 0;
-    this.anisotropy = 1; // number of max samples for anisotropic filtering
-    this.generateMipMap = 0;
+    assign(this, SAMPLER_DEFAULTS);
 };
 
 SamplerConfig.prototype.set = function(other) {
-    this.minFilter = other.minFilter;
-    this.magFilter = other.magFilter;
-    this.mipFilter = other.mipFilter;
-    this.wrapS = other.wrapS;
-    this.wrapT = other.wrapT;
-    this.wrapU = other.wrapU;
-    this.textureType = other.textureType;
-    this.colorR = other.colorR;
-    this.colorG = other.colorG;
-    this.colorB = other.colorB;
-    this.generateMipMap = other.generateMipMap;
+    assign(this, other);
 };
 
 

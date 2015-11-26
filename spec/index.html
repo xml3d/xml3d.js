@@ -1671,6 +1671,7 @@
             <dl class='element'>
                 <dt>Categories:</dt>
                 <dd><a href="#data-elements">Data element</a></dd>
+                <dd><a href="#transformable-elements">Transformable element</a></dd>
             </dl>
 
             <p>An <dfn>assetmesh element</dfn> represents a single drawable mesh in the asset and works similar to the
@@ -3432,7 +3433,8 @@
         <h3>Quat</h3>
         <dl class='element'>
         </dl>
-        <p>Quat represents a rotation as a quaternion of the form [x, y, z, w]. </p>
+        <p>Quat represents a rotation as a quaternion of the form [x, y, z, w]. The provided functions and accessors
+            do not automatically normalize the quaternion unless otherwise stated.</p>
 
         <dl title='interface Quat' class='idl'>
             <dt>attribute Float32Array data</dt>
@@ -3501,15 +3503,15 @@
             <dt>Quat scale(float scale)</dt>
             <dd>Returns the scaled quaternion as a new Quat. This is identical to <a>Vec4</a>.scale.</dd>
             <dt>static Quat fromAxisAngle(AxisAngle a)</dt>
-            <dd>Generates a quaternion representation of the given AxisAngle.</dd>
+            <dd>Generates a normalized quaternion representation of the given AxisAngle.</dd>
             <dt>static Quat fromBasis(Vec3 x, Vec3 y, Vec3 z)</dt>
-            <dd>Generates a quaternion from the given basis vectors, defined as the rotation between the coordinate
+            <dd>Generates a normalized quaternion from the given basis vectors, defined as the rotation between the coordinate
                 space defined by these vectors and the standard space.
             </dd>
             <dt>static Quat fromMat3(Mat3 mat)</dt>
-            <dd>Generates a quaternion from the given rotation matrix.</dd>
+            <dd>Generates a normalized quaternion from the given rotation matrix.</dd>
             <dt>static Quat fromRotationTo(Vec3 from, Vec3 to)</dt>
-            <dd>Generates a quaternion representing the shortest rotation from one vector to another.</dd>
+            <dd>Generates a normalized quaternion representing the shortest rotation from one vector to another.</dd>
             <dt>Quat slerp()</dt>
             <dd>Returns a spherical linear interpolation between the two quaternions as a new Quat.
                 <dl class='parameters'>
@@ -3566,7 +3568,7 @@
             <dd>Returns the multiplication of this matrix with the other as a new Mat2.</dd>
             <dt>Mat2 rotate(float angleInRadians)</dt>
             <dd>Returns the rotation of this matrix by the given angle in radians as a new Mat2.</dd>
-            <dt>Mat2 scale(float scale)</dt>
+            <dt>Mat2 scale(Vec2 scale)</dt>
             <dd>Returns the scaled matrix as a new Mat2.</dd>
             <dt>Mat2 transpose()</dt>
             <dd>Returns the transpose of this matrix as a new Mat2.</dd>
@@ -3631,7 +3633,7 @@
             <dd>Returns the multiplication of this matrix with the other as a new Mat3.</dd>
             <dt>Mat3 rotate(float angleInRadians)</dt>
             <dd>Returns the rotation of this matrix by the given angle in radians as a new Mat3.</dd>
-            <dt>Mat3 scale(float scale)</dt>
+            <dt>Mat3 scale(Vec3 scale)</dt>
             <dd>Returns the scaled matrix as a new Mat3.</dd>
             <dt>Mat3 translate(Vec3 translation)</dt>
             <dd>Returns the translated matrix as a new Mat3.</dd>
@@ -3721,7 +3723,7 @@
             <dd>Returns the rotation of this matrix by the given angle around the Y axis as a new Mat4.</dd>
             <dt>Mat4 rotateZ(float angleInRadians)</dt>
             <dd>Returns the rotation of this matrix by the given angle around the Z axis as a new Mat4.</dd>
-            <dt>Mat4 scale(float scale)</dt>
+            <dt>Mat4 scale(Vec3 scale)</dt>
             <dd>Returns the scaled matrix as a new Mat4.</dd>
             <dt>Mat4 translate(Vec3 translation)</dt>
             <dd>Returns the translated matrix as a new Mat4.</dd>

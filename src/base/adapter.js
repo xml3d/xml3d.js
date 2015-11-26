@@ -1,5 +1,3 @@
-var registerFactory = require("./resourcemanager.js").registerFactory;
-var Resource = require("./resourcemanager.js").Resource;
 var Events = require("../interface/notification.js");
 var config = require("../interface/elements.js").config;
 
@@ -135,7 +133,7 @@ NodeAdapter.prototype.notifyChanged = function(e) {
  */
 NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
     canvasId = canvasId === undefined ? this.factory.canvasId : canvasId;
-    return Resource.getAdapterHandle(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL,
+    return XML3D.resource.getAdapterHandle(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL,
         uri, aspectType || this.factory.aspect, canvasId, this.node.nodeName);
 };
 /**
@@ -144,7 +142,7 @@ NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
  */
 NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
     type = type || Events.ADAPTER_HANDLE_CHANGED;
-    return Resource.notifyNodeAdapterChange(this.node,
+    return XML3D.resource.notifyNodeAdapterChange(this.node,
         this.factory.aspect, this.factory.canvasId, type);
 };
 
@@ -168,9 +166,7 @@ NodeAdapter.prototype.traverse = function(callback) {
  */
 var IFactory = function() {
 };
-
-/** @type {string} */
-IFactory.prototype.aspect;
+IFactory.prototype.createAdapter = function() {};
 
 
 /**
@@ -186,8 +182,6 @@ var AdapterFactory = function(aspect, mimetypes, canvasId) {
     this.aspect = aspect;
     this.canvasId = canvasId || 0;
     this.mimetypes = typeof mimetypes == "string" ? [ mimetypes] : mimetypes;
-
-    registerFactory(this);
 };
 
  /** Implemented by subclass
@@ -245,8 +239,6 @@ NodeAdapterFactory.prototype.getAdapter = function(node) {
     }
     return adapter;
 };
-
-XML3D.resource.AdapterFactory = AdapterFactory;
 
 module.exports = {
 NodeAdapter : NodeAdapter,

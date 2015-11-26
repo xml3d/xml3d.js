@@ -59,6 +59,9 @@ Resource.getDocument = function(urlString, opt) {
     return new Promise(function(resolve, reject) {
         Resource.fetch(urlString, opt)
             .then(function(response) {
+                if (!response.ok) {
+                    reject(response); //TODO: Wrap the response in an exception before rejecting
+                }
                 response.originalURL = urlString;
                 if (c_cachedDocuments[urlString] && c_cachedDocuments[urlString].document) { //TODO: better handling of concurrent requests to same document before parsing is done
                     resolve(c_cachedDocuments[urlString].document);

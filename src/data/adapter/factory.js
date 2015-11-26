@@ -27,7 +27,6 @@ var XML3DDataAdapterFactory = function () {
     NodeAdapterFactory.call(this, "data");
 };
 XML3D.createClass(XML3DDataAdapterFactory, NodeAdapterFactory);
-XML3DDataAdapterFactory.prototype.aspect = "data";
 
 var reg = {
     'mesh': Misc.SinkDataAdapter,

@@ -343,6 +343,11 @@ function updateDocumentHandles(url) {
  */
 function invalidateDocumentHandles(url) {
     var docCache = c_cachedDocuments[url];
+    if (!docCache) {
+        // The document was never loaded
+        invalidateHandles(url);
+        return;
+    }
     var fragments = docCache.fragments;
     docCache.fragments = [];
     for (var i = 0; i < fragments.length; ++i) {
@@ -424,20 +429,10 @@ function invalidateHandles(url) {
  * @param {Object} data Data for this handle. Possibly a DOM element
  */
 function updateHandle(handle, adapterType, canvasId, format, data) {
-
-    var factory = format.getFactory(adapterType, canvasId);
-
-    if(!factory) {
-        XML3D.debug.logError("Format does not support adapterType " + adapterType);
-        return;
-    }
-
-    var adapter = factory.getAdapter ? factory.getAdapter(data) : factory.createAdapter(data);
+    var adapter = format.getAdapter(data, adapterType, canvasId);
     if (adapter) {
         handle.setAdapter(adapter, AdapterHandle.STATUS.READY);
     }
-
-
 }
 
 /**
@@ -526,14 +521,19 @@ Resource.getAdapterHandle = function(baseURI, uri, adapterType, canvasId, nodeNa
         } else {
             if (!docData) {
                 var acceptType = getAcceptTypeForNode(nodeName, docURI);
+                //TODO: We need to ensure we pass the full original uri here. Right now we trim the fragment and this leads
+                // to inconsistencies in the document cache
                 XML3D.resource.getDocument(docURI, {"Accept" : acceptType}).then(function(doc) {
                     if (doc) {
                         docData = c_cachedDocuments[docURI];
                         docData.fragments.push(uri.fragment);
                         updateDocumentHandles(docURI);
                     } else {
-                        invalidateDocumentHandles(docURI);
+                        invalidateDocumentHandles(uri.toString()); //URL with fragment
                     }
+                }).catch(function(e) {
+                    XML3D.debug.logError(e.toString());
+                    invalidateDocumentHandles(uri.toString());
                 });
 
             }
@@ -566,14 +566,10 @@ function getAcceptTypeForNode(nodeName, uri) {
  * @param node
  * @param adapterType
  * @param canvasId
- * @return {XML3D.base.Adapter?}
+ * @return {?XML3D.base.Adapter}
  */
 Resource.getAdapter = function(node, adapterType, canvasId) {
-    var factory = XML3D.xml3dFormatHandler.getFactory(adapterType, canvasId);
-    if (factory) {
-        return factory.getAdapter(node);
-    }
-    return null;
+    return XML3D.xml3dFormatHandler.getAdapter(node, adapterType, canvasId);
 };
 
 /**

@@ -1,8 +1,3 @@
-var RenderAdapterFactory = require("./adapter/factory.js");
-var xml3dFormatHandler = require("../../resource/formathandler.js").xml3dFormatHandler;
-
-xml3dFormatHandler.registerFactoryClass(RenderAdapterFactory);
-
 var factory = require("./renderer-factory.js");
 
 var configure = function(xml3ds) {

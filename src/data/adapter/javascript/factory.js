@@ -1,14 +1,11 @@
-var registerFormat = require("../../../resource/resourcefetcher.js").registerFormat;
-var FormatHandler = require("../../../resource/formathandler.js").FormatHandler;
-var AdapterFactory = require("../../../base/adapter.js").AdapterFactory;
 
 var JavaScriptFormatHandler = function () {
-    FormatHandler.call(this);
+    XML3D.resource.FormatHandler.call(this);
 };
-XML3D.createClass(JavaScriptFormatHandler, FormatHandler);
+XML3D.createClass(JavaScriptFormatHandler, XML3D.resource.FormatHandler);
 
 JavaScriptFormatHandler.prototype.isFormatSupported = function (response) {
-    return response.headers.get("Content-Type") === "application/javascript" || response.url.match(/\.js/);
+    return response.headers.get("Content-Type") === "application/javascript";
 };
 
 
@@ -16,8 +13,15 @@ JavaScriptFormatHandler.prototype.getFormatData = function (response, callback) 
     response.text().then(callback);
 };
 
+JavaScriptFormatHandler.prototype.getAdapter = function(xflowNode, aspect, canvasId) {
+    if (aspect === "data") {
+        return new ScriptDataAdapter(xflowNode);
+    }
+    throw new Error("Unsupported aspect '"+aspect+"' encountered in JavaScript format handler.");
+};
+
 var javaScriptFormatHandler = new JavaScriptFormatHandler();
-registerFormat(javaScriptFormatHandler);
+XML3D.resource.registerFormat(javaScriptFormatHandler);
 
 
 var ScriptDataAdapter = function (script) {
@@ -31,18 +35,3 @@ ScriptDataAdapter.prototype.getScriptType = function () {
 ScriptDataAdapter.prototype.getScript= function () {
     return this.script;
 };
-
-
-var ScriptFactory = function () {
-    AdapterFactory.call(this, "data");
-};
-XML3D.createClass(ScriptFactory, AdapterFactory);
-
-
-ScriptFactory.prototype.aspect = "data";
-
-ScriptFactory.prototype.createAdapter = function (xflowNode) {
-    return new ScriptDataAdapter(xflowNode);
-};
-
-javaScriptFormatHandler.registerFactoryClass(ScriptFactory);

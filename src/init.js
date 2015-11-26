@@ -234,7 +234,7 @@ function resolveMutations(mutations){
             var cssTarget = mutationTarget._configured ? mutationTarget : mutationTarget.querySelector("xml3d");
             if(cssTarget && cssTarget._configured) { // xml3d is a child node
                 var adaptersNames = Object.keys(cssTarget._configured.adapters).filter(function(a) {
-                    return a.indexOf("webgl") == 0;
+                    return a.indexOf("scene") == 0;
                 });
                 adaptersNames.map(function(name){return cssTarget._configured.adapters[name];}).forEach(function(renderAdapter) {
                     renderAdapter.traverse(function(adapter) {

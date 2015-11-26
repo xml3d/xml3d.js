@@ -9,7 +9,6 @@ var PickNormalRenderPass = require("./render-passes/pick-normal.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
 var GLU = require("../../contrib/glu.js");
 var Options = require("../../utils/options.js");
-var xml3dFormatHandler = require("../../resource/formathandler.js").xml3dFormatHandler;
 var MAX_PICK_BUFFER_DIMENSION = 512;
 var vec3 = require("gl-matrix").vec3;
 var quat = require("gl-matrix").quat;
@@ -71,7 +70,7 @@ var GLRenderer = function (element, canvasHandler) {
     this.context = new GLContext(canvas, this._canvasHandler.id);
     this.scene = new GLScene(this.context);
 
-    var factory = xml3dFormatHandler.getFactory("webgl", this._canvasHandler.id);
+    var factory = XML3D.xml3dFormatHandler.getFactory("scene", this._canvasHandler.id);
     factory.setScene(this.scene);
     factory.setRenderer(this);
 

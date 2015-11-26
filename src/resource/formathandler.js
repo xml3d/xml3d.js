@@ -1,6 +1,3 @@
-var AdapterFactory = require("./../base/adapter.js").AdapterFactory;
-var registerFormat = require("./resourcefetcher.js").registerFormat;
-var config = require("../interface/elements.js").config;
 
 /**
  * A format handler is provide functionality for detecting format of resources
@@ -9,32 +6,6 @@ var config = require("../interface/elements.js").config;
  * @constructor
  */
 var FormatHandler = function() {
-    this.factoryClasses = {}; // a map from an aspect name to a factory class
-    this.factoryCache = {}; // maps unique keys (aspect + "_" + canvasId) to the factory instance
-};
-
-FormatHandler.prototype.registerFactoryClass = function (factoryClass) {
-    if (!factoryClass.prototype.aspect )
-        throw new Error("factoryClass must be a subclass of XML3D.base.AdapterFactory");
-    this.factoryClasses[factoryClass.prototype.aspect] = factoryClass;
-};
-
-FormatHandler.prototype.getFactoryClassByAspect = function (aspect) {
-    return this.factoryClasses[aspect];
-};
-
-FormatHandler.prototype.getFactory = function (aspect, canvasId) {
-    canvasId = canvasId || 0;
-    var key = aspect + "_" + canvasId;
-    var factory = this.factoryCache[key];
-    if (!factory) {
-        var factoryClass = this.getFactoryClassByAspect(aspect);
-        if (!factoryClass)
-            return null;
-        factory = new factoryClass(canvasId);
-        this.factoryCache[key] = factory;
-    }
-    return factory;
 };
 
 //noinspection JSUnusedLocalSymbols
@@ -78,50 +49,15 @@ FormatHandler.prototype.getFragmentData = function (documentData, fragment) {
     return null;
 };
 
-
 /**
- *
- * @constructor
- * @extends FormatHandler
+ * Returns an Adapter for the given aspect. Should be overridden.
+ * @param {Object} data
+ * @param {String} aspect
+ * @param {?Number} canvasId
+ * @returns {Adapter}
  */
-var XML3DFormatHandler = function () {
-    FormatHandler.call(this);
-};
-XML3D.createClass(XML3DFormatHandler, FormatHandler);
-
-XML3DFormatHandler.prototype.isFormatSupported = function (response) {
-    if (response.headers.has("Content-Type")) {
-        return response.headers.get("Content-Type") === "application/xml";
-    }
-    if (response.url.match(/\.xml/)) {
-        return true;
-    }
+FormatHandler.prototype.getAdapter = function(data, aspect, canvasId) {
+    return null;
 };
 
-XML3DFormatHandler.prototype.getFormatData = function (response, callback) {
-    response.text().then(function(responseText) {
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(responseText, "text/xml");
-
-        var xml3dElements = doc.querySelectorAll("xml3d");
-        for (var i = 0; i < xml3dElements.length; ++i) {
-            config.element(xml3dElements[i]);
-        }
-        callback(doc);
-    });
-};
-
-XML3DFormatHandler.prototype.getFragmentData = function (documentData, fragment) {
-    return documentData.querySelectorAll("*[id='" + fragment + "']")[0];
-};
-
-var xml3dFormatHandler = new XML3DFormatHandler();
-registerFormat(xml3dFormatHandler);
-XML3D.xml3dFormatHandler = xml3dFormatHandler;
-XML3D.resource.FormatHandler = FormatHandler;
-
-module.exports = {
-    XML3DFormatHandler: XML3DFormatHandler,
-    FormatHandler: FormatHandler,
-    xml3dFormatHandler: xml3dFormatHandler
-};
+module.exports = FormatHandler;

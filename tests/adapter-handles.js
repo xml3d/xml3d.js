@@ -40,13 +40,13 @@ test("Get Local Adapters", function() {
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     equal(handle.getAdapter().node.localName, "material", "Adapter adapts material");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#material1", 'webgl', canvasId);
-    ok(handle.hasAdapter(), "Handle of #material1 has 'webgl' adapter");
+    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#material1", 'scene', canvasId);
+    ok(handle.hasAdapter(), "Handle of #material1 has 'scene' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    equal(handle.getAdapter().factory.aspect, "webgl", "Adapter has right aspect");
+    equal(handle.getAdapter().factory.aspect, "scene", "Adapter has right aspect");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#group1", "webgl", canvasId);
-    ok(handle.hasAdapter(), "Handle of #group1 has 'webgl' adapter");
+    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#group1", "scene", canvasId);
+    ok(handle.hasAdapter(), "Handle of #group1 has 'scene' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     // TODO: No access to adapters
     //ok(handle.getAdapter() instanceof XML3D.webgl.GroupRenderAdapter,"Adapter is instanceof XML3D.webgl.GroupRenderAdapter");
@@ -56,12 +56,12 @@ test("Get Local Adapters", function() {
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     equal(handle.getAdapter().node.localName, "mesh", "Adapter adapts mesh");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", 'webgl', canvasId);
-    ok(handle.hasAdapter(), "Handle of #mesh1 has 'webgl' adapter");
+    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", 'scene', canvasId);
+    ok(handle.hasAdapter(), "Handle of #mesh1 has 'scene' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     // TODO: No access to adapters
     //ok(handle.getAdapter() instanceof XML3D.webgl.MeshRenderAdapter, "Adapter is instanceof XML3D.webgl.MeshRenderAdapter");
-    equal(handle.getAdapter().factory.aspect, 'webgl', "Adapter has right aspect");
+    equal(handle.getAdapter().factory.aspect, 'scene', "Adapter has right aspect");
 
 });
 
@@ -92,16 +92,16 @@ test("Get External Adapters", 17, function() {
         // TODO: ok(handle.getAdapter() instanceof 'data'.DataAdapter, "Adapter is instanceof 'data'.DataAdapter");
 
         var handle2 = XML3D.resource.getAdapterHandle(self.doc.URL, "xml/materials.xml#flatgreen2",
-            'webgl', canvasId);
-        ok(!handle2.hasAdapter(), "Handle of 'xml/materials.xml#flatgreen2' has no 'webgl' adapter yet");
+            'scene', canvasId);
+        ok(!handle2.hasAdapter(), "Handle of 'xml/materials.xml#flatgreen2' has no 'scene' adapter yet");
         ok(handle2.status == AdapterHandle.STATUS.LOADING, "Handle status is 'LOADING'" );
 
         handle2.addListener(function(e){
 
             ok(handle2 == e.adapterHandle, "Event has correct AdapterHandle");
-            ok(handle2.hasAdapter(), "Handle has 'webgl' adapter now");
+            ok(handle2.hasAdapter(), "Handle has 'scene' adapter now");
             ok(handle2.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-            equal(handle2.getAdapter().factory.aspect, 'webgl', "Adapter has right aspect");
+            equal(handle2.getAdapter().factory.aspect, 'scene', "Adapter has right aspect");
             // TODO: No access to RenderAdapter
             //ok(handle2.getAdapter() instanceof XML3D.webgl.MaterialRenderAdapter, "Adapter is instanceof XML3D.webgl.MaterialRenderAdapter");
 
@@ -176,7 +176,7 @@ test("Notify Adapters", 8, function() {
     var node = this.doc.getElementById("mesh1");
     var dataHandle1 = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", "data");
     var dataHandle2 = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", "data");
-    var webglHandle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", "webgl", canvasId);
+    var webglHandle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", "scene", canvasId);
     dataHandle1.addListener(function(e){
         ok(true, "First Data Adapter got notified");
         ok(e.type == Events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
@@ -189,7 +189,7 @@ test("Notify Adapters", 8, function() {
         ok(true, "WebGL Adapter got notified");
         ok(e.type == Events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
     });
-    XML3D.resource.notifyNodeAdapterChange(node, 'webgl', canvasId, Events.ADAPTER_HANDLE_CHANGED);
+    XML3D.resource.notifyNodeAdapterChange(node, 'scene', canvasId, Events.ADAPTER_HANDLE_CHANGED);
     XML3D.resource.notifyNodeAdapterChange(node, "data", 0, Events.ADAPTER_HANDLE_CHANGED);
 });
 

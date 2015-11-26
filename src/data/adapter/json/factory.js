@@ -3,14 +3,12 @@ var InputNode = require("../../../xflow/interface/graph.js").InputNode;
 var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
 var Resource = require("../../../base/resourcemanager.js").Resource;
-var registerFormat = require("../../../resource/resourcefetcher.js").registerFormat;
-var FormatHandler = require("../../../resource/formathandler.js").FormatHandler;
 var AdapterFactory = require("../../../base/adapter.js").AdapterFactory;
 
 var XML3DJSONFormatHandler = function() {
-    FormatHandler.call(this);
+    XML3D.resource.FormatHandler.call(this);
 };
-XML3D.createClass(XML3DJSONFormatHandler, FormatHandler);
+XML3D.createClass(XML3DJSONFormatHandler, XML3D.resource.FormatHandler);
 
 XML3DJSONFormatHandler.prototype.isFormatSupported = function(response) {
     if (response.headers.has("Content-Type")) {
@@ -23,19 +21,18 @@ XML3DJSONFormatHandler.prototype.isFormatSupported = function(response) {
 
 
 XML3DJSONFormatHandler.prototype.getFormatData = function(response, callback) {
-    response.json().then(function(json) {
-        try {
-            var xflowNode = createXflowNode(json);
-            callback(xflowNode);
-        } catch (e) {
-            XML3D.debug.logException(e, "Failed to process XML3D json file");
-            callback(new DataNode(false));
-        }
-    });
+    response.json().then(callback);
+};
+
+XML3DJSONFormatHandler.prototype.getAdapter = function(data, aspect, canvasId) {
+    if (aspect === "data" || aspect === "scene") {
+        return new JSONDataAdapter(createXflowNode(data));
+    }
+    throw new Error("Unsupported aspect '"+aspect+"' encountered in JSON format handler.");
 };
 
 var xml3dJSonFormatHandler = new XML3DJSONFormatHandler();
-registerFormat(xml3dJSonFormatHandler);
+XML3D.resource.registerFormat(xml3dJSonFormatHandler);
 
 
 var empty = function() {};
@@ -143,22 +140,3 @@ var JSONDataAdapter = function(xflowNode) {
 JSONDataAdapter.prototype.getXflowNode = function(){
     return this.xflowDataNode;
 };
-
-/**
- * @constructor
- * @implements {XML3D.base.IFactory}
- */
-var JSONFactory = function()
-{
-    AdapterFactory.call(this, "data");
-};
-XML3D.createClass(JSONFactory, AdapterFactory);
-
-
-JSONFactory.prototype.aspect = "data";
-
-JSONFactory.prototype.createAdapter = function(xflowNode) {
-    return new JSONDataAdapter(xflowNode);
-};
-
-xml3dJSonFormatHandler.registerFactoryClass(JSONFactory);

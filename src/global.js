@@ -51,8 +51,7 @@ XML3D.resource = require("./base/resourcemanager.js").Resource; //Required for t
 XML3D.extend(XML3D.resource, require("./resource/resourcefetcher.js").Resource);
 XML3D.resource.registerFormat = require("./resource/resourcefetcher.js").registerFormat;
 XML3D.resource.URI = require("./utils/uri.js").URI;
-//XML3D.resource.FormatHandler
-//XML3D.resource.JSONFormatHandler
+XML3D.resource.FormatHandler = require("./resource/formathandler.js");
 //XML3D.resource.AdapterFactory
 XML3D.webcl = require("./utils/webcl.js").webcl;
 XML3D.math = require("gl-matrix");
@@ -80,6 +79,8 @@ Xflow.ComputeRequest = require("./xflow/interface/request.js").ComputeRequest;
 XML3D.webgl = {};
 XML3D.webgl.BaseRenderTree = require("./renderer/webgl/render-trees/base.js");
 XML3D.webgl.BaseRenderPass = require("./renderer/webgl/render-passes/base.js");
+
+require("./resource/xml3dformathandler.js");
 
 require("./xflow/operator/default");
 

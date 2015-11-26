@@ -20,7 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-@version: 5.0.1
+@version: 5.0.2
 **/
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
@@ -9439,7 +9439,7 @@ function setDocumentData(httpRequest, url, mimetype) {
         else{
             invalidateDocumentHandles(url);
         }
-    } );
+    }, url );
 
 }
 
@@ -12614,7 +12614,7 @@ var Xflow = Xflow || {};
 window.XML3D = XML3D;
 window.Xflow = Xflow;
 
-XML3D.version = '5.0.1';
+XML3D.version = '5.0.2';
 /** @const */
 XML3D.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
 /** @const */
@@ -12652,10 +12652,14 @@ XML3D.util = require("./utils/misc.js");
 XML3D.options = require("./utils/options.js");
 XML3D.materials = require("./renderer/webgl/materials/urn/registery.js");
 XML3D.resource = require("./base/resourcemanager.js").Resource; //Required for the test library because the RM needs to "belong" to the same document as the XML3D element in order to resolve references correctly
+
 XML3D.resource.registerFormat = require("./base/resourcemanager.js").registerFormat;
+XML3D.resource.Asset = require("./asset/asset.js").Asset;
+XML3D.resource.SubData = require("./asset/asset.js").SubData;
 //XML3D.resource.FormatHandler
 //XML3D.resource.JSONFormatHandler
 //XML3D.resource.AdapterFactory
+
 XML3D.webcl = require("./utils/webcl.js").webcl;
 XML3D.math = require("gl-matrix");
 require("./math/math.js")(XML3D.math);
@@ -12690,7 +12694,7 @@ module.exports = {
     Xflow : Xflow
 };
 
-},{"./base/resourcemanager.js":50,"./math/math.js":77,"./renderer/webgl/materials/urn/registery.js":134,"./renderer/webgl/render-passes/base.js":140,"./renderer/webgl/render-trees/base.js":151,"./types/axisangle.js":162,"./types/box.js":163,"./types/data-observer.js":164,"./types/mat2.js":165,"./types/mat3.js":166,"./types/mat4.js":167,"./types/quat.js":168,"./types/ray.js":169,"./types/vec2.js":170,"./types/vec3.js":171,"./types/vec4.js":172,"./utils/debug.js":176,"./utils/misc.js":177,"./utils/options.js":178,"./utils/webcl.js":180,"./xflow/interface/constants.js":182,"./xflow/interface/data.js":183,"./xflow/interface/graph.js":184,"./xflow/interface/request.js":185,"./xflow/operator/default":203,"./xflow/operator/operator.js":222,"gl-matrix":1,"lodash.assign":17,"lodash.create":32}],69:[function(require,module,exports){
+},{"./asset/asset.js":46,"./base/resourcemanager.js":50,"./math/math.js":77,"./renderer/webgl/materials/urn/registery.js":134,"./renderer/webgl/render-passes/base.js":140,"./renderer/webgl/render-trees/base.js":151,"./types/axisangle.js":162,"./types/box.js":163,"./types/data-observer.js":164,"./types/mat2.js":165,"./types/mat3.js":166,"./types/mat4.js":167,"./types/quat.js":168,"./types/ray.js":169,"./types/vec2.js":170,"./types/vec3.js":171,"./types/vec4.js":172,"./utils/debug.js":176,"./utils/misc.js":177,"./utils/options.js":178,"./utils/webcl.js":180,"./xflow/interface/constants.js":182,"./xflow/interface/data.js":183,"./xflow/interface/graph.js":184,"./xflow/interface/request.js":185,"./xflow/operator/default":203,"./xflow/operator/operator.js":222,"gl-matrix":1,"lodash.assign":17,"lodash.create":32}],69:[function(require,module,exports){
 var XML3D = require("./global.js").XML3D;
 var Config = require("./interface/elements.js").config;
 var sendAdapterEvent = require("./utils/misc.js").sendAdapterEvent;
@@ -13644,7 +13648,7 @@ classInfo['group'] = {
     onkeydown: {a: handlers.EventAttributeHandler},
     onkeyup: {a: handlers.EventAttributeHandler},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
-    getLocalMatrix: {m: methods.groupGetLocalMatrix},
+    getLocalMatrix: {m: methods.XML3DGraphTypeGetLocalMatrix},
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     transform: {a: handlers.StringAttributeHandler},
@@ -13674,6 +13678,7 @@ classInfo['mesh'] = {
     transform: {a: handlers.StringAttributeHandler},
     material: {a: handlers.StringAttributeHandler},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
+    getLocalMatrix: {m: methods.XML3DGraphTypeGetLocalMatrix},
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     getOutputNames: {m: methods.meshGetOutputNames},
@@ -13702,6 +13707,7 @@ classInfo['model'] = {
     complete: {p: properties.AssetComplete},
     progressLevel: {p: properties.AssetProgressLevel},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
+    getLocalMatrix: {m: methods.XML3DGraphTypeGetLocalMatrix},
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     src: {a: handlers.StringAttributeHandler},
@@ -13755,6 +13761,7 @@ classInfo['light'] = {
     onkeyup: {a: handlers.EventAttributeHandler},
     global: {a: handlers.BoolAttributeHandler, params: false},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
+    getLocalMatrix: {m: methods.XML3DGraphTypeGetLocalMatrix},
     onload: {a: handlers.EventAttributeHandler},
     onprogress: {a: handlers.EventAttributeHandler},
     complete: {p: properties.XML3DNestedDataContainerTypeComplete},
@@ -13990,6 +13997,7 @@ classInfo['view'] = {
     onkeydown: {a: handlers.EventAttributeHandler},
     onkeyup: {a: handlers.EventAttributeHandler},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
+    getLocalMatrix: {m: methods.XML3DGraphTypeGetLocalMatrix},
     getProjectionMatrix:{m: methods.viewGetProjectionMatrix},
     getViewMatrix: {m: methods.viewGetViewMatrix}
     };
@@ -14541,17 +14549,6 @@ methods.xml3dGenerateRay = function(x, y) {
     return new XML3D.Ray();
 };
 
-methods.groupGetLocalMatrix = function() {
-    XML3D.flushDOMChanges();
-    var adapters = this._configured.adapters || {};
-    for ( var adapter in adapters) {
-        if (adapters[adapter].getLocalMatrix) {
-            return adapters[adapter].getLocalMatrix();
-        }
-    }
-    return new Mat4();
-};
-
 /**
  * return the bounding box of the owning space in world space
  */
@@ -14602,6 +14599,17 @@ methods.XML3DGraphTypeGetWorldMatrix = function() {
     for (var adapter in adapters) {
         if (adapters[adapter].getWorldMatrix) {
             return adapters[adapter].getWorldMatrix();
+        }
+    }
+    return new Mat4();
+};
+
+methods.XML3DGraphTypeGetLocalMatrix = function() {
+    XML3D.flushDOMChanges();
+    var adapters = this._configured.adapters || {};
+    for ( var adapter in adapters) {
+        if (adapters[adapter].getLocalMatrix) {
+            return adapters[adapter].getLocalMatrix();
         }
     }
     return new Mat4();
@@ -20497,6 +20505,10 @@ var StateMachine = require("../../../contrib/state-machine.js");
 var SamplerConfig = require("../../../xflow/interface/data.js").SamplerConfig;
 var XC = require("../../../xflow/interface/constants.js");
 var uniqueObjectId = utils.getUniqueCounter();
+
+/**
+ * @type {WebGLRenderingContext}
+ */
 var GL = require("../constants.js");
 
 //noinspection JSValidateJSDoc
@@ -20704,6 +20716,7 @@ XML3D.extend(GLTexture.prototype, {
         var gl = this.context.gl;
         this._bind();
 
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
         gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_S, this.wrapS);
         gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_T, this.wrapT);
         gl.texParameteri(this.textureType, gl.TEXTURE_MIN_FILTER, this.minFilter);
@@ -20760,7 +20773,7 @@ XML3D.extend(GLTexture.prototype, {
         this.handle = gl.createTexture();
         this._bind();
 
-        // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, opt.flipY);
         gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_S, opt.wrapS);
         gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_T, opt.wrapT);
         gl.texParameteri(this.textureType, gl.TEXTURE_MIN_FILTER, opt.minFilter);
@@ -26257,6 +26270,7 @@ module.exports = XflowMesh;
 },{"../../../xflow/interface/constants.js":182,"../../../xflow/interface/request.js":185,"../../renderer/scene/constants.js":99,"../../renderer/scene/drawableclosure.js":100,"../base/mesh.js":115,"../constants.js":121,"../materials/events.js":124,"./utils.js":160,"assert":11}],162:[function(require,module,exports){
 var vec4 = require("gl-matrix").vec4;
 var Vec3 = require("./vec3.js");
+var Quat = require("./quat.js");
 
 var AxisAngle = function(vec, y, z, angle) {
     if (this instanceof AxisAngle) {
@@ -26325,7 +26339,7 @@ AxisAngle.wrap = function(vec) {
 
 module.exports = AxisAngle;
 
-},{"./vec3.js":171,"gl-matrix":1}],163:[function(require,module,exports){
+},{"./quat.js":168,"./vec3.js":171,"gl-matrix":1}],163:[function(require,module,exports){
 var Vec3 = require("./vec3.js");
 var vec3 = require("gl-matrix").vec3;
 
@@ -27225,24 +27239,28 @@ Quat.fromAxisAngle = function(axis, rad) {
     } else {
         quat.setAxisAngle(out.data, axis.data ? axis.data : axis, rad);
     }
+    quat.normalize(out.data, out.data);
     return out;
 };
 
 Quat.fromBasis = function(x, y, z) {
     var out = new Quat();
     XML3D.math.quat.setFromBasis(out.data, x.data ? x.data : x, y.data ? y.data : y, z.data ? z.data : z);
+    quat.normalize(out.data, out.data);
     return out;
 };
 
 Quat.fromMat3 = function(m) {
     var out = new Quat();
     quat.fromMat3(out.data, m.data ? m.data : m);
+    quat.normalize(out.data, out.data);
     return out;
 };
 
 Quat.fromRotationTo = function(from, to) {
     var out = new Quat();
     quat.rotationTo(out.data, from.data ? from.data : from, to.data ? to.data : to);
+    quat.normalize(out.data, out.data);
     return out;
 };
 
@@ -30580,6 +30598,7 @@ module.exports = C;
 },{}],183:[function(require,module,exports){
 var Base = require("../base.js");
 var C = require("./constants.js");
+var assign = require('lodash.assign');
 require("../../utils/array.js");
 
 /**
@@ -30595,53 +30614,31 @@ require("../../utils/array.js");
 // SamplerConfig
 //----------------------------------------------------------------------------------------------------------------------
 
+var SAMPLER_DEFAULTS = {
+    minFilter : C.TEX_FILTER_TYPE.LINEAR,
+    magFilter : C.TEX_FILTER_TYPE.LINEAR,
+    wrapS : C.TEX_WRAP_TYPE.CLAMP,
+    wrapT : C.TEX_WRAP_TYPE.CLAMP,
+    textureType : C.TEX_TYPE.TEXTURE_2D,
+    flipY: true,
+    anisotropy : 1, // number of max samples for anisotropic filtering
+    generateMipMap : 0
+};
 
 /**
  * SamplerConfig is used to define sampler properties of a TextureEntry or ImageDataTextureEntry
  * @constructor
  */
 var SamplerConfig = function(){
-    this.minFilter = 0;
-    this.magFilter = 0;
-    this.mipFilter = 0;
-    this.wrapS = 0;
-    this.wrapT = 0;
-    this.wrapU = 0;
-    this.textureType = 0;
-    this.colorR = 0;
-    this.colorG = 0;
-    this.colorB = 0;
-    this.anisotropy = 0; // number of max samples for anisotropic filtering
-    this.generateMipMap = 0;
+    this.setDefaults();
 };
 
 SamplerConfig.prototype.setDefaults = function() {
-    this.minFilter = C.TEX_FILTER_TYPE.LINEAR;
-    this.magFilter = C.TEX_FILTER_TYPE.LINEAR;
-    this.mipFilter = C.TEX_FILTER_TYPE.NEAREST;
-    this.wrapS = C.TEX_WRAP_TYPE.CLAMP;
-    this.wrapT = C.TEX_WRAP_TYPE.CLAMP;
-    this.wrapU = C.TEX_WRAP_TYPE.CLAMP;
-    this.textureType = C.TEX_TYPE.TEXTURE_2D;
-    this.colorR = 0;
-    this.colorG = 0;
-    this.colorB = 0;
-    this.anisotropy = 1; // number of max samples for anisotropic filtering
-    this.generateMipMap = 0;
+    assign(this, SAMPLER_DEFAULTS);
 };
 
 SamplerConfig.prototype.set = function(other) {
-    this.minFilter = other.minFilter;
-    this.magFilter = other.magFilter;
-    this.mipFilter = other.mipFilter;
-    this.wrapS = other.wrapS;
-    this.wrapT = other.wrapT;
-    this.wrapU = other.wrapU;
-    this.textureType = other.textureType;
-    this.colorR = other.colorR;
-    this.colorG = other.colorG;
-    this.colorB = other.colorB;
-    this.generateMipMap = other.generateMipMap;
+    assign(this, other);
 };
 
 
@@ -31224,7 +31221,7 @@ module.exports = {
     DataChangeNotifier: DataChangeNotifier
 };
 
-},{"../../utils/array.js":173,"../base.js":181,"./constants.js":182}],184:[function(require,module,exports){
+},{"../../utils/array.js":173,"../base.js":181,"./constants.js":182,"lodash.assign":17}],184:[function(require,module,exports){
 var C = require("./constants.js");
 var Mapping = require("./../processing/mapping.js");
 require("../../utils/array.js");

@@ -26,6 +26,14 @@ var ResponseBodyUsedException = function(response) {
     }
 };
 
+var RequestFailedException = function(response) {
+    this.message = "The request failed with status code "+response.status;
+    this.response = response;
+    this.toString = function() {
+        return this.message;
+    }
+};
+
 var registerFormat = function(formatHandler) {
     if (formatHandler)
         c_formatHandlers.push(formatHandler);
@@ -41,8 +49,7 @@ Resource.fetch = function(uriString, opt) {
             c_requestHooks[i](uri, opt);
         }
         if (opt.abort) {
-            reject(new RequestAbortedException(uri));
-            return;
+            throw new RequestAbortedException(uri);
         }
 
         fetch(uri.toString(), opt)
@@ -60,7 +67,7 @@ Resource.getDocument = function(urlString, opt) {
         Resource.fetch(urlString, opt)
             .then(function(response) {
                 if (!response.ok) {
-                    reject(response); //TODO: Wrap the response in an exception before rejecting
+                    throw new RequestFailedException(response);
                 }
                 response.originalURL = urlString;
                 if (c_cachedDocuments[urlString] && c_cachedDocuments[urlString].document) { //TODO: better handling of concurrent requests to same document before parsing is done
@@ -88,7 +95,7 @@ Resource.parseResponse = function(response) {
 
             if (response.bodyUsed) {
                 XML3D.debug.logError("FormatHandlers should not access the response body in the isFormatSupported function!");
-                reject(new ResponseBodyUsedException(response));
+                throw new ResponseBodyUsedException(response);
             }
 
             if (isSupported) {

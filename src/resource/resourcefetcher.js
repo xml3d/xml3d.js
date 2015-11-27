@@ -70,18 +70,23 @@ Resource.getDocument = function(urlString, opt) {
                     throw new RequestFailedException(response);
                 }
                 response.originalURL = urlString;
-                if (c_cachedDocuments[urlString] && c_cachedDocuments[urlString].document) { //TODO: better handling of concurrent requests to same document before parsing is done
-                    resolve(c_cachedDocuments[urlString].document);
+                var cache;
+                if (cache = c_cachedDocuments[urlString]) {
+                    resolve(cache.pending ? cache.pending : cache.document);
                 } else {
-                    c_cachedDocuments[urlString] = { fragments : [] };
-                    return Resource.parseResponse(response);
+                    // Cache entry must be created before parsing begins
+                    cache = c_cachedDocuments[urlString] = { fragments : [] };
+                    cache.pending = Resource.parseResponse(response);
+                    return cache.pending;
                 }
             })
             .then(function(doc) {
                 doc._documentURL = urlString;
                 c_cachedDocuments[urlString].document = doc;
+                delete c_cachedDocuments[urlString].pending;
                 resolve(doc);
             }).catch(function(exception) {
+                c_cachedDocuments[urlString] && delete c_cachedDocuments[urlString].pending;
                 reject(exception);
             });
     });

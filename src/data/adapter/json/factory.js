@@ -26,7 +26,7 @@ XML3DJSONFormatHandler.prototype.getFormatData = function(response, callback) {
 
 XML3DJSONFormatHandler.prototype.getAdapter = function(data, aspect, canvasId) {
     if (aspect === "data" || aspect === "scene") {
-        return new JSONDataAdapter(createXflowNode(data));
+        return new JSONDataAdapter(createXflowNode(data, aspect));
     }
     throw new Error("Unsupported aspect '"+aspect+"' encountered in JSON format handler.");
 };
@@ -114,7 +114,7 @@ function createXflowInputs(dataNode, name, jsonData){
     }
 }
 
-function createXflowNode(jsonData){
+function createXflowNode(jsonData, aspect){
     if (jsonData.format != "xml3d-json")
         throw new Error("Unknown JSON format: " + jsonData.format);
     if (jsonData.version != "0.4.0")
@@ -123,7 +123,12 @@ function createXflowNode(jsonData){
     var node = new DataNode(false);
     node.userData = "External Json"; // TODO: Try to add document URL here (how to get it?)
 
-    var entries = jsonData.data;
+    var entries;
+    if (aspect === "scene")
+        entries = jsonData.material;
+    else
+        entries = jsonData.data;
+
     for(var name in entries) {
         createXflowInputs(node, name, entries[name]);
     }

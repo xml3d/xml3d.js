@@ -6,8 +6,12 @@ var Options = require("../utils/options.js");
 //var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
 //Options.register(OPTION_RESOURCE_CORS, "anonymous");
 
-var c_requestHooks = [];
-var c_formatHandlers = [];
+var MAX_CONCURRENT_REQUESTS = 100;  // Maximum number of requests awaiting a response
+
+var c_requestHooks = [];    // Request hooks called for each outgoing request
+var c_formatHandlers = [];  // All registered FormatHandler plugins
+var c_requestQueue = [];    // Requests that haven't been sent out yet
+var c_openRequests = 0;     // Number of requests that are currently waiting on a response
 window.c_cachedDocuments = {}; //TODO: Currently global during refactoring, make local when ResourceManager is refactored
 
 var RequestAbortedException = function(url) {
@@ -51,15 +55,29 @@ Resource.fetch = function(uriString, opt) {
         if (opt.abort) {
             throw new RequestAbortedException(uri);
         }
-
-        fetch(uri.toString(), opt)
-            .then(function(response) {
-                resolve(response);
-            }).catch(function (exception) {
-                XML3D.debug.logError("Could not retrieve document at '"+uri.toString()+"'. Reason: "+exception);
-                reject(exception);
-            });
+        scheduleRequest({
+            opt : opt,
+            uri : uri,
+            resolve : resolve,
+            reject : reject,
+            timestamp : Date.now()
+        });
     });
+};
+
+var popRequestQueue = function() {
+    var request = c_requestQueue.shift();
+    c_openRequests++;
+
+    fetch(request.uri.toString(), request.opt)
+        .then(function(response) {
+            c_openRequests--;
+            request.resolve(response);
+        }).catch(function (exception) {
+            XML3D.debug.logError("Could not retrieve document at '"+request.uri.toString()+"'. Reason: "+exception);
+            c_openRequests--;
+            request.reject(exception);
+        });
 };
 
 Resource.getDocument = function(urlString, opt) {
@@ -72,23 +90,23 @@ Resource.getDocument = function(urlString, opt) {
                 response.originalURL = urlString;
                 var cache;
                 if (cache = c_cachedDocuments[urlString]) {
-                    resolve(cache.pending ? cache.pending : cache.document);
+                    return cache.pending ? cache.pending : cache.document;
                 } else {
-                    // Cache entry must be created before parsing begins
                     cache = c_cachedDocuments[urlString] = { fragments : [] };
                     cache.pending = Resource.parseResponse(response);
                     return cache.pending;
                 }
-            })
-            .then(function(doc) {
+            }).then(function(doc) {
                 doc._documentURL = urlString;
-                c_cachedDocuments[urlString].document = doc;
-                delete c_cachedDocuments[urlString].pending;
+                var cache = c_cachedDocuments[urlString];
+                cache.document = doc;
+                delete cache.pending;
                 resolve(doc);
             }).catch(function(exception) {
                 c_cachedDocuments[urlString] && delete c_cachedDocuments[urlString].pending;
                 reject(exception);
             });
+
     });
 };
 
@@ -99,8 +117,8 @@ Resource.parseResponse = function(response) {
             var isSupported = fh.isFormatSupported(response);
 
             if (response.bodyUsed) {
-                XML3D.debug.logError("FormatHandlers should not access the response body in the isFormatSupported function!");
-                throw new ResponseBodyUsedException(response);
+                XML3D.debug.logError("FormatHandlers should not access the response body in the isFormatSupported function without first cloning the response object!");
+                reject(ResponseBodyUsedException(response));
             }
 
             if (isSupported) {
@@ -116,6 +134,25 @@ Resource.onRequest = function(callback) {
     c_requestHooks.push(callback);
 };
 
+var scheduleRequest = function(obj) {
+    if (!c_requestQueue.length) {
+        // The request queue was empty before so we're waking up from an idle state
+        window.requestAnimationFrame(tickWorkWindow);
+    }
+    c_requestQueue.push(obj);
+};
+
+var tickWorkWindow = function() {
+    // Both of these loops trigger asynchronous work through Promises so working through all queue items shouldn't block the thread for too long
+    while (c_requestQueue.length > 0 && c_openRequests < MAX_CONCURRENT_REQUESTS) {
+        popRequestQueue();
+    }
+
+    if (c_requestQueue.length) {
+        // If there's more work to do schedule another call, otherwise idle until more work arrives in the scheduleWork function
+        window.requestAnimationFrame(tickWorkWindow);
+    }
+};
 
 var initOptions = function(opt) {
     opt = opt || {};

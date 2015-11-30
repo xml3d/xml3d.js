@@ -521,9 +521,10 @@ Resource.getAdapterHandle = function(baseURI, uri, adapterType, canvasId, nodeNa
         } else {
             if (!docData) {
                 var acceptType = getAcceptTypeForNode(nodeName, docURI);
+                var priority = adapterType === "scene" ? 1 : 0; //Give materials a higher priority
                 //TODO: We need to ensure we pass the full original uri here. Right now we trim the fragment and this leads
                 // to inconsistencies in the document cache
-                XML3D.resource.getDocument(docURI, {"Accept" : acceptType}).then(function(doc) {
+                XML3D.resource.getDocument(docURI, {"Accept" : acceptType, priority : priority}).then(function(doc) {
                     if (doc) {
                         docData = c_cachedDocuments[docURI];
                         docData.fragments.push(uri.fragment);

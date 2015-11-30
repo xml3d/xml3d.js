@@ -59,8 +59,7 @@ Resource.fetch = function(uriString, opt) {
             opt : opt,
             uri : uri,
             resolve : resolve,
-            reject : reject,
-            timestamp : Date.now()
+            reject : reject
         });
     });
 };
@@ -140,6 +139,14 @@ var scheduleRequest = function(obj) {
         window.requestAnimationFrame(tickWorkWindow);
     }
     c_requestQueue.push(obj);
+    if (obj.opt.priority > 0) {
+        // 0 is lowest priority so pushing it to the back is enough, for all other priorities we should to resort the array
+        c_requestQueue.sort(prioritySort);
+    }
+};
+
+var prioritySort = function(a, b) {
+    return b.opt.priority - a.opt.priority; //Sort descending, higher priority first
 };
 
 var tickWorkWindow = function() {
@@ -157,6 +164,7 @@ var tickWorkWindow = function() {
 var initOptions = function(opt) {
     opt = opt || {};
     opt.headers = opt.headers || {};
+    opt.priority = opt.priority || 0;
     return opt;
 };
 

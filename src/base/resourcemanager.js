@@ -8,24 +8,9 @@ var Options = require("../utils/options.js");
 var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
 Options.register(OPTION_RESOURCE_CORS, "anonymous");
 
-//var c_cachedDocuments = {};
-var c_factories = {};
 var c_cachedAdapterHandles = {};
 var c_canvasIdCounters = {};
-var c_formatHandlers = [];
 
-var c_binaryContentTypes = ["application/octet-stream", "text/plain; charset=x-user-defined"];
-var c_binaryExtensions = [".bin", ".bson"];
-
-var findFormat = function(response, responseType, mimetype) {
-    for (var i = 0; i < c_formatHandlers.length; ++i) {
-        var formatHandler = c_formatHandlers[i];
-        if (c_formatHandlers[i].isFormatSupported(response, responseType, mimetype)) {
-            return formatHandler;
-        }
-    }
-    return null;
-};
 
 /**
  * @constructor
@@ -108,54 +93,6 @@ Resource.removeLoadCompleteListener = function(canvasId, listener) {
             counterObject.listeners.splice(idx, 1);
     }
 };
-
-
-function stringEndsWithSuffix(str, suffix) {
-    return str.indexOf(suffix, str.length - suffix.length) !== -1;
-}
-
-//noinspection JSUnusedGlobalSymbols
-Resource.addBinaryContentType = function(type) {
-    if (c_binaryContentTypes.indexOf(type) == -1)
-        c_binaryContentTypes.push(type);
-};
-
-//noinspection JSUnusedGlobalSymbols
-Resource.removeBinaryContentType = function(type) {
-    var idx = c_binaryContentTypes.indexOf(type);
-    if (idx != -1)
-        c_binaryContentTypes.splice(idx, 1);
-};
-
-function isBinaryContentType(contentType) {
-    for (var i in c_binaryContentTypes) {
-        if (contentType == c_binaryContentTypes[i]) {
-            return true;
-        }
-    }
-    return false;
-}
-
-Resource.addBinaryExtension = function(extension) {
-    if (c_binaryExtensions.indexOf(extension) == -1)
-        c_binaryExtensions.push(extension);
-};
-
-//noinspection JSUnusedGlobalSymbols
-Resource.removeBinaryExtension = function(extension) {
-    var idx = c_binaryExtensions.indexOf(extension);
-    if (idx != -1)
-        c_binaryExtensions.splice(idx, 1);
-};
-
-function isBinaryExtension(url) {
-    for (var i in c_binaryExtensions) {
-        if (stringEndsWithSuffix(url, c_binaryExtensions[i]))
-            return true;
-    }
-    return false;
-}
-
 
 /**
  * Update all existing handles of a received document
@@ -509,6 +446,5 @@ Resource.getVideo = function(uri, autoplay, loop, muted, listeners) {
 };
 
 module.exports = {
-    findFormat: findFormat,
     Resource: Resource
 };

@@ -17,22 +17,6 @@ var c_formatHandlers = [];
 var c_binaryContentTypes = ["application/octet-stream", "text/plain; charset=x-user-defined"];
 var c_binaryExtensions = [".bin", ".bson"];
 
-/**
- * Register a factory with the resource manager
- * @param {AdapterFactory} factory - the factory to be registered
- */
-var registerFactory = function(factory) {
-    var canvasId = factory.canvasId;
-    if (!c_factories[canvasId])
-        c_factories[canvasId] = [];
-    c_factories[canvasId].push(factory);
-};
-
-var registerFormat = function(formatHandler) {
-    if (formatHandler)
-        c_formatHandlers.push(formatHandler);
-};
-
 var findFormat = function(response, responseType, mimetype) {
     for (var i = 0; i < c_formatHandlers.length; ++i) {
         var formatHandler = c_formatHandlers[i];
@@ -172,157 +156,6 @@ function isBinaryExtension(url) {
     return false;
 }
 
-/**
- * Load a document via XMLHttpRequest
- * @private
- * @param {string} url URL of the document
- * @param {string} acceptType The content type that should be requested for this document
- */
-function loadDocument(url, acceptType) {
-    var xmlHttp = null;
-    try {
-        xmlHttp = new XMLHttpRequest();
-    } catch (e) {
-        xmlHttp = null;
-    }
-    if (xmlHttp) {
-        xmlHttp._url = url;
-        xmlHttp._contentChecked = false;
-        xmlHttp.open('GET', url, true);
-        if (isBinaryExtension(url))
-            xmlHttp.responseType = "arraybuffer";
-
-        xmlHttp.setRequestHeader("Accept", acceptType);
-
-        xmlHttp.onreadystatechange = function() {
-            if (xmlHttp._aborted) // This check is possibly not needed
-                return;
-            // check compatibility between content and request mode
-            if (!xmlHttp._contentChecked &&
-                // 2 - HEADERS_RECEIVED, 3 - LOADING, 4 - DONE
-                ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 || xmlHttp.readyState == 4) &&
-                    xmlHttp.status == 200)) {
-                xmlHttp._contentChecked = true; // we check only once
-                // check if we need to change request mode
-                var contentType = xmlHttp.getResponseHeader("content-type");
-                if (contentType) {
-                    var binaryContent = isBinaryContentType(contentType);
-                    var binaryRequest = (xmlHttp.responseType == "arraybuffer");
-                    // When content is not the same as request, we need to repeat request
-                    if (binaryContent != binaryRequest) {
-                        xmlHttp._aborted = true;
-                        var cb = xmlHttp.onreadystatechange;
-                        xmlHttp.onreadystatechange = null;
-                        var url = xmlHttp._url;
-                        xmlHttp.abort();
-
-                        // Note: We do not recycle XMLHttpRequest !
-                        //       This does work only when responseType is changed to "arraybuffer",
-                        //       however the size of the xmlHttp.response buffer is then wrong !
-                        //       It does not work at all (at least in Chrome) when we use overrideMimeType
-                        //       with "text/plain; charset=x-user-defined" argument.
-                        //       The latter mode require creation of the fresh XMLHttpRequest.
-
-                        xmlHttp = new XMLHttpRequest();
-                        xmlHttp._url = url;
-                        xmlHttp._contentChecked = true;
-                        xmlHttp.open('GET', url, true);
-                        if (binaryContent)
-                            xmlHttp.responseType = "arraybuffer";
-                        xmlHttp.onreadystatechange = cb;
-                        xmlHttp.send(null);
-                        return;
-                    }
-                }
-            }
-            // Request mode and content type are compatible here (both binary or both text)
-            if (xmlHttp.readyState == 4) {
-                if (xmlHttp.status == 200) {
-                    XML3D.debug.logDebug("Loaded: " + xmlHttp._url);
-                    XML3D.xmlHttpCallback && XML3D.xmlHttpCallback(xmlHttp);
-                    processResponse(xmlHttp);
-                }
-                else {
-                    XML3D.debug.logError("Could not load external document '" + xmlHttp._url +
-                        "': " + xmlHttp.status + " - " + xmlHttp.statusText);
-                    invalidateDocumentHandles(xmlHttp._url);
-                }
-            }
-        };
-        xmlHttp.send(null);
-    }
-}
-/**
- * Process response of ajax request from loadDocument()
- * @private
- * @param {XMLHttpRequest} httpRequest
- */
-function processResponse(httpRequest) {
-    var mimetype = httpRequest.getResponseHeader("content-type");
-    if (!mimetype) {
-        XML3D.debug.logError("Could not load external document because the server did not provide a content-type header: "+httpRequest._url);
-        invalidateDocumentHandles(httpRequest._url);
-        return;
-    }
-    setDocumentData(httpRequest, httpRequest._url, mimetype);
-}
-/**
- * Initialize data of a received document
- * @private
- * @param {XMLHttpRequest} httpRequest The XMLHttpRequest of the loaded document
- * @param {string} url URL of the loaded document
- * @param {string} mimetype The mimetype of the loaded document
- */
-function setDocumentData(httpRequest, url, mimetype) {
-    var docCache = c_cachedDocuments[url];
-    docCache.mimetype = mimetype;
-
-    var cleanedMimetype = mimetype;
-
-    if (mimetype.indexOf(';') > 0)
-        cleanedMimetype = mimetype.substr(0, mimetype.indexOf(';'));
-
-    var response = null;
-    if (httpRequest.responseType == "arraybuffer") {
-        response = httpRequest.response;
-    } else if (cleanedMimetype.match(/json/)) {
-        response = JSON.parse(httpRequest.responseText);
-    } else if (cleanedMimetype.match(/xml/)) {
-        response = httpRequest.responseXML;
-        if (!response) {
-            XML3D.debug.logError("Invalid external XML document '" + httpRequest._url +
-                "': XML Syntax error or the request did not succeed or the document was truncated for being too large.");
-            return;
-        }
-        //Workaround for IE "bug" where external documents always report their document.URL as being identical to window.location.href
-        response._documentURL = url;
-    } else if (cleanedMimetype == "application/octet-stream" || mimetype.match(/text\/plain/)) {
-        XML3D.debug.logError("Possibly wrong loading of resource " + url + ". Mimetype is " + mimetype + " but response is not an ArrayBuffer");
-        response = httpRequest.response;
-    } else if (cleanedMimetype == "application/javascript" || mimetype == "text/javascript") {
-        response = httpRequest.response;
-    }else {
-        XML3D.debug.logError("Unidentified response type (response = '" + httpRequest.response + "', responseType = '" + httpRequest.responseType + "')");
-        response = httpRequest.response;
-    }
-
-    var formatHandler = findFormat(response, httpRequest.responseType, cleanedMimetype);
-    if (!formatHandler) {
-        XML3D.debug.logError("No format handler for resource (response = '" + response + "', responseType = '" + httpRequest.responseType + "')");
-        invalidateDocumentHandles(url);
-        return;
-    }
-
-    formatHandler.getFormatData(response, httpRequest.responseType, cleanedMimetype, function(success, result){
-        if(success){
-            updateDocumentHandles(url)
-        }
-        else{
-            invalidateDocumentHandles(url);
-        }
-    }, url );
-
-}
 
 /**
  * Update all existing handles of a received document
@@ -450,25 +283,6 @@ function clearHandles(url) {
         }
     }
 }
-
-/**
- * This methods returns an absolute URI compatible with the resource manager.
- * This means: Any reference from an external document will be absolute and any id reference from the current
- * document will remain an id reference.
- * @param {String} baseURI - the base URI that the uri is relative to
- * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
- * @returns {URI} The (sometimes) absolute URI
- */
-Resource.getAbsoluteURI = function(baseURI, uri){
-    if (!uri)
-        return null;
-
-    if (typeof uri == "string") uri = new URI(uri);
-    if (baseURI != document.URL || !uri.isLocal()) {
-        uri = uri.getAbsoluteURI(baseURI);
-    }
-    return uri;
-};
 
 /**
  * Get any adapter, internal or external.
@@ -612,102 +426,6 @@ Resource.notifyNodeAdapterChange = function(element, adapterType, canvasId, type
     }
 };
 
-
-/**
- * Load data via XMLHttpRequest
- * @private
- * @param {string} url URL of the document
- * @param {function(object)} loadListener Gets the response of the XHR
- * @param {function(XMLHttpRequest)} errorListener Get the XHR object for further analysis
- */
-Resource.loadData = function(url, loadListener, errorListener) {
-    var xmlHttp = null;
-    try {
-        xmlHttp = new XMLHttpRequest();
-    } catch (e) {
-        xmlHttp = null;
-    }
-    if (xmlHttp) {
-        xmlHttp._url = url;
-        xmlHttp._contentChecked = false;
-        xmlHttp.open('GET', url, true);
-        if (isBinaryExtension(url))
-            xmlHttp.responseType = "arraybuffer";
-
-        xmlHttp.onreadystatechange = function() {
-            if (xmlHttp._aborted) // This check is possibly not needed
-                return;
-            // check compatibility between content and request mode
-            if (!xmlHttp._contentChecked &&
-                // 2 - HEADERS_RECEIVED, 3 - LOADING, 4 - DONE
-                ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 || xmlHttp.readyState == 4) &&
-                    xmlHttp.status == 200)) {
-                xmlHttp._contentChecked = true; // we check only once
-                // check if we need to change request mode
-                var contentType = xmlHttp.getResponseHeader("content-type");
-                if (contentType) {
-                    var binaryContent = isBinaryContentType(contentType);
-                    var binaryRequest = (xmlHttp.responseType == "arraybuffer");
-                    // When content is not the same as request, we need to repeat request
-                    if (binaryContent != binaryRequest) {
-                        xmlHttp._aborted = true;
-                        var cb = xmlHttp.onreadystatechange;
-                        xmlHttp.onreadystatechange = null;
-                        var url = xmlHttp._url;
-                        xmlHttp.abort();
-
-                        // Note: We do not recycle XMLHttpRequest !
-                        //       This does work only when responseType is changed to "arraybuffer",
-                        //       however the size of the xmlHttp.response buffer is then wrong !
-                        //       It does not work at all (at least in Chrome) when we use overrideMimeType
-                        //       with "text/plain; charset=x-user-defined" argument.
-                        //       The latter mode require creation of the fresh XMLHttpRequest.
-
-                        xmlHttp = new XMLHttpRequest();
-                        xmlHttp._url = url;
-                        xmlHttp._contentChecked = true;
-                        xmlHttp.open('GET', url, true);
-                        if (binaryContent)
-                            xmlHttp.responseType = "arraybuffer";
-                        xmlHttp.onreadystatechange = cb;
-                        xmlHttp.send(null);
-                        return;
-                    }
-                }
-            }
-            // Request mode and content type are compatible here (both binary or both text)
-            if (xmlHttp.readyState == 4) {
-                if (xmlHttp.status == 200) {
-                    XML3D.debug.logDebug("Loaded: " + xmlHttp._url);
-
-                    var mimetype = xmlHttp.getResponseHeader("content-type");
-                    var response = null;
-
-                    if (xmlHttp.responseType == "arraybuffer") {
-                        response = xmlHttp.response;
-                    } else if (mimetype == "application/json") {
-                        response = JSON.parse(xmlHttp.responseText);
-                    } else if (mimetype == "application/xml" || mimetype == "text/xml") {
-                        response = xmlHttp.responseXML;
-                    } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
-                        XML3D.debug.logError("Possibly wrong loading of resource " + url + ". Mimetype is " + mimetype + " but response is not an ArrayBuffer");
-                        response = xmlHttp.responseText; // FIXME is this correct ?
-                    }
-                    if (loadListener)
-                        loadListener(response);
-                }
-                else {
-                    XML3D.debug.logError("Could not load external document '" + xmlHttp._url +
-                        "': " + xmlHttp.status + " - " + xmlHttp.statusText);
-                    if (errorListener)
-                        errorListener(xmlHttp);
-                }
-            }
-        };
-        xmlHttp.send(null);
-    }
-};
-
 /**
  * This function is called to load an Image.
  *
@@ -791,8 +509,6 @@ Resource.getVideo = function(uri, autoplay, loop, muted, listeners) {
 };
 
 module.exports = {
-    registerFactory: registerFactory,
-    registerFormat: registerFormat,
     findFormat: findFormat,
     Resource: Resource
 };

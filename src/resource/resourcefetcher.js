@@ -177,6 +177,26 @@ Resource.onRequest(function(uri, opt) {
     }
 });
 
+
+/**
+ * This methods returns an absolute URI compatible with the resource manager.
+ * This means: Any reference from an external document will be absolute and any id reference from the current
+ * document will remain an id reference.
+ * @param {String} baseURI - the base URI that the uri is relative to
+ * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
+ * @returns {URI} The (sometimes) absolute URI
+ */
+Resource.getAbsoluteURI = function(baseURI, uri){
+    if (!uri)
+        return null;
+
+    if (typeof uri == "string") uri = new URI(uri);
+    if (baseURI != document.URL || !uri.isLocal()) {
+        uri = uri.getAbsoluteURI(baseURI);
+    }
+    return uri;
+};
+
 module.exports = {
     Resource : Resource,
     registerFormat: registerFormat

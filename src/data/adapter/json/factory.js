@@ -105,9 +105,12 @@ function createXflowInputs(dataNode, name, jsonData){
                 // FIXME add big-endian -> little-endian conversion
                 throw new Error("Big-endian binary data are not supported yet");
             }
-            Resource.loadData(value.url, function (arrayBuffer) {
-                createXflowValueFromBuffer(dataNode, jsonData.type, name, key, arrayBuffer, value.byteOffset, value.byteLength);
-            }, null);
+            Resource.fetch(value.url)
+                .then(function (response) {
+                    return response.arrayBuffer();
+                }).then(function(arrayBuffer) {
+                    createXflowValueFromBuffer(dataNode, jsonData.type, name, key, arrayBuffer, value.byteOffset, value.byteLength);
+                });
         } else {
             createXflowValue(dataNode, jsonData.type, name, key, value);
         }

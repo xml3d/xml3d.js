@@ -1,10 +1,11 @@
 var SceneElementAdapter = require("./scene-element.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 var Events = require("../../../interface/notification.js");
-var Resource = require("../../../base/resourcemanager.js").Resource;
 var AdapterHandle = require("../../../base/adapterhandle.js");
 var encodeZIndex = require("../../../utils/misc.js").encodeZIndex;
 var mat4 = require("gl-matrix").mat4;
+var Resource = require("../../../resource/resource-coordinator.js");
+
 
 var ModelRenderAdapter = function (factory, node) {
     SceneElementAdapter.call(this, factory, node, false, true);

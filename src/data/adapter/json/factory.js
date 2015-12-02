@@ -2,7 +2,6 @@ var XC = require("../../../xflow/interface/constants.js");
 var InputNode = require("../../../xflow/interface/graph.js").InputNode;
 var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
-var Resource = require("../../../base/resourcemanager.js").Resource;
 var AdapterFactory = require("../../../base/adapter.js").AdapterFactory;
 
 var XML3DJSONFormatHandler = function() {
@@ -105,7 +104,7 @@ function createXflowInputs(dataNode, name, jsonData){
                 // FIXME add big-endian -> little-endian conversion
                 throw new Error("Big-endian binary data are not supported yet");
             }
-            Resource.fetch(value.url)
+            XML3D.resource.fetch(value.url)
                 .then(function (response) {
                     return response.arrayBuffer();
                 }).then(function(arrayBuffer) {

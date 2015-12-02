@@ -1,5 +1,5 @@
 var XC = require("../xflow/interface/constants.js");
-var Resource = require("../base/resourcemanager.js").Resource;
+var Resource = require("../resource/resource-coordinator.js");
 
 var c_XflowObserverList = [];
 

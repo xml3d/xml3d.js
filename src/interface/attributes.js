@@ -1,4 +1,4 @@
-var Resource = require("../base/resourcemanager.js").Resource;
+var Resource = require("../resource/resource-coordinator.js");
 
 var string2bool = function(string) {
     if (!string) {

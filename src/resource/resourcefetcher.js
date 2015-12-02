@@ -3,9 +3,6 @@ require("whatwg-fetch");
 var URI = require("../utils/uri.js").URI;
 var Options = require("../utils/options.js");
 
-//var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
-//Options.register(OPTION_RESOURCE_CORS, "anonymous");
-
 var MAX_CONCURRENT_REQUESTS = 100;  // Maximum number of requests awaiting a response
 
 var c_requestHooks = [];    // Request hooks called for each outgoing request
@@ -38,12 +35,13 @@ var RequestFailedException = function(response) {
     }
 };
 
-var registerFormat = function(formatHandler) {
+var Resource = {};
+
+Resource.registerFormat = function(formatHandler) {
     if (formatHandler)
         c_formatHandlers.push(formatHandler);
 };
 
-var Resource = {};
 Resource.fetch = function(uriString, opt) {
     opt = initOptions(opt);
     var uri = new URI(uriString);
@@ -197,7 +195,5 @@ Resource.getAbsoluteURI = function(baseURI, uri){
     return uri;
 };
 
-module.exports = {
-    Resource : Resource,
-    registerFormat: registerFormat
-};
+module.exports = Resource;
+

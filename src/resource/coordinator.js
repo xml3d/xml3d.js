@@ -3,7 +3,7 @@ var AdapterHandle = require("../base/adapterhandle.js");
 var URI = require("../utils/uri.js").URI;
 var URIResolver = require("../utils/uri.js").URIResolver;
 var Options = require("../utils/options.js");
-var ResourceCounter = require("./resource-counter.js");
+var ResourceCounter = require("./counter.js");
 
 var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
 Options.register(OPTION_RESOURCE_CORS, "anonymous");

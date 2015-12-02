@@ -1,6 +1,6 @@
 var events = require("./notification.js");
 var ClassInfo = require("./configuration.js").classInfo;
-var Resource = require("../resource/resource-coordinator.js");
+var Resource = require("../resource/coordinator.js");
 
 var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver),
     mutObserver;

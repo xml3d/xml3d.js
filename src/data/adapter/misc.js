@@ -2,7 +2,7 @@ var DataAdapter = require("./data.js");
 var Events = require("../../interface/notification.js");
 var URI = require("../../utils/uri.js").URI;
 var Util = require("../../utils/misc.js");
-var Resource = require("../../resource/resource-coordinator.js");
+var Resource = require("../../resource/coordinator.js");
 
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;

@@ -2,7 +2,7 @@ var SceneElementAdapter = require("./scene-element.js");
 
 var Events = require("../../../interface/notification.js");
 var LightConfiguration = require("../scene/configuration.js");
-var Resource = require("../../../resource/resource-coordinator.js");
+var Resource = require("../../../resource/coordinator.js");
 
 var DEFAULT_LIGHT_MODEL = "urn:xml3d:light:directional";
 /**

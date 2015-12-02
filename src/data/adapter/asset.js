@@ -7,7 +7,7 @@ var Asset = require("../../asset/asset.js").Asset;
 var SubData = require("../../asset/asset.js").SubData;
 var Events = require("../../interface/notification.js");
 var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
-var Resource = require("../../resource/resourcefetcher.js");
+var Resource = require("../../resource/fetcher.js");
 
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;

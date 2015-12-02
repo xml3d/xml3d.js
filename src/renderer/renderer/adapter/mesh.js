@@ -2,7 +2,7 @@ var SceneElementAdapter = require("./scene-element.js");
 
 var Events = require("../../../interface/notification.js");
 var encodeZIndex = require("../../../utils/misc.js").encodeZIndex;
-var Resource = require("../../../resource/resource-coordinator.js");
+var Resource = require("../../../resource/coordinator.js");
 
 var DEFAULT_PRIMITIVE_TYPE = "triangles";
 

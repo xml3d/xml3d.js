@@ -4,7 +4,7 @@ var Events = require("../../../interface/notification.js");
 var AdapterHandle = require("../../../base/adapterhandle.js");
 var encodeZIndex = require("../../../utils/misc.js").encodeZIndex;
 var mat4 = require("gl-matrix").mat4;
-var Resource = require("../../../resource/resource-coordinator.js");
+var Resource = require("../../../resource/coordinator.js");
 
 
 var ModelRenderAdapter = function (factory, node) {

@@ -2,7 +2,7 @@ var RenderAdapter = require("./base.js");
 var Utils = require("../utils.js");
 var Events = require("../../../interface/notification.js");
 var dispatchCustomEvent = require("../../../utils/misc.js").dispatchCustomEvent;
-var ResourceCounter = require("../../../resource/resource-counter.js");
+var ResourceCounter = require("../../../resource/counter.js");
 
 var XML3DRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);

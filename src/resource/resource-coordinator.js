@@ -3,15 +3,15 @@ var AdapterHandle = require("../base/adapterhandle.js");
 var URI = require("../utils/uri.js").URI;
 var URIResolver = require("../utils/uri.js").URIResolver;
 var Options = require("../utils/options.js");
+var ResourceCounter = require("./resource-counter.js");
 
 var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
 Options.register(OPTION_RESOURCE_CORS, "anonymous");
 
+// Proxy adapters that provide the connections between elements (eg. "src" -> "id")
 var c_cachedAdapterHandles = {};
-var c_canvasIdCounters = {};
 
 var Resource = {};
-
 
 /**
  * This function is called when an id of an element changes or if that element is now reachable
@@ -129,8 +129,7 @@ var createAdapterHandle = function(uri, aspect, canvasId) {
             handle.setAdapter(null, AdapterHandle.STATUS.NOT_FOUND);
     }
     else {
-        var counterObject = getOrCreateCounterObject(canvasId);
-        counterObject.counter++;
+        ResourceCounter.addPendingResource(uri, canvasId);
 
         var docURI = uri.toStringWithoutFragment();
         var docData = c_cachedDocuments[docURI];
@@ -201,7 +200,7 @@ function updateMissingHandles(uri, formatHandler, data) {
             if (!handle.hasAdapter()) {
                 updateHandle(handle, adapterType, +canvasId, formatHandler, data);
                 if(!uri.isLocal())
-                    loadComplete(canvasId);
+                    ResourceCounter.resolvePendingResource(uri, canvasId);
             }
         }
     }
@@ -217,7 +216,7 @@ function invalidateHandles(uri) {
         for (var canvasId in c_cachedAdapterHandles[url][adapterType]) {
             var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
             handle.setAdapter(null, AdapterHandle.STATUS.NOT_FOUND);
-            loadComplete(canvasId);
+            ResourceCounter.resolvePendingResource(uri, canvasId);
         }
     }
 }
@@ -257,69 +256,6 @@ function updateDocumentHandles(uri) {
     }
 }
 
-function getOrCreateCounterObject(canvasId) {
-    var counterObject = c_canvasIdCounters[canvasId];
-    if (!counterObject) {
-        counterObject = {counter: 0, listeners: []};
-        c_canvasIdCounters[canvasId] = counterObject;
-    }
-    return counterObject;
-}
-
-function notifyLoadCompleteListeners(counterObject) {
-    var listeners = counterObject.listeners;
-    //counterObject.listeners = new Array();
-    var i = listeners.length;
-    while (i--) {
-        listeners[i](this);
-    }
-}
-
-function loadComplete(canvasId) {
-    // notify all load complete listeners
-    var counterObject = c_canvasIdCounters[canvasId];
-    if (counterObject) {
-        XML3D.debug.assert(counterObject.counter > 0, "counter must be > 0");
-        counterObject.counter--;
-        if (counterObject.counter == 0) {
-            notifyLoadCompleteListeners(counterObject);
-        }
-    }
-}
-
-Resource.isLoadComplete = function(canvasId) {
-    return !c_canvasIdCounters[canvasId] || c_canvasIdCounters[canvasId].counter == 0;
-};
-
-/*
- * Register listener that will be fired when all resources for specified canvasId are loaded.
- * Listener is fired only once.
- *
- * @param {number} canvasId
- * @param {EventListener} listener
- */
-Resource.addLoadCompleteListener = function(canvasId, listener) {
-    var counterObject = getOrCreateCounterObject(canvasId);
-    var idx = counterObject.listeners.indexOf(listener);
-    if (idx == -1) {
-        counterObject.listeners.push(listener);
-    }
-};
-
-/**
- *
- * @param {number} canvasId
- * @param {function} listener
- */
-Resource.removeLoadCompleteListener = function(canvasId, listener) {
-    var counterObject = c_canvasIdCounters[canvasId];
-    if (counterObject) {
-        var idx = counterObject.listeners.indexOf(listener);
-        if (idx != -1)
-            counterObject.listeners.splice(idx, 1);
-    }
-};
-
 /**
  * This function is called to load an Image.
  *
@@ -332,16 +268,16 @@ Resource.removeLoadCompleteListener = function(canvasId, listener) {
  */
 Resource.getImage = function(uri, loadListener, errorListener) {
     // we use canvasId 0 to represent images loaded in a document
-    getOrCreateCounterObject(0).counter++;
+    ResourceCounter.addPendingResource(uri, 0);
 
     var image = new Image();
     image.onload = function(e) {
         loadListener(e, image);
-        loadComplete(0);
+        ResourceCounter.resolvePendingResource(uri, 0);
     };
     image.onerror = function(e) {
         errorListener(e, image);
-        loadComplete(0);
+        ResourceCounter.resolvePendingResource(uri, 0);
     };
     if(!uri.hasSameOrigin(document.location.href)) {
         image.crossOrigin = Options.getValue(OPTION_RESOURCE_CORS);
@@ -364,13 +300,13 @@ Resource.getImage = function(uri, loadListener, errorListener) {
  */
 Resource.getVideo = function(uri, autoplay, loop, muted, listeners) {
     // we use canvasId 0 to represent videos loaded in a document
-    getOrCreateCounterObject(0).counter++;
+    ResourceCounter.addPendingResource(uri, 0);
 
     // FIXME: In HTML, we create a configured video, play/pause won't work
     var video = document.createElement("video");
 
     var loadCompleteCallback = function(event) {
-        loadComplete(0);
+        ResourceCounter.resolvePendingResource(uri, 0);
         video.removeEventListener("canplay", loadCompleteCallback, true);
         video.removeEventListener("error", loadCompleteCallback, true);
     };

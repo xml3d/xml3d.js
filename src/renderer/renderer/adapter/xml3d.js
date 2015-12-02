@@ -2,7 +2,7 @@ var RenderAdapter = require("./base.js");
 var Utils = require("../utils.js");
 var Events = require("../../../interface/notification.js");
 var dispatchCustomEvent = require("../../../utils/misc.js").dispatchCustomEvent;
-var Resource = require("../../../resource/resource-coordinator.js");
+var ResourceCounter = require("../../../resource/resource-counter.js");
 
 var XML3DRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
@@ -42,16 +42,16 @@ XML3D.createClass(XML3DRenderAdapter, RenderAdapter, {
         // emit load event when all resources currently loading are completed
         var callback = this.onLoadComplete.bind(this);
         // register callback for canvasId == 0 i.e. global resources
-        Resource.addLoadCompleteListener(0, callback);
+        ResourceCounter.addLoadCompleteListener(0, callback);
         // register callback for canvasId of this node
-        Resource.addLoadCompleteListener(this.factory.canvasId, callback);
+        ResourceCounter.addLoadCompleteListener(this.factory.canvasId, callback);
         this.onLoadComplete();
     },
 
     /* Interface methods */
 
     onLoadComplete: function (canvasId) {
-        if (Resource.isLoadComplete(0) && Resource.isLoadComplete(this.factory.canvasId)) {
+        if (ResourceCounter.isLoadComplete(0) && ResourceCounter.isLoadComplete(this.factory.canvasId)) {
             this.fireLoadEventAfterDraw = true;
         }
     },
@@ -68,7 +68,7 @@ XML3D.createClass(XML3DRenderAdapter, RenderAdapter, {
     getComplete: function () {
         if (this.fireLoadEventAfterDraw) return false;
         if (!this.firstLoadFired) return false;
-        return Resource.isLoadComplete(0) && Resource.isLoadComplete(this.factory.canvasId);
+        return ResourceCounter.isLoadComplete(0) && ResourceCounter.isLoadComplete(this.factory.canvasId);
     },
 
     getWorldBoundingBox: function () {

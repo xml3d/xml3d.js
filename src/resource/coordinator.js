@@ -252,6 +252,7 @@ function updateDocumentHandles(uri) {
     }
 }
 
+
 /**
  * This function is called to load an Image.
  *
@@ -267,22 +268,25 @@ Resource.getImage = function(uri, loadListener, errorListener) {
     ResourceCounter.addPendingResource(uri, 0);
 
     var image = new Image();
+    if(!uri.hasSameOrigin(document.location.href)) {
+        image.crossOrigin = Options.getValue(OPTION_RESOURCE_CORS);
+    }
+
     image.onload = function(e) {
         loadListener(e, image);
         ResourceCounter.resolvePendingResource(uri, 0);
     };
     image.onerror = function(e) {
+        if (image.crossOrigin) {
+            XML3D.debug.logWarning("May have attempted to use a cross-origin texture without proper cross-origin handling. More information can be found at https://github.com/xml3d/xml3d.js/issues/164");
+        }
         errorListener(e, image);
         ResourceCounter.resolvePendingResource(uri, 0);
     };
-    if(!uri.hasSameOrigin(document.location.href)) {
-        image.crossOrigin = Options.getValue(OPTION_RESOURCE_CORS);
-    }
 
     image.src = uri.toString(); // here loading starts
     return image;
 };
-
 
 /**
  * This function is called to load a Video.
@@ -300,16 +304,19 @@ Resource.getVideo = function(uri, autoplay, loop, muted, listeners) {
 
     // FIXME: In HTML, we create a configured video, play/pause won't work
     var video = document.createElement("video");
+    if (!uri.hasSameOrigin(document.location.href)) {
+        video.crossOrigin = Options.getValue(OPTION_RESOURCE_CORS);
+    }
 
     var loadCompleteCallback = function(event) {
+        if (video.crossOrigin && event.type === "error") {
+            XML3D.debug.logWarning("May have attempted to use a cross-origin texture without proper cross-origin handling. More information can be found at https://github.com/xml3d/xml3d.js/issues/164");
+        }
         ResourceCounter.resolvePendingResource(uri, 0);
         video.removeEventListener("canplay", loadCompleteCallback, true);
         video.removeEventListener("error", loadCompleteCallback, true);
     };
 
-    if (!uri.hasSameOrigin(document.location.href)) {
-        video.crossOrigin = Options.getValue(OPTION_RESOURCE_CORS);
-    }
 
     video.autoplay = autoplay;
     video.loop = loop;

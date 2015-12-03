@@ -229,8 +229,12 @@ function resolveMutations(mutations){
 
         } else if (mutation.type == 'attributes') {
             var mutationTarget = mutation.target;
-            if (mutation.attributeName === "id" || mutation.attributeName === "class")
-                mutationTarget = mutation.target.parentNode;
+            if (mutation.attributeName === "id" || mutation.attributeName === "class") {
+                mutationTarget = mutation.target.parentNode; // Start CSS re-eval at parent to honor sibling selectors
+                if (!mutationTarget) {
+                    continue; // Target was removed from the DOM before this event was processed
+                }
+            }
             var cssTarget = mutationTarget._configured ? mutationTarget : mutationTarget.querySelector("xml3d");
             if(cssTarget && cssTarget._configured) { // xml3d is a child node
                 var adaptersNames = Object.keys(cssTarget._configured.adapters).filter(function(a) {

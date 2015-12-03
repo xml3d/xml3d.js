@@ -9,7 +9,7 @@ var c_requestHooks = [];    // Request hooks called for each outgoing request
 var c_formatHandlers = [];  // All registered FormatHandler plugins
 var c_requestQueue = [];    // Requests that haven't been sent out yet
 var c_openRequests = 0;     // Number of requests that are currently waiting on a response
-window.c_cachedDocuments = {}; //TODO: Currently global during refactoring, make local when ResourceManager is refactored
+var c_cachedDocuments = {}; // Already received and processed resources, indexed by URL without the fragment
 
 var RequestAbortedException = function(url) {
     this.message = "Request was aborted by an onRequest listener.";
@@ -194,6 +194,10 @@ Resource.getAbsoluteURI = function(baseURI, uri){
         uri = uri.getAbsoluteURI(baseURI);
     }
     return uri;
+};
+
+Resource.getDocumentCache = function(urlString) {
+    return c_cachedDocuments[urlString];
 };
 
 module.exports = Resource;

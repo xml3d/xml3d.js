@@ -4,6 +4,7 @@ var URI = require("../utils/uri.js").URI;
 var URIResolver = require("../utils/uri.js").URIResolver;
 var Options = require("../utils/options.js");
 var ResourceCounter = require("./counter.js");
+var getDocumentCache = require("./fetcher.js").getDocumentCache;
 
 var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
 Options.register(OPTION_RESOURCE_CORS, "anonymous");
@@ -132,14 +133,14 @@ var createAdapterHandle = function(uri, aspect, canvasId) {
         ResourceCounter.addPendingResource(uri, canvasId);
 
         var docURI = uri.toStringWithoutFragment();
-        var docData = c_cachedDocuments[docURI];
+        var docData = getDocumentCache(docURI);
         if (docData && docData.document) {
             updateExternalHandles(uri, docData);
         } else {
             var priority = aspect === "scene" ? 1 : 0; //Give materials a higher priority
             XML3D.resource.getDocument(docURI, {priority : priority}).then(function(doc) {
                 if (doc) {
-                    docData = c_cachedDocuments[docURI];
+                    docData = getDocumentCache(docURI);
                     docData.fragments.push(uri.fragment);
                     updateDocumentHandles(docURI);
                 } else {
@@ -227,7 +228,7 @@ function invalidateHandles(uri) {
  */
 function invalidateDocumentHandles(uri) {
     var url = uri.toStringWithoutFragment();
-    var docCache = c_cachedDocuments[url];
+    var docCache = getDocumentCache(url);
     if (!docCache) {
         // The document was never loaded
         invalidateHandles(uri);
@@ -246,7 +247,7 @@ function invalidateDocumentHandles(uri) {
  */
 function updateDocumentHandles(uri) {
     var url = uri.toString();
-    var docCache = c_cachedDocuments[url];
+    var docCache = getDocumentCache(url);
     var fragments = docCache.fragments;
     docCache.fragments = [];
     var tempUri = new URI(uri);

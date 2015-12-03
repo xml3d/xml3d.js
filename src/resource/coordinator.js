@@ -22,11 +22,6 @@ var Resource = {};
  * @param {string} newId New id of element
  */
 Resource.notifyNodeIdChange = function(node, previousId, newId) {
-    var parent = node;
-    while (parent.parentNode) parent = parent.parentNode;
-    if (parent != window.document) //TODO: This is broken if the node was recently removed from the DOM
-        return;
-
     var uri = new URI();
     if (previousId) {
         uri.fragment = previousId;

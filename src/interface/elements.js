@@ -90,24 +90,15 @@ function handleNodeRemoved(node, mutation) {
     if(node._configured) {
         n.type = events.THIS_REMOVED;
         removeRecursive(node, n);
-        notifyNodeIdChangeRecursive(node);
     } else if (node.nodeType === Node.TEXT_NODE){
         // This may have been the value of eg. a float3 element, we should also treat it as a characterDataChanged event
         handleCharacterDataChanged(mutation);
     }
 }
 
-function notifyNodeIdChangeRecursive(element){
-    Resource.notifyNodeIdChange(element, element.id, null);
-    var n = element.firstElementChild;
-    while(n) {
-        notifyNodeIdChangeRecursive(n);
-        n = n.nextElementSibling;
-    }
-}
-
 function removeRecursive(element, evt) {
     if(element._configured) {
+        Resource.notifyNodeIdChange(element, element.id, null);
         element._configured.notify(evt);
         element._configured.remove(evt);
     }

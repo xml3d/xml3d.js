@@ -12,7 +12,7 @@ var c_openRequests = 0;     // Number of requests that are currently waiting on 
 window.c_cachedDocuments = {}; //TODO: Currently global during refactoring, make local when ResourceManager is refactored
 
 var RequestAbortedException = function(url) {
-    this.message = "Request was aborted.";
+    this.message = "Request was aborted by an onRequest listener.";
     this.url = url;
     this.toString = function() {
         return "Failed to load "+this.url+": "+this.message;
@@ -163,6 +163,7 @@ var initOptions = function(opt) {
     opt = opt || {};
     opt.headers = opt.headers || {};
     opt.priority = opt.priority || 0;
+    opt.abort = opt.abort || false;
     return opt;
 };
 

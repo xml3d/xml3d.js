@@ -9,7 +9,7 @@ var c_requestHooks = [];    // Request hooks called for each outgoing request
 var c_formatHandlers = [];  // All registered FormatHandler plugins
 var c_requestQueue = [];    // Requests that haven't been sent out yet
 var c_openRequests = 0;     // Number of requests that are currently waiting on a response
-var c_cachedDocuments = {}; // Already received and processed resources, indexed by URL without the fragment
+var c_cachedDocuments = new Map(); // Already received and processed resources, indexed by URL without the fragment
 
 var RequestAbortedException = function(url) {
     this.message = "Request was aborted by an onRequest listener.";
@@ -86,21 +86,22 @@ Resource.getDocument = function(urlString, opt) {
                 }
                 response.originalURL = urlString;
                 var cache;
-                if (cache = c_cachedDocuments[urlString]) {
+                if (cache = c_cachedDocuments.get(urlString)) {
                     return cache.pending ? cache.pending : cache.document;
                 } else {
-                    cache = c_cachedDocuments[urlString] = { fragments : [] };
+                    cache = { fragments : [] };
+                    c_cachedDocuments.set(urlString, cache); // Resource.parseResponse expects this entry to exist already
                     cache.pending = Resource.parseResponse(response);
                     return cache.pending;
                 }
             }).then(function(doc) {
                 doc._documentURL = urlString;
-                var cache = c_cachedDocuments[urlString];
+                var cache = c_cachedDocuments.get(urlString);
                 cache.document = doc;
                 delete cache.pending;
                 resolve(doc);
             }).catch(function(exception) {
-                c_cachedDocuments[urlString] && delete c_cachedDocuments[urlString].pending;
+                c_cachedDocuments.has(urlString) && delete c_cachedDocuments.get(urlString).pending;
                 reject(exception);
             });
 
@@ -119,7 +120,7 @@ Resource.parseResponse = function(response) {
             }
 
             if (isSupported) {
-                c_cachedDocuments[response.originalURL].handler = fh;
+                c_cachedDocuments.get(response.originalURL).handler = fh;
                 fh.getFormatData(response, resolve);
                 break;
             }
@@ -197,7 +198,7 @@ Resource.getAbsoluteURI = function(baseURI, uri){
 };
 
 Resource.getDocumentCache = function(urlString) {
-    return c_cachedDocuments[urlString];
+    return c_cachedDocuments.get(urlString);
 };
 
 module.exports = Resource;

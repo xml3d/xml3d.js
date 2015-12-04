@@ -27,13 +27,13 @@ function displayWebGLNotSupportedInfo(xml3dElement){
     var doDefault = XML3D.util.dispatchCustomEvent(xml3dElement, 'unsupported', false, true, null);
     if(doDefault){
         // Place xml3dElement inside an invisible div
-        var hideDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
+        var hideDiv = document.createElement('div');
 
         xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
         hideDiv.appendChild(xml3dElement);
         //hideDiv.style.display = "none";
 
-        var infoDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
+        var infoDiv = document.createElement('div');
         if(xml3dElement.hasAttribute("class")){
             infoDiv.setAttribute("class", xml3dElement.getAttribute("class"));
         }

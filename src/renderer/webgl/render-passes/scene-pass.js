@@ -105,12 +105,12 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
 
                 primitiveCount += mesh.draw(program);
                 objCount++;
-
-                if (transparent) {
-                    gl.disable(gl.BLEND);
-                }
-
             }
+
+            if (transparent) {
+                gl.disable(gl.BLEND);
+            }
+
             program.changeUniformVariableOverride(prevOverride, null);
 
             program.unbind();

@@ -58,10 +58,13 @@ XML3D.extend(ForwardRenderPass.prototype, {
                     });
                 }
                 if (sorted.transparent[zLayer].length) {
-                    this.renderObjectsToActiveBuffer(sorted.transparent[zLayer], scene, target, systemUniforms, c_programSystemUniforms, {
-                        transparent: true,
-                        stats: count
-                    });
+                    for (var k = 0; k < sorted.transparent[zLayer].length; k++) {
+                        var objectArray = [sorted.transparent[zLayer][k]];
+                        this.renderObjectsToActiveBuffer(objectArray, scene, target, systemUniforms, c_programSystemUniforms, {
+                            transparent: true,
+                            stats: count
+                        });
+                    }
                 }
             }
 

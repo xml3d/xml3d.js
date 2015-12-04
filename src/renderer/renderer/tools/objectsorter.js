@@ -42,8 +42,11 @@ XML3D.extend(ObjectSorter.prototype, {
 
         // Separate the scene into z-layers according to z-index
         var zLayers = Object.keys(presortOpaque).concat(Object.keys(presortTransparent));
-        zLayers.sort(function(a,b) {
+        zLayers = zLayers.sort(function(a,b) {
             return a.localeCompare(b);
+        }).filter(function(item, pos, ary) {
+            // Remove duplicates
+            return !pos || item != ary[pos - 1];
         });
 
         // Sort opaque z-buckets by shader

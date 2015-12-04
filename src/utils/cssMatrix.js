@@ -778,17 +778,15 @@ FirminCSSMatrix.prototype.setMatrixValue = function(domstr) {
         XML3D.debug.logError("Invalid CSS Matrix: ", domstr);
         return;
     }
-
-    for (i = 0; i < len; i++) {
-        chunk = chunks[i];
-        if (chunk.match(/^-?\d+(\.\d+)?$/)) {
+    try {
+        for (i = 0; i < len; i++) {
+            chunk = chunks[i];
             points[i] = parseFloat(chunk);
-        } else {
-            XML3D.debug.logError("Invalid CSS Matrix: ", domstr);
-            return;
         }
+    } catch(e) {
+        XML3D.debug.logError("Invalid CSS Matrix: ", domstr);
+        return;
     }
-
     for (i = 0; i < len; i++) {
         var point = is3d ?
         ("m" + (Math.floor(i / 4) + 1)) + (i % 4 + 1) :

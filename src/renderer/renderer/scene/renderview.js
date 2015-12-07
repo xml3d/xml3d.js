@@ -4,6 +4,10 @@ var Constants = require("./constants.js");
 var Frustum = require("../tools/frustum.js").Frustum;
 var vec3 = require("gl-matrix").vec3;
 var mat4 = require("gl-matrix").mat4;
+var Options = require("../../../utils/options.js");
+
+var OPTION_RENDERER_CLIPPLANES = "renderer-clipping-planes";
+Options.register(OPTION_RENDERER_CLIPPLANES, {});
 
 /** @const */
 var CLIPPLANE_NEAR_MIN = 0.01;
@@ -39,6 +43,7 @@ var RenderView = function (scene, pageEntry, opt) {
     this.worldSpacePosition = vec3.create();
     this.viewDirty = true;
     this.frustum = null;
+    Options.addObserver(OPTION_RENDERER_CLIPPLANES, this.userClippingPlanesChanged.bind(this));
 };
 RenderView.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -133,6 +138,7 @@ XML3D.extend(RenderView.prototype, {
     },
 
     getClippingPlanes: function(bb) {
+        var userPlanes = Options.getValue(OPTION_RENDERER_CLIPPLANES);
         if(!bb) {
             bb = new XML3D.Box();
             this.scene.getBoundingBox(bb);
@@ -147,13 +153,19 @@ XML3D.extend(RenderView.prototype, {
         var near = -bb.max.z, far = -bb.min.z, expand = Math.max((far - near) * 0.005, 0.05);
 
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
-        near = Math.max(near - expand, expand, CLIPPLANE_NEAR_MIN);
-        far = Math.max(far + expand, near + expand);
+        near = userPlanes.near ? userPlanes.near : Math.max(near - expand, expand, CLIPPLANE_NEAR_MIN);
+        far = userPlanes.far ? userPlanes.far : Math.max(far + expand, near + expand);
         return {near: near, far: far};
     },
 
     remove: function() {
         this.camera.destroy();
+    },
+
+    userClippingPlanesChanged: function() {
+        this.scene.requestRedraw("User clipping plane override");
+        this.projectionDirty = true;
+        this.viewDirty = true;
     }
 });
 

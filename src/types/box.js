@@ -187,6 +187,13 @@ Box.prototype.intersects = function(ray, opt) {
     return true;
 };
 
+Box.prototype.contains = function(point) {
+    var p = point.data ? point.data : point;
+    return this.data[0] <= p[0] && p[0] <= this.data[3] &&
+           this.data[1] <= p[1] && p[1] <= this.data[4] &&
+           this.data[2] <= p[2] && p[2] <= this.data[5];
+};
+
 Box.prototype.toString = function() {
     return 'XML3D.Box(' + this.data[0] + ', ' + this.data[1] + ', ' + this.data[2] + ', ' + this.data[3] + ', ' +
         this.data[4] + ', ' + this.data[5] + ')';

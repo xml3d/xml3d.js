@@ -70,6 +70,9 @@ function handleChildListChanged(mutation) {
 }
 
 function handleNodeInserted(node, mutation) {
+    if (!node.parentNode) {
+        return; //Node may have been subsequently removed again in a mutation event that we haven't processed yet
+    }
     var targetHandler = mutation.target._configured;
     if (!targetHandler) {
         return;

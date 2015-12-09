@@ -132,7 +132,7 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
                 this.dispose();
                 break;
             case Events.NODE_INSERTED:
-                this.initElement(evt.mutation.target);
+                this.initElement(evt.affectedNode);
                 break;
             default:
                 XML3D.debug.logDebug("Unhandled event in SceneElementAdapter:", evt);

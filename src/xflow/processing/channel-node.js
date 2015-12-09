@@ -83,10 +83,14 @@ ChannelNode.prototype.synchronize = function(){
 
 ChannelNode.prototype.clear = function(){
     this.useCount = 0;
-     this.inputChannels.clear();
-     this.outputChannels.clear();
-     // TODO: Make sure everything is cleaned up there!
-    return true;
+    this.inputChannels.clear();
+    this.outputChannels.clear();
+    delete this.owner;
+    var reqs = Object.keys(this.requestNodes);
+    for (var i = 0; i < reqs.length; i++) {
+        this.requestNodes[reqs[i]].clear();
+    }
+    this.requestNodes = {};
 };
 
 ChannelNode.prototype.increaseRef = function(){
@@ -190,7 +194,6 @@ ChannelNode.prototype.getOutputChannelInfo = function(name){
 function updatePlatform(channelNode) {
     var platform;
     var owner = channelNode.owner;
-    var graph = owner._graph;
 
     // Platforms other than JavaScript are available only for computing operators
     if(!channelNode.owner._computeOperator) {

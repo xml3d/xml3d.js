@@ -565,7 +565,6 @@ function updateAccumulatedNode(table, entry){
         return;
 
     if(entry.accumulatedXflowNode){
-        entry.accumulatedXflowNode.clear();
         entry.accumulatedXflowNode.setCompute("");
         entry.accumulatedXflowNode.setFilter("");
         entry.accumulatedXflowNode.dataflowNode = null;

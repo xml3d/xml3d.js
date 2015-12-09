@@ -63,10 +63,6 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
         }
     },
 
-    onDispose: function () {
-        this.transformFetcher && this.transformFetcher.clear();
-    },
-
     onConfigured: function () {
     },
 
@@ -90,6 +86,7 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
 
     dispose: function() {
         this.getRenderNode().remove();
+        this.transformFetcher && this.transformFetcher.dispose();
         this.clearAdapterHandles();
     },
 

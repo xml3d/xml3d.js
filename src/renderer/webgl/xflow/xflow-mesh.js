@@ -413,6 +413,7 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         this.objectShaderRequest && this.objectShaderRequest.clear();
         this.typeRequest && this.typeRequest.clear();
         this.setShaderComposer(null);
+        delete this.dataNode;
     }
 
 });

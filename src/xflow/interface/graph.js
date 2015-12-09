@@ -549,9 +549,14 @@ DataNode.prototype.clear = function(){
     this._children = [];
     this._dataflowNode && this._dataflowNode.removeParent(this);
     this._dataflowNode = null;
+    this._channelNode.decreaseRef();
     clearSubstitutionNodes(this);
     updateProgressLevel(this);
     this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    this._listeners = [];
+    delete this._userData;
+    delete this._channelNode;
+    delete this._dataflowNode;
     Base._flushResultCallbacks();
 };
 

@@ -16,7 +16,13 @@ var DOMTransformFetcher = function (owner, attrName, dataName, onlyDataTransform
 DOMTransformFetcher.prototype.clear = function () {
     this.xflowRequest && this.xflowRequest.clear();
     this.xflowRequest = null;
-    this.adapterHandle && this.adapterHandle.removeListener(this._bindedCallback)
+    this.adapterHandle && this.adapterHandle.removeListener(this._bindedCallback);
+};
+
+DOMTransformFetcher.prototype.dispose = function() {
+    this.clear();
+    delete this.owner;
+    delete this.node;
 };
 
 DOMTransformFetcher.prototype.update = function () {

@@ -100,7 +100,7 @@ function removeRecursive(element, evt) {
     if(element._configured) {
         Resource.notifyNodeIdChange(element, element.id, null);
         element._configured.notify(evt);
-        element._configured.remove(evt);
+        delete element._configured;
     }
     var child = element.firstElementChild;
     while(child) {
@@ -293,8 +293,8 @@ ElementHandler.prototype.attributeChangedCallback =  function(mutation) {
 ElementHandler.prototype.remove = function(evt) {
     for(var h in this.adapters) {
         var adapter = this.adapters[h];
-        if(adapter.onDispose)
-            adapter.onDispose();
+        if(adapter.dispose)
+            adapter.dispose();
         if(adapter.clearAdapterHandles)
             adapter.clearAdapterHandles();
     }

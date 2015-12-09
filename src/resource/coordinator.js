@@ -278,7 +278,7 @@ Resource.getImage = function(uri, loadListener, errorListener) {
     };
     image.onerror = function(e) {
         if (image.crossOrigin) {
-            XML3D.debug.logWarning("May have attempted to use a cross-origin texture without proper cross-origin handling. More information can be found at https://github.com/xml3d/xml3d.js/issues/164");
+            XML3D.debug.logIssue("May have attempted to use a cross-origin texture without proper cross-origin handling.", 164);
         }
         errorListener(e, image);
         ResourceCounter.resolvePendingResource(uri, 0);
@@ -310,7 +310,7 @@ Resource.getVideo = function(uri, autoplay, loop, muted, listeners) {
 
     var loadCompleteCallback = function(event) {
         if (video.crossOrigin && event.type === "error") {
-            XML3D.debug.logWarning("May have attempted to use a cross-origin texture without proper cross-origin handling. More information can be found at https://github.com/xml3d/xml3d.js/issues/164");
+            XML3D.debug.logIssue("May have attempted to use a cross-origin texture without proper cross-origin handling.", 164);
         }
         ResourceCounter.resolvePendingResource(uri, 0);
         video.removeEventListener("canplay", loadCompleteCallback, true);

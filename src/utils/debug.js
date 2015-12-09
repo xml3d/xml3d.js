@@ -12,18 +12,20 @@ var assert = require("assert");
         DEBUG: 1,
         INFO: 2,
         WARNING: 3,
-        ERROR: 4,
-        EXCEPTION: 5,
+        ISSUE: 4,
+        ERROR: 5,
+        EXCEPTION: 6,
         params: {},
         isSetup: false,
-        loglevel: 4,
+        loglevel: 5,
         loglevels: {
             all: 0,
             debug: 1,
             info: 2,
             warning: 3,
-            error: 4,
-            exception: 5
+            issue: 4,
+            error: 5,
+            exception: 6
         },
 
         setup: function () {
@@ -64,6 +66,11 @@ var assert = require("assert");
                     case XML3D.debug.DEBUG:
                         window.console.debug.apply(window.console, args);
                         break;
+                    case XML3D.debug.ISSUE:
+                        assert(args[1] !== undefined, "Github issue number must be specified.");
+                        var issue = args[0] + "\nMore information can be found at https://github.com/xml3d/xml3d.js/issues/" + args[1];
+                        window.console.error(issue);
+                        break;
                     default:
                         break;
                 }
@@ -80,6 +87,9 @@ var assert = require("assert");
         },
         logError: function () {
             XML3D.debug.doLog(XML3D.debug.ERROR, arguments);
+        },
+        logIssue: function() {
+            XML3D.debug.doLog(XML3D.debug.ISSUE, arguments);
         },
         logException: function () {
             XML3D.debug.doLog(XML3D.debug.EXCEPTION, arguments);

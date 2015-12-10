@@ -54,34 +54,31 @@ var popRequestQueue = function() {
 };
 
 Resource.getDocument = function(urlString, opt) {
-    return new Promise(function(resolve, reject) {
-        Resource.fetch(urlString, opt)
-            .then(function(response) {
-                if (!response.ok) {
-                    throw new RequestFailedException(response);
-                }
-                response.originalURL = urlString;
-                var cache;
-                if (cache = c_cachedDocuments.get(urlString)) {
-                    return cache.pending ? cache.pending : cache.document;
-                } else {
-                    cache = { fragments : [] };
-                    c_cachedDocuments.set(urlString, cache); // Resource.parseResponse expects this entry to exist already
-                    cache.pending = Resource.parseResponse(response);
-                    return cache.pending;
-                }
-            }).then(function(doc) {
-                doc._documentURL = urlString;
-                var cache = c_cachedDocuments.get(urlString);
-                cache.document = doc;
-                delete cache.pending;
-                resolve(doc);
-            }).catch(function(exception) {
-                c_cachedDocuments.has(urlString) && delete c_cachedDocuments.get(urlString).pending;
-                reject(exception);
-            });
-
-    });
+    return Resource.fetch(urlString, opt)
+        .then(function(response) {
+            if (!response.ok) {
+                throw new RequestFailedException(response);
+            }
+            response.originalURL = urlString;
+            var cache;
+            if (cache = c_cachedDocuments.get(urlString)) {
+                return cache.pending ? cache.pending : cache.document;
+            } else {
+                cache = { fragments : [] };
+                c_cachedDocuments.set(urlString, cache); // Resource.parseResponse expects this entry to exist already
+                cache.pending = Resource.parseResponse(response);
+                return cache.pending;
+            }
+        }).then(function(doc) {
+            doc._documentURL = urlString;
+            var cache = c_cachedDocuments.get(urlString);
+            cache.document = doc;
+            delete cache.pending;
+            return doc;
+        }).catch(function(exception) {
+            c_cachedDocuments.has(urlString) && delete c_cachedDocuments.get(urlString).pending;
+            throw exception;
+        });
 };
 
 Resource.parseResponse = function(response) {

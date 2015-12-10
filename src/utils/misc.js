@@ -128,7 +128,7 @@
     };
 
     exports.encodeZIndex = function(zIndex, isLeafNode) {
-        if (zIndex === "auto" || zIndex === "") {
+        if (zIndex === "auto" || zIndex === "" || zIndex === "0") {
             if (isLeafNode) {
                 zIndex = "0"; // Always give leaf nodes an implicit stacking context with z-index of 0 to ensure they compare properly with negative z-index leaf nodes
             } else {

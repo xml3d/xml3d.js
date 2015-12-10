@@ -51,7 +51,7 @@ test("Check onRequest hook", function() {
         ok(false, "Request should have been aborted");
         start();
     }).catch(function(e) {
-        ok(e.message == "Request was aborted by an onRequest listener.", "Request was properly aborted");
+        ok(e.name == "RequestAbortedException", "Request was properly aborted");
         start();
     });
     stop();

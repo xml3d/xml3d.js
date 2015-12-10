@@ -30,8 +30,7 @@ XML3DJSONFormatHandler.prototype.getAdapter = function(data, aspect, canvasId) {
     throw new Error("Unsupported aspect '"+aspect+"' encountered in JSON format handler.");
 };
 
-var xml3dJSonFormatHandler = new XML3DJSONFormatHandler();
-XML3D.resource.registerFormat(xml3dJSonFormatHandler);
+XML3D.resource.registerFormat(new XML3DJSONFormatHandler());
 
 
 var empty = function() {};

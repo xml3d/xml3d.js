@@ -20,8 +20,7 @@ JavaScriptFormatHandler.prototype.getAdapter = function(xflowNode, aspect, canva
     throw new Error("Unsupported aspect '"+aspect+"' encountered in JavaScript format handler.");
 };
 
-var javaScriptFormatHandler = new JavaScriptFormatHandler();
-XML3D.resource.registerFormat(javaScriptFormatHandler);
+XML3D.resource.registerFormat(new JavaScriptFormatHandler());
 
 
 var ScriptDataAdapter = function (script) {

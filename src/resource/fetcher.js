@@ -11,30 +11,6 @@ var c_requestQueue = [];    // Requests that haven't been sent out yet
 var c_openRequests = 0;     // Number of requests that are currently waiting on a response
 var c_cachedDocuments = new Map(); // Already received and processed resources, indexed by URL without the fragment
 
-var RequestAbortedException = function(url) {
-    this.message = "Request was aborted by an onRequest listener.";
-    this.url = url;
-    this.toString = function() {
-        return "Failed to load "+this.url+": "+this.message;
-    }
-};
-
-var ResponseBodyUsedException = function(response) {
-    this.message = "The body of the Response was read prematurely.";
-    this.url = response.url;
-    this.toString = function() {
-        return "Failed to process "+this.url+": "+this.message;
-    }
-};
-
-var RequestFailedException = function(response) {
-    this.message = "The request failed with status code "+response.status;
-    this.response = response;
-    this.toString = function() {
-        return this.message;
-    }
-};
-
 var Resource = {};
 
 Resource.registerFormat = function(formatHandler) {
@@ -199,6 +175,35 @@ Resource.getAbsoluteURI = function(baseURI, uri){
 Resource.getDocumentCache = function(urlString) {
     return c_cachedDocuments.get(urlString);
 };
+
+
+function RequestAbortedException(url) {
+    this.name = "RequestAbortedException";
+    this.message = "Request was aborted by an onRequest listener: "+url;
+    this.url = url;
+    this.stack = (new Error()).stack;
+}
+RequestAbortedException.prototype = Object.create(Error.prototype);
+RequestAbortedException.prototype.constructor = RequestAbortedException;
+
+function ResponseBodyUsedException(response) {
+    this.name = "ResponseBodyUsedException";
+    this.message = "The body of the Response was read prematurely.";
+    this.response = response;
+    this.stack = (new Error()).stack;
+}
+ResponseBodyUsedException.prototype = Object.create(Error.prototype);
+ResponseBodyUsedException.prototype.constructor = ResponseBodyUsedException;
+
+function RequestFailedException(response) {
+    this.name = "RequestFailedException";
+    this.message = "The request failed with status code "+response.status;
+    this.response = response;
+    this.stack = (new Error()).stack;
+}
+RequestFailedException.prototype = Object.create(Error.prototype);
+RequestFailedException.prototype.constructor = RequestFailedException;
+
 
 module.exports = Resource;
 

@@ -142,7 +142,7 @@ var createAdapterHandle = function(uri, aspect, canvasId) {
                     invalidateDocumentHandles(uri);
                 }
             }).catch(function(e) {
-                XML3D.debug.logError(e.toString());
+                XML3D.debug.logError(e);
                 invalidateDocumentHandles(uri);
             });
         }

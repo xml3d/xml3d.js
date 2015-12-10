@@ -9,8 +9,8 @@ JavaScriptFormatHandler.prototype.isFormatSupported = function (response) {
 };
 
 
-JavaScriptFormatHandler.prototype.getFormatData = function (response, callback) {
-    response.text().then(callback);
+JavaScriptFormatHandler.prototype.getFormatData = function (response) {
+    return response.text();
 };
 
 JavaScriptFormatHandler.prototype.getAdapter = function(xflowNode, aspect, canvasId) {

@@ -23,8 +23,8 @@ XML3DFormatHandler.prototype.isFormatSupported = function (response) {
     }
 };
 
-XML3DFormatHandler.prototype.getFormatData = function (response, callback) {
-    response.text().then(function(responseText) {
+XML3DFormatHandler.prototype.getFormatData = function (response) {
+    return response.text().then(function(responseText) {
         var parser = new DOMParser();
         var doc = parser.parseFromString(responseText, "text/xml");
 
@@ -32,7 +32,7 @@ XML3DFormatHandler.prototype.getFormatData = function (response, callback) {
         for (var i = 0; i < xml3dElements.length; ++i) {
             config.element(xml3dElements[i]);
         }
-        callback(doc);
+        return doc;
     });
 };
 

@@ -83,23 +83,44 @@ Resource.getDocument = function(urlString, opt) {
 
 Resource.parseResponse = function(response) {
     return new Promise(function(resolve, reject) {
-        for (var ind in c_formatHandlers) {
-            var fh = c_formatHandlers[ind];
-            var isSupported = fh.isFormatSupported(response);
+        var handlerCandidates = c_formatHandlers.filter(function(handler) {
+            return handler.isFormatSupported(response);
+        });
 
-            if (response.bodyUsed) {
-                XML3D.debug.logError("FormatHandlers should not access the response body in the isFormatSupported function without first cloning the response object!");
-                reject(ResponseBodyUsedException(response));
-            }
+        if (response.bodyUsed) {
+            XML3D.debug.logError("FormatHandlers should not access the response body in the isFormatSupported function without first cloning the response object!");
+            reject(new ResponseBodyUsedException(response));
+        }
 
-            if (isSupported) {
+        if (handlerCandidates.length == 1) {
+            //Special case to avoid unnecessary cloning of the response
+            handlerCandidates[0].getFormatData(response).then(function(doc) {
+                c_cachedDocuments.get(response.originalURL).handler = handlerCandidates[0];
+                resolve(doc);
+            });
+        } else {
+            tryFormatHandlers(c_formatHandlers, response, function(fh, doc) {
                 c_cachedDocuments.get(response.originalURL).handler = fh;
-                fh.getFormatData(response, resolve);
-                break;
-            }
+                resolve(doc);
+            });
         }
     })
 };
+
+function tryFormatHandlers(candidates, response, callback) {
+    (function tryNextHandler(index) {
+        if (index >= candidates.length) {
+            // Reached the end of the array
+            throw new TypeError("No FormatHandler could be found for the document "+response.url);
+        }
+        var fh = candidates[index];
+        fh.getFormatData(response.clone()).then(function(doc) {
+            callback(fh, doc);
+        }).catch(function(e) {
+            tryNextHandler(++index);
+        })
+    })(0);
+}
 
 Resource.onRequest = function(callback) {
     c_requestHooks.push(callback);

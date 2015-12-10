@@ -19,8 +19,8 @@ XML3DJSONFormatHandler.prototype.isFormatSupported = function(response) {
 };
 
 
-XML3DJSONFormatHandler.prototype.getFormatData = function(response, callback) {
-    response.json().then(callback);
+XML3DJSONFormatHandler.prototype.getFormatData = function(response) {
+    return response.json();
 };
 
 XML3DJSONFormatHandler.prototype.getAdapter = function(data, aspect, canvasId) {

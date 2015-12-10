@@ -31,8 +31,8 @@ FormatHandler.prototype.isFormatSupported = function (response) {
  * @param {function} callback
  * @return {Object}
  */
-FormatHandler.prototype.getFormatData = function (response, callback) {
-    callback(response);
+FormatHandler.prototype.getFormatData = function (response) {
+    return Promise.resolve(response);
 };
 
 /**

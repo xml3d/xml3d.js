@@ -99,7 +99,7 @@ Resource.parseResponse = function(response) {
                 resolve(doc);
             });
         } else {
-            tryFormatHandlers(c_formatHandlers, response, function(fh, doc) {
+            tryFormatHandlers(handlerCandidates, response, function(fh, doc) {
                 c_cachedDocuments.get(response.originalURL).handler = fh;
                 resolve(doc);
             });

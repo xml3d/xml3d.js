@@ -13,7 +13,7 @@ var c_cachedDocuments = new Map(); // Already received and processed resources, 
 
 var Resource = {};
 
-Resource.registerFormat = function(formatHandler) {
+Resource.registerFormatHandler = function(formatHandler) {
     if (formatHandler)
         c_formatHandlers.push(formatHandler);
 };

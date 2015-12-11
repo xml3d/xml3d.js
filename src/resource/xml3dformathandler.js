@@ -67,7 +67,7 @@ XML3DFormatHandler.prototype.getFactory = function(aspect, canvasId) {
 };
 
 var xml3dFormatHandler = new XML3DFormatHandler();
-XML3D.resource.registerFormat(xml3dFormatHandler);
+XML3D.resource.registerFormatHandler(xml3dFormatHandler);
 XML3D.xml3dFormatHandler = xml3dFormatHandler;
 
 module.exports = {

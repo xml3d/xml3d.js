@@ -2,7 +2,7 @@
 /**
  * A format handler is provide functionality for detecting format of resources
  * and providing format-specific services.
- * FormatHandlers are registered with XML3D.resource.registerFormat() function.
+ * FormatHandlers are registered with XML3D.resource.registerFormatHandler() function.
  * @constructor
  */
 var FormatHandler = function() {

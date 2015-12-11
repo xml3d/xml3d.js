@@ -21,42 +21,6 @@ test("Check onload", function() {
     equal(this.doc.onloadCounter, 3, "Correct number of loaded xml3d elements");
 });
 
-
-test("Check onRequest hook", function() {
-    var xml3d = this.doc.XML3D;
-    var hookTestDone = false;
-    var hook = function(uri, request) {
-        if (hookTestDone)
-            return;
-        ok(true, "Request hook was called");
-        ok(uri instanceof xml3d.resource.URI, "URI was provided");
-        ok(request.headers !== undefined &&
-            request.priority !== undefined &&
-            request.abort !== undefined, "Request object contained the expected fields");
-        hookTestDone = true;
-    };
-    this.doc.XML3D.resource.onRequest(hook);
-
-    var abortHook = function(uri, request) {
-        if (uri.fragment == "abortThisRequest") {
-            request.abort = true;
-        }
-    };
-    this.doc.XML3D.resource.onRequest(abortHook);
-
-    xml3d.resource.fetch("json/offsets.json").then(function(response) {
-        ok(response !== undefined, "Request was completed");
-    });
-    xml3d.resource.fetch("json/offsets.json#abortThisRequest").then(function(doc) {
-        ok(false, "Request should have been aborted");
-        start();
-    }).catch(function(e) {
-        ok(e.name == "RequestAbortedException", "Request was properly aborted");
-        start();
-    });
-    stop();
-});
-
 module("Scene Loading", {
     setup : function() {
         stop();

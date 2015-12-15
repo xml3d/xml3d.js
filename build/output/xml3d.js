@@ -20,7 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-@version: 5.0.2
+@version: 5.0.3
 **/
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
@@ -12614,7 +12614,7 @@ var Xflow = Xflow || {};
 window.XML3D = XML3D;
 window.Xflow = Xflow;
 
-XML3D.version = '5.0.2';
+XML3D.version = '5.0.3';
 /** @const */
 XML3D.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
 /** @const */
@@ -12626,7 +12626,8 @@ XML3D._parallel = XML3D._parallel != undefined ? XML3D._parallel : false;
 XML3D.xhtml = !!(document.doctype && new XMLSerializer().serializeToString(document.doctype).match(/xhtml/i));
 
 XML3D.createElement = function(tagName) {
-    return document.createElementNS(XML3D.xml3dNS, tagName);
+    XML3D.debug.logWarning("This function is deprecated and will be removed in the next major release. Use document.createElement instead.");
+    return document.createElement(tagName);
 };
 
 XML3D.extend = assign;
@@ -12724,13 +12725,13 @@ function displayWebGLNotSupportedInfo(xml3dElement){
     var doDefault = XML3D.util.dispatchCustomEvent(xml3dElement, 'unsupported', false, true, null);
     if(doDefault){
         // Place xml3dElement inside an invisible div
-        var hideDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
+        var hideDiv = document.createElement('div');
 
         xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
         hideDiv.appendChild(xml3dElement);
         //hideDiv.style.display = "none";
 
-        var infoDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
+        var infoDiv = document.createElement('div');
         if(xml3dElement.hasAttribute("class")){
             infoDiv.setAttribute("class", xml3dElement.getAttribute("class"));
         }
@@ -12926,8 +12927,12 @@ function resolveMutations(mutations){
 
         } else if (mutation.type == 'attributes') {
             var mutationTarget = mutation.target;
-            if (mutation.attributeName === "id" || mutation.attributeName === "class")
-                mutationTarget = mutation.target.parentNode;
+            if (mutation.attributeName === "id" || mutation.attributeName === "class") {
+                mutationTarget = mutation.target.parentNode; // Start CSS re-eval at parent to honor sibling selectors
+                if (!mutationTarget) {
+                    continue; // Target was removed from the DOM before this event was processed
+                }
+            }
             var cssTarget = mutationTarget._configured ? mutationTarget : mutationTarget.querySelector("xml3d");
             if(cssTarget && cssTarget._configured) { // xml3d is a child node
                 var adaptersNames = Object.keys(cssTarget._configured.adapters).filter(function(a) {
@@ -26529,6 +26534,13 @@ Box.prototype.intersects = function(ray, opt) {
     return true;
 };
 
+Box.prototype.contains = function(point) {
+    var p = point.data ? point.data : point;
+    return this.data[0] <= p[0] && p[0] <= this.data[3] &&
+           this.data[1] <= p[1] && p[1] <= this.data[4] &&
+           this.data[2] <= p[2] && p[2] <= this.data[5];
+};
+
 Box.prototype.toString = function() {
     return 'XML3D.Box(' + this.data[0] + ', ' + this.data[1] + ', ' + this.data[2] + ', ' + this.data[3] + ', ' +
         this.data[4] + ', ' + this.data[5] + ')';
@@ -28789,17 +28801,15 @@ FirminCSSMatrix.prototype.setMatrixValue = function(domstr) {
         XML3D.debug.logError("Invalid CSS Matrix: ", domstr);
         return;
     }
-
-    for (i = 0; i < len; i++) {
-        chunk = chunks[i];
-        if (chunk.match(/^-?\d+(\.\d+)?$/)) {
+    try {
+        for (i = 0; i < len; i++) {
+            chunk = chunks[i];
             points[i] = parseFloat(chunk);
-        } else {
-            XML3D.debug.logError("Invalid CSS Matrix: ", domstr);
-            return;
         }
+    } catch(e) {
+        XML3D.debug.logError("Invalid CSS Matrix: ", domstr);
+        return;
     }
-
     for (i = 0; i < len; i++) {
         var point = is3d ?
         ("m" + (Math.floor(i / 4) + 1)) + (i % 4 + 1) :

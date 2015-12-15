@@ -22,7 +22,8 @@ XML3D._parallel = XML3D._parallel != undefined ? XML3D._parallel : false;
 XML3D.xhtml = !!(document.doctype && new XMLSerializer().serializeToString(document.doctype).match(/xhtml/i));
 
 XML3D.createElement = function(tagName) {
-    return document.createElementNS(XML3D.xml3dNS, tagName);
+    XML3D.debug.logWarning("This function is deprecated and will be removed in the next major release. Use document.createElement instead.");
+    return document.createElement(tagName);
 };
 
 XML3D.extend = assign;

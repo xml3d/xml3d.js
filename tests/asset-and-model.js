@@ -38,6 +38,30 @@ test("Modify material assignment", 5, function () {
 
 });
 
+test("Modify visibility", function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/asset-basic.html");
+
+    var test = frameLoaded.then(function (doc) {
+        var xTest = doc.getElementById("xml3dTest");
+        var mm1 = doc.getElementById("mm1");
+        var override = doc.createElement("assetmesh");
+        override.setAttribute("name", "mesh1");
+        override.setAttribute("id", "mesh1Override");
+        override.setAttribute("style", "display: none");
+        mm1.appendChild(override);
+        return xTest;
+    }).then(promiseSceneRendered).then(function (s) {
+        QUnit.closePixel(XML3DUnit.getPixelValue(getContextForXml3DElement(s), 248, 151), [0,0,0,0], PIXEL_EPSILON, "Assetmesh visibility was overridden");
+        s.querySelector("#mesh1Override").setAttribute("style", "display: notnone");
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        QUnit.closePixel(XML3DUnit.getPixelValue(getContextForXml3DElement(s), 248, 151), [255, 127, 127, 255], PIXEL_EPSILON, "Assetmesh responded to change in visibility");
+        return s;
+    });
+    test.fin(QUnit.start).done();
+});
+
 
 test("Modify asset pick", 5, function () {
     stop();

@@ -212,7 +212,7 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
                 data: meshSets[i].xflowNode, type: meshSets[i].type
             },
             name: adapter.node.id,
-            visible: true
+            visible: meshSets[i].visible
         });
         renderNode.setLocalMatrix(meshSets[i].transform || c_IDENTITY);
         renderNode.setMaterial(adapter.getMaterialConfiguration(meshSets[i].material, adapter._subRenderNodes.length));

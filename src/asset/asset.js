@@ -237,6 +237,7 @@ var SubData = function(xflowNodeOut, xflowNodeIn, refNode){
     this.material = null;
     this.transform = null;
     this.meshType = null;
+    this.visible = true;
     this.assetParent = null;
     this.loading = false;
     this.loadLevel = 0;
@@ -343,6 +344,10 @@ SubData.prototype.setMeshType = function(meshType){
     invalidateParent(this);
 };
 
+SubData.prototype.setVisibility = function(isVisible) {
+    this.visible = isVisible;
+    invalidateParent(this);
+};
 function invalidateParent(subData){
     if(subData.assetParent){
         invalidateAsset(subData.assetParent);
@@ -544,6 +549,7 @@ function rec_getDataTree(table){
                 type: entry.meshType,
                 material: entry.material,
                 transform: entry.transform,
+                visible: entry.visible,
                 refNode: entry.refNode
             });
         }
@@ -649,6 +655,7 @@ function AssetTableEntry (subData){
     this.postQueue = [];
     this.material = null;
     this.transform = null;
+    this.visible = true;
 
     this.accumulatedXflowNode = null;
     this.outOfSync = true;
@@ -695,6 +702,7 @@ AssetTableEntry.prototype.pushTableEntry = function(srcEntry){
     this.name = srcEntry.name;
     Set.add(this.classNames, srcEntry.classNames);
     if(srcEntry.meshType) this.meshType = srcEntry.meshType;
+    if(srcEntry.visible !== undefined) this.visible = srcEntry.visible;
 
     if(srcEntry.transform) this.transform = combineTransform(this.transform, srcEntry.transform);
     if(srcEntry.material) this.material = srcEntry.material;
@@ -718,6 +726,7 @@ AssetTableEntry.prototype.pushPostEntry = function(subData){
     Set.add(this.classNames, subData.classNames);
     if(subData.meshType) this.meshType = subData.meshType;
     if(subData.material) this.material = subData.material;
+    if(subData.visible !== undefined) this.visible = subData.visible;
     if(subData.transform) this.transform = combineTransform(this.transform, subData.transform);
 };
 

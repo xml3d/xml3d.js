@@ -52,6 +52,15 @@
             </float4x4>
         </data>
 
+        <data id="t2">
+            <float4x4 name="transform">
+                1.5 0 0 0
+                0 1.5 0 0
+                0 0 1 0
+                0 0 0 1
+            </float4x4>
+        </data>
+
 
         <asset id="asset1">
             <assetmesh name="mesh1" type="triangles" material="#redmaterial">
@@ -93,7 +102,7 @@
 
         <group style="transform: translateX(-5px)">
             <model id="mm2" src="#asset2">
-                <assetmesh name="mesh2" material="#greenmaterial" id="outerSubData">
+                <assetmesh id="toverride" name="mesh2" material="#greenmaterial" id="outerSubData">
                      <int name="index">0 1 2</int>
                 </assetmesh>
             </model>

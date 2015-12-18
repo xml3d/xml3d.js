@@ -20,7 +20,14 @@ XML3DJSONFormatHandler.prototype.isFormatSupported = function(response) {
 
 
 XML3DJSONFormatHandler.prototype.getFormatData = function(response) {
-    return response.json();
+    return response.json().then(function(json) {
+        if (json.format != "xml3d-json")
+            throw new Error("Unknown JSON format: " + json.format);
+        if (json.version != "0.4.0")
+          throw new Error("Unknown JSON version: " + json.version);
+
+        return json;
+    });
 };
 
 XML3DJSONFormatHandler.prototype.getAdapter = function(data, aspect, canvasId) {
@@ -116,10 +123,6 @@ function createXflowInputs(dataNode, name, jsonData){
 }
 
 function createXflowNode(jsonData, aspect){
-    if (jsonData.format != "xml3d-json")
-        throw new Error("Unknown JSON format: " + jsonData.format);
-    if (jsonData.version != "0.4.0")
-        throw new Error("Unknown JSON version: " + jsonData.version);
 
     var node = new DataNode(false);
     node.userData = "External Json"; // TODO: Try to add document URL here (how to get it?)

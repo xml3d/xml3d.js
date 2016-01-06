@@ -82,31 +82,6 @@ test("Modify CSS transform on assetmesh", function () {
     test.fin(QUnit.start).done();
 });
 
-test("Modify transform element on assetmesh", function () {
-    stop();
-    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/asset-basic.html");
-
-    var test = frameLoaded.then(function (doc) {
-        var xTest = doc.getElementById("xml3dTest");
-        var mm3 = doc.getElementById("mm3");
-        var override = doc.createElement("assetmesh");
-        override.setAttribute("name", "mesh3");
-        override.setAttribute("id", "mesh3Override");
-        override.setAttribute("transform", "#t2");
-        mm3.appendChild(override);
-        return xTest;
-    }).then(promiseSceneRendered).then(function (s) {
-        QUnit.closePixel(XML3DUnit.getPixelValue(getContextForXml3DElement(s), 248, 68), [0,255,0, 255], PIXEL_EPSILON, "Assetmesh transform was overridden");
-        s.querySelector("#mesh3Override").removeAttribute("transform");
-        return s;
-    }).then(promiseSceneRendered).then(function(s) {
-        QUnit.closePixel(XML3DUnit.getPixelValue(getContextForXml3DElement(s), 248, 68), [255, 127, 127, 255], PIXEL_EPSILON, "Override removed, original transform applied again");
-        return s;
-    });
-    test.fin(QUnit.start).done();
-});
-
-
 test("Modify asset pick", 5, function () {
     stop();
     var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/asset-basic.html");

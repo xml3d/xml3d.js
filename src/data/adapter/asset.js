@@ -271,6 +271,7 @@ createClass(AssetMeshAdapter, AssetDataAdapter, {
         this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles");
         this.assetEntry.setMatchFilter(this.node.getAttribute("match"));
         this.transformFetcher.update();
+        this.updateVisibility();
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
@@ -285,6 +286,7 @@ createClass(AssetMeshAdapter, AssetDataAdapter, {
             case "style":
             case "transform":
                 this.transformFetcher.update();
+                this.updateVisibility();
                 break;
             case "type":
                 this.assetEntry.setMeshType(newValue || "triangles")
@@ -293,6 +295,14 @@ createClass(AssetMeshAdapter, AssetDataAdapter, {
 
     notifyChanged: function (evt) {
         AssetDataAdapter.prototype.notifyChanged.call(this, evt);
+    },
+
+    updateVisibility: function () {
+        if (!this.node.style) {
+            this.node.style = window.getComputedStyle(this.node);
+        }
+        var none = this.node.style.display == "none";
+        this.assetEntry && this.assetEntry.setVisibility(!none);
     }
 });
 

@@ -23,7 +23,7 @@ var RenderNode = function (type, scene, pageEntry, opt) {
 
     this.setParent(opt.parent || scene.rootNode);
 
-    this.localVisible = true;
+    this.localVisible = opt.visible !== undefined ? opt.visible : true;
     // The global visibility depends on visibility of parents
     this.visible = true;
     this.evaluateVisibility();

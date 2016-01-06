@@ -68,12 +68,12 @@ test("Modify CSS transform on assetmesh", function () {
 
     var test = frameLoaded.then(function (doc) {
         var xTest = doc.getElementById("xml3dTest");
-        var mesh2 = doc.getElementById("toverride");
+        var mesh2 = doc.getElementById("outerSubData");
         mesh2.setAttribute("style", "transform: translateX(2px)");
         return xTest;
     }).then(promiseSceneRendered).then(function (s) {
         QUnit.closePixel(XML3DUnit.getPixelValue(getContextForXml3DElement(s), 192, 137), [0,255,0, 255], PIXEL_EPSILON, "Assetmesh transform was overridden");
-        s.querySelector("#toverride").setAttribute("style", "");
+        s.querySelector("#outerSubData").setAttribute("style", "");
         return s;
     }).then(promiseSceneRendered).then(function(s) {
         QUnit.closePixel(XML3DUnit.getPixelValue(getContextForXml3DElement(s), 130, 137), [0, 255, 0, 255], PIXEL_EPSILON, "Assetmesh returned to original position");

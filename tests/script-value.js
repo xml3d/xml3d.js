@@ -86,10 +86,9 @@ test("Set script value detached from document", function() {
 
     dataElement.appendChild(colorValue);
 
-    equal(colorValue.textContent, "[value set by script]", "Color has correct text content after readding");
+    equal(colorValue.textContent, "[value set by script]", "Color has correct text content after reading");
     var result = dataElement.getResult();
-    QUnit.closeArray(result.getValue("color"), colorArray,
-        EPSILON, "Color has correct Xflow result  after readding");
+    ok(!result.getValue("color"), "Internal color value is null after detach");
 
     dataElement.removeChild(colorValue);
 
@@ -99,7 +98,7 @@ test("Set script value detached from document", function() {
     dataElement.appendChild(colorValue);
     var result = dataElement.getResult();
     QUnit.closeArray(result.getValue("color"), new Float32Array(colorTextValue.split(/\s+/)),
-        EPSILON, "Color has correct Xflow result  after readding #2");
+        EPSILON, "Color has correct Xflow result after re-attach with text");
 
 
 });

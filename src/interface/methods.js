@@ -1,7 +1,7 @@
 var sendAdapterEvent = require("../utils/misc.js").sendAdapterEvent;
 var callAdapterFunc = require("../utils/misc.js").callAdapterFunc;
 var CSS = require("../utils/css.js");
-var Resource = require("../resource/coordinator.js");
+var Resource = require("../resource");
 
 var Vec3 = require("../types/vec3.js");
 var Mat4 = require("../types/mat4.js");

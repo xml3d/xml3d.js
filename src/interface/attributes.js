@@ -1,4 +1,4 @@
-var Resource = require("../resource/coordinator.js");
+var Resource = require("../resource");
 
 var string2bool = function(string) {
     if (!string) {

@@ -1,6 +1,6 @@
 var SceneElementAdapter = require("./scene-element.js");
 var CameraConfiguration = require("../scene/configuration.js");
-var Resource = require("../../../resource/coordinator.js");
+var Resource = require("../../../resource");
 
 var DEFAULT_CAMERA_MODEL = "urn:xml3d:view:perspective";
 

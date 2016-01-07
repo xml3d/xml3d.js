@@ -1,6 +1,6 @@
 var Events = require("../interface/notification.js");
 var config = require("../interface/elements.js").config;
-var Resource = require("../resource/coordinator.js");
+var Resource = require("../resource");
 
 /**
  * A normal adapter that doesn't need to be connected to a DOM node

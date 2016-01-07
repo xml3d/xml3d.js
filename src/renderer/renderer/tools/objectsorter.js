@@ -13,70 +13,105 @@ var c_center = vec3.create();
 
 XML3D.extend(ObjectSorter.prototype, {
     /**
-     * @param {GLScene} scene
+     * @param {Array} sourceObjectArray
      * @param {XML3D.Mat4?} viewMatrix Matrix to apply to objects world space extend before sorting
      */
-    sortScene: function (scene, viewMatrix) {
-        var sourceObjectArray = scene.ready, opaque = {}, transparent = [];
+    sortObjects: function (sourceObjectArray, viewMatrix) {
+        var presortOpaque = {}, presortTransparent = {}, obj, zLayer, i, l, n;
 
-        var transparentArray = [], obj;
-        for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
+        // Sort by transparency and z-index
+        for (i = 0, l = sourceObjectArray.length; i < l; i++) {
             obj = sourceObjectArray[i];
             if (obj.inFrustum === false) {
                 continue;
             }
             if (obj.hasTransparency()) {
-                transparentArray.push(obj);
+                if (!presortTransparent[obj._zIndex]) {
+                    presortTransparent[obj._zIndex] = [obj];
+                } else {
+                    presortTransparent[obj._zIndex].push(obj);
+                }
             } else {
+                if (!presortOpaque[obj._zIndex]) {
+                    presortOpaque[obj._zIndex] = [obj];
+                } else {
+                    presortOpaque[obj._zIndex].push(obj);
+                }
+            }
+        }
+
+        // Separate the scene into z-layers according to z-index
+        var zLayers = Object.keys(presortOpaque).concat(Object.keys(presortTransparent));
+        zLayers = zLayers.sort(function(a,b) {
+            return a.localeCompare(b);
+        }).filter(function(item, pos, ary) {
+            // Remove duplicates
+            return !pos || item != ary[pos - 1];
+        });
+
+        // Sort opaque z-buckets by shader
+        var opaque = {};
+        for (i=0; i<zLayers.length; i++) {
+            zLayer = zLayers[i];
+            opaque[zLayer] = {};
+            for (n in presortOpaque[zLayer]) {
+                obj = presortOpaque[zLayer][n];
                 var program = obj.getProgram();
-                opaque[program.id] = opaque[program.id] || [];
-                opaque[program.id].push(obj);
+                opaque[zLayer][program.id] = opaque[zLayer][program.id] || [];
+                opaque[zLayer][program.id].push(obj);
             }
         }
 
-        // Sort opaque objects from front to back in order
-        // to have earlier z-fails
-        for (var progId in opaque) {
-            var withinShader = opaque[progId];
-            var sortedArray = new Array(withinShader.length);
-            for (i = 0; i < withinShader.length; i++) {
-                obj = withinShader[i];
-                obj.getWorldSpaceBoundingBox(c_bbox);
-                c_bbox.center(c_center);
-                viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
-                sortedArray[i] = {
-                    obj: obj, depth: c_center.z
-                };
+        // Sort opaque shader buckets by depth for early z fails
+        for (zLayer in zLayers) {
+            for (var progId in opaque[zLayer]) {
+                var withinShader = opaque[zLayer][progId];
+                var sortedArray = new Array(withinShader.length);
+                for (i = 0; i < withinShader.length; i++) {
+                    obj = withinShader[i];
+                    obj.getWorldSpaceBoundingBox(c_bbox);
+                    c_bbox.center(c_center);
+                    viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
+                    sortedArray[i] = {
+                        obj: obj, depth: c_center.z
+                    };
+                }
+                sortedArray.sort(function (a, b) {
+                    return b.depth - a.depth;
+                });
+                opaque[zLayer][progId] = sortedArray.map(function (e) {
+                    return e.obj;
+                });
             }
-            sortedArray.sort(function (a, b) {
-                return b.depth - a.depth;
-            });
-            opaque[progId] = sortedArray.map(function(e) { return e.obj; });
         }
 
-        //Sort transparent objects from back to front
-        var tlength = transparentArray.length;
-        if (tlength > 1) {
-            for (i = 0; i < tlength; i++) {
-                obj = transparentArray[i];
+        //Sort transparent z-buckets back to front
+        var transparent = {};
+        for (var ind in zLayers) {
+            zLayer = zLayers[ind];
+            var tlayer = [];
+            for (n in presortTransparent[zLayer]) {
+                obj = presortTransparent[zLayer][n];
                 obj.getWorldSpaceBoundingBox(c_bbox);
                 c_bbox.center(c_center);
                 viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
-                transparentArray[i] = [obj, c_center.z];
+                tlayer.push([obj, c_center.z]);
             }
 
-            transparentArray.sort(function (a, b) {
+            tlayer.sort(function (a, b) {
                 return a[1] - b[1];
             });
 
-            for (i = 0; i < tlength; i++) {
-                transparent[i] = transparentArray[i][0];
+            for (i = 0; i < tlayer.length; i++) {
+                tlayer[i] = tlayer[i][0];
             }
-        } else if (tlength == 1) {
-            transparent[0] = transparentArray[0];
+
+            transparent[zLayer] = tlayer;
         }
+
+        // zLayers contains all unique z-index values in the scene, partitioning it into z-buckets
         return {
-            opaque: opaque, transparent: transparent
+            opaque: opaque, transparent: transparent, zLayers : zLayers
         }
     }
 

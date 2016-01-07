@@ -431,6 +431,11 @@ RequestNode.prototype.onXflowChannelChange = function(channel, state){
     }
 };
 
+RequestNode.prototype.clear = function() {
+    this.setStructureOutOfSync();
+    delete this.owner;
+};
+
 /**
  *
  * @param requestNode

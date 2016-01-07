@@ -170,6 +170,9 @@ DataAdapter.prototype.notifyChanged = function (evt) {
 
     } else if (evt.type === Events.THIS_REMOVED) {
         this.clearAdapterHandles();
+        this.xflowDataNode.clear();
+        delete this.srcDataNode;
+        delete this.node;
     }
 };
 

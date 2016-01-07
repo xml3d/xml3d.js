@@ -1,8 +1,8 @@
 var RenderAdapter = require("./base.js");
 var Events = require("../../../interface/notification.js");
 var URI = require("../../../utils/uri.js").URI;
-var Resource = require("../../../base/resourcemanager.js").Resource;
 var AdapterHandle = require("../../../base/adapterhandle.js");
+var Resource = require("../../../resource");
 
 /**
  * @param factory

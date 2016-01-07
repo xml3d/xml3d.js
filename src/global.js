@@ -48,14 +48,11 @@ XML3D.debug = require("./utils/debug.js");
 XML3D.util = require("./utils/misc.js");
 XML3D.options = require("./utils/options.js");
 XML3D.materials = require("./renderer/webgl/materials/urn/registery.js");
-XML3D.resource = require("./base/resourcemanager.js").Resource; //Required for the test library because the RM needs to "belong" to the same document as the XML3D element in order to resolve references correctly
-
-XML3D.resource.registerFormat = require("./base/resourcemanager.js").registerFormat;
+XML3D.resource = {};
+XML3D.extend(XML3D.resource, require("./resource"));
+XML3D.extend(XML3D.resource, require("./utils/uri.js"));
 XML3D.resource.Asset = require("./asset/asset.js").Asset;
 XML3D.resource.SubData = require("./asset/asset.js").SubData;
-//XML3D.resource.FormatHandler
-//XML3D.resource.JSONFormatHandler
-//XML3D.resource.AdapterFactory
 
 XML3D.webcl = require("./utils/webcl.js").webcl;
 XML3D.math = require("gl-matrix");
@@ -80,9 +77,13 @@ XML3D.extend(Xflow, require("./xflow/interface/graph.js"));
 XML3D.extend(Xflow, require("./xflow/interface/data.js"));
 Xflow.ComputeRequest = require("./xflow/interface/request.js").ComputeRequest;
 
+XML3D.asset = require("./asset/asset.js");
+
 XML3D.webgl = {};
 XML3D.webgl.BaseRenderTree = require("./renderer/webgl/render-trees/base.js");
 XML3D.webgl.BaseRenderPass = require("./renderer/webgl/render-passes/base.js");
+
+require("./resource/xml3dformathandler.js");
 
 require("./xflow/operator/default");
 

@@ -130,19 +130,24 @@ MouseEventHandler.prototype =  {
             var cachedPosition = undefined;
             var cachedNormal = undefined;
 
-            event.__defineGetter__("normal", function () {
-                if (!cachedNormal) {
-                    var norm = (handler.getWorldSpaceNormalByPoint(x, y));
-                    cachedNormal = norm || null;
+            Object.defineProperty(event, "normal", {
+                get : function() {
+                    if (!cachedNormal) {
+                        var norm = (handler.getWorldSpaceNormalByPoint(x, y));
+                        cachedNormal = norm || null;
+                    }
+                    return cachedNormal;
                 }
-                return cachedNormal;
             });
-            event.__defineGetter__("position", function () {
-                if (!cachedPosition) {
-                    var pos = handler.getWorldSpacePositionByPoint(x, y);
-                    cachedPosition = pos || null;
+
+            Object.defineProperty(event, "position", {
+                get : function() {
+                    if (!cachedPosition) {
+                        var pos = handler.getWorldSpacePositionByPoint(x, y);
+                        cachedPosition = pos || null;
+                    }
+                    return cachedPosition;
                 }
-                return cachedPosition;
             });
         })();
     },

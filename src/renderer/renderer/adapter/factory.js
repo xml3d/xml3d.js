@@ -1,6 +1,4 @@
 var NodeAdapterFactory = require("../../../base/adapter.js").NodeAdapterFactory;
-var DataAdapterFactory = require("../../../data/adapter/factory.js");
-require("../../../base/formathandler.js").xml3dFormatHandler.registerFactoryClass(DataAdapterFactory);
 
 /**
  * @constructor
@@ -9,12 +7,10 @@ require("../../../base/formathandler.js").xml3dFormatHandler.registerFactoryClas
  * @param {number} canvasId
  */
 var RenderAdapterFactory = function (canvasId) {
-    NodeAdapterFactory.call(this, "webgl", canvasId);
+    NodeAdapterFactory.call(this, "scene", canvasId);
     this.type = "RenderAdapterFactory";
 };
 XML3D.createClass(RenderAdapterFactory, NodeAdapterFactory);
-RenderAdapterFactory.prototype.aspect = "webgl";
-
 
 var registry = {
         xml3d: require("./xml3d.js"),

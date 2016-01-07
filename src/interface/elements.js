@@ -1,6 +1,6 @@
 var events = require("./notification.js");
 var ClassInfo = require("./configuration.js").classInfo;
-var Resource = require("../base/resourcemanager.js").Resource;
+var Resource = require("../resource");
 
 var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver),
     mutObserver;
@@ -70,6 +70,9 @@ function handleChildListChanged(mutation) {
 }
 
 function handleNodeInserted(node, mutation) {
+    if (!node.parentNode) {
+        return; //Node may have been subsequently removed again in a mutation event that we haven't processed yet
+    }
     var targetHandler = mutation.target._configured;
     if (!targetHandler) {
         return;
@@ -90,26 +93,17 @@ function handleNodeRemoved(node, mutation) {
     if(node._configured) {
         n.type = events.THIS_REMOVED;
         removeRecursive(node, n);
-        notifyNodeIdChangeRecursive(node);
     } else if (node.nodeType === Node.TEXT_NODE){
         // This may have been the value of eg. a float3 element, we should also treat it as a characterDataChanged event
         handleCharacterDataChanged(mutation);
     }
 }
 
-function notifyNodeIdChangeRecursive(element){
-    Resource.notifyNodeIdChange(element, element.id, null);
-    var n = element.firstElementChild;
-    while(n) {
-        notifyNodeIdChangeRecursive(n);
-        n = n.nextElementSibling;
-    }
-}
-
 function removeRecursive(element, evt) {
     if(element._configured) {
+        Resource.notifyNodeIdChange(element, element.id, null);
         element._configured.notify(evt);
-        element._configured.remove(evt);
+        delete element._configured;
     }
     var child = element.firstElementChild;
     while(child) {
@@ -302,8 +296,8 @@ ElementHandler.prototype.attributeChangedCallback =  function(mutation) {
 ElementHandler.prototype.remove = function(evt) {
     for(var h in this.adapters) {
         var adapter = this.adapters[h];
-        if(adapter.onDispose)
-            adapter.onDispose();
+        if(adapter.dispose)
+            adapter.dispose();
         if(adapter.clearAdapterHandles)
             adapter.clearAdapterHandles();
     }

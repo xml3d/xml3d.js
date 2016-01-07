@@ -63,10 +63,6 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
         }
     },
 
-    onDispose: function () {
-        this.transformFetcher && this.transformFetcher.clear();
-    },
-
     onConfigured: function () {
     },
 
@@ -83,17 +79,21 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
         this.renderNode.setLocalVisible(!(none || hidden));
     },
 
+
+    updateZIndex: function() {
+        //This function is overridden by the leaf nodes (mesh, model), otherwise it should do nothing
+    },
+
     dispose: function() {
         this.getRenderNode().remove();
+        this.transformFetcher && this.transformFetcher.dispose();
         this.clearAdapterHandles();
     },
 
-
-
     styleChangedCallback: function() {
+        this.updateZIndex();
         this.updateVisibility();
     },
-
 
     updateLocalMatrix: function () {
         this.transformFetcher && this.transformFetcher.update();
@@ -132,13 +132,15 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
                 this.dispose();
                 break;
             case Events.NODE_INSERTED:
-                this.initElement(evt.mutation.target);
+                this.initElement(evt.affectedNode);
                 break;
             default:
                 XML3D.debug.logDebug("Unhandled event in SceneElementAdapter:", evt);
         }
     }
 });
+
+
 
 function getMaterialURI(node) {
     var materialURI = node.getAttribute("material");

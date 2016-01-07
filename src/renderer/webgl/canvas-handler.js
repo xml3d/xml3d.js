@@ -1,6 +1,5 @@
 var AbstractCanvasHandler = require("../renderer/canvas-handler.js");
 var Options = require("../../utils/options.js");
-var xml3dFormatHandler = require("../../base/formathandler.js").xml3dFormatHandler;
 var Util = require("../../utils/misc.js");
 
 var MAXFPS = 30;
@@ -167,7 +166,7 @@ GLCanvasHandler.prototype.draw = function () {
         var end = c_timer.now();
 
 
-        var factory = xml3dFormatHandler.getFactory("webgl", this.id);
+        var factory = XML3D.xml3dFormatHandler.getFactory("scene", this.id);
         var xml3dAdapter = factory.getAdapter(this._xml3dElement);
         xml3dAdapter.onFrameDrawn();
         this.dispatchFrameDrawnEvent(start, end, stats);

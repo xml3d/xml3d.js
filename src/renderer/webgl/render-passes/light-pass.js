@@ -45,17 +45,23 @@ XML3D.createClass(LightPass, SceneRenderPass, {
             frustum.getProjectionMatrix(c_projMat_tmp, aspect);
 
             scene.updateReadyObjectsFromMatrices(c_viewMat_tmp, c_projMat_tmp);
-            var objects = this.sorter.sortScene(scene);
+            var objects = this.sorter.sortObjects(scene.ready);
 
             var parameters = {};
             parameters["viewMatrix"] = c_viewMat_tmp;
             parameters["projectionMatrix"] = c_projMat_tmp;
 
             //Render opaque objects
-            for (var shader in objects.opaque) {
-                this.renderObjectsToActiveBuffer(objects.opaque[shader], scene, target, parameters, c_programSystemUniforms, {
-                    transparent: false, stats: count, program: program
-                });
+            for (var i in objects.zLayers) {
+                var zLayer = objects.zLayers[i];
+                gl.clear(gl.DEPTH_BUFFER_BIT);
+                for (var prg in objects.opaque[zLayer]) {
+                    this.renderObjectsToActiveBuffer(objects.opaque[zLayer][prg], scene, target, parameters, c_programSystemUniforms, {
+                        transparent: false,
+                        stats: count,
+                        program: program
+                    });
+                }
             }
 
             // Do not render transparent objects (considered to not throw shadows

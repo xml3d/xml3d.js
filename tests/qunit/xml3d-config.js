@@ -266,7 +266,14 @@ function promiseIFrameLoaded(url) {
     v.addEventListener("load", f, true);
     v.src = url +window.location.search;
     return deferred.promise;
-};
+}
+
+function displayMousePosition(e) {
+    var pointerPosElement = document.getElementById("pointerPosElement");
+    if (pointerPosElement) {
+        pointerPosElement.textContent = "GLCoords: "+ e.clientX+", "+ (this.height - e.clientY);
+    }
+}
 
 function displayMousePosition(e) {
     console.log(e.clientX + ", " + e.clientY);
@@ -332,7 +339,7 @@ function getWebGLAdapter(x) {
     window.XML3D.flushDOMChanges();
     if(x._configured){
         for(var i in x._configured.adapters){
-            if(i.indexOf("webgl") == 0){
+            if(i.indexOf("scene") == 0){
                 return x._configured.adapters[i];
             }
         }

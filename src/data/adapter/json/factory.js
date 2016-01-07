@@ -2,34 +2,42 @@ var XC = require("../../../xflow/interface/constants.js");
 var InputNode = require("../../../xflow/interface/graph.js").InputNode;
 var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
-var Resource = require("../../../base/resourcemanager.js").Resource;
-var registerFormat = require("../../../base/resourcemanager.js").registerFormat;
-var JSONFormatHandler = require("../../../base/formathandler.js").JSONFormatHandler;
 var AdapterFactory = require("../../../base/adapter.js").AdapterFactory;
 
 var XML3DJSONFormatHandler = function() {
-    JSONFormatHandler.call(this);
+    XML3D.resource.FormatHandler.call(this);
 };
-XML3D.createClass(XML3DJSONFormatHandler, JSONFormatHandler);
+XML3D.createClass(XML3DJSONFormatHandler, XML3D.resource.FormatHandler);
 
-XML3DJSONFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
-    return mimetype === "application/json" && response.format == "xml3d-json" && response.version == "0.4.0";
-};
-
-
-XML3DJSONFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
-    try{
-        var xflowNode = createXflowNode(response);
-        callback(true, xflowNode);
-    } catch (e) {
-        XML3D.debug.logException(e, "Failed to process XML3D json file");
-        callback(false);
+XML3DJSONFormatHandler.prototype.isFormatSupported = function(response) {
+    if (response.headers.has("Content-Type")) {
+        return response.headers.get("Content-Type") === "application/json";
     }
-
+    if (response.url.match(/\.json/)) {
+        return true;
+    }
 };
 
-var xml3dJSonFormatHandler = new XML3DJSONFormatHandler();
-registerFormat(xml3dJSonFormatHandler);
+
+XML3DJSONFormatHandler.prototype.getFormatData = function(response) {
+    return response.json().then(function(json) {
+        if (json.format != "xml3d-json")
+            throw new Error("Unknown JSON format: " + json.format);
+        if (json.version != "0.4.0")
+          throw new Error("Unknown JSON version: " + json.version);
+
+        return json;
+    });
+};
+
+XML3DJSONFormatHandler.prototype.getAdapter = function(data, aspect, canvasId) {
+    if (aspect === "data" || aspect === "scene") {
+        return new JSONDataAdapter(createXflowNode(data, aspect));
+    }
+    throw new Error("Unsupported aspect '"+aspect+"' encountered in JSON format handler.");
+};
+
+XML3D.resource.registerFormatHandler(new XML3DJSONFormatHandler());
 
 
 var empty = function() {};
@@ -102,25 +110,29 @@ function createXflowInputs(dataNode, name, jsonData){
                 // FIXME add big-endian -> little-endian conversion
                 throw new Error("Big-endian binary data are not supported yet");
             }
-            Resource.loadData(value.url, function (arrayBuffer) {
-                createXflowValueFromBuffer(dataNode, jsonData.type, name, key, arrayBuffer, value.byteOffset, value.byteLength);
-            }, null);
+            XML3D.resource.fetch(value.url)
+                .then(function (response) {
+                    return response.arrayBuffer();
+                }).then(function(arrayBuffer) {
+                    createXflowValueFromBuffer(dataNode, jsonData.type, name, key, arrayBuffer, value.byteOffset, value.byteLength);
+                });
         } else {
             createXflowValue(dataNode, jsonData.type, name, key, value);
         }
     }
 }
 
-function createXflowNode(jsonData){
-    if (jsonData.format != "xml3d-json")
-        throw new Error("Unknown JSON format: " + jsonData.format);
-    if (jsonData.version != "0.4.0")
-        throw new Error("Unknown JSON version: " + jsonData.version);
+function createXflowNode(jsonData, aspect){
 
     var node = new DataNode(false);
     node.userData = "External Json"; // TODO: Try to add document URL here (how to get it?)
 
-    var entries = jsonData.data;
+    var entries;
+    if (aspect === "scene")
+        entries = jsonData.material;
+    else
+        entries = jsonData.data;
+
     for(var name in entries) {
         createXflowInputs(node, name, entries[name]);
     }
@@ -137,22 +149,3 @@ var JSONDataAdapter = function(xflowNode) {
 JSONDataAdapter.prototype.getXflowNode = function(){
     return this.xflowDataNode;
 };
-
-/**
- * @constructor
- * @implements {XML3D.base.IFactory}
- */
-var JSONFactory = function()
-{
-    AdapterFactory.call(this, "data");
-};
-XML3D.createClass(JSONFactory, AdapterFactory);
-
-
-JSONFactory.prototype.aspect = "data";
-
-JSONFactory.prototype.createAdapter = function(xflowNode) {
-    return new JSONDataAdapter(xflowNode);
-};
-
-xml3dJSonFormatHandler.registerFactoryClass(JSONFactory);

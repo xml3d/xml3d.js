@@ -1,0 +1,131 @@
+<!DOCTYPE html><html><head lang="en">
+    <meta charset="UTF-8">
+    <title>XML3D Lines</title>
+    <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+<xml3d id="myXml3d" width="600px" height="400px" style="background: black">
+    <view style="transform: translate3d(0,0,10px)"></view>
+    <defs>
+        <material id="flatblue" model="urn:xml3d:material:flat">
+            <float3 name="diffuseColor">
+                0 0 1
+            </float3>
+        </material>
+        <material id="flatgreen" model="urn:xml3d:material:flat">
+            <float3 name="diffuseColor">
+                0 1 0
+            </float3>
+        </material>
+        <material id="flatpurple" model="urn:xml3d:material:flat">
+            <float3 name="diffuseColor">
+                1 0 1
+            </float3>
+        </material>
+        <material id="flatyellow" model="urn:xml3d:material:flat">
+            <float3 name="diffuseColor">
+                1 1 0
+            </float3>
+        </material>
+
+        <material id="flatred" model="urn:xml3d:material:flat">
+            <float3 name="diffuseColor">
+                1 0 0
+            </float3>
+        </material>
+
+
+        <data id="meshdata">
+            <int name="index">0 1 2 1 2 3</int>
+            <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+            <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+            <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        </data>
+    </defs>
+
+    <!-- TOP ROW -->
+    <!-- blue should be above green because the same-layer z-index is higher -->
+    <group id="layer1" style="z-index: 5">
+        <group id="layer1_2" style="z-index: 6">
+            <mesh src="#meshdata" material="#flatblue" style="transform: translate3d(-5px, 3px, 0px)"></mesh>
+        </group>
+        <group id="layer1_2b" style="z-index: 3">
+            <mesh src="#meshdata" material="#flatgreen" style="transform: translate3d(-4px, 3px, 0px)"></mesh>
+        </group>
+    </group>
+
+    <!-- purple should be above yellow because its layer2 z-index is higher (6 vs 4) even though purple's layer3 index is higher (100) -->
+    <group id="layer1b">
+        <group id="layer1b_2" style="z-index: 6">
+            <mesh src="#meshdata" material="#flatpurple" style="transform: translate3d(-1px, 3px, 0px)"></mesh>
+        </group>
+        <group id="layer1b_2b" style="z-index: 4">
+            <mesh src="#meshdata" material="#flatyellow" style="z-index: 100; transform: translate3d(0px, 3px, 0px);"></mesh>
+        </group>
+    </group>
+
+    <!-- red should be above blue, checking that negative values are interpreted properly -->
+    <group id="layer1c">
+        <group id="layer1c_2" style="z-index: 6">
+            <mesh src="#meshdata" material="#flatred" style="transform: translate3d(3px, 3px, 0px)"></mesh>
+        </group>
+        <group id="layer1c_2b" style="z-index: -9">
+            <mesh src="#meshdata" material="#flatblue" style="transform: translate3d(4px, 3px, 0px);"></mesh>
+        </group>
+    </group>
+
+
+    <!-- MIDDLE ROW -->
+
+    <!-- green should be above blue because z-index: auto doesn't create a stacking context, so (100) is relative to layer1 (50) -->
+    <group id="layer1d" style="z-index: 5">
+        <group id="layer1d_2" style="z-index: 6">
+            <mesh src="#meshdata" material="#flatblue" style="z-index: 50; transform: translate3d(-5px, 0px, 0px)"></mesh>
+            <group id="layer1d_2b" style="z-index: auto">
+                <mesh src="#meshdata" material="#flatgreen" style="z-index: 100; transform: translate3d(-4px, 0px, 0px)"></mesh>
+            </group>
+        </group>
+
+    </group>
+
+    <!-- flatyellow should be drawn below flatpurple because its z-index is negative -->
+    <group id="layer1e">
+        <group id="layer1e_2">
+            <mesh src="#meshdata" material="#flatpurple" style="transform: translate3d(-1px, 0px, 0px)"></mesh>
+        </group>
+        <group id="layer1e_2b">
+            <mesh src="#meshdata" material="#flatyellow" style="z-index: -44; transform: translate3d(0px, 0px, 0px);"></mesh>
+        </group>
+    </group>
+
+    <!-- same as above this time with models instead of simple meshes -->
+    <group id="layer1f">
+        <group id="layer1f_2">
+            <model id="model1" src="assets/cube.xml#Cube" material="#flatpurple" style="transform: translate3d(3px, 0px, 0px)"></model>
+        </group>
+        <group id="layer1f_2b">
+            <model id="model2" src="assets/cube.xml#Cube" material="#flatyellow" style="z-index: -44; transform: translate3d(4px, 0px, 0px);"></model>
+        </group>
+    </group>
+
+
+<!-- BOTTOM ROW -->
+
+    <!--  -->
+    <group id="layer1g">
+        <group id="layer1f_2">
+            <model src="assets/cube.xml#Cube" material="#flatpurple" style="transform: translate3d(-5px, -3px, 0px)"></model>
+        </group>
+        <group id="layer1f_2b">
+            <model src="assets/cube.xml#Cube" material="#flatyellow" style="transform: translate3d(-4px, -3px, 0px);"></model>
+        </group>
+    </group>
+
+
+
+
+</xml3d>
+
+
+</body></html>

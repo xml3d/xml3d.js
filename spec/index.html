@@ -710,6 +710,83 @@
 
     </section>
 
+    <section>
+        <h3>The <code>z-index</code> property</h3>
+
+        <div class="propdef">
+            <dl>
+                <dt>
+                    <span class="index-def" title="'z-index'"><strong>'z-index'</strong></span>
+                </dt>
+                <dd>
+                    <table class="propinfo" cellspacing="0" cellpadding="0">
+                        <tbody>
+                        <tr valign="baseline">
+                            <td><em>Value:</em>&nbsp;&nbsp;</td>
+                            <td>auto | &lt;integer&gt;
+                            </td>
+                        </tr>
+                        <tr valign="baseline">
+                            <td><em>Initial:</em>&nbsp;&nbsp;</td>
+                            <td>auto
+                            </td>
+                        </tr>
+                        <tr valign="baseline">
+                            <td><em>Applies to:</em>&nbsp;&nbsp;</td>
+                            <td><a href="#scene-elements">Scene elements</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </dd>
+            </dl>
+        </div>
+        <p>The meanings of the values of this property for XML3D elements:</p>
+        <dl>
+            <dt><span class="index-def" title="'none', definition of"><strong>auto</strong></span>
+            </dt>
+            <dd>This is the default value and causes the element to be rendered in the same z-layer (stacking context) as its parent element.
+                If no other z-index values appear in the scene this means all elements will be rendered in a single z-layer according
+                to their distance from the camera.
+            </dd>
+            <dt><span class="index-def" title="definition of other values">&lt;other values&gt;</span>
+            </dt>
+            <dd>Any value other than '0' will create a new stacking context, similar to the behavior of z-index for normal
+                HTML elements.
+            </dd>
+        </dl>
+
+        <p>During rendering objects will first be sorted into bins according to the stacking contexts present in the scene.
+        Then the bins will be rendered from lowest z-index to highest, with the objects in each bin sorted according
+        to their distance from the camera. The depth buffer will be cleared between each bin.</p>
+
+        <p>This has the effect of rendering objects with a higher z-index on top of those with a lower z-index
+        regardless of their spatial orientation in the scene.</p>
+
+        <p>Note that the same stacking context rules apply for XML3D elements as for HTML elements. This means an
+        element's z-index is always relative to the closest parent element having a z-index value other than 'auto'.</p>
+
+        Here are some examples for the 'z-index' property:
+    <pre class="example highlight">
+        &lt;mesh src="example.xml" style="z-index: 5"&gt;&lt;/mesh&gt;
+        &lt;mesh src="example.xml" style="z-index: 10"&gt;&lt;/mesh&gt; &lt;!-- Will always be drawn above the other two meshes --&gt;
+        &lt;mesh src="example.xml" style="z-index: -5"&gt;&lt;/mesh&gt; &lt;!-- Will always be drawn below the other two meshes --&gt;
+    </pre>
+
+        In the example below the mesh with the z-index value of 500 will be drawn <em>below</em> the other meshes. This 
+        is because both groups create their own stacking contexts, and the second group's z-index is lower than that of the first.
+        <pre class="example highlight">
+            &lt;group style="z-index: 1"&gt;
+                &lt;mesh src="example.xml" style="z-index: 10"&gt;&lt;/mesh&gt; &lt;!-- Will always be drawn above the second mesh --&gt;
+                &lt;mesh src="example.xml"&gt;&lt;/mesh&gt;
+            &lt;/group&gt;
+            &lt;group style="z-index: -1"&gt;
+                &lt;mesh src="example.xml" style="z-index: 500"&gt;&lt;/mesh&gt; &lt;!-- Will be drawn *below* the other meshes --&gt;
+            &lt;/group&gt;
+        </pre>
+
+    </section>
+
 </section>
 
 <section>

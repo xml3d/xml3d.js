@@ -1,7 +1,6 @@
-var registerFactory = require("./resourcemanager.js").registerFactory;
-var Resource = require("./resourcemanager.js").Resource;
 var Events = require("../interface/notification.js");
 var config = require("../interface/elements.js").config;
+var Resource = require("../resource");
 
 /**
  * A normal adapter that doesn't need to be connected to a DOM node
@@ -82,7 +81,7 @@ Adapter.prototype.getConnectedAdapter = function(key) {
  * This function is called, when the adapater is detached from the node.
  * At this point, the adapater should disconnect from any other adapter and prepare to be properly garbage collected
  */
-Adapter.prototype.onDispose = function() {
+Adapter.prototype.dispose = function() {
 };
 
 
@@ -168,9 +167,7 @@ NodeAdapter.prototype.traverse = function(callback) {
  */
 var IFactory = function() {
 };
-
-/** @type {string} */
-IFactory.prototype.aspect;
+IFactory.prototype.createAdapter = function() {};
 
 
 /**
@@ -186,8 +183,6 @@ var AdapterFactory = function(aspect, mimetypes, canvasId) {
     this.aspect = aspect;
     this.canvasId = canvasId || 0;
     this.mimetypes = typeof mimetypes == "string" ? [ mimetypes] : mimetypes;
-
-    registerFactory(this);
 };
 
  /** Implemented by subclass
@@ -245,8 +240,6 @@ NodeAdapterFactory.prototype.getAdapter = function(node) {
     }
     return adapter;
 };
-
-XML3D.resource.AdapterFactory = AdapterFactory;
 
 module.exports = {
 NodeAdapter : NodeAdapter,

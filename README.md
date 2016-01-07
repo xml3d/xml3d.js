@@ -80,9 +80,9 @@ In addition a full [specification and API description](http://xml3d.org/xml3d/sp
 ### Change log ###
 5.1 - 07.01.2016
 * Resource system is now based on the [Fetch API](https://developer.mozilla.org/en/docs/Web/API/Fetch_API) and [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-* Better FormatHandler interface for custom mesh loaders [wiki](https://github.com/xml3d/xml3d.js/wiki/Writing-a-custom-FormatHandler-plugin)
-* Support for the CSS z-index property [demo](http://xml3d.github.io/xml3d-examples/examples/zindex/index.html), [spec](http://xml3d.org/xml3d/specification/5.1/#the-z-index-property)
-* New onRequest interface for custom HTTP headers [wiki](https://github.com/xml3d/xml3d.js/wiki/Adding-custom-headers-%28eg.-Auth%29-to-requests)
+* Better FormatHandler interface for custom mesh loaders - [wiki](https://github.com/xml3d/xml3d.js/wiki/Writing-a-custom-FormatHandler-plugin)
+* Support for the CSS z-index property - [demo](http://xml3d.github.io/xml3d-examples/examples/zindex/index.html), [spec](http://xml3d.org/xml3d/specification/5.1/#the-z-index-property)
+* New onRequest interface for custom HTTP headers - [wiki](https://github.com/xml3d/xml3d.js/wiki/Adding-custom-headers-%28eg.-Auth%29-to-requests)
 * Memory performance improvements when removing elements from the DOM
 
 5.0 - 16.10.2015 ([Not backwards compatible!](https://github.com/xml3d/xml3d.js/wiki/Migrate-to-XML3D-5.0))

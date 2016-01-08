@@ -23,7 +23,7 @@ Resource.fetch = function(uriString, opt) {
         c_requestHooks[i](uri, opt);
     }
     if (opt.abort) {
-        Promise.reject(new RequestAbortedException(uri));
+        return Promise.reject(new RequestAbortedException(uri));
     }
 
     return doFetch(uri, opt);

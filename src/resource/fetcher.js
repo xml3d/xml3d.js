@@ -1,9 +1,6 @@
 
 require("whatwg-fetch");
 var URI = require("../utils/uri.js").URI;
-var Options = require("../utils/options.js");
-
-var MAX_CONCURRENT_REQUESTS = 100;  // Maximum number of requests awaiting a response
 
 var c_requestHooks = [];    // Request hooks called for each outgoing request
 var c_formatHandlers = [];  // All registered FormatHandler plugins
@@ -22,13 +19,18 @@ Resource.fetch = function(uriString, opt) {
     opt = initOptions(opt);
     var uri = new URI(uriString);
 
+    for (var i=0; i < c_requestHooks.length; i++) {
+        c_requestHooks[i](uri, opt);
+    }
+    if (opt.abort) {
+        return Promise.reject(new RequestAbortedException(uri));
+    }
+
+    return doFetch(uri, opt);
+};
+
+function doFetch(uri, opt) {
     return new Promise(function(resolve, reject) {
-        for (var i=0; i < c_requestHooks.length; i++) {
-            c_requestHooks[i](uri, opt);
-        }
-        if (opt.abort) {
-            throw new RequestAbortedException(uri);
-        }
         scheduleRequest({
             opt : opt,
             uri : uri,
@@ -36,7 +38,7 @@ Resource.fetch = function(uriString, opt) {
             reject : reject
         });
     });
-};
+}
 
 var popRequestQueue = function() {
     var request = c_requestQueue.shift();
@@ -54,21 +56,38 @@ var popRequestQueue = function() {
 };
 
 Resource.getDocument = function(urlString, opt) {
-    return Resource.fetch(urlString, opt)
+    opt = initOptions(opt);
+    var uri = new URI(urlString);
+
+    for (var i=0; i < c_requestHooks.length; i++) {
+        c_requestHooks[i](uri, opt);
+    }
+    if (opt.abort) {
+        Promise.reject(new RequestAbortedException(uri));
+    }
+
+    var cache;
+    if (opt.allowCaching) {
+        if (cache = c_cachedDocuments.get(urlString)) {
+            // We can skip the fetch phase and piggy back on the result of the previous fetch, this avoids unnecessary Requests
+            return cache.pending ? cache.pending : Promise.resolve(cache.document);
+        }
+
+        // There is no pending or complete Request for this url so lets create a cache entry and start one
+        cache = {fragments: []};
+        c_cachedDocuments.set(urlString, cache); // Resource.parseResponse expects this entry to exist already
+    }
+
+    var documentPromise = doFetch(urlString, opt)
         .then(function(response) {
             if (!response.ok) {
                 throw new RequestFailedException(response);
             }
             response.originalURL = urlString;
-            var cache;
-            if (cache = c_cachedDocuments.get(urlString)) {
-                return cache.pending ? cache.pending : cache.document;
-            } else {
-                cache = { fragments : [] };
-                c_cachedDocuments.set(urlString, cache); // Resource.parseResponse expects this entry to exist already
-                cache.pending = Resource.parseResponse(response);
-                return cache.pending;
-            }
+            var cache = { fragments : [] };
+            c_cachedDocuments.set(urlString, cache); // Resource.parseResponse expects this entry to exist already
+            cache.pending = Resource.parseResponse(response);
+            return cache.pending;
         }).then(function(doc) {
             doc._documentURL = urlString;
             var cache = c_cachedDocuments.get(urlString);
@@ -79,6 +98,12 @@ Resource.getDocument = function(urlString, opt) {
             c_cachedDocuments.has(urlString) && delete c_cachedDocuments.get(urlString).pending;
             throw exception;
         });
+
+    if (cache) {
+        cache.pending = documentPromise;
+    }
+
+    return documentPromise;
 };
 
 Resource.parseResponse = function(response) {
@@ -144,7 +169,7 @@ var prioritySort = function(a, b) {
 
 var tickWorkWindow = function() {
     // Both of these loops trigger asynchronous work through Promises so working through all queue items shouldn't block the thread for too long
-    while (c_requestQueue.length > 0 && c_openRequests < MAX_CONCURRENT_REQUESTS) {
+    while (c_requestQueue.length > 0) {
         popRequestQueue();
     }
 
@@ -159,6 +184,7 @@ var initOptions = function(opt) {
     opt.headers = opt.headers || {};
     opt.priority = opt.priority || 0;
     opt.abort = opt.abort || false;
+    opt.allowCaching = opt.allowCaching !== undefined ? opt.allowCaching : true;
     return opt;
 };
 

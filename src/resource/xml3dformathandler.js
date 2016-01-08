@@ -17,7 +17,7 @@ XML3D.createClass(XML3DFormatHandler, XML3D.resource.FormatHandler);
 XML3DFormatHandler.prototype.isFormatSupported = function (response) {
     if (response.headers.has("Content-Type")) {
         var contentType = response.headers.get("Content-Type");
-        return contentType === "application/xml" || contentType === "text/xml";
+        return contentType.match(/\/xml/);
     }
     if (response.url.match(/\.xml/)) {
         return true;

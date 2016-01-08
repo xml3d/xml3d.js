@@ -11,7 +11,8 @@ XML3D.createClass(XML3DJSONFormatHandler, XML3D.resource.FormatHandler);
 
 XML3DJSONFormatHandler.prototype.isFormatSupported = function(response) {
     if (response.headers.has("Content-Type")) {
-        return response.headers.get("Content-Type") === "application/json";
+        var contentType = response.headers.get("Content-Type");
+        return contentType.match(/\/json/);
     }
     if (response.url.match(/\.json/)) {
         return true;

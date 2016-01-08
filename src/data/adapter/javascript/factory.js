@@ -5,7 +5,8 @@ var JavaScriptFormatHandler = function () {
 XML3D.createClass(JavaScriptFormatHandler, XML3D.resource.FormatHandler);
 
 JavaScriptFormatHandler.prototype.isFormatSupported = function (response) {
-    return response.headers.get("Content-Type") === "application/javascript";
+    var contentType = response.headers.get("Content-Type");
+    return !!contentType && contentType.match(/\/javascript/);
 };
 
 

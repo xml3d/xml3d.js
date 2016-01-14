@@ -91,6 +91,9 @@ var curXML3DInitElements = [];
 function initXML3DElement(xml3dElement) {
     if(curXML3DInitElements.indexOf(xml3dElement) > -1)
         return;
+    if(!xml3dElement.parentNode) {
+        return;
+    }
 
     curXML3DInitElements.push(xml3dElement);
 

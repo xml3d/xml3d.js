@@ -22,7 +22,13 @@
                <transform id="t9" translation="-1 0 -10" rotation="0 1 0 1.57"></transform>
                <transform id="t10" translation="-4.5 0 -9"></transform>
                <transform id="t11" translation="0 0 -1"></transform>
+               <transform id="t12" translation="2.5 0 -10"></transform>
 
+                <material id="material_transparent" model="urn:xml3d:material:diffuse">
+                    <float3 name="diffuseColor">1 0.2 0.3</float3>
+                    <float name="ambientIntensity">0.8</float>
+                    <float name="opacity">0.1</float>
+                </material>
                <material id="material_diffuse" model="urn:xml3d:material:diffuse">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
                   <float name="ambientIntensity">0.8</float>
@@ -113,6 +119,9 @@
                 </group>
                 <group material="#material_phong_texture" transform="#t5">
                    <mesh id="pickingMesh5" src="#mySimpleMesh"></mesh>
+                </group>
+                <group material="#material_transparent" transform="#t12">
+                    <mesh id="pickingMesh12" src="#mySimpleMesh"></mesh>
                 </group>
             </group>
 			<group id="many" material="#material_diffuse">

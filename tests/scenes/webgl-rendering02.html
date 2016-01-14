@@ -6,13 +6,17 @@
   <script type="text/javascript" src="scripts/custommaterial.js"></script>
 </head>
   <body style="background-color: #FFF;width:500px">
-   <xml3d id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" view="#defaultView">
+   <xml3d id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" width="200" height="200" view="#defaultView">
     <defs>   
    
     <material id="texmaterial1" model="urn:xml3d:material:phong">
         <texture id="tex1" name="diffuseTexture">
             <img id="tex1img" src="textures/yellow.png">
         </texture>
+    </material>
+
+    <material id="transparency" model="urn:xml3d:material:phong">
+        <float name="opacity">1.0</float>
     </material>
     
     <material id="npotTexmaterial" model="urn:xml3d:material:phong">
@@ -90,7 +94,18 @@
     <group id="custommaterialGroup" material="#custommaterial" style="display: none;">
         <mesh src="#meshdata" type="triangles">
         </mesh>
-    </group> 
+    </group>
+
+       <group id="tranparencyGroup" material="#transparency" style="display: block">
+           <mesh src="#meshdata" type="triangles" style="transform: translate3d(-2px,0,-10px)"></mesh>
+           <mesh src="#meshdata" type="triangles" style="transform: translate3d(0,0,-11px)">
+               <float name="diffuseColor">1 0 0</float>
+               <float name="opacity">1</float>
+           </mesh>
+           <mesh src="#meshdata" type="triangles" style="transform: translate3d(0,0,-10px)">
+               <float name="opacity" id="opacityOverride">0.5</float>
+           </mesh>
+       </group>
 
     </xml3d>
     <script type="text/javascript">

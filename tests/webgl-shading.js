@@ -126,9 +126,30 @@ test("Phong fragment shader", function() {
 });
 
 
+module("Materials with Opacity", {
 
+});
 
+test("Opacity override of non-transparent material", 3, function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering02.html");
 
+    var test = frameLoaded.then(function (doc) {
+        doc.getElementById("tranparencyGroup").style.display = 'inherit';
+        return doc.querySelector("#xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 100, 100);
+        deepEqual(actual, [255,127,127,255], "Override caused obj to be rendered with transparency");
+
+        var override = s.querySelector("#opacityOverride");
+        override.parentElement.removeChild(override);
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 100, 100);
+        deepEqual(actual, [255,255,255,255], "Removed override, obj now opaque");
+    });
+    test.fin(QUnit.start).done();
+});
 
 
 

@@ -72,6 +72,7 @@ exports = module.exports = function (grunt) {
                 options: {
                     browserifyOptions: {
                         debug: true,
+                        transform: ["brfs"],
                         standalone: "XML3DTestLib"
                     }
                 }

@@ -61,6 +61,10 @@ XML3D.extend(GLMesh.prototype, {
         this.minAttributeCount = -1;
     },
 
+    getUniformOverride: function(name) {
+        return this.uniformOverride[name];
+    },
+
     setUniformOverride: function (name, value) {
         if (value === undefined)
             delete this.uniformOverride[name];

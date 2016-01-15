@@ -57,6 +57,31 @@ test("Simple picking with getElementByRay", 4, function () {
 
 });
 
+test("Pick transparent object", 4, function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-picking.html");
+
+    var test = frameLoaded.then(function (doc) {
+        return doc.getElementById("xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var doc = s.ownerDocument;
+        var transparent = doc.getElementById("pickingMesh12");
+        var foundNormal = new XML3D.Vec3();
+        var foundPosition = new XML3D.Vec3();
+
+        var ray = new XML3D.Ray().setFromOriginDirection([2.5, 0, 0], [0, 0, -1]);
+
+        var obj = s.getElementByRay(ray, foundPosition, foundNormal);
+
+        equal(obj, transparent, "Ray picked the transparent object");
+        QUnit.closeVector(foundPosition, XML3D.math.vec3.fromValues(2.5196,0.02,-10), EPSILON, "Picked position is correct");
+        QUnit.closeVector(foundNormal, XML3D.math.vec3.fromValues(0,0,1), EPSILON, "Picked normal is correct");
+        return s;
+    });
+    test.fin(QUnit.start).done();
+
+});
+
 
 module("WebGL Picking tests", {
     setup : function() {

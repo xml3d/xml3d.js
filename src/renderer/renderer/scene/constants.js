@@ -9,7 +9,8 @@ module.exports = {
         LIGHT_VALUE_CHANGED: "light_value_changed",
         SCENE_SHAPE_CHANGED: "scene_shape_changed",
         SCENE_STRUCTURE_CHANGED: "scene_structure_changed",
-        DRAWABLE_STATE_CHANGED: "drawable_state_changed"
+        DRAWABLE_STATE_CHANGED: "drawable_state_changed",
+        OPACITY_STATE_CHANGED: "opacity_state_changed"
 
     }
 };

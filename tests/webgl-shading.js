@@ -127,13 +127,6 @@ test("Phong fragment shader", function() {
 
 
 
-
-
-
-
-
-
-
 module("Materials with Textures", {
 
 });

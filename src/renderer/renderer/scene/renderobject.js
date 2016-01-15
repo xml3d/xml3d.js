@@ -108,8 +108,12 @@ XML3D.createClass(RenderObject, RenderNode, {
             result.updateTypeRequest();
             result.calculateBoundingBox();
             result.on(C.EVENT_TYPE.SCENE_SHAPE_CHANGED, function (evt) {
-                that.scene.emit(C.EVENT_TYPE.SCENE_SHAPE_CHANGED)
-            })
+                that.scene.emit(C.EVENT_TYPE.SCENE_SHAPE_CHANGED);
+            });
+            result.on(C.EVENT_TYPE.OPACITY_STATE_CHANGED, function(oldValue, newValue) {
+                that.override = that.override || {};
+                that.override.opacity = newValue;
+            });
         }
         return result;
     },
@@ -312,6 +316,9 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     hasTransparency: function () {
+        if (this.override && this.override.opacity !== undefined) {
+            return this.override.opacity[0] < 1;
+        }
         var program = this.getProgram();
         return program ? program.hasTransparency() : false;
     },

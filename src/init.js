@@ -91,7 +91,13 @@ var curXML3DInitElements = [];
 function initXML3DElement(xml3dElement) {
     if(curXML3DInitElements.indexOf(xml3dElement) > -1)
         return;
-    if(!xml3dElement.parentNode) {
+
+    // Make sure the xml3d element is still in the DOM
+    var parent = xml3dElement.parentNode;
+    while (parent && !Util.elementIs(parent, "body")) {
+        parent = parent.parentNode;
+    }
+    if (!parent || !Util.elementIs(parent, "body")) {
         return;
     }
 

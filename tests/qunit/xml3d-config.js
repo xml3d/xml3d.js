@@ -275,14 +275,6 @@ function displayMousePosition(e) {
     }
 }
 
-function displayMousePosition(e) {
-    console.log(e.clientX + ", " + e.clientY);
-    var pointerPosElement = document.getElementById("pointerPosElement");
-    if (pointerPosElement) {
-        pointerPosElement.textContent = "GLCoords: "+ e.clientX+", "+ (this.height - e.clientY);
-    }
-}
-
 function promiseOneSceneCompleteAndRendered(xml3dElement) {
     if(xml3dElement.complete) {
         return Q(xml3dElement);

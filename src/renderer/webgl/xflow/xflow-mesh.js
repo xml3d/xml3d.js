@@ -338,21 +338,14 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         this.mesh.setIndexRange(webglData.minIndex, webglData.maxIndex);
     },
 
-    /*checkBufferSize: function(name, xflowDataEntry){
-     if(xflowDataEntry.getIterateCount){
-     var cnt = xflowDataEntry.getIterateCount();
-     if(cnt >= this.mesh.maxIndex)
-     throw new Error("Index range of [" + this.mesh.minIndex + ", " + this.mesh.maxIndex + "] " +
-     " goes beyond element count " + cnt + " of attribute '" + name + "'");
-     }
-     },*/
-
     handleUniform: function (name, xflowDataEntry) {
         var value = XflowUtils.getGLUniformValueFromXflowDataEntry(xflowDataEntry, this.context);
+        if (name === 'opacity') {
+            this.emit(EVENT_TYPE.OPACITY_STATE_CHANGED, this.mesh.getUniformOverride(name), value);
+        }
         this.mesh.setUniformOverride(name, value);
-    }, /**
-     *
-     */
+    },
+
     updateTypeRequest: function () {
         var requestNames = this.getTypeRequestNames(MESH_PARAMETERS);
 

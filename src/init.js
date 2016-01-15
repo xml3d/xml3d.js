@@ -92,6 +92,15 @@ function initXML3DElement(xml3dElement) {
     if(curXML3DInitElements.indexOf(xml3dElement) > -1)
         return;
 
+    // Make sure the xml3d element is still in the DOM
+    var parent = xml3dElement.parentNode;
+    while (parent && !Util.elementIs(parent, "body")) {
+        parent = parent.parentNode;
+    }
+    if (!parent || !Util.elementIs(parent, "body")) {
+        return;
+    }
+
     curXML3DInitElements.push(xml3dElement);
 
     var debug = XML3D.debug.setup();

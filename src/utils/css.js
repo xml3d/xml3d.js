@@ -44,10 +44,42 @@ css.matrixStringToMat4 = function(matrix) {
     return mat4;
 };
 
+css.getLargestTransitionDurationMS = function(tdString) {
+    var durations = tdString.split(", ");
+    var largestDuration = 0;
+    for (var i = 0; i < durations.length; i++) {
+        var duration = durations[i].substr(0, durations[i].length - 1); //remove the s on the end
+        duration = +duration;
 
+        if (isNaN(duration)) {
+            XML3D.debug.logError("Encountered an invalid duration for a CSS transition: "+tdString);
+            duration = 1000;
+        }
 
+        largestDuration = Math.max(duration, largestDuration);
+    }
+    return largestDuration * 1000;
+};
 
+var activeTransitions = [];
+css.addTransitionCallback = function(func, durationMS) {
+    activeTransitions.push({func: func, endTime: Date.now() + durationMS});
+};
 
+var updateTransitions = function() {
+    var currTime = Date.now();
+    for (var i=0; i < activeTransitions.length; i++) {
+        var transition = activeTransitions[i];
+        transition.func();
+        if (transition.endTime < currTime) {
+            activeTransitions.splice(transition, 1);
+            i--;
+        }
+    }
+    window.requestAnimationFrame(updateTransitions);
+};
+
+window.requestAnimationFrame(updateTransitions);
 
 css.matrix3dStringToMat4 = function(matrix3d) {
     var mat4 = new XML3D.Mat4();

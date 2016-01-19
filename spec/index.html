@@ -696,6 +696,13 @@
             values, which will be combined from left to right. Transformations also apply to all descendant scene
             elements, building a transformation hierarchy. </p>
 
+        <p>CSS transitions can also be used to animate transforms. The below example smoothly moves an object from left to right:</p>
+
+        <pre class="example highlight">
+            // Ease an object 5 units on the x axis over 500ms
+            $("#myMesh").css({ transform: "translate3d(5px, 0px, 0px);", transition: "transform 500ms ease" });
+        </pre>
+
         <div class="note">Some transform functions (eg. <code>translate3d</code>) require a unit of measurement to be
             valid. Because browsers do not yet support units that make sense
             for a 3D scene these values should be given in 'px'. For example, <code>translate3d(10px, 5px, 0px)</code>.
@@ -704,8 +711,7 @@
         </div>
 
         <div class="note">Some browsers silently ignore invalid CSS transforms. If a CSS transform is not behaving as
-            expected double check to ensure the formatting and syntax are
-            valid.
+            expected double check to ensure the formatting and syntax are valid.
         </div>
 
     </section>

@@ -45,9 +45,9 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
 
     return function () {
         if (!this.onlyDataTransform) {
-            var cssMatrix = CSS.getCSSMatrix(this.node);
-            if (cssMatrix) {
-                return CSS.convertCssToMat4(cssMatrix).data;
+            var cssMatrix = this.owner.style.transform;
+            if (cssMatrix && cssMatrix !== "none") {
+                return CSS.matrixStringToMat4(cssMatrix).data;
             }
         }
         var adapter;

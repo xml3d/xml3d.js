@@ -21,6 +21,7 @@ var AssetAdapter = function (factory, node) {
      *  @type Asset
      **/
     this.asset = new Asset(this.node);
+    this.style = window.getComputedStyle(this.node);
     if (node.localName.toLowerCase() !== "model") {
         this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
     }
@@ -261,6 +262,7 @@ function setMaterialUrl(adapter, dest) {
 
 var AssetMeshAdapter = function (factory, node) {
     AssetDataAdapter.call(this, factory, node);
+    this.style = window.getComputedStyle(node);
     this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
 };
 createClass(AssetMeshAdapter, AssetDataAdapter, {
@@ -298,10 +300,10 @@ createClass(AssetMeshAdapter, AssetDataAdapter, {
     },
 
     updateVisibility: function () {
-        if (!this.node.style) {
-            this.node.style = window.getComputedStyle(this.node);
+        if (!this.style) {
+            this.style = window.getComputedStyle(this.node);
         }
-        var none = this.node.style.display == "none";
+        var none = this.style.display == "none";
         this.assetEntry && this.assetEntry.setVisibility(!none);
     }
 });

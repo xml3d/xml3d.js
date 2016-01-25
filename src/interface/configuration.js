@@ -304,23 +304,6 @@ classInfo['light'] = {
     model: {a: handlers.StringAttributeHandler}
     };
 /**
- * Properties and methods for <lightshader>
- * // TODO(ksons): Remove in XML3D 5.1
- **/
-classInfo['lightshader'] = {
-    id: {a: handlers.IDHandler},
-    className: {a: handlers.StringAttributeHandler, id: 'class'},
-    onload: {a: handlers.EventAttributeHandler},
-    onprogress: {a: handlers.EventAttributeHandler},
-    complete: {p: properties.XML3DNestedDataContainerTypeComplete},
-    compute: {a: handlers.StringAttributeHandler},
-    getOutputNames: {m: methods.XML3DShaderProviderTypeGetOutputNames},
-    getOutputChannelInfo: {m: methods.XML3DShaderProviderTypeGetOutputChannelInfo},
-    getResult: {m: methods.XML3DShaderProviderTypeGetResult},
-    script: {a: handlers.StringAttributeHandler},
-    src: {a: handlers.StringAttributeHandler}
-    };
-/**
  * Properties and methods for <script>
  **/
 classInfo['script'] = {

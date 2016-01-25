@@ -31,7 +31,6 @@ XML3D.createClass(XML3DDataAdapterFactory, NodeAdapterFactory);
 var reg = {
     'mesh': Misc.SinkDataAdapter,
     'material': Misc.SinkDataAdapter,
-    'shader': Misc.SinkDataAdapter, // TODO(ksons): Remove in 5.1
     'light': Misc.SinkDataAdapter,
     'view': Misc.SinkDataAdapter,
     'float': ValueDataAdapter,

@@ -285,14 +285,20 @@ createClass(AssetMeshAdapter, AssetDataAdapter, {
             case "match":
                 this.assetEntry.setMatchFilter(newValue);
                 break;
-            case "style":
             case "transform":
                 this.transformFetcher.update();
-                this.updateVisibility();
+                break;
+            case "style":
+                this.styleChangedCallback();
                 break;
             case "type":
                 this.assetEntry.setMeshType(newValue || "triangles")
         }
+    },
+
+    styleChangedCallback: function() {
+        this.transformFetcher.update();
+        this.updateVisibility();
     },
 
     notifyChanged: function (evt) {

@@ -93,6 +93,7 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     styleChangedCallback: function() {
         this.updateZIndex();
         this.updateVisibility();
+        this.transformFetcher && this.transformFetcher.updateMatrix();
     },
 
     updateLocalMatrix: function () {
@@ -111,11 +112,18 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
 
         if (name == "transform") {
             this.transformFetcher && this.transformFetcher.update();
-        } else if (name == "style") {
-            this.transformFetcher && this.transformFetcher.updateMatrix();
         } else if (name == "material" && this.handleMaterial) {
             this.updateMaterialHandler();
             this.factory.renderer.requestRedraw("Transformable material changed.");
+        } else if (name == "style") {
+            this.traverse(function(adapter) {
+                adapter.styleChangedCallback();
+            });
+        } else if (name == "class" || name == "id") {
+            // Need to re-evaluate CSS starting at the parent node to honor sibling selectors
+            this.getParentRenderAdapter().traverse(function(adapter) {
+                adapter.styleChangedCallback();
+            });
         }
     },
 

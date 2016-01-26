@@ -7,6 +7,9 @@
     .invisible {
       display: none;
     }
+    .siblingInv + group {
+      display: none;
+    }
   </style>
 </head>
 
@@ -35,7 +38,7 @@
      }
    </script>
    <script>
-     var mesh, group;
+     var mesh, group, siblingGroup;
      var addInvisbleGroup = function () {
        mesh = document.createElement("mesh");
        mesh.setAttribute("src", "#meshdata");
@@ -101,8 +104,24 @@
        mesh.setAttribute("id", "invisibleMesh");
        mesh.style.display = "none";
        group.appendChild(mesh);
-     }
+     };
 
+     var addVisibleGroup = function() {
+       mesh = document.createElement("mesh");
+       mesh.setAttribute("src", "#meshdata");
+
+       group = document.createElement("group");
+       group.appendChild(mesh);
+
+       siblingGroup = document.createElement("group");
+
+       document.querySelector("xml3d").appendChild(siblingGroup);
+       document.querySelector("xml3d").appendChild(group);
+     };
+
+     var addInvisibleSiblingSelector = function() {
+       siblingGroup.setAttribute("class", "siblingInv");
+     }
 
 
 </script>
@@ -118,6 +137,8 @@
        <li><a href="#" onclick="makeInvisibleAPI()">Make group invisible (using style API)</a></li>
        <li><a href="#" onclick="addVisibleMeshToInvisibleGroup()">Add mesh to invisible group</a></li>
        <li><a href="#" onclick="addInvisibleMeshToVisibleGroup()">Add invisible mesh to visible group</a></li>
+       <li><a href="#" onclick="addVisibleGroup()">Add a group with a visible mesh</a></li>
+       <li><a href="#" onclick="addInvisibleSiblingSelector()">Make group invisible through a sibling selector</a></li>
      </ol>
    </div>
  

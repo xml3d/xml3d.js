@@ -156,7 +156,7 @@ NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
  */
 NodeAdapter.prototype.traverse = function(callback) {
     callback(this);
-    var child = this.node.firstElementChild;
+    var child = this.node.firstElementChild || (this.node.shadowRoot && this.node.shadowRoot.firstElementChild);
     while (child) {
         var adapter = this.factory.getAdapter(child);
         adapter && adapter.traverse(callback);

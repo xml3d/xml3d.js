@@ -367,29 +367,28 @@ config.element = function(element) {
     if (element._configured === undefined ) {
         var classInfo = ClassInfo[element.localName];
         if (classInfo === undefined) {
-            XML3D.debug.logInfo("Unrecognised element " + element.localName);
-        } else {
-            element._configured = element.localName == "xml3d" ?
-                new XML3DHandler(element)
-                : new ElementHandler(element);
-            element._configured.registerAttributes(classInfo);
-            // Fix difference in Firefox (undefined) and Chrome (null)
-            try{
-                if (element.style == undefined)
-                    element.style = null;
+            if (element.nodeName.indexOf("-") !== -1) {
+                classInfo = ClassInfo["_web-component_"];
+            } else {
+                XML3D.debug.logInfo("Unrecognised element " + element.localName);
+                return;
             }
-            catch(e){
-                // Firefox throws exception here...
-            }
+        }
 
-            var n = element.firstElementChild;
+        element._configured = element.localName == "xml3d" ?
+            new XML3DHandler(element)
+            : new ElementHandler(element);
+        element._configured.registerAttributes(classInfo);
+        var n = element.firstElementChild;
+        if (!n && element.shadowRoot) {
+            n = element.shadowRoot.firstElementChild;
+        }
 
-            Resource.notifyNodeIdChange(element, null, element.getAttribute("id"));
+        Resource.notifyNodeIdChange(element, null, element.getAttribute("id"));
 
-            while(n) {
-                config.element(n);
-                n = n.nextElementSibling;
-            }
+        while(n) {
+            config.element(n);
+            n = n.nextElementSibling;
         }
     }
 };

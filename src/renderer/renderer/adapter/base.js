@@ -7,7 +7,11 @@ var RenderAdapter = function (factory, node) {
 XML3D.createClass(RenderAdapter, NodeAdapter, {
 
     getParentRenderAdapter: function () {
-        return this.factory.getAdapter(this.node.parentNode, RenderAdapter);
+        if(this.node.parentNode.host) {
+            return this.factory.getAdapter(this.node.parentNode.host, RenderAdapter);
+        } else {
+            return this.factory.getAdapter(this.node.parentNode, RenderAdapter);
+        }
     },
 
     /**
@@ -22,7 +26,7 @@ XML3D.createClass(RenderAdapter, NodeAdapter, {
      * @param {Element} element
      */
     initChildElements: function (element) {
-        var child = element.firstElementChild;
+        var child = element.shadowRoot ? element.shadowRoot.firstElementChild : element.firstElementChild;
         while (child) {
             this.initElement(child);
             child = child.nextElementSibling;

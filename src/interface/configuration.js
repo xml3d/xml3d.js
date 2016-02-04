@@ -516,6 +516,14 @@ classInfo['view'] = {
     getViewMatrix: {m: methods.viewGetViewMatrix}
     };
 
+/**
+ * Properties and methods for web component tags which always have a '-' in them
+ **/
+classInfo['_web-component_'] = {
+    id: {a: handlers.IDHandler},
+    className: {a: handlers.StringAttributeHandler, id: 'class'}
+};
+
 module.exports = {
     classInfo : classInfo,
     MeshTypes : MeshTypes,

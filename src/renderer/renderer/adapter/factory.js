@@ -31,6 +31,11 @@ RenderAdapterFactory.prototype.createAdapter = function (node) {
     var adapterConstructor = registry[node.localName];
     if (adapterConstructor !== undefined) {
         return new adapterConstructor(this, node);
+    } else {
+        if (node.nodeName.indexOf("-") !== -1) {
+            // This is likely a web component instance, so treat it as a group
+            return new registry["group"](this, node);
+        }
     }
     return null;
 };

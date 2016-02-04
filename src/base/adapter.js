@@ -1,6 +1,7 @@
 var Events = require("../interface/notification.js");
 var config = require("../interface/elements.js").config;
 var Resource = require("../resource");
+var URI = require("../utils/uri.js").URI;
 
 /**
  * A normal adapter that doesn't need to be connected to a DOM node
@@ -134,8 +135,10 @@ NodeAdapter.prototype.notifyChanged = function(e) {
  */
 NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
     canvasId = canvasId === undefined ? this.factory.canvasId : canvasId;
-    return Resource.getAdapterHandle(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL,
-        uri, aspectType || this.factory.aspect, canvasId, this.node.nodeName);
+    if (typeof uri == "string") {
+        uri = new URI(uri);
+    }
+    return Resource.getAdapterHandle(this.node, uri, aspectType || this.factory.aspect, canvasId);
 };
 /**
  * notifies all adapter that refer to this adapter through AdapterHandles.

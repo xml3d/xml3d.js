@@ -85,40 +85,68 @@ Resource.getAdapter = function(node, aspect, canvasId) {
  * This function will trigger the loading of documents, if required.
  * An AdapterHandle will be always be returned, expect when an invalid (empty) uri is passed.
  *
- * @param {String} baseURI - the base URI from which to look up the reference
+ * @param {Element} requestingNode - the node that initiated the request
  * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
  * @param {Object} aspect The type of adapter required (e.g. XML3D.data or XML3D.webgl)
  * @param {number=} canvasId Id of GLCanvasHandler handler this adapter depends on, 0 if not depending on any GLCanvasHandler
  * @returns {?AdapterHandle} The requested AdapterHandler. Note: might be null
  */
-Resource.getAdapterHandle = function(baseURI, uri, aspect, canvasId) {
-    canvasId = canvasId || 0;
-    uri = XML3D.resource.getAbsoluteURI(baseURI, uri);
-
-    if (!uri)
+Resource.getAdapterHandle = function(requestingNode, uri, aspect, canvasId) {
+    if (!uri) {
         return null;
+    }
+    canvasId = canvasId || 0;
+    var doc;
+    var uriStr;
 
-    if (!c_cachedAdapterHandles[uri])
-        c_cachedAdapterHandles[uri] = {};
-
-    if (!c_cachedAdapterHandles[uri][aspect]) {
-        c_cachedAdapterHandles[uri][aspect] = {};
+    if (!uri.isLocal()) {
+        // Non-local URIs are handled the same even if the requesting node is in a shadow DOM
+        doc = requestingNode.ownerDocument;
+        var baseURI = doc._documentURL || doc.URL;
+        uri = XML3D.resource.getAbsoluteURI(baseURI, uri);
+        uriStr = uri && uri.toString();
+    } else {
+        doc = getOwningDocument(requestingNode);
+        if (doc.host) {
+            // The requesting node is part of a shadow DOM, use the host element's name to cache the adapter
+            uriStr = doc.host.nodeName + uri.toString();
+        } else {
+            uriStr = uri.toString();
+        }
     }
 
-    var handle = c_cachedAdapterHandles[uri][aspect][canvasId];
+    if (!c_cachedAdapterHandles[uriStr])
+        c_cachedAdapterHandles[uriStr] = {};
+
+    if (!c_cachedAdapterHandles[uriStr][aspect]) {
+        c_cachedAdapterHandles[uriStr][aspect] = {};
+    }
+
+    var handle = c_cachedAdapterHandles[uriStr][aspect][canvasId];
     if (handle)
         return handle;
 
-    return createAdapterHandle(uri, aspect, canvasId);
+    return createAdapterHandle(doc, uri, uriStr, aspect, canvasId);
 };
 
-var createAdapterHandle = function(uri, aspect, canvasId) {
+var getOwningDocument = function(node) {
+    // The node may be in a shadow DOM document fragment
+    var parent = node;
+    while(parent = parent.parentNode) {
+        if (parent.nodeName.indexOf("#document") !== -1) {
+            return parent;
+        }
+    }
+    return node.ownerDocument;
+};
+
+var createAdapterHandle = function(doc, uri, uriCacheKey, aspect, canvasId) {
     var url = uri.toString();
     var handle = new AdapterHandle(url);
-    c_cachedAdapterHandles[url][aspect][canvasId] = handle;
+    c_cachedAdapterHandles[uriCacheKey][aspect][canvasId] = handle;
 
     if (uri.isLocal()) {
-        var node = URIResolver.resolveLocal(uri);
+        var node = URIResolver.resolveLocal(uri, doc);
         if (node)
             updateHandle(handle, aspect, canvasId, XML3D.xml3dFormatHandler, node);
         else

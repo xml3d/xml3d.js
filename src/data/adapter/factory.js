@@ -56,7 +56,8 @@ var reg = {
     'asset': Asset.AssetAdapter,
     'assetdata': Asset.AssetDataAdapter,
     'assetmesh': Asset.AssetMeshAdapter,
-    'model': Asset.AssetAdapter
+    'model': Asset.AssetAdapter,
+    'content': DataAdapter
 };
 
 /**
@@ -73,7 +74,6 @@ XML3DDataAdapterFactory.prototype.createAdapter = function (node) {
     if (adapterContructor !== undefined) {
         return new adapterContructor(this, node);
     }
-    XML3D.debug.logWarning("Not supported as data element: " + node.localName);
     return null;
 };
 

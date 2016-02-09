@@ -524,6 +524,14 @@ classInfo['_web-component_'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'}
 };
 
+/**
+ * Properties and methods for content nodes, which are found inside web components
+ **/
+classInfo['content'] = {
+    id: {a: handlers.IDHandler},
+    className: {a: handlers.StringAttributeHandler, id: 'class'}
+};
+
 module.exports = {
     classInfo : classInfo,
     MeshTypes : MeshTypes,

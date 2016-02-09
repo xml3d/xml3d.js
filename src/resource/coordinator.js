@@ -109,7 +109,7 @@ Resource.getAdapterHandle = function(requestingNode, uri, aspect, canvasId) {
         doc = getOwningDocument(requestingNode);
         if (doc.host) {
             // The requesting node is part of a shadow DOM, use the host element's name to cache the adapter
-            uriStr = doc.host.nodeName + uri.toString();
+            uriStr = doc.host.nodeName + doc.host.componentId + uri.toString();
         } else {
             uriStr = uri.toString();
         }

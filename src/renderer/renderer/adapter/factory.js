@@ -20,7 +20,8 @@ var registry = {
         model: require("./model.js"),
         material: require("./material.js"),
         group: require("./group.js"),
-        light: require("./light.js")
+        light: require("./light.js"),
+        "web-component": require("./web-component.js")
     };
 
 /**
@@ -34,7 +35,7 @@ RenderAdapterFactory.prototype.createAdapter = function (node) {
     } else {
         if (node.nodeName.indexOf("-") !== -1) {
             // This is likely a web component instance, so treat it as a group
-            return new registry["group"](this, node);
+            return new registry["web-component"](this, node);
         }
     }
     return null;

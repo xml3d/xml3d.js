@@ -97,7 +97,12 @@ function recursiveDataNodeAttrInit(parentNode) {
 }
 
 function recursiveDataAdapterConstruction(adapter) {
-    for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
+    var children = adapter.node.childNodes;
+    if (adapter.node.getDistributedNodes) {
+        children = adapter.node.getDistributedNodes();
+    }
+    for (var i=0; i < children.length; i++) {
+        var child = children[i];
         var subadapter = adapter.factory.getAdapter(child);
         if (subadapter) {
             if (subadapter.getXflowNode) {

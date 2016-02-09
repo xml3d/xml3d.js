@@ -358,6 +358,7 @@ XML3D.createClass(XML3DHandler, ElementHandler);
 
 
 var config = {};
+var webComponentCounter = 0;
 
 /**
  * @param {Element} element
@@ -369,6 +370,7 @@ config.element = function(element) {
         if (classInfo === undefined) {
             if (element.nodeName.indexOf("-") !== -1) {
                 classInfo = ClassInfo["_web-component_"];
+                element.componentId = ++webComponentCounter;
             } else {
                 XML3D.debug.logInfo("Unrecognised element " + element.localName);
                 return;

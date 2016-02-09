@@ -26,6 +26,16 @@ test("Simple square component", function() {
     }).then(promiseSceneRendered).then(function(s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),150,100);
         QUnit.closeArray(pick, [0, 255, 0, 255], PIXEL_EPSILON, "Javascript added component was rendered");
+
+        var square = s.ownerDocument.querySelector("x-square");
+        var color = s.ownerDocument.createElement("float3");
+        color.setAttribute("name", "diffuseColor");
+        color.textContent = "0 0 1";
+        square.appendChild(color);
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),150,100);
+        QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Distributed node for material property diffuseColor");
     });
 
 

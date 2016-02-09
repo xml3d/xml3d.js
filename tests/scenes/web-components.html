@@ -24,7 +24,9 @@
     <template id="square-template" name="x-square">
         <style> @import "../../css/xml3d-component.css"; </style>
         <material id="square-material" model="urn:xml3d:material:flat">
-            <float3 name="diffuseColor">0 1 0</float3>
+            <content select="float3[name='diffuseColor']">
+                <float3 name="diffuseColor">0 1 0</float3>
+            </content>
         </material>
         <data id="square-data">
             <int name="index">0 2 1 0 3 2</int>
@@ -36,11 +38,12 @@
     </template>
 
     <xml3d id="myXml3d" width="300" height="200" style="background-color: #eee">
-
         <group id="rootGroup" style="transform: translate3d(0px, 0px, -10px)">
 
         </group>
-        <x-square style="transform: translate3d(-3px, 0, -10px)"></x-square>
+        <x-square style="transform: translate3d(-3px, 0, -10px)">
+
+        </x-square>
     </xml3d>
 
 

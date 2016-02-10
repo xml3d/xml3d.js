@@ -30,11 +30,17 @@
         </material>
         <data id="square-data">
             <int name="index">0 2 1 0 3 2</int>
-            <float3 name="position">-1.0 -1.0 1.0 1.0 -1.0 1.0 1.0 1.0 1.0 -1.0 1.0 1.0</float3>
+            <content select="float3[name='position']">
+                <float3 name="position">-1.0 -1.0 1.0 1.0 -1.0 1.0 1.0 1.0 1.0 -1.0 1.0 1.0</float3>
+            </content>
             <float3 name="normal">0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0</float3>
             <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0</float2>
         </data>
-        <mesh src="#square-data" type="triangles" material="#square-material"></mesh>
+        <mesh type="triangles" material="#square-material">
+            <content select="data[class='meshdata']">
+                <data src="#square-data"></data>
+            </content>
+        </mesh>
     </template>
 
     <xml3d id="myXml3d" width="300" height="200" style="background-color: #eee">

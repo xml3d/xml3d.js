@@ -521,7 +521,21 @@ classInfo['view'] = {
  **/
 classInfo['_web-component_'] = {
     id: {a: handlers.IDHandler},
-    className: {a: handlers.StringAttributeHandler, id: 'class'}
+    className: {a: handlers.StringAttributeHandler, id: 'class'},
+    onclick: {a: handlers.EventAttributeHandler},
+    ondblclick: {a: handlers.EventAttributeHandler},
+    onmousedown: {a: handlers.EventAttributeHandler},
+    onmouseup: {a: handlers.EventAttributeHandler},
+    onmouseover: {a: handlers.EventAttributeHandler},
+    onmousemove: {a: handlers.EventAttributeHandler},
+    onmouseout: {a: handlers.EventAttributeHandler},
+    onkeypress: {a: handlers.EventAttributeHandler},
+    onkeydown: {a: handlers.EventAttributeHandler},
+    onkeyup: {a: handlers.EventAttributeHandler},
+    getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
+    getLocalMatrix: {m: methods.XML3DGraphTypeGetLocalMatrix},
+    getWorldBoundingBox : {m: methods.getWorldBoundingBox},
+    getLocalBoundingBox : {m: methods.getLocalBoundingBox}
 };
 
 /**

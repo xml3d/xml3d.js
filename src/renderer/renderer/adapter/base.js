@@ -7,11 +7,19 @@ var RenderAdapter = function (factory, node) {
 XML3D.createClass(RenderAdapter, NodeAdapter, {
 
     getParentRenderAdapter: function () {
-        if(this.node.parentNode.host) {
-            return this.factory.getAdapter(this.node.parentNode.host, RenderAdapter);
-        } else {
-            return this.factory.getAdapter(this.node.parentNode, RenderAdapter);
-        }
+        var node = this.node;
+        do {
+            node = node.parentNode;
+            if (node.host) {
+                return this.factory.getAdapter(node.host, RenderAdapter);
+            }
+            var adapter = this.factory.getAdapter(node, RenderAdapter);
+            if (adapter) {
+                return adapter;
+            }
+        } while(node.parentNode);
+
+        return null;
     },
 
     /**

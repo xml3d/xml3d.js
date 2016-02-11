@@ -86,3 +86,41 @@ test("Distributed nodes", function() {
 
     test.fin(QUnit.start).done();
 });
+
+test("Cube asset component", function() {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/web-components.html");
+
+    var test = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
+        var cube = s.ownerDocument.createElement("x-cube");
+        var group = s.ownerDocument.getElementById("rootGroup");
+        group.appendChild(cube);
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),150,100);
+        QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Cube rendered with the correct material");
+
+        var cube = s.ownerDocument.querySelector("x-cube");
+        var trans = s.ownerDocument.createElement("float3");
+        trans.setAttribute("class", "cube-translation");
+        trans.setAttribute("name", "translation");
+        trans.textContent = "2 0 0";
+        cube.appendChild(trans);
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),215,100);
+        QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Cube moved in response to distributed node for translation");
+
+        var t = s.ownerDocument.querySelector("float3.cube-translation");
+        t.textContent = "-2 0 0";
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),70,100);
+        QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Cube moved in response to translation change");
+    });
+
+    test.fin(QUnit.start).done();
+});

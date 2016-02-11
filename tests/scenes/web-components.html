@@ -5,19 +5,10 @@
   <script type="text/javascript" src="../../build/output/xml3d.js"></script>
   <script type="text/javascript" src="../../tools/camera.js"></script>
     <script>
-        function createXML3DComponent(template) {
-            var ElementProto = Object.create(HTMLElement.prototype);
-            ElementProto.createdCallback = function() {
-                var root = this.createShadowRoot();
-                root.appendChild(document.importNode(template.content, true));
-            };
-            document.registerElement(template.getAttribute("name"), {prototype : ElementProto});
-        }
-
         window.addEventListener("load", function() {
-            createXML3DComponent(document.querySelector("#square-template"));
+            XML3D.registerComponent(document.querySelector("#square-template"));
+            XML3D.registerComponent(document.querySelector("#cube-template"));
         });
-
     </script>
 </head>
 <body style="background-color: #fff;width:500px">
@@ -43,7 +34,22 @@
         </mesh>
     </template>
 
-    <xml3d id="myXml3d" width="300" height="200" style="background-color: #eee">
+    <template id="cube-template" name="x-cube">
+        <style> @import "../../css/xml3d-component.css"; </style>
+        <material id="square-material" model="urn:xml3d:material:flat"> <!-- id is deliberately the same as the square above to test id scoping -->
+            <float3 name="diffuseColor">1 0 1</float3>
+        </material>
+        <data id="t_cube" compute="transform = xflow.createTransform(translation, rotation, scale)">
+            <content select="float3.cube-translation">
+                <float3 name="translation">0 0 0</float3>
+            </content>
+            <float4 name="rotation">0 0 1 0</float4>
+            <float3 name="scale">1 1 1</float3>
+        </data>
+        <model transform="#t_cube" src="assets/cube.xml#Cube" material="#square-material"></model>
+    </template>
+
+    <xml3d id="myXml3d" width="300" height="200" style="background-color: #eee" >
         <group id="rootGroup" style="transform: translate3d(0px, 0px, -10px)">
 
         </group>

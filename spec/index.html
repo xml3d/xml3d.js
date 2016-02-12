@@ -3092,6 +3092,126 @@
 </section>
 
 <section>
+    <h2>Web Components</h2>
+
+    <p>XML3D supports the <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components">web component</a> approach to
+    defining custom HTML objects that can be easily encapsulated and shared. </p>
+
+    <div class="note">
+        Web Components are a new technology still under development by the major browsers. In some browsers they may need to be
+        explicitly enabled, others may not support them at all. In these cases a <a href="http://webcomponents.org/polyfills/">web components polyfill</a>
+        will need to be included in the page.
+    </div>
+
+    <p>The following example shows a simple web component that instantiates a cube:</p>
+
+     <pre class="example highlight">
+        &lt;script type="text/javascript"&gt;
+            window.addEventListener("load", function() {
+                // This is a convenience function provided by XML3D. You can also register your web component manually
+                // as described in the web components standard
+                XML3D.registerComponent(document.querySelector("#cube-template"));
+            });
+        &lt;/script&gt;
+
+        &lt;template id="cube-template" name="x-cube"&gt;
+            &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
+                &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
+            &lt;/material&gt;          
+            &lt;mesh material="#cube-material" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+        &lt;/template&gt;
+         
+        &lt;xml3d&gt;
+            &lt;group style="transform: translate3d(0,0,-10px)"&gt;
+                &lt;x-cube&gt;&lt;/x-cube&gt;
+            &lt;/group&gt;
+        &lt;/xml3d&gt;
+    </pre>
+
+    <p>XML3D also supports using content elements to configure web components. For example, to make the color of the cube configurable:</p>
+
+    <pre class="example highlight">
+        &lt;template id="cube-template" name="x-cube"&gt;
+            &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
+                &lt;content select="float3[name='diffuseColor']"&gt;
+                    &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
+                &lt;/content&gt;
+            &lt;/material&gt;          
+            &lt;mesh material="#cube-material" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+        &lt;/template&gt;
+
+        &lt;xml3d&gt;
+            &lt;group style="transform: translate3d(0,0,-10px)"&gt;
+                &lt;x-cube&gt;
+                    &lt;float3 name="diffuseColor"&gt;1 0 1&lt;/float3&gt;
+                &lt;/x-cube&gt;
+            &lt;/group&gt;
+        &lt;/xml3d&gt;
+    </pre>
+
+    <p>Note that content elements can only be used to configure <a href="#value-elements">value elements</a> and the
+        <a href="#the-data-element">data element</a>. In many cases this is not a severe limitation. For example, normally it would
+    not be possible to configure the transform of an object inside a component because neither the <code>style</code> attribute
+    nor the <a href="#the-transform-element">transform element</a> can be configured in this way. But as shown in the 
+    <a href="#transformable-elements">transformable elements</a> section an object's transform can also be represented as an Xflow data graph:</p>
+
+    <pre class="example highlight">
+        &lt;template id="cube-template" name="x-cube"&gt;
+            ...
+            &lt;data id="cube-transform" compute="transform = xflow.createTransform(translation, rotation, scale)"&gt;
+                &lt;content select="float3[name='translation']"&gt;
+                    &lt;float3 name="translation"&gt;0 0 0&lt;/float3&gt;
+                &lt;/content&gt;
+                &lt;content select="float4[name='rotation']"&gt;
+                    &lt;float4 name="rotation"&gt;0 0 1 0&lt;/float4&gt;
+                &lt;/content&gt;
+                &lt;content select="float3.my-cube-scale"&gt; &lt;!-- Selecting by class --&gt;
+                    &lt;float3 name="scale"&gt;1 1 1&lt;/float3&gt;
+                &lt;/content&gt;
+            &lt;/data&gt;
+            &lt;mesh transform="#cube-transform" material="#cube-material" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+        &lt;/template&gt;
+
+        &lt;xml3d&gt;
+            &lt;x-cube&gt;
+                &lt;float3 name="translation"&gt;0 0 -10&lt;/float3&gt;
+                &lt;float3 class="my-cube-scale" name="scale"&gt;0.5 0.5 0.5&lt;/float3&gt;
+            &lt;/x-cube&gt;
+        &lt;/xml3d&gt;
+    </pre>
+
+    <p>The following rules and limitations also apply to components: </p>
+    <ul>
+        <li>The <code>names</code> and types of configurable value elements must always match</li>
+        <li>The tag <code>name</code> given for the template must include a hyphen '-'</li>
+        <li>The component tag itself (eg. <code>&lt;x-cube&gt;</code>) acts as a <a href="#the-group-element">group element</a> in the scene</li>
+        <li>The template acts as a black box, exposing only the configurable interface as defined by the content elements. This means CSS, Javascript and
+        HTML id references cannot cross the boundary between the template and the rest of the page. Id references are scoped to the template.</li>
+        <li>Nested templates are not supported</li>
+    </ul>
+
+    <div class="note">
+        To avoid seeing raw data displayed on the page it's a good idea to load and register template elements from an external source through Javascript
+         instead of having them reside in the DOM.
+    </div>
+
+    <p>Components can also define their own event listeners and event handling code. This can be used to encapsulate user interaction within the component:</p>
+
+    <pre class="example highlight">
+        &lt;template id="cube-template" name="x-clickable-cube"&gt;
+            &lt;script type="text/javascript"&gt;
+                function myClickHandler(event) {
+                    alert("Hello!");
+                }
+            &lt;/script&gt;
+
+            &lt;mesh onclick="window.myClickHandler(event)" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+        &lt;/template&gt;C
+    </pre>
+
+</section>
+
+<section>
     <h2>Global options</h2>
     <p>XML3D provides a set of global options through the <code>XML3D.options</code> interface. These options are shared between
     all XML3D elements on a page.</p>

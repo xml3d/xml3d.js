@@ -3195,7 +3195,7 @@
          instead of having them reside in the DOM.
     </div>
 
-    <p>Components can also define their own event listeners and event handling code. This can be used to encapsulate user interaction within the component:</p>
+    <p>Components can also define their own event listeners and event handling code:</p>
 
     <pre class="example highlight">
         &lt;template id="cube-template" name="x-clickable-cube"&gt;
@@ -3203,11 +3203,18 @@
                 function myClickHandler(event) {
                     alert("Hello!");
                 }
+
+                document.getElementById("shadowMesh"); //This will return null
             &lt;/script&gt;
 
-            &lt;mesh onclick="window.myClickHandler(event)" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+            &lt;mesh id="shadowMesh" onclick="window.myClickHandler(event)" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
         &lt;/template&gt;C
     </pre>
+
+    However both the scripts inside components and the event listeners themselves are executed in the global scope, meaning they have no access to the component's
+    shadow DOM. For this reason the call to <code>document.getElementById</code> will return null in the above example. Also note that events from inside
+    the shadow DOM will bubble up through the shadow DOM boundary, but will be re-targeted to the component element when they cross the boundary. Some events
+    are not permitted to cross the boundary at all. All of these behaviors are defined by the web components standard.
 
 </section>
 

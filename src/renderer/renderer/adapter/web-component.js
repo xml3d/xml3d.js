@@ -3,7 +3,7 @@ var Events = require("../../../interface/notification.js");
 var mat4 = require("gl-matrix").mat4;
 
 var WebComponentRenderAdapter = function (factory, node) {
-    GroupRenderAdapter.call(this, factory, node, true, true);
+    GroupRenderAdapter.call(this, factory, node);
 };
 
 XML3D.createClass(WebComponentRenderAdapter, GroupRenderAdapter, {
@@ -18,7 +18,9 @@ XML3D.createClass(WebComponentRenderAdapter, GroupRenderAdapter, {
                 }
                 break;
             case Events.THIS_REMOVED:
+                removeRecursive(this.renderNode);
                 this.dispose();
+                this.factory.renderer.requestRedraw("Web component removed");
                 break;
             case Events.NODE_INSERTED:
                 if (evt.affectedNode.getDestinationInsertionPoints) {
@@ -39,5 +41,12 @@ XML3D.createClass(WebComponentRenderAdapter, GroupRenderAdapter, {
     }
 
 });
+
+function removeRecursive(renderNode) {
+    for (var i=0; i < renderNode.children.length; i++) {
+        removeRecursive(renderNode.children[i]);
+    }
+    renderNode.dispose && renderNode.dispose();
+}
 
 module.exports = WebComponentRenderAdapter;

@@ -3115,6 +3115,7 @@
         &lt;/script&gt;
 
         &lt;template id="cube-template" name="x-cube"&gt;
+            &lt;style&gt; @import "xml3d.org/xml3d/scripts/xml3d-component.css"; &lt;/style&gt;
             &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
                 &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
             &lt;/material&gt;          
@@ -3132,6 +3133,7 @@
 
     <pre class="example highlight">
         &lt;template id="cube-template" name="x-cube"&gt;
+            &lt;style&gt; @import "xml3d.org/xml3d/scripts/xml3d-component.css"; &lt;/style&gt;
             &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
                 &lt;content select="float3[name='diffuseColor']"&gt;
                     &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
@@ -3192,7 +3194,14 @@
 
     <div class="note">
         To avoid seeing raw data displayed on the page it's a good idea to load and register template elements from an external source through Javascript
-         instead of having them reside in the DOM.
+         instead of having them reside in the DOM. All component templates should also import the xml3d-component stylesheet to prevent the raw data inside
+        value elements from being displayed on the page:
+
+    <pre class="example highlight">
+        &lt;template name="x-example"&gt;
+            &lt;style&gt; @import "xml3d.org/xml3d/scripts/xml3d-component.css"; &lt;/style&gt;
+        &lt;/template&gt;
+    </pre>
     </div>
 
     <p>Components can also define their own event listeners and event handling code:</p>

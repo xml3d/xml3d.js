@@ -3219,8 +3219,8 @@
             <dd>Creates a new Vec2 object from the space-separated string representation as used in XML3D element
                 attributes.
             </dd>
-            <dt>DOMString toDOMString(Vec2 vec)</dt>
-            <dd>Converts a Vec2 into the space-seperated string representation used in XML3D element attributes.</dd>
+            <dt>DOMString toDOMString()</dt>
+            <dd>Returns a space-seperated string representation for use in XML3D element attributes or value elements.</dd>
 
             <dt>Constructor ()</dt>
             <dd>Creates a new identity Vec2 <code>[0,0]</code></dd>
@@ -3304,8 +3304,8 @@
             <dd>Creates a new Vec3 object from the space-separated string representation as used in XML3D element
                 attributes.
             </dd>
-            <dt>DOMString toDOMString(Vec3 vec)</dt>
-            <dd>Converts a Vec3 into the space-seperated string representation used in XML3D element attributes.</dd>
+            <dt>DOMString toDOMString()</dt>
+            <dd>Returns a space-seperated string representation for use in XML3D element attributes or value elements.</dd>
 
             <dt>Constructor ()</dt>
             <dd>Creates a new identity Vec3 <code>[0,0,0]</code></dd>
@@ -3399,8 +3399,8 @@
             <dd>Creates a new Vec4 object from the space-separated string representation as used in XML3D element
                 attributes.
             </dd>
-            <dt>DOMString toDOMString(Vec4 vec)</dt>
-            <dd>Converts a Vec4 into the space-seperated string representation used in XML3D element attributes.</dd>
+            <dt>DOMString toDOMString()</dt>
+            <dd>Returns a space-seperated string representation for use in XML3D element attributes or value elements.</dd>
 
             <dt>Constructor ()</dt>
             <dd>Creates a new identity Vec4 <code>[0,0,0,0]</code></dd>
@@ -3480,8 +3480,8 @@
             <dd>Creates a new AxisAngle object from the space-separated string representation as used in XML3D element
                 attributes.
             </dd>
-            <dt>DOMString toDOMString(AxisAngle vec)</dt>
-            <dd>Converts a AxisAngle into the space-seperated string representation used in XML3D element attributes.
+            <dt>DOMString toDOMString()</dt>
+            <dd>Returns a space-seperated string representation for use in XML3D element attributes or value elements.
             </dd>
 
             <dt>Constructor ()</dt>
@@ -3526,8 +3526,8 @@
             <dd>Provides mutable access to the fourth component of this quaternion.</dd>
             <dt>static Quat fromDOMString(DOMString str)</dt>
             <dd>Creates a new Quat object from a space-separated string representation.</dd>
-            <dt>DOMString toDOMString(Quat vec)</dt>
-            <dd>Converts a Quat into a space-seperated string representation.</dd>
+            <dt>DOMString toDOMString()</dt>
+            <dd>Returns a space-seperated string representation for use in XML3D element attributes or value elements.</dd>
 
             <dt>Constructor ()</dt>
             <dd>Creates a new identity Quat <code>[0,0,0,1]</code></dd>
@@ -3891,6 +3891,8 @@
             <dd>Returns true if the given point is inside the box.</dd>
             <dt>DOMString toString()</dt>
             <dd>A human readable string representation of this box.</dd>
+            <dt>DOMString toDOMString()</dt>
+            <dd>Returns a space-seperated string representation for use in XML3D element attributes or value elements.</dd>
         </dl>
     </section>
     <section>

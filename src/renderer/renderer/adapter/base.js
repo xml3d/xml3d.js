@@ -49,6 +49,10 @@ XML3D.createClass(RenderAdapter, NodeAdapter, {
 
     getScene: function () {
         return this.factory.renderer.scene;
+    },
+
+    dispose: function() {
+        this.node = null;
     }
 });
 

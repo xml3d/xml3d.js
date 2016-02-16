@@ -51,7 +51,6 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
         }
         var status = this.materialHandler.status;
         if (status === AdapterHandle.STATUS.NOT_FOUND) {
-            XML3D.debug.logError("Could not find element of url '" + this.materialHandler.url + "' for material", this.node);
             this.getRenderNode().setMaterial(null);
             return;
         }
@@ -85,6 +84,7 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     },
 
     dispose: function() {
+        RenderAdapter.prototype.dispose.call(this);
         this.getRenderNode().remove();
         this.transformFetcher && this.transformFetcher.dispose();
         this.clearAdapterHandles();

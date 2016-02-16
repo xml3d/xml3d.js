@@ -24,6 +24,10 @@ var Resource = {};
 Resource.notifyNodeIdChange = function(node, previousId, newId) {
     var uri = new URI();
     if (previousId) {
+        var doc = getOwningDocument(node);
+        if (doc.host) {
+            uri.path = doc.host.nodeName + doc.host.componentId;
+        }
         uri.fragment = previousId;
         clearHandles(uri);
     }
@@ -65,6 +69,7 @@ function clearHandles(uri) {
             }
         }
     }
+    delete c_cachedAdapterHandles[url];
 }
 
 /**
@@ -126,7 +131,7 @@ Resource.getAdapterHandle = function(requestingNode, uri, aspect, canvasId) {
     if (handle)
         return handle;
 
-    return createAdapterHandle(doc, uri, uriStr, aspect, canvasId);
+    return createAdapterHandle(doc, uri, uriStr, aspect, canvasId, requestingNode);
 };
 
 var getOwningDocument = function(node) {
@@ -140,7 +145,7 @@ var getOwningDocument = function(node) {
     return node.ownerDocument;
 };
 
-var createAdapterHandle = function(doc, uri, uriCacheKey, aspect, canvasId) {
+var createAdapterHandle = function(doc, uri, uriCacheKey, aspect, canvasId, requestingNode) {
     var url = uri.toString();
     var handle = new AdapterHandle(url);
     c_cachedAdapterHandles[uriCacheKey][aspect][canvasId] = handle;
@@ -149,8 +154,10 @@ var createAdapterHandle = function(doc, uri, uriCacheKey, aspect, canvasId) {
         var node = URIResolver.resolveLocal(uri, doc);
         if (node)
             updateHandle(handle, aspect, canvasId, XML3D.xml3dFormatHandler, node);
-        else
+        else {
+            XML3D.debug.logError("Could not find the element referenced by '" + url, requestingNode);
             handle.setAdapter(null, AdapterHandle.STATUS.NOT_FOUND);
+        }
     }
     else {
         ResourceCounter.addPendingResource(uri, canvasId);
@@ -167,10 +174,11 @@ var createAdapterHandle = function(doc, uri, uriCacheKey, aspect, canvasId) {
                     docData.fragments.push(uri.fragment);
                     updateDocumentHandles(docURI);
                 } else {
+                    XML3D.debug.logError("Could not find the element referenced by '" + url, requestingNode);
                     invalidateDocumentHandles(uri);
                 }
             }).catch(function(e) {
-                XML3D.debug.logError(e);
+                XML3D.debug.logError(e, requestingNode);
                 invalidateDocumentHandles(uri);
             });
         }

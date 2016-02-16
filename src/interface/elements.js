@@ -110,6 +110,10 @@ function removeRecursive(element, evt) {
         removeRecursive(child, evt);
         child = child.nextElementSibling;
     }
+    if (element.shadowRoot) {
+        removeRecursive(element.shadowRoot, evt);
+    }
+
 }
 
 function addRecursive(element){

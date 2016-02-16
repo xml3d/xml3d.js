@@ -18,7 +18,6 @@ XML3D.createClass(WebComponentRenderAdapter, GroupRenderAdapter, {
                 }
                 break;
             case Events.THIS_REMOVED:
-                removeRecursive(this.renderNode);
                 this.dispose();
                 this.factory.renderer.requestRedraw("Web component removed");
                 break;

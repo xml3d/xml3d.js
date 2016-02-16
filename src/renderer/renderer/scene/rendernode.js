@@ -125,6 +125,9 @@ XML3D.extend(RenderNode.prototype, {
     remove: function () {
         this.parent.removeChild(this);
         this.scene.pager.freePageEntry({page: this.page, offset: this.offset, size: this.entrySize});
+        if (this.node) {
+            this.node = null;
+        }
     },
 
     findRayIntersections: function (/* ray, closestIntersection*/) {

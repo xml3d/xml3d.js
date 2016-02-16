@@ -8,11 +8,13 @@
         window.addEventListener("load", function() {
             XML3D.registerComponent(document.querySelector("#square-template"));
             XML3D.registerComponent(document.querySelector("#cube-template"));
+            XML3D.registerComponent(document.querySelector("#triple-cube-template"));
         });
     </script>
 </head>
 <body style="background-color: #fff;width:500px">
     <template id="square-template" name="x-square">
+
         <style> @import "../../css/xml3d-component.css"; </style>
         <material id="square-material" model="urn:xml3d:material:flat">
             <content select="float3[name='diffuseColor']">
@@ -47,6 +49,18 @@
             <float3 name="scale">1 1 1</float3>
         </data>
         <model transform="#t_cube" src="assets/cube.xml#Cube" material="#square-material"></model>
+    </template>
+
+    <template id="triple-cube-template" name="x-triplecube">
+        <style> @import "../../css/xml3d-component.css"; </style>
+        <material id="square-material" model="urn:xml3d:material:flat"> 
+            <float3 name="diffuseColor">1 0 1</float3>
+        </material>
+        <model src="assets/cube.xml#Cube" material="#square-material"></model>
+        <group>
+            <model style="transform: translate3d(5px, 0, 0)" src="assets/cube.xml#Cube" material="#square-material"></model>
+        </group>
+        <model style="transform: translate3d(-5px, 0, 0)" src="assets/cube.xml#Cube" material="#square-material"></model>
     </template>
 
     <xml3d id="myXml3d" width="300" height="200" style="background-color: #eee" >

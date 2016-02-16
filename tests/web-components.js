@@ -124,3 +124,35 @@ test("Cube asset component", function() {
 
     test.fin(QUnit.start).done();
 });
+
+test("Add/remove multiple mesh component", function() {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/web-components.html");
+
+    var test = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
+        var cube = s.ownerDocument.createElement("x-triplecube");
+        var group = s.ownerDocument.getElementById("rootGroup");
+        group.appendChild(cube);
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),150,100);
+        QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Middle cube rendered correctly");
+        pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),270,100);
+        QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Right cube rendered correctly");
+
+        var comp = s.ownerDocument.querySelector("x-triplecube");
+        comp.parentElement.removeChild(comp);
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),270,100);
+        QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "Right cube was removed");
+
+        pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),150,100);
+        QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "Middle cube was removed");
+    });
+
+    test.fin(QUnit.start).done();
+});

@@ -1,8 +1,5 @@
 var RenderNode = require("./rendernode.js");
 var Constants = require("./constants.js");
-var Frustum = require("../tools/frustum.js").Frustum;
-var vec3 = require("gl-matrix").vec3;
-var mat4 = require("gl-matrix").mat4;
 
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;

@@ -1,6 +1,5 @@
 var GroupRenderAdapter = require("./group.js");
 var Events = require("../../../interface/notification.js");
-var mat4 = require("gl-matrix").mat4;
 
 var WebComponentRenderAdapter = function (factory, node) {
     GroupRenderAdapter.call(this, factory, node);
@@ -11,11 +10,7 @@ XML3D.createClass(WebComponentRenderAdapter, GroupRenderAdapter, {
     notifyChanged: function (evt) {
         switch (evt.type) {
             case Events.ADAPTER_HANDLE_CHANGED:
-                var key = evt.key;
-                if (key == "material") {
-                    this.updateMaterialHandler();
-                    this.factory.renderer.requestRedraw("Material reference changed.");
-                }
+                GroupRenderAdapter.prototype.notifyChanged.call(this, evt);
                 break;
             case Events.THIS_REMOVED:
                 this.dispose();
@@ -40,12 +35,5 @@ XML3D.createClass(WebComponentRenderAdapter, GroupRenderAdapter, {
     }
 
 });
-
-function removeRecursive(renderNode) {
-    for (var i=0; i < renderNode.children.length; i++) {
-        removeRecursive(renderNode.children[i]);
-    }
-    renderNode.dispose && renderNode.dispose();
-}
 
 module.exports = WebComponentRenderAdapter;

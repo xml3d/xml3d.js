@@ -372,12 +372,14 @@ config.element = function(element) {
     if (element._configured === undefined ) {
         var classInfo = ClassInfo[element.localName];
         if (classInfo === undefined) {
+            if (element.nodeType !== 1) {
+                return; //Not an element node so ignore this
+            }
             if (element.nodeName.indexOf("-") !== -1) {
                 classInfo = ClassInfo["_web-component_"];
                 element.componentId = ++webComponentCounter;
             } else {
-                XML3D.debug.logInfo("Unrecognised element " + element.localName);
-                return;
+                classInfo = ClassInfo["_dummy_"];
             }
         }
 

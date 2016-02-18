@@ -539,6 +539,30 @@ classInfo['_web-component_'] = {
 };
 
 /**
+ * Properties and methods for any unknown elements that aren't web components (ie. <div> or <p>)
+ * These elements will be treated similar to a <group>
+ **/
+classInfo['_dummy_'] = {
+    id: {a: handlers.IDHandler},
+    className: {a: handlers.StringAttributeHandler, id: 'class'},
+    onclick: {a: handlers.EventAttributeHandler},
+    ondblclick: {a: handlers.EventAttributeHandler},
+    onmousedown: {a: handlers.EventAttributeHandler},
+    onmouseup: {a: handlers.EventAttributeHandler},
+    onmouseover: {a: handlers.EventAttributeHandler},
+    onmousemove: {a: handlers.EventAttributeHandler},
+    onmouseout: {a: handlers.EventAttributeHandler},
+    onkeypress: {a: handlers.EventAttributeHandler},
+    onkeydown: {a: handlers.EventAttributeHandler},
+    onkeyup: {a: handlers.EventAttributeHandler},
+    getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
+    getLocalMatrix: {m: methods.XML3DGraphTypeGetLocalMatrix},
+    getWorldBoundingBox : {m: methods.getWorldBoundingBox},
+    getLocalBoundingBox : {m: methods.getLocalBoundingBox}
+};
+
+
+/**
  * Properties and methods for content nodes, which are found inside web components
  **/
 classInfo['content'] = {

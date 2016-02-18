@@ -1,4 +1,5 @@
 var NodeAdapterFactory = require("../../../base/adapter.js").NodeAdapterFactory;
+var ConfigInfo = require("../../../interface/configuration.js").classInfo;
 
 /**
  * @constructor
@@ -32,13 +33,22 @@ RenderAdapterFactory.prototype.createAdapter = function (node) {
     var adapterConstructor = registry[node.localName];
     if (adapterConstructor !== undefined) {
         return new adapterConstructor(this, node);
-    } else {
-        if (node.nodeName.indexOf("-") !== -1) {
-            // This is likely a web component instance, so treat it as a group
-            return new registry["web-component"](this, node);
-        }
     }
-    return null;
+    if (node.nodeType !== 1) {
+        // This is a non-element node (ie. text node) so ignore it
+        return null;
+    }
+    if (ConfigInfo[node.nodeName.toLowerCase()] !== undefined) {
+        // This is an XML3D related element that doesn't need a render adapter (ie. value elements like float3)
+        return null;
+    }
+    if (node.nodeName.indexOf("-") !== -1) {
+        // This node follows the web component naming scheme, so treat it as a web component
+        return new registry["web-component"](this, node);
+    }
+
+    // This is some other element like a div or a p, in this case treat it as a group node
+    return new registry["group"](this, node);
 };
 
 RenderAdapterFactory.prototype.setScene = function (scene) {

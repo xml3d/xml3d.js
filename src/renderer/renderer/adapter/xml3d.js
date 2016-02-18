@@ -11,6 +11,10 @@ var XML3DRenderAdapter = function (factory, node) {
 };
 XML3D.createClass(XML3DRenderAdapter, RenderAdapter, {
 
+    getParentRenderAdapter: function() {
+        return null; //<xml3d> is the root element of every scene tree
+    },
+
     activeViewChanged: function () {
         var viewElement = getOrCreateActiveView(this.node);
         var adapter = this.factory.getAdapter(viewElement);

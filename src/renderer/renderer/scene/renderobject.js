@@ -2,8 +2,6 @@ var SystemNotifier = require("../../webgl/system/system-notifier.js");
 var RenderNode = require("./rendernode.js");
 var DrawableClosure= require("./drawableclosure.js");
 var C = require("./constants.js");
-var Scene= require("./scene.js");
-var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 var mat4 = require("gl-matrix").mat4;
 
 // Entry:

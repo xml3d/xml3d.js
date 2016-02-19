@@ -65,16 +65,16 @@ test("Texture Points", 7, function() {
 
     var testStep = 0;
     function onFrameDrawn(){
-        if( XML3DUnit.getPixelValue(glTest, 172, 168)[0] != 255)
+        if( XML3DUnit.getPixelValue(glTest, 172, 168)[1] != 255)
             return;
 
-        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 172, 168), [255,0,0,255], PIXEL_EPSILON,
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 172, 168), [0,255,0,255], PIXEL_EPSILON,
             "Lower Point has correct texture" );
-        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 172, 232), [0,255,255,255], PIXEL_EPSILON,
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 172, 232), [0,0,255,255], PIXEL_EPSILON,
             "Upper Point has correct texture" );
-        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 138, 200), [0,255,0,255], PIXEL_EPSILON,
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 138, 200), [255,0,0,255], PIXEL_EPSILON,
             "Left Point has correct texture" );
-        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 198, 200), [0,0,255,255], PIXEL_EPSILON,
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 198, 200), [0,255,255,255], PIXEL_EPSILON,
             "Right Point has correct texture" );
         QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 158, 155), [0,0,0,0], PIXEL_EPSILON,
             "Corner Point is transparent due to round texture image" );
@@ -93,16 +93,16 @@ test("Texture Color Points", 6, function() {
 
     var testStep = 0;
     function onFrameDrawn(){
-        if( XML3DUnit.getPixelValue(glTest, 428, 167)[0] != 255)
+        if( XML3DUnit.getPixelValue(glTest, 428, 167)[1] != 255)
             return;
 
-        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 428, 167), [255,0,0,255], PIXEL_EPSILON,
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 428, 167), [0,255,0,255], PIXEL_EPSILON,
             "Lower Point has correct texture and color" );
-        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 428, 231), [0,102,102,255], PIXEL_EPSILON,
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 428, 231), [0,0,102,255], PIXEL_EPSILON,
             "Upper Point has correct texture and color" );
-        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 396, 200), [0,153,0,255], PIXEL_EPSILON,
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 396, 200), [153,0,0,255], PIXEL_EPSILON,
             "Left Point has correct texture and color" );
-        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 460, 200), [0,0,204,255], PIXEL_EPSILON,
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 460, 200), [0,204,204,255], PIXEL_EPSILON,
             "Right Point has correct texture and color" );
         start();
     }

@@ -76,6 +76,15 @@ XML3D.createClass(LightRenderAdapter, SceneElementAdapter, {
         var m = new XML3D.Mat4();
         this.renderNode.getWorldMatrix(m.data);
         return m;
+    },
+
+    /**
+     * @return {XML3D.Mat4}
+     */
+    getLocalMatrix: function () {
+        var m = new XML3D.Mat4();
+        this.renderNode.getLocalMatrix(m.data);
+        return m;
     }
 });
 

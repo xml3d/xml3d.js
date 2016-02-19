@@ -156,3 +156,45 @@ test("Add/remove multiple mesh component", function() {
 
     test.fin(QUnit.start).done();
 });
+
+test("Add divs to scene graph", function() {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/web-components.html");
+
+    var test = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
+        var cube = s.ownerDocument.createElement("x-triplecube");
+        var group = s.ownerDocument.getElementById("rootGroup");
+        var div = s.ownerDocument.createElement("div");
+        div.setAttribute("id", "scene_div");
+        group.appendChild(div);
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var div = s.ownerDocument.querySelector("#scene_div");
+        QUnit.ok(div.getWorldMatrix && div.getWorldBoundingBox, "Div was configured as a group element");
+
+        var wm = div.getWorldMatrix();
+        var pwm = div.parentElement.getWorldMatrix();
+        QUnit.closeMatrix(wm, pwm, EPSILON, "Div world matrix matches parent's world matrix");
+
+        var mesh = s.ownerDocument.createElement("mesh");
+        mesh.setAttribute("src", "#sdata");
+        div.appendChild(mesh);
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),150,100);
+        QUnit.closeArray(pick, [255, 0, 0, 255], PIXEL_EPSILON, "Mesh inside div was rendered");
+
+        s.ownerDocument.querySelector("#scene_div").setAttribute("style", "transform: translate3d(4px, 0, 0)");
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),270,100);
+        QUnit.closeArray(pick, [255, 0, 0, 255], PIXEL_EPSILON, "Changing div's style transform moved the mesh");
+
+        return s;
+    });
+
+    test.fin(QUnit.start).done();
+});

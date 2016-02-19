@@ -2456,11 +2456,8 @@
 
             <p>WebGL primitive: <code>POINT</code></p>
 
-            <p>Points are drawn from a list of vertex positions, which each position being drawn as a single point.</p>
-
-            <div class="note">Currently to change the size of the drawn points, or to draw them as textured sprites, it
-                is necessary to define a custom material shader.
-            </div>
+            <p><dfn>The point primitive</dfn> is drawn from a list of vertex positions, with each position being drawn as a single point. Points
+            must use either the <a>point material model</a> or a custom material designed for point rendering. </p>
         </section>
 
         <section>
@@ -2758,6 +2755,65 @@
         }
       </pre>
         </section>
+    <section>
+        <h2>Point</h2>
+
+        <p>URN: <code>urn:xml3d:material:point</code></p>
+
+        <div class="attributes">Parameters:
+            <table>
+                <tbody>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>diffuseColor</td>
+                    <td>float3</td>
+                    <td>1 1 1</td>
+                    <td>The objects RGB color</td>
+                </tr>
+                <tr>
+                    <td>useVertexColor</td>
+                    <td>bool</td>
+                    <td>false</td>
+                    <td>if true, the vertex attribute 'color' is used to color the object.</td>
+                </tr>
+                <tr>
+                    <td>texCoordOffset</td>
+                    <td>float2</td>
+                    <td>0 0</td>
+                    <td>An offset to add to the texture coordinates for each point.</td>
+                </tr>
+                <tr>
+                    <td>texCoordSize</td>
+                    <td>float2</td>
+                    <td>1 1</td>
+                    <td>A scale factor to multiply the texture coordinates of each point with. Only applies to
+                    the implicit texture coordinate defined by gl_PointCoord, not the optional <code>texcoord</code> vertex attribute.
+                     See the note below for more information.</td>
+                </tr>
+                <tr>
+                    <td>pointSize</td>
+                    <td>float</td>
+                    <td>1</td>
+                    <td>The base size of each point. Will be scaled by distance from the camera.</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="note">
+                <p> For points, texture coordinates are a mixture of the <code>texcoord</code> attribute and the <code>gl_PointCoord</code>
+                    value provided by WebGL. The final texture coordinate for each fragment is calculated as follows: </p>
+
+                <pre>  vec2 uv = texcoord + texCoordOffset + (gl_PointCoord * texCoordSize);</pre>
+            </div>
+        </div>
+        <p>
+            The <dfn>point material model</dfn> is always used in conjunction with <a>the point primitive</a> type.
+        </p>
+    </section>
     </section>
 
     <section>

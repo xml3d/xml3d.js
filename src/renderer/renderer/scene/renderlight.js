@@ -92,15 +92,13 @@ XML3D.extend(RenderLight.prototype, {
         this.scene.emit(EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this, removed);
     },
 
-    updateWorldMatrix: function () {
-        if (this.parent) {
-            this.parent.getWorldMatrix(tmp_worldMatrix);
-            var page = this.page;
-            var offset = this.offset;
-            XML3D.math.mat4.multiplyOffset(page, offset + WORLD_MATRIX_OFFSET, page, offset + LOCAL_MATRIX_OFFSET, tmp_worldMatrix, 0);
-            // We change position / direction of the light
-            this.lightValueChanged();
-        }
+    updateWorldMatrix: function (sourceMat4) {
+        var page = this.page;
+        var offset = this.offset;
+        XML3D.math.mat4.multiplyOffset(page, offset + WORLD_MATRIX_OFFSET, page, offset + LOCAL_MATRIX_OFFSET, sourceMat4, 0);
+        // We change position / direction of the light
+        this.lightValueChanged();
+        this.transformDirty = false;
     },
 
     visibilityChanged: function (newVal) {
@@ -109,7 +107,8 @@ XML3D.extend(RenderLight.prototype, {
     },
 
     setTransformDirty: function () {
-        this.updateWorldMatrix();
+        this.parent.getWorldMatrix(tmp_worldMatrix);
+        this.updateWorldMatrix(tmp_worldMatrix);
     },
 
     remove: function () {

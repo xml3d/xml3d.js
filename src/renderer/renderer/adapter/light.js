@@ -27,6 +27,7 @@ XML3D.createClass(LightRenderAdapter, SceneElementAdapter, {
             parent: parentNode
         });
         this.updateVisibility();
+        this.updateLocalMatrix();
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {

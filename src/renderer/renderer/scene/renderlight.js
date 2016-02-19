@@ -7,13 +7,12 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
 
 var tmp_worldMatrix = XML3D.math.mat4.create();
 
-var SHADOWMAP_OFFSET_MATRIX = new Float32Array([0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0]);
-
 /** @const */
-var CLIPPLANE_NEAR_MIN = 1.0;
-
+var WORLD_MATRIX_OFFSET = 0;
 /** @const */
-var ENTRY_SIZE = 16;
+var LOCAL_MATRIX_OFFSET = WORLD_MATRIX_OFFSET + 16;
+/** @const */
+var ENTRY_SIZE = LOCAL_MATRIX_OFFSET;
 
 var c_BoundingBox = new XML3D.Box();
 
@@ -63,10 +62,20 @@ XML3D.extend(RenderLight.prototype, {
         this.lightStructureChanged(false);
     },
 
-    setLocalMatrix: function (source) {
-        XML3D.debug.logError("RenderLight::setLocalMatrix not implemented");
+    getLocalMatrix: function (dest) {
+        var o = this.offset + LOCAL_MATRIX_OFFSET;
+        for (var i = 0; i < 16; i++, o++) {
+            dest[i] = this.page[o];
+        }
     },
 
+    setLocalMatrix: function (source) {
+        var o = this.offset + LOCAL_MATRIX_OFFSET;
+        for (var i = 0; i < 16; i++, o++) {
+            this.page[o] = source[i];
+        }
+        this.setTransformDirty();
+    },
 
     getFrustum: function (aspect) {
         this.scene.getBoundingBox(c_BoundingBox);
@@ -86,7 +95,9 @@ XML3D.extend(RenderLight.prototype, {
     updateWorldMatrix: function () {
         if (this.parent) {
             this.parent.getWorldMatrix(tmp_worldMatrix);
-            this.setWorldMatrix(tmp_worldMatrix);
+            var page = this.page;
+            var offset = this.offset;
+            XML3D.math.mat4.multiplyOffset(page, offset + WORLD_MATRIX_OFFSET, page, offset + LOCAL_MATRIX_OFFSET, tmp_worldMatrix, 0);
             // We change position / direction of the light
             this.lightValueChanged();
         }
@@ -101,13 +112,11 @@ XML3D.extend(RenderLight.prototype, {
         this.updateWorldMatrix();
     },
 
-
     remove: function () {
         this.parent.removeChild(this);
         this.scene.lights.remove(this);
         this.lightStructureChanged(true);
     },
-
 
     getWorldSpaceBoundingBox: function (bbox) {
         bbox.setEmpty();

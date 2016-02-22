@@ -314,7 +314,7 @@ function updateComputedChannels(channelNode){
     }
 
     if(oldDataflowChannelNode && oldDataflowChannelNode != channelNode.dataflowChannelNode){
-        oldDataflowChannelNode.owner._removeSubstitutionNode(oldDataflowChannelNode);
+        oldDataflowChannelNode.owner && oldDataflowChannelNode.owner._removeSubstitutionNode(oldDataflowChannelNode);
     }
 }
 

@@ -115,6 +115,10 @@
             return;
         }
         var bb = element.getWorldBoundingBox();
+        if (bb.empty()) {
+            element.addEventListener("load", this.examine.bind(this, element));
+            return;
+        }
         var center = bb.center();
         var r = center.len();
         var newPos = center.clone();

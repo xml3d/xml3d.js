@@ -6,8 +6,6 @@ XML3D.materials.register("point", {
         "attribute vec2 texcoord;",
 
         "varying vec3 fragNormal;",
-        "varying vec3 fragVertexPosition;",
-        "varying vec3 fragEyeVector;",
         "varying vec2 fragTexCoord;",
         "varying vec3 fragVertexColor;",
 
@@ -15,7 +13,6 @@ XML3D.materials.register("point", {
         "uniform mat4 modelViewMatrix;",
         "uniform mat4 projectionMatrix;",
         "uniform mat3 modelViewMatrixN;",
-        "uniform vec3 eyePosition;",
         "uniform vec3 coords;",
         "uniform float pointSize;",
 
@@ -23,11 +20,10 @@ XML3D.materials.register("point", {
         "    vec3 pos = position;",
 
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
-        "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
-        "    fragEyeVector = normalize(fragVertexPosition);",
         "    fragTexCoord = texcoord;",
         "    fragVertexColor = color;",
-        "    vec4 pos2 = vec4(fragVertexPosition, 1.0); pos2.x += pointSize;",
+        "    vec4 pos2 = modelViewMatrix * vec4(pos, 1.0);",
+        "    pos2.x += pointSize;",
         "    gl_PointSize = distance( gl_Position.xy, (projectionMatrix * pos2).xy ) * coords.x / gl_Position.w;",
         "}"
     ].join("\n"),
@@ -45,8 +41,6 @@ XML3D.materials.register("point", {
         "#endif",
 
         "varying vec3 fragNormal;",
-        "varying vec3 fragVertexPosition;",
-        "varying vec3 fragEyeVector;",
         "varying vec2 fragTexCoord;",
         "varying vec3 fragVertexColor;",
 
@@ -57,7 +51,6 @@ XML3D.materials.register("point", {
         "    objDiffuse *= fragVertexColor;",
         "  #if HAS_DIFFUSETEXTURE",
         "    vec2 texCoord = fragTexCoord + texCoordOffset + gl_PointCoord*texCoordSize;",
-        "    texCoord.y = 1.0 - texCoord.y;",
         "    vec4 texDiffuse = texture2D(diffuseTexture, texCoord);",
         "    alpha *= texDiffuse.a;",
         "    objDiffuse *= texDiffuse.rgb;",

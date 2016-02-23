@@ -14,11 +14,6 @@ var WORLD_BB_OFFSET = LOCAL_MATRIX_OFFSET + 16;
 var ENTRY_SIZE = WORLD_BB_OFFSET + 6;
 
 
-   /** @const */
-    var CLIPPLANE_NEAR_MIN = 0.01;
-
-    /** @const */
-    var DEFAULT_FIELDOFVIEW = 45 / 180 * Math.PI;
 /**
  *
  * @constructor

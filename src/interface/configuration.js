@@ -565,7 +565,7 @@ classInfo['_dummy_'] = {
 /**
  * Properties and methods for content nodes, which are found inside web components
  **/
-classInfo['content'] = {
+classInfo['_content_'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'}
 };

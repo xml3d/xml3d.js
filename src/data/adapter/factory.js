@@ -74,6 +74,10 @@ XML3DDataAdapterFactory.prototype.createAdapter = function (node) {
     if (adapterContructor !== undefined) {
         return new adapterContructor(this, node);
     }
+    if (node.localName.indexOf("-") > 0) {
+        // This is likely a web component instance, treat it as a data element
+        return new reg["data"](this, node);
+    }
     return null;
 };
 

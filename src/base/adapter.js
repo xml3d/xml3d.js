@@ -156,11 +156,16 @@ NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
  */
 NodeAdapter.prototype.traverse = function(callback) {
     callback(this);
-    var child = this.node.firstElementChild || (this.node.shadowRoot && this.node.shadowRoot.firstElementChild);
-    while (child) {
-        var adapter = this.factory.getAdapter(child);
+    var children = this.node.childNodes;
+    if (this.node.shadowRoot) {
+        children = this.node.shadowRoot.childNodes;
+    } else if (this.node.getDistributedNodes) {
+        children = this.node.getDistributedNodes();
+    }
+
+    for (var i=0; i < children.length; i++) {
+        var adapter = this.factory.getAdapter(children[i]);
         adapter && adapter.traverse(callback);
-        child = child.nextElementSibling;
     }
 };
 

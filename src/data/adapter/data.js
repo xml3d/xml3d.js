@@ -98,9 +98,12 @@ function recursiveDataNodeAttrInit(parentNode) {
 
 function recursiveDataAdapterConstruction(adapter) {
     var children = adapter.node.childNodes;
-    if (adapter.node.getDistributedNodes) {
+ 	if (adapter.node.shadowRoot) {
+        children = adapter.node.shadowRoot.childNodes;
+    } else if (adapter.node.getDistributedNodes) {
         children = adapter.node.getDistributedNodes();
     }
+
     for (var i=0; i < children.length; i++) {
         var child = children[i];
         var subadapter = adapter.factory.getAdapter(child);

@@ -34,10 +34,15 @@ XML3D.createClass(RenderAdapter, NodeAdapter, {
      * @param {Element} element
      */
     initChildElements: function (element) {
-        var child = element.shadowRoot ? element.shadowRoot.firstElementChild : element.firstElementChild;
-        while (child) {
-            this.initElement(child);
-            child = child.nextElementSibling;
+        var children = element.childNodes;
+        if (element.shadowRoot) {
+            children = element.shadowRoot.childNodes;
+        } else if (element.getDistributedNodes) {
+            children = element.getDistributedNodes();
+        }
+
+		for (var i=0; i < children.length; i++) {
+            this.initElement(children[i]);
         }
     },
 

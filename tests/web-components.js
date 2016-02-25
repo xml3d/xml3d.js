@@ -13,7 +13,7 @@ test("Simple square component", function() {
         // as part of the mutation event processing. This happens as part of the document.registerElement function that we overwrite in dom.js,
         // causing the returned transform style to be "none" during initialization of the x-square's GroupRenderAdapter.
         // Firefox does not show this behavior and instead returns the correct style.
-        s.ownerDocument.querySelector("x-square").setAttribute("style", "transform: translate3d(-3px, 0, -10px)");
+        s.ownerDocument.querySelector("x-square").setAttribute("style", "transform: translate3d(-3px, 0, 0)");
         return s;
     }).then(promiseSceneRendered).then(function(s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),70,100);
@@ -43,7 +43,7 @@ test("Distributed nodes", function() {
         // as part of the mutation event processing. This happens as part of the document.registerElement function that we overwrite in dom.js,
         // causing the returned transform style to be "none" during initialization of the x-square's GroupRenderAdapter.
         // Firefox does not show this behavior and instead returns the correct style.
-        s.ownerDocument.querySelector("x-square").setAttribute("style", "transform: translate3d(-3px, 0, -10px)");
+        s.ownerDocument.querySelector("x-square").setAttribute("style", "transform: translate3d(-3px, 0, 0)");
         return s;
     }).then(promiseSceneRendered).then(function(s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),70,100);
@@ -192,6 +192,48 @@ test("Add divs to scene graph", function() {
     }).then(promiseSceneRendered).then(function(s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),270,100);
         QUnit.closeArray(pick, [255, 0, 0, 255], PIXEL_EPSILON, "Changing div's style transform moved the mesh");
+
+        return s;
+    });
+
+    test.fin(QUnit.start).done();
+});
+
+test("Transform component", function() {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/web-components.html");
+
+    var test = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
+        var square = s.ownerDocument.querySelector("x-square");
+        square.removeAttribute("style");
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),150,100);
+        QUnit.closeArray(pick, [0, 255, 0, 255], PIXEL_EPSILON, "Square component has no transformation");
+
+        var trans = s.ownerDocument.createElement("x-test-transform");
+        trans.setAttribute("id", "testTransform");
+        s.appendChild(trans);
+
+        var square = s.ownerDocument.querySelector("x-square");
+        square.setAttribute("transform", "#testTransform");
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),250,100);
+        QUnit.closeArray(pick, [0, 255, 0, 255], PIXEL_EPSILON, "Cube moved in response to transform component");
+
+        var trans = s.ownerDocument.querySelector("x-test-transform");
+        var to = s.ownerDocument.createElement("float3");
+        to.setAttribute("name", "translation");
+        to.textContent = "-4 0 0";
+        trans.appendChild(to);
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),40,100);
+        QUnit.closeArray(pick, [0, 255, 0, 255], PIXEL_EPSILON, "Cube moved in response to translation override");
 
         return s;
     });

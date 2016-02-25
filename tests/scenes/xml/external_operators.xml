@@ -46,4 +46,14 @@
         <float3 name="posAdd1">1 1 1  0 0 0</float3>
         <float3 name="posAdd2">1 0 0  0 -1 0</float3>
     </data>
+
+    <dataflow id="transform" out="transform">
+        <script name="xflow.fromAxisAngle" type="text/javascript" src="../../scripts/xflow-fromaxisangle.js"></script>
+        <float3 name="translation" param="true"></float3>
+        <float4 name="rotation" param="true"></float4>
+        <compute>
+            quat = xflow.fromAxisAngle(rotation);
+            transform = xflow.createTransform(translation, quat);
+        </compute>
+    </dataflow>
 </xml3d>

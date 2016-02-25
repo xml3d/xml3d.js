@@ -9,6 +9,7 @@
             XML3D.registerComponent(document.querySelector("#square-template"));
             XML3D.registerComponent(document.querySelector("#cube-template"));
             XML3D.registerComponent(document.querySelector("#triple-cube-template"));
+            XML3D.registerComponent(document.querySelector("#transform-template"));
         });
     </script>
 </head>
@@ -63,6 +64,18 @@
         <model style="transform: translate3d(-5px, 0, 0)" src="assets/cube.xml#Cube" material="#square-material"></model>
     </template>
 
+    <template id="transform-template" name="x-test-transform">
+        <style> @import "../../css/xml3d-component.css"; </style>
+        <data id="t_test1" compute="dataflow['xml/external_operators.xml#transform']">
+            <content select="float3[name='translation']">
+                <float3 name="translation">4 0 0</float3>
+            </content>
+            <content select="float4[name='rotation']">
+                <float4 name="rotation">0 0 0 1</float4>
+            </content>
+        </data>
+    </template>
+
     <xml3d id="myXml3d" width="300" height="200" style="background-color: #eee" >
         <data id="sdata">
             <int name="index">0 2 1 0 3 2</int>
@@ -72,11 +85,10 @@
         </data>
 
         <group id="rootGroup" style="transform: translate3d(0px, 0px, -10px)">
+            <x-square style="transform: translate3d(-3px, 0, 0)">
 
+            </x-square>
         </group>
-        <x-square style="transform: translate3d(-3px, 0, -10px)">
-
-        </x-square>
     </xml3d>
 
 

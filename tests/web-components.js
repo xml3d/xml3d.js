@@ -240,3 +240,52 @@ test("Transform component", function() {
 
     test.fin(QUnit.start).done();
 });
+
+test("Web components inside web components, oh my!", function() {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/web-components.html");
+
+    var test = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
+        var square = s.ownerDocument.querySelector("x-square");
+        square.setAttribute("style", "display: none");
+
+        var cubeslot = s.ownerDocument.createElement("x-triplecube-slots");
+        s.appendChild(cubeslot);
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),150,170);
+        QUnit.closeArray(pick, [255, 255, 0, 255], PIXEL_EPSILON, "Triplecube component with content slots was created properly");
+
+        var cubeslot = s.ownerDocument.querySelector("x-triplecube-slots");
+        var leftCube = s.ownerDocument.createElement("x-cube");
+        leftCube.setAttribute("class", "left");
+        leftCube.setAttribute("style", "transform: translate3d(-1px, 0, 0)");
+        var color = s.ownerDocument.createElement("float3");
+        color.setAttribute("name", "diffuseColor");
+        color.textContent = "0 0 1";
+        leftCube.appendChild(color);
+
+        var rightCube = s.ownerDocument.createElement("x-cube");
+        rightCube.setAttribute("class", "right");
+        rightCube.setAttribute("style", "transform: translate3d(1px, 0, 0)");
+
+        cubeslot.appendChild(leftCube);
+        cubeslot.appendChild(rightCube);
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        // Left cube has a blue color override through a <content> slot
+        // Both cubes have their own 1px transforms that should combine with the 1px transform around their <content> slots
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),40,100);
+        QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Left cube instance was added properly");
+
+        pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),250,100);
+        QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Right cube instance was added properly");
+
+        return s;
+    });
+
+    test.fin(QUnit.start).done();
+});

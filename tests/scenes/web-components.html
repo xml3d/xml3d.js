@@ -10,6 +10,7 @@
             XML3D.registerComponent(document.querySelector("#cube-template"));
             XML3D.registerComponent(document.querySelector("#triple-cube-template"));
             XML3D.registerComponent(document.querySelector("#transform-template"));
+            XML3D.registerComponent(document.querySelector("#triple-cube-slot-template"));
         });
     </script>
 </head>
@@ -40,7 +41,9 @@
     <template id="cube-template" name="x-cube">
         <style> @import "../../css/xml3d-component.css"; </style>
         <material id="square-material" model="urn:xml3d:material:flat"> <!-- id is deliberately the same as the square above to test id scoping -->
-            <float3 name="diffuseColor">1 0 1</float3>
+            <content select="float3[name='diffuseColor']">
+                <float3 name="diffuseColor">1 0 1</float3>
+            </content>
         </material>
         <data id="t_cube" compute="transform = xflow.createTransform(translation, rotation, scale)">
             <content select="float3.cube-translation">
@@ -64,6 +67,28 @@
         <model style="transform: translate3d(-5px, 0, 0)" src="assets/cube.xml#Cube" material="#square-material"></model>
     </template>
 
+    <template id="triple-cube-slot-template" name="x-triplecube-slots">
+        <style> @import "../../css/xml3d-component.css"; </style>
+        <material id="square-material" model="urn:xml3d:material:flat">
+            <float3 name="diffuseColor">1 1 0</float3>
+        </material>
+        <group style="transform: translate3d(-1px, 0, 0);">
+            <content select=".left">
+
+            </content>
+        </group>
+
+        <group style="transform: translate3d(0, 2px, 0)">
+            <model src="assets/cube.xml#Cube" material="#square-material"></model>
+        </group>
+
+        <group style="transform: translate3d(1px, 0, 0)">
+            <content select=".right">
+
+            </content>
+        </group>
+    </template>
+
     <template id="transform-template" name="x-test-transform">
         <style> @import "../../css/xml3d-component.css"; </style>
         <data id="t_test1" compute="dataflow['xml/external_operators.xml#transform']">
@@ -76,7 +101,7 @@
         </data>
     </template>
 
-    <xml3d id="myXml3d" width="300" height="200" style="background-color: #eee" >
+    <xml3d id="myXml3d" view="#camera" width="300" height="200" style="background-color: #eee" >
         <data id="sdata">
             <int name="index">0 2 1 0 3 2</int>
             <float3 name="position">-1.0 -1.0 1.0 1.0 -1.0 1.0 1.0 1.0 1.0 -1.0 1.0 1.0</float3>
@@ -84,7 +109,9 @@
             <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0</float2>
         </data>
 
-        <group id="rootGroup" style="transform: translate3d(0px, 0px, -10px)">
+        <view id="camera" style="transform: translate3d(0,0,10px);"></view>
+
+        <group id="rootGroup" >
             <x-square style="transform: translate3d(-3px, 0, 0)">
 
             </x-square>

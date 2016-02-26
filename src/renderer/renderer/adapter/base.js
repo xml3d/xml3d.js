@@ -8,6 +8,12 @@ XML3D.createClass(RenderAdapter, NodeAdapter, {
 
     getParentRenderAdapter: function () {
         var node = this.node;
+        if (node.getDestinationInsertionPoints) {
+            var points = node.getDestinationInsertionPoints();
+            if (points.length) {
+                return this.factory.getAdapter(points[0], RenderAdapter);
+            }
+        }
         do {
             node = node.parentNode;
             if (node.host) {

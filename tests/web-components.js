@@ -278,10 +278,10 @@ test("Web components inside web components, oh my!", function() {
     }).then(promiseSceneRendered).then(function(s) {
         // Left cube has a blue color override through a <content> slot
         // Both cubes have their own 1px transforms that should combine with the 1px transform around their <content> slots
-        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),40,100);
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),80,100);
         QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Left cube instance was added properly");
 
-        pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),250,100);
+        pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),220,100);
         QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Right cube instance was added properly");
 
         return s;

@@ -156,9 +156,9 @@ NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
  */
 NodeAdapter.prototype.traverse = function(callback) {
     callback(this);
-    var children = this.node.childNodes;
+    var children = this.node.children;
     if (this.node.shadowRoot) {
-        children = this.node.shadowRoot.childNodes;
+        children = this.node.shadowRoot.children;
     } else if (this.node.getDistributedNodes) {
         children = this.node.getDistributedNodes();
     }

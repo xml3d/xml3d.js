@@ -43,22 +43,7 @@ XML3D.createClass = function(obj, parent, methods) {
     }
     return obj;
 };
-/**
- *
- * @param {Element} template the template element for the web component
- */
-XML3D.registerComponent = function(template) {
-    if (!template || !template.content || !template.hasAttribute("name")) {
-        XML3D.debug.logError("A valid template element with a name must be provided when registering a web component!");
-        return;
-    }
-    var ElementProto = Object.create(HTMLElement.prototype);
-    ElementProto.createdCallback = function() {
-        var root = this.createShadowRoot();
-        root.appendChild(document.importNode(template.content, true));
-    };
-    document.registerElement(template.getAttribute("name"), {prototype : ElementProto});
-};
+
 
 XML3D.debug = require("./utils/debug.js");
 XML3D.util = require("./utils/misc.js");
@@ -98,6 +83,8 @@ XML3D.asset = require("./asset/asset.js");
 XML3D.webgl = {};
 XML3D.webgl.BaseRenderTree = require("./renderer/webgl/render-trees/base.js");
 XML3D.webgl.BaseRenderPass = require("./renderer/webgl/render-passes/base.js");
+
+XML3D.registerComponent = require("./interface/web-component.js");
 
 require("./resource/xml3dformathandler.js");
 

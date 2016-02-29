@@ -45,7 +45,11 @@ XCompProto.createdCallback = function() {
 
 XCompProto.place = function (path) {
     var context = this.root.firstElementChild;
-    return document.evaluate(path, context, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    while (context) {
+        node = document.evaluate(path, context, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        if (node) return node;
+        context = context.nextElementSibling;
+    }
 };
 
 XCompProto.attributeChangedCallback = function(attr, oldValue, newValue) {

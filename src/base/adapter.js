@@ -156,17 +156,26 @@ NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
  */
 NodeAdapter.prototype.traverse = function(callback) {
     callback(this);
+    var children = this.getChildren();
+
+    for (var i=0; i < children.length; i++) {
+        var adapter = this.factory.getAdapter(children[i]);
+        adapter && adapter.traverse(callback);
+    }
+};
+
+/**
+ * Returns all child nodes of this adapter, including possible shadow dom/distributed nodes
+ * @returns {*|Array.<ProcessNode>|Array|HTMLElement[]}
+ */
+NodeAdapter.prototype.getChildren = function() {
     var children = this.node.children;
     if (this.node.shadowRoot) {
         children = this.node.shadowRoot.children;
     } else if (this.node.getDistributedNodes) {
         children = this.node.getDistributedNodes();
     }
-
-    for (var i=0; i < children.length; i++) {
-        var adapter = this.factory.getAdapter(children[i]);
-        adapter && adapter.traverse(callback);
-    }
+    return children;
 };
 
 

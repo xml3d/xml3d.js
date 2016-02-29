@@ -33,23 +33,7 @@ XML3D.createClass(RenderAdapter, NodeAdapter, {
      */
     initElement: function (element) {
         this.factory.getAdapter(element);
-        this.initChildElements(element);
-    },
-
-    /**
-     * @param {Element} element
-     */
-    initChildElements: function (element) {
-        var children = element.childNodes;
-        if (element.shadowRoot) {
-            children = element.shadowRoot.childNodes;
-        } else if (element.getDistributedNodes) {
-            children = element.getDistributedNodes();
-        }
-
-		for (var i=0; i < children.length; i++) {
-            this.initElement(children[i]);
-        }
+        this.traverse(function() {}); //Can be empty function as traverse already creates adapters, which is all we need here
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {

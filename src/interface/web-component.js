@@ -34,10 +34,10 @@ XCompProto.createdCallback = function() {
         // This element was already initialized by XML3D before it was properly defined as a web component, we need to trigger a
         // cleanup and re-initialization
         var parent = this.parentElement;
-        var previousChild = this.previousElementSibling;
+        var nextChild = this.nextElementSibling;
         parent.removeChild(this);
-        if (previousChild) {
-            parent.insertBefore(this, previousChild);
+        if (nextChild) {
+            parent.insertBefore(this, nextChild);
         } else {
             parent.appendChild(this);
         }

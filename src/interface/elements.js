@@ -164,8 +164,8 @@ ElementHandler.prototype.registerAttributes = function(config) {
 
     var isHTML = (elem instanceof HTMLElement);
     var keyPrefix = (isHTML ? "_html" : "_xml");
-    var handlerKey = keyPrefix + "handlers",
-        protoKey = keyPrefix + "proto";
+    var handlerKey = keyPrefix + elem.nodeName + "handlers",
+        protoKey = keyPrefix + elem.nodeName + "proto";
 
     var canProto = !!elem.__proto__;
 

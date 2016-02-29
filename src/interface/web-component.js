@@ -26,8 +26,6 @@ XCompProto.createdCallback = function() {
 
         handler(this.getAttribute(attrName));
         this.handlers[attrName] = handler;
-
-        delete this.template;
     }
 
     if (this._configured) {
@@ -79,7 +77,6 @@ function registerComponentURL(url, name) {
 }
 
 function registerComponentElem(element, name) {
-    var elem = document.querySelector("xml3d");
     name = name || element.getAttribute("name");
     var proto = Object.create(XCompProto);
     proto.template = element;

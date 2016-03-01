@@ -42,8 +42,8 @@ RenderAdapterFactory.prototype.createAdapter = function (node) {
         // This is an XML3D related element that doesn't need a render adapter (ie. value elements like float3)
         return null;
     }
-    if (node.nodeName.indexOf("-") !== -1) {
-        // This node follows the web component naming scheme, so treat it as a web component
+    if (node.nodeName.indexOf("-") !== -1 && node.shadowRoot) {
+        // This node follows the web component naming scheme, so treat it as a web component if it has a shadow root
         return new registry["web-component"](this, node);
     }
 

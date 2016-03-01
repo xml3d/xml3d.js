@@ -11,15 +11,15 @@ XML3D.createClass(RenderAdapter, NodeAdapter, {
         if (node.getDestinationInsertionPoints) {
             var points = node.getDestinationInsertionPoints();
             if (points.length) {
-                return this.factory.getAdapter(points[0], RenderAdapter);
+                return this.factory.getAdapter(points[0]);
             }
         }
         do {
             node = node.parentNode;
             if (node.host) {
-                return this.factory.getAdapter(node.host, RenderAdapter);
+                return this.factory.getAdapter(node.host);
             }
-            var adapter = this.factory.getAdapter(node, RenderAdapter);
+            var adapter = this.factory.getAdapter(node);
             if (adapter) {
                 return adapter;
             }

@@ -62,7 +62,7 @@ XCompProto.attributeChangedCallback = function(attr, oldValue, newValue) {
 
 function registerComponent(source, name) {
     if (typeof source === "string") {
-        registerComponentURL(source, name);
+        return registerComponentURL(source, name);
     } else if (source instanceof HTMLElement) {
         registerComponentElem(source, name);
     } else {
@@ -71,14 +71,18 @@ function registerComponent(source, name) {
 }
 
 function registerComponentURL(url, name) {
-    fetch(url).then(function(response) {
-        return response.text();
-    }).then(function(text) {
-        var div = document.createElement("div");
-        div.innerHTML = text;
-        registerComponentElem(div.querySelector("template"), name);
-    }).catch(function(exception) {
-        XML3D.debug.logError("Error while registering web component: ", exception);
+    return new Promise(function(resolve, reject) {
+        fetch(url).then(function (response) {
+            return response.text();
+        }).then(function (text) {
+            var div = document.createElement("div");
+            div.innerHTML = text;
+            registerComponentElem(div.querySelector("template"), name);
+            resolve(name);
+        }).catch(function (exception) {
+            XML3D.debug.logError("Error while registering web component: ", exception);
+            reject(name);
+        });
     });
 }
 

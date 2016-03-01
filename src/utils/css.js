@@ -94,11 +94,16 @@ css.matrix3dStringToMat4 = function(matrix3d) {
     return mat4;
 };
 
-(function () {
+css.XML3DStyleElement = function() {
     var styleElement = document.createElement("style");
     styleElement.textContent = "xml3d * { display: inherit; }" +
         "float,float2,float3,float4,float4x4,int,int4,bool,texture,string,compute { display: none; } " +
         "mesh,model,group { position: absolute; }";
+    return styleElement;
+};
+
+(function () {
+    var styleElement = css.XML3DStyleElement();
     document.head.appendChild(styleElement);
 }());
 

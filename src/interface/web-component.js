@@ -1,7 +1,9 @@
+var CSS = require("../utils/css.js");
 var XCompProto = Object.create(HTMLElement.prototype);
 
 XCompProto.createdCallback = function() {
     this.root = this.createShadowRoot();
+    this.root.appendChild( CSS.XML3DStyleElement() );
     var clone = document.importNode(this.template.content, true);
     this.root.appendChild(clone);
 

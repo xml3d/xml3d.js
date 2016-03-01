@@ -23,3 +23,7 @@ xml3d|model {
 	cursor: default;
 	display: block;
 }
+
+._xml3d_hideDiv {
+	display: none;
+}

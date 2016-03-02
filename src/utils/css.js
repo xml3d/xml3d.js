@@ -98,7 +98,7 @@ css.XML3DStyleElement = function() {
     var styleElement = document.createElement("style");
     styleElement.textContent = "xml3d * { display: inherit; }" +
         "float,float2,float3,float4,float4x4,int,int4,bool,texture,string,compute { display: none; } " +
-        "mesh,model,group { position: absolute; }";
+        "mesh,model,group { position: relative; }";
     return styleElement;
 };
 

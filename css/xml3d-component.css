@@ -14,6 +14,6 @@ script  {
 mesh,
 group,
 model {
-	position: absolute;
+	position: relative;
 }
 

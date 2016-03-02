@@ -15,12 +15,8 @@ var GLRenderInterface = function (context, scene) {
     this.context = context;
     this.scene = scene;
     this.shaders = {};
-    this.options = {
-        pickingEnabled: true,
-        mouseMovePickingEnabled: true,
-        glBlendFuncSeparate: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA]
-    };
     this.renderTree = null;
+    initGLStates(this, context);
 };
 
 XML3D.extend(GLRenderInterface.prototype, {
@@ -56,8 +52,85 @@ XML3D.extend(GLRenderInterface.prototype, {
 
     createSceneRenderPass: function(target) {
         return new ForwardRenderPass(this, target || this.context.canvasTarget);
+    },
+
+    setGLState: function(state) {
+        for (var key in state) {
+            var vals = state[key];
+            this.glStateMap[key].set(state[key]);
+        }
+    },
+
+    resetGLState: function(state) {
+        for (var key in state) {
+            this.glStateMap[key].set(this.glStateMap[key].default);
+        }
     }
 });
+
+function initGLStates(ri, context) {
+    var gl = context.gl;
+
+    ri.glStateMap = {
+        depthWrite: {
+            default: [true],
+            set: function(vals) {
+                gl.depthWrite.apply(gl, vals);
+            }
+        },
+        depthTest: {
+            default: [true],
+            set: function(val) {
+                if (val[0])
+                    gl.enable(gl.DEPTH_TEST);
+                else
+                    gl.disable(gl.DEPTH_TEST)
+            }
+        },
+        depthFunc: {
+            default: [gl.LESS],
+            set: function(vals) {
+                gl.depthFunc.apply(gl, vals);
+            }
+        },
+        blendEquationSeparate:  {
+            default: [gl.FUNC_ADD, gl.FUNC_ADD],
+            set: function(vals) {
+                gl.blendEquationSeparate.apply(gl, vals);
+            }
+        },
+        blendFuncSeparate: {
+            default: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA],
+            set: function (vals) {
+                gl.blendFuncSeparate.apply(vals);
+            }
+        },
+        blend: {
+            default: [false],
+            set: function(val) {
+                if (val[0])
+                    gl.enable(gl.BLEND);
+                else
+                    gl.disable(gl.BLEND)
+            }
+        },
+        cullFace: {
+            default: [true],
+            set: function(val) {
+                if (val[0])
+                    gl.enable(gl.CULL_FACE);
+                else
+                    gl.disable(gl.CULL_FACE)
+            }
+        },
+        cullFaceMode: {
+            default: [gl.BACK],
+            set: function(vals) {
+                gl.cullFace.apply(gl, vals);
+            }
+        }
+    }
+}
 
 module.exports = GLRenderInterface;
 

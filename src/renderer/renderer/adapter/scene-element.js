@@ -94,6 +94,7 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
         this.updateZIndex();
         this.updateVisibility();
         this.transformFetcher && this.transformFetcher.updateMatrix();
+        this.factory.renderer.requestRedraw("Style changed");
     },
 
     updateLocalMatrix: function () {

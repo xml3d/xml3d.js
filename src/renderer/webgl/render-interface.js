@@ -72,10 +72,10 @@ function initGLStates(ri, context) {
     var gl = context.gl;
 
     ri.glStateMap = {
-        depthWrite: {
+        depthMask: {
             default: [true],
             set: function(vals) {
-                gl.depthWrite.apply(gl, vals);
+                gl.depthMask.apply(gl, vals);
             }
         },
         depthTest: {

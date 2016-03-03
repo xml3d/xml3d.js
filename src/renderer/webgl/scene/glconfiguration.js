@@ -16,13 +16,17 @@ var Configuration = require("../../renderer/scene/configuration.js");
 var GLConfiguration = function(model, dataNode, opt) {
     Configuration.call(this, model, dataNode, opt);
 
+    /**
+     * Contains the WebGL state overrides that this material requests.
+     * @type {{}}
+     */
     this.states = {};
 
     createStateRequest(this);
 };
 
 function createStateRequest(conf) {
-    var request = new ComputeRequest(conf.dataNode, ["gl-depthWrite", "gl-depthTest", "gl-depthFunc",
+    var request = new ComputeRequest(conf.dataNode, ["gl-depthMask", "gl-depthTest", "gl-depthFunc",
         "gl-blendEquationSeparate", "gl-blendFuncSeparate", "gl-blend", "gl-cullFace", "gl-cullFaceMode"], updateStates.bind(window, conf));
     updateStates(conf, request);
 }
@@ -52,7 +56,7 @@ function parseGLValues(vals) {
     var parsed = [];
     for (var j=0; j<vals.length; j++) {
         var val = vals[j];
-        if (GL[val]) {
+        if (GL[val] !== undefined) {
             parsed.push(GL[val]);
         } else if (typeof val == typeof "") {
             if (val.toLowerCase() == "true") {

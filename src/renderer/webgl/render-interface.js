@@ -96,13 +96,21 @@ function initGLStates(ri, context) {
         blendEquationSeparate:  {
             default: [gl.FUNC_ADD, gl.FUNC_ADD],
             set: function(vals) {
-                gl.blendEquationSeparate.apply(gl, vals);
+                if (vals.length == 1) {
+                    gl.blendEquation(vals[0]);
+                } else {
+                    gl.blendEquationSeparate.apply(gl, vals);
+                }
             }
         },
         blendFuncSeparate: {
             default: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA],
             set: function (vals) {
-                gl.blendFuncSeparate.apply(vals);
+                if (vals.length == 2) {
+                    gl.blendFunc(vals[0], vals[1]);
+                } else if (vals.length == 4) {
+                    gl.blendFuncSeparate.apply(gl, vals);
+                }
             }
         },
         blend: {

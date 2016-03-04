@@ -80,7 +80,7 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 if (!obj.visible)
                     continue;
 
-                this.renderInterface.setGLState(obj._material.states);
+                this.renderInterface.setGLState(obj._actualMaterial.states);
 
                 var mesh = obj.mesh;
                 XML3D.debug.assert(mesh, "We need a mesh at this point.");
@@ -108,7 +108,7 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 primitiveCount += mesh.draw(program);
                 objCount++;
 
-                this.renderInterface.resetGLState(obj._material.states);
+                this.renderInterface.resetGLState(obj._actualMaterial.states);
             }
 
             if (transparent) {

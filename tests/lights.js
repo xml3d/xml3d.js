@@ -279,6 +279,64 @@ test("Change light shader", 4, function() {
 
 });
 
+test("Change light transformation", function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering03.html");
+
+    var test = frameLoaded.then(function (doc) {
+        var s = doc.querySelector("#xml3DElem");
+        doc.getElementById("pointlight").style.display = 'inherit';
+        doc.getElementById("dirlight").style.display = 'none';
+        doc.getElementById("phongShadedGroup").style.display = 'inherit';
+
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
+        deepEqual(actual, [255,0,0,255], "Phong object is lit by red point light shader");
+
+        var light = s.ownerDocument.querySelector("#pointlightLight");
+        QUnit.closeMatrix(light.getLocalMatrix(), new XML3D.Mat4(), EPSILON, "Light has a local transform matrix that is identity");
+
+        light.setAttribute("style", "transform: translate3d(0, 0, -10px)");
+
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        var light = s.ownerDocument.querySelector("#pointlightLight");
+        QUnit.closeMatrix(light.getLocalMatrix(), new XML3D.Mat4().translate(new XML3D.Vec3(0,0,-10)), EPSILON, "Light's local matrix was updated with new style transform");
+        var parentWorld = light.parentElement.getWorldMatrix();
+        QUnit.closeMatrix(light.getWorldMatrix(), parentWorld.translate(new XML3D.Vec3(0,0,-10)), EPSILON, "Light's world matrix matches parent * local");
+
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
+        deepEqual(actual, [0,0,0,255], "Light is properly positioned behind the square");
+
+        light.removeAttribute("style");
+
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
+        deepEqual(actual, [255,0,0,255], "Light position was reset once local transform was removed");
+
+        var transform = s.ownerDocument.createElement("transform");
+        transform.setAttribute("id", "test_light_transform");
+        transform.setAttribute("translation", "0 0 -10");
+        s.appendChild(transform);
+
+        s.ownerDocument.querySelector("#pointlightLight").setAttribute("transform", "#test_light_transform");
+        return s;
+    }).then(promiseSceneRendered).then(function(s) {
+        var light = s.ownerDocument.querySelector("#pointlightLight");
+        QUnit.closeMatrix(light.getLocalMatrix(), new XML3D.Mat4().translate(new XML3D.Vec3(0,0,-10)), EPSILON, "Light's local matrix was updated with new transform element");
+        var parentWorld = light.parentElement.getWorldMatrix();
+        QUnit.closeMatrix(light.getWorldMatrix(), parentWorld.translate(new XML3D.Vec3(0,0,-10)), EPSILON, "Light's world matrix matches parent * local");
+
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
+        deepEqual(actual, [0,0,0,255], "Light is properly positioned behind the square");
+    });
+
+    test.fin(QUnit.start).done();
+
+});
+
 
 module("Lights", {
     setup : function() {

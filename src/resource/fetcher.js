@@ -70,7 +70,7 @@ Resource.getDocument = function(urlString, opt) {
     if (opt.allowCaching) {
         if (cache = c_cachedDocuments.get(urlString)) {
             // We can skip the fetch phase and piggy back on the result of the previous fetch, this avoids unnecessary Requests
-            return cache.pending ? cache.pending : Promise.resolve(cache.document);
+            return cache.pending ? Promise.race([cache.pending]) : Promise.resolve(cache.document);
         }
 
         // There is no pending or complete Request for this url so lets create a cache entry and start one

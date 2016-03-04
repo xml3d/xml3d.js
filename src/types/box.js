@@ -199,6 +199,11 @@ Box.prototype.toString = function() {
         this.data[4] + ', ' + this.data[5] + ')';
 };
 
+Box.prototype.toDOMString = function() {
+   return this.data[0] + ' ' + this.data[1] + ' ' + this.data[2] + ' ' + this.data[3] + ' ' +
+       this.data[4] + ' ' + this.data[5];
+};
+
 Box.EMPTY_BOX = new Box();
 
 module.exports = Box;

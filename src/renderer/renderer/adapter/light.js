@@ -27,6 +27,7 @@ XML3D.createClass(LightRenderAdapter, SceneElementAdapter, {
             parent: parentNode
         });
         this.updateVisibility();
+        this.updateLocalMatrix();
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
@@ -78,6 +79,15 @@ XML3D.createClass(LightRenderAdapter, SceneElementAdapter, {
     getWorldMatrix: function () {
         var m = new XML3D.Mat4();
         this.renderNode.getWorldMatrix(m.data);
+        return m;
+    },
+
+    /**
+     * @return {XML3D.Mat4}
+     */
+    getLocalMatrix: function () {
+        var m = new XML3D.Mat4();
+        this.renderNode.getLocalMatrix(m.data);
         return m;
     }
 });

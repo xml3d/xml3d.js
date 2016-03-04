@@ -115,8 +115,12 @@
             return;
         }
         var bb = element.getWorldBoundingBox();
+        if (bb.isEmpty()) {
+            XML3D.debug.logError("The given element has an empty bounding box, ensure it has finished loading before trying to examine it!", element);
+            return;
+        }
         var center = bb.center();
-        var r = center.len();
+        var r = center.sub(bb.min).len();
         var newPos = center.clone();
         newPos.z += r / Math.tan(this.transformInterface.fieldOfView / 2);
         this.transformInterface.position = newPos;

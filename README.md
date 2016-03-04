@@ -27,7 +27,7 @@ Here you can find [small examples](https://github.com/xml3d/xml3d-examples) of i
 
 #### Usage ####
 
-Download the [library](http://www.xml3d.org/xml3d/script/xml3d.js) and include it in your xhtml.
+Download the [library](http://www.xml3d.org/xml3d/script/xml3d.js) and include it in your html page.
 
 ```html
 <script src="http://www.xml3d.org/xml3d/script/xml3d.js"></script>

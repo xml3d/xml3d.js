@@ -1,0 +1,47 @@
+<!DOCTYPE html><html><head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Rendering 4</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+  <body style="background-color: #FFF;width:500px">
+   <xml3d id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" view="#defaultView">
+    <defs>
+
+      <material id="allSupportedStatesValid" model="urn:xml3d:material:phong">
+          <string name="gl-depthMask">false</string>
+          <string name="gl-depthTest">false</string>
+          <string name="gl-depthFunc">NEVER</string>
+          <string name="gl-blendEquationSeparate">FUNC_ADD FUNC_SUBTRACT</string>
+          <string name="gl-blendFuncSeparate">DST_COLOR ONE_MINUS_DST_ALPHA</string>
+          <string name="gl-blend">true</string>
+          <string name="gl-cullFace">false</string>
+          <string name="gl-cullFaceMode">FRONT</string>
+      </material>
+
+    <data id="meshdata">
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+
+    <transform id="t_Lamp" translation="0 0 3"></transform>
+
+    </defs>
+
+     <view id="defaultView" style="transform: translate3d(0px, 0px, 3px)"></view>
+     <group transform="#t_Lamp" id="mainlight">
+       <light model="urn:xml3d:light:point">
+         <float3 name="attenuation">1 0 0</float3>
+         <float3 name="intensity">
+           1 1 1
+         </float3>
+       </light>
+     </group>
+
+    </xml3d>
+  
+ 
+
+</body></html>

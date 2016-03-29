@@ -29,6 +29,6 @@
     "lodash.create": "^3.1.0",
     "lodash.defaults": "^3.1.1",
     "whatwg-fetch": "0.10.1",
-    "texture-manager": "http://github.com/ksons/texture-manager/tarball/master"
+    "texture-manager": "git://github.com/ksons/texture-manager.git#master"
   }
 }

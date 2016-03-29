@@ -5,6 +5,8 @@ var FullScreenQuad = require("./base/fullscreenquad.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
 var ForwardRenderPass = require("./render-passes/forward.js");
 
+var ConfigurableGLStates = ["depthMask", "depthTest", "depthFunc", "blendEquationSeparate", "blendFuncSeparate", "blend", "cullFace", "cullFaceMode"];
+
 /**
  *
  * @param {GLContext} context
@@ -65,12 +67,17 @@ XML3D.extend(GLRenderInterface.prototype, {
         for (var key in state) {
             this.glStateMap[key].set(this.glStateMap[key].default);
         }
+    },
+
+    getConfigurableGLStates: function() {
+        return ConfigurableGLStates;
     }
 });
 
 function initGLStates(ri, context) {
     var gl = context.gl;
 
+    // When adding new configurable states don't forget to add them to the ConfigurableGLStates array at the top of this file!
     ri.glStateMap = {
         depthMask: {
             default: [true],
@@ -140,5 +147,8 @@ function initGLStates(ri, context) {
     }
 }
 
-module.exports = GLRenderInterface;
+module.exports = {
+    GLRenderInterface : GLRenderInterface,
+    ConfigurableGLStates : ConfigurableGLStates
+};
 

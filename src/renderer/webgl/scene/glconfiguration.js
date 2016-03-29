@@ -1,6 +1,12 @@
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 var GL = require("../../webgl/constants.js");
 var Configuration = require("../../renderer/scene/configuration.js");
+var ConfigurableGLStates = require("../render-interface.js").ConfigurableGLStates;
+
+var configurableGLStates = [];
+for (var i = 0; i < ConfigurableGLStates.length; i++) {
+    configurableGLStates.push("gl-" + ConfigurableGLStates[i]);
+}
 
 /**
  * A configuration connects a model (material, light, camera) with a data node containing
@@ -26,8 +32,7 @@ var GLConfiguration = function(model, dataNode, opt) {
 };
 
 function createStateRequest(conf) {
-    var request = new ComputeRequest(conf.dataNode, ["gl-depthMask", "gl-depthTest", "gl-depthFunc",
-        "gl-blendEquationSeparate", "gl-blendFuncSeparate", "gl-blend", "gl-cullFace", "gl-cullFaceMode"], updateStates.bind(window, conf));
+    var request = new ComputeRequest(conf.dataNode, configurableGLStates, updateStates.bind(window, conf));
     updateStates(conf, request);
 }
 

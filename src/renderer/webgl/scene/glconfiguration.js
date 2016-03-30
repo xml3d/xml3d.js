@@ -51,7 +51,7 @@ function updateStates(conf, request, data) {
         if (parsed) {
             state[name] = parsed;
         } else {
-            XML3D.debug.logError("The values for the '"+name+"' field in material '#"+conf.name+"' don't match any GL constants.");
+            XML3D.debug.logError("The arguments '"+vals+"' for 'gl-"+name+"' in material '#"+conf.name+"' are not valid.");
         }
     }
     conf.states = state;
@@ -68,6 +68,8 @@ function parseGLValues(vals) {
                 parsed.push(true);
             } else if (val.toLowerCase() == "false") {
                 parsed.push(false);
+            } else if (!isNaN(+val)) {
+                parsed.push(+val);
             } else {
                 return null;
             }

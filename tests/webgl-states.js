@@ -1,6 +1,8 @@
 module("WebGL States", {});
 
-var SupportedStates = ["depthMask", "depthTest", "depthFunc", "blendEquationSeparate", "blendFuncSeparate", "blend", "cullFace", "cullFaceMode"];
+// The supported states are repeated here to ensure tests are written for any new states added to the RI
+var SupportedStates = ["depthMask", "depthTest", "depthFunc", "blendEquationSeparate",
+    "blendFuncSeparate", "blend", "cullFace", "cullFaceMode", "colorMask", "scissorTest", "scissor"];
 
 test("Tested states match those provided by RenderInterface", function () {
     stop();
@@ -60,6 +62,9 @@ test("Parse supported states with valid inputs", function () {
                 ok(checkStateValue(state, "blend", [true]), "blend parsed correctly");
                 ok(checkStateValue(state, "cullFace", [false]), "cullFace parsed correctly");
                 ok(checkStateValue(state, "cullFaceMode", [gl.FRONT]), "cullFaceMode parsed correctly");
+                ok(checkStateValue(state, "colorMask", [true, true, true, false]), "colorMask parsed correctly");
+                ok(checkStateValue(state, "scissorTest", [true]), "scissorTest parsed correctly");
+                ok(checkStateValue(state, "scissor", [10, 10, 50, 50]), "scissor parsed correctly");
             }
             doneTest = true;
         };

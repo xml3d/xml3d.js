@@ -1,0 +1,13 @@
+site_name: FIWARE 3D UI (XML3D)
+site_url: https://xml3d.readthedocs.org
+repo_url: https://github.com/xml3d/xml3d.js.git
+site_description: XML3D 3D UI - Documentation
+docs_dir: doc
+markdown_extensions: [toc,fenced_code]
+use_directory_urls: false
+theme: readthedocs
+extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+pages:
+  - Home: index.md
+  - 'User & Programmers Manual': 'user_guide.md'
+  - 'Installation & Administration Manual': 'installation_guide.md'

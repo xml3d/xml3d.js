@@ -113,12 +113,12 @@ function createPassInfo(light, context) {
 
 function createLightPass(light, context, params) {
     var lightFramebuffer = new Targets.GLRenderTarget(context, params);
-    return new LightPass({context: context}, lightFramebuffer, light);
+    return new LightPass({context: context, setGLState: function() {}, resetGLState: function() {}}, lightFramebuffer, light);
 }
 
 function createPointLightPass(light, context, params) {
     var lightFramebuffer = new Targets.GLCubeMapRenderTarget(context, params);
-    return new PointLightPass({context: context}, lightFramebuffer, light);
+    return new PointLightPass({context: context, setGLState: function() {}, resetGLState: function() {}}, lightFramebuffer, light);
 }
 
 function mergeShadowParameters(shadowMapInfos) {

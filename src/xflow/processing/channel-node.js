@@ -227,12 +227,14 @@ function synchronizeChildren(channelNode){
     // Now synchronize all children (either referenced data node, or real children)
     // TODO: Change here if we change behaviour of src attribute
     if(dataNode._sourceNode){
-        dataNode._sourceNode._getOrCreateChannelNode(channelNode.substitution).synchronize();
+        var sub = dataNode._sourceNode._getOrCreateChannelNode(channelNode.substitution);
+        sub && sub.synchronize();
     }
     else{
         for(var i = 0; i < dataNode._children.length; ++i){
             if(dataNode._children[i]._getOrCreateChannelNode){
-                dataNode._children[i]._getOrCreateChannelNode(channelNode.substitution).synchronize();
+                var sub = dataNode._children[i]._getOrCreateChannelNode(channelNode.substitution);
+                sub && sub.synchronize();
             }
         }
     }
@@ -246,7 +248,8 @@ function updateInputChannels(channelNode){
     var owner = channelNode.owner;
     // TODO: Change here if we change behaviour of src attribute
     if(owner._sourceNode){
-        channelNode.inputChannels.merge(owner._sourceNode._getOrCreateChannelNode(channelNode.substitution).outputChannels, 0);
+        var sub = owner._sourceNode._getOrCreateChannelNode(channelNode.substitution);
+        sub && channelNode.inputChannels.merge(sub.outputChannels, 0);
     }
     else{
         var children = owner._children;
@@ -287,7 +290,8 @@ function mergeInputChannelInputNodes(channelNode, children) {
 function mergeInputChannelDataNodes(channelNode, children) {
     for (var i = 0; i < children.length; ++i) {
         if (children[i]._getOrCreateChannelNode) {  // Child is a DataNode
-            channelNode.inputChannels.merge(children[i]._getOrCreateChannelNode(channelNode.substitution).outputChannels, i);
+            var sub = children[i]._getOrCreateChannelNode(channelNode.substitution);
+            sub && channelNode.inputChannels.merge(sub.outputChannels, i);
         }
     }
 }

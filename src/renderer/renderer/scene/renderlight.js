@@ -12,7 +12,7 @@ var WORLD_MATRIX_OFFSET = 0;
 /** @const */
 var LOCAL_MATRIX_OFFSET = WORLD_MATRIX_OFFSET + 16;
 /** @const */
-var ENTRY_SIZE = LOCAL_MATRIX_OFFSET;
+var ENTRY_SIZE = 32;
 
 var c_BoundingBox = new XML3D.Box();
 

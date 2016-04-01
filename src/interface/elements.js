@@ -218,41 +218,28 @@ ElementHandler.prototype.registerAttributes = function(config) {
     }
     // Set and initialize handlers for element
     this.handlers = config._cache[handlerKey];
-    if(canProto){
-        elem.__proto__ = config._cache[protoKey];
-        for ( var prop in config) {
-            if(prop =="_cache") continue;
-            if(config[prop] && config[prop].a !== undefined){
-                var attrName = config[prop].id || prop;
-                var handler = this.handlers[attrName.toLowerCase()];
-                handler.init && handler.init(elem, this.storage);
-                delete elem[prop];
-            }
+
+    for ( var prop in config) {
+        if(prop =="_cache") continue;
+        if (config[prop] === undefined) {
+            delete elem[prop];
         }
-    }
-    else{
-        for ( var prop in config) {
-            if(prop =="_cache") continue;
-            if (config[prop] === undefined) {
-                delete elem[prop];
+        else if (config[prop].a !== undefined){
+            var attrName = config[prop].id || prop;
+            var handler = this.handlers[attrName.toLowerCase()];
+            handler.init && handler.init(elem, this.storage);
+            try {
+                Object.defineProperty(elem, prop, handler.desc);
+            } catch (e) {
+                XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
             }
-            else if (config[prop].a !== undefined){
-                var attrName = config[prop].id || prop;
-                var handler = this.handlers[attrName.toLowerCase()];
-                handler.init && handler.init(elem, this.storage);
-                try {
-                    Object.defineProperty(elem, prop, handler.desc);
-                } catch (e) {
-                    XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
-                }
-            }else if (config[prop].m !== undefined) {
-                elem[prop] = config[prop].m;
-            } else if (config[prop].p !== undefined) {
-                try {
-                    Object.defineProperty(elem, prop, config[prop].p);
-                } catch (e) {
-                    XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
-                }
+        }else if (config[prop].m !== undefined) {
+            elem[prop] = config[prop].m;
+        } else if (config[prop].p !== undefined) {
+            try {
+                Object.defineProperty(elem, prop, config[prop].p);
+            } catch (e) {
+                XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
             }
         }
     }

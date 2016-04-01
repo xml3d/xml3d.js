@@ -60,37 +60,63 @@ XCompProto.attributeChangedCallback = function(attr, oldValue, newValue) {
     handler(newValue);
 };
 
-function registerComponent(source, name) {
+function registerComponent(source, opt) {
     if (typeof source === "string") {
-        return registerComponentURL(source, name);
+        return registerComponentURL(source, opt);
     } else if (source instanceof HTMLElement) {
-        registerComponentElem(source, name);
+        registerComponentElem(source, opt);
     } else {
         XML3D.debug.logError("Must provide a template element or a URL to a template element when registering a component!");
     }
 }
 
-function registerComponentURL(url, name) {
+function registerComponentURL(url, opt) {
     return new Promise(function(resolve, reject) {
         fetch(url).then(function (response) {
             return response.text();
         }).then(function (text) {
             var div = document.createElement("div");
             div.innerHTML = text;
-            registerComponentElem(div.querySelector("template"), name);
+            var name = registerComponentElem(div.querySelector("template"), opt);
             resolve(name);
         }).catch(function (exception) {
             XML3D.debug.logError("Error while registering web component: ", exception);
-            reject(name);
+            reject(url);
         });
     });
 }
 
-function registerComponentElem(element, name) {
-    name = name || element.getAttribute("name");
+function registerComponentElem(element, opt) {
+    opt = opt || {};
+    var name = opt.name || element.getAttribute("name");
     var proto = Object.create(XCompProto);
     proto.template = element;
+    if (opt.proto) {
+        extendComponentPrototype(proto, opt.proto);
+    }
     document.registerElement(name, { prototype: proto });
+    return name;
+}
+
+function extendComponentPrototype(baseProto, extension) {
+    for (var field in extension) {
+        if (!extension.hasOwnProperty(field)) {
+            continue;
+        }
+        if (field === "createdCallback") {
+            baseProto.createdCallback = function () {
+                XCompProto.createdCallback.call(this);
+                extension.createdCallback.call(this);
+            }
+        } else if (field === "attributeChangedCallback") {
+            baseProto.attributeChangedCallback = function(attr, oldValue, newValue) {
+                XCompProto.attributeChangedCallback.call(this, attr, oldValue, newValue);
+                extension.attributeChangedCallback.call(this, attr, oldValue, newValue);
+            }
+        } else {
+            baseProto[field] = extension[field];
+        }
+    }
 }
 
 module.exports =  registerComponent;

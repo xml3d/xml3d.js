@@ -6,13 +6,14 @@ var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
 
 var tmp_worldMatrix = XML3D.math.mat4.create();
+var identity_mat4 = XML3D.math.mat4.create();
 
 /** @const */
 var WORLD_MATRIX_OFFSET = 0;
 /** @const */
 var LOCAL_MATRIX_OFFSET = WORLD_MATRIX_OFFSET + 16;
 /** @const */
-var ENTRY_SIZE = LOCAL_MATRIX_OFFSET;
+var ENTRY_SIZE = 32;
 
 var c_BoundingBox = new XML3D.Box();
 
@@ -42,6 +43,9 @@ var RenderLight = function (scene, pageEntry, opt) {
     RenderNode.call(this, NODE_TYPE.LIGHT, scene, pageEntry, opt);
     opt = opt || {};
     var configuration = opt.configuration || {};
+    // Matrices need to be set to identity to avoid non-affine matrices during the rest of the light construction
+    this.setLocalMatrix(identity_mat4);
+    this.setWorldMatrix(identity_mat4);
     this.setLightType(configuration.model, configuration.dataNode);
 };
 RenderLight.ENTRY_SIZE = ENTRY_SIZE;

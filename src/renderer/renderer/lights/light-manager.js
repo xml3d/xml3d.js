@@ -100,6 +100,7 @@ LightManager.prototype = {
         var length = entry.lightModels.length;
         if (!length) {
             entry.parameters = {};
+            this._inUpdate = false;
             return;
         }
         var model = entry.lightModels[0];
@@ -110,7 +111,6 @@ LightManager.prototype = {
         });
         entry.changed = true;
         this._inUpdate = false;
-
     }
 };
 

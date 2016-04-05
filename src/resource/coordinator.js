@@ -258,16 +258,17 @@ function invalidateHandles(uri) {
  * @param {URI} uri The URI of the document
  */
 function invalidateDocumentHandles(uri) {
+    invalidateHandles(uri);
     var url = uri.toStringWithoutFragment();
     var docCache = getDocumentCache(url);
     if (!docCache) {
         // The document was never loaded
-        invalidateHandles(uri);
         return;
     }
     var fragments = docCache.fragments;
     docCache.fragments = [];
     for (var i = 0; i < fragments.length; ++i) {
+        uri.fragment = fragments[i];
         invalidateHandles(uri);
     }
 }

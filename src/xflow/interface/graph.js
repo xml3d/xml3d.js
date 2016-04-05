@@ -555,7 +555,6 @@ DataNode.prototype.clear = function(){
     this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
     this._listeners = [];
     delete this._userData;
-    delete this._channelNode;
     delete this._dataflowNode;
     Base._flushResultCallbacks();
 };

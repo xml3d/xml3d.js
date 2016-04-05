@@ -3278,7 +3278,6 @@
         &lt;/script&gt;
 
         &lt;template id="cube-template" name="x-cube"&gt;
-            &lt;style&gt; @import "xml3d.org/xml3d/scripts/xml3d-component.css"; &lt;/style&gt;
             &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
                 &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
             &lt;/material&gt;          
@@ -3296,9 +3295,8 @@
 
     <pre class="example highlight">
         &lt;template id="cube-template" name="x-cube"&gt;
-            &lt;style&gt; @import "xml3d.org/xml3d/scripts/xml3d-component.css"; &lt;/style&gt;
             &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
-                &lt;content select="float3[name='diffuseColor']"&gt;
+                &lt;content select="float3[name='diffuseColor']"&gt; &lt;!-- Select a float3 element with the name 'diffuseColor' --&gt;
                     &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
                 &lt;/content&gt;
             &lt;/material&gt;          
@@ -3308,64 +3306,52 @@
         &lt;xml3d&gt;
             &lt;group style="transform: translate3d(0,0,-10px)"&gt;
                 &lt;x-cube&gt;
-                    &lt;float3 name="diffuseColor"&gt;1 0 1&lt;/float3&gt;
+                    &lt;float3 name="diffuseColor"&gt;1 0 1&lt;/float3&gt; &lt;!-- This float3 will be appended to the above content slot, overriding the default float3 --&gt;
                 &lt;/x-cube&gt;
             &lt;/group&gt;
         &lt;/xml3d&gt;
     </pre>
 
-    <p>Note that content elements can only be used to configure <a href="#value-elements">value elements</a> and the
-        <a href="#the-data-element">data element</a>. In many cases this is not a severe limitation. For example, normally it would
-    not be possible to configure the transform of an object inside a component because neither the <code>style</code> attribute
-    nor the <a href="#the-transform-element">transform element</a> can be configured in this way. But as shown in the 
-    <a href="#transformable-elements">transformable elements</a> section an object's transform can also be represented as an Xflow data graph:</p>
+    <p>Content elements can also be used to add renderable objects or even other web components, however in this case they will <em>not</em> override
+    existing defaults, but will instead be rendered alongside them:</p>
 
     <pre class="example highlight">
         &lt;template id="cube-template" name="x-cube"&gt;
-            ...
-            &lt;data id="cube-transform" compute="transform = xflow.createTransform(translation, rotation, scale)"&gt;
-                &lt;content select="float3[name='translation']"&gt;
-                    &lt;float3 name="translation"&gt;0 0 0&lt;/float3&gt;
+            &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
+                &lt;content select="float3[name='diffuseColor']"&gt;
+                    &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
                 &lt;/content&gt;
-                &lt;content select="float4[name='rotation']"&gt;
-                    &lt;float4 name="rotation"&gt;0 0 1 0&lt;/float4&gt;
-                &lt;/content&gt;
-                &lt;content select="float3.my-cube-scale"&gt; &lt;!-- Selecting by class --&gt;
-                    &lt;float3 name="scale"&gt;1 1 1&lt;/float3&gt;
-                &lt;/content&gt;
-            &lt;/data&gt;
-            &lt;mesh transform="#cube-transform" material="#cube-material" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+            &lt;/material&gt;
+            &lt;content select="mesh"&gt;
+                &lt;mesh material="#cube-material" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+                &lt;!-- The below mesh will be inserted here --&gt;
+            &lt;/content&gt;
+            &lt;content select=".otherComponent"&gt;
+                &lt;!-- The below x-cube instance with the class 'otherComponent' will be inserted here --&gt;
+            &lt;/content&gt;
         &lt;/template&gt;
 
         &lt;xml3d&gt;
-            &lt;x-cube&gt;
-                &lt;float3 name="translation"&gt;0 0 -10&lt;/float3&gt;
-                &lt;float3 class="my-cube-scale" name="scale"&gt;0.5 0.5 0.5&lt;/float3&gt;
-            &lt;/x-cube&gt;
+            &lt;group style="transform: translate3d(0,0,-10px)"&gt;
+                &lt;x-cube&gt;
+                    &lt;float3 name="diffuseColor"&gt;1 0 1&lt;/float3&gt;
+                    &lt;mesh src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt; &lt;!-- This x-cube component now contains 2 overlapping cubes --&gt;
+                    &lt;x-cube class="otherComponent"&gt;&lt;/x-cube&gt;            &lt;!-- This x-cube component now contains 3 overlapping cubes --&gt;
+                &lt;/x-cube&gt;
+            &lt;/group&gt;
         &lt;/xml3d&gt;
     </pre>
 
     <p>The following rules and limitations also apply to components: </p>
     <ul>
         <li>The <code>names</code> and types of configurable value elements must always match</li>
-        <li>The tag <code>name</code> given for the template must include a hyphen '-'</li>
+        <li>The tag <code>name</code> given for the component must include a hyphen '-'</li>
         <li>The component tag itself (eg. <code>&lt;x-cube&gt;</code>) acts as a <a href="#the-group-element">group element</a> in the scene</li>
-        <li>The template acts as a black box, exposing only the configurable interface as defined by the content elements. This means CSS, Javascript and
-        HTML id references cannot cross the boundary between the template and the rest of the page. Id references are scoped to the template.</li>
-        <li>Nested templates are not supported</li>
+        <li>A web component acts as a black box, exposing only the configurable interface as defined by the content elements. This means CSS, Javascript and
+        HTML id references cannot cross the boundary between the shadow DOM of the component and the rest of the page. Id references are scoped to the component.</li>
+        <li>Nested templates are not supported, but a template may contain other web components</li>
+        <li>Each child node of a web component can only be inserted into a single <code>&lt;content&gt;</code> slot. Children without a matching content slot are ignored.</li>
     </ul>
-
-    <div class="note">
-        To avoid seeing raw data displayed on the page it's a good idea to load and register template elements from an external source through Javascript
-         instead of having them reside in the DOM. All component templates should also import the xml3d-component stylesheet to prevent the raw data inside
-        value elements from being displayed on the page:
-
-    <pre class="example highlight">
-        &lt;template name="x-example"&gt;
-            &lt;style&gt; @import "xml3d.org/xml3d/scripts/xml3d-component.css"; &lt;/style&gt;
-        &lt;/template&gt;
-    </pre>
-    </div>
 
     <p>Components can also define their own event listeners and event handling code:</p>
 
@@ -3373,20 +3359,26 @@
         &lt;template id="cube-template" name="x-clickable-cube"&gt;
             &lt;script type="text/javascript"&gt;
                 function myClickHandler(event) {
-                    alert("Hello!");
-                }
+                    document.getElementById("shadowMesh"); // This will return null
 
-                document.getElementById("shadowMesh"); //This will return null
+                    alert(event.target); // Target will be the below mesh element
+
+                    event.target.setAttribute("style", "transform: translate3d(10px, 0px, 0px)"); // This will move the mesh
+                }
             &lt;/script&gt;
 
             &lt;mesh id="shadowMesh" onclick="window.myClickHandler(event)" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
-        &lt;/template&gt;C
+        &lt;/template&gt;
     </pre>
 
-    However both the scripts inside components and the event listeners themselves are executed in the global scope, meaning they have no access to the component's
-    shadow DOM. For this reason the call to <code>document.getElementById</code> will return null in the above example. Also note that events from inside
+    <p>However both the scripts inside components and the event listeners themselves are executed in the global scope, meaning they have no direct access to the component's
+    shadow DOM. For this reason the call to <code>document.getElementById</code> will return null in the above example. If the event listener was attached to an
+    element inside the web component (as is the case above) then the <code>event.target</code> will be that element. This gives the event handling code indirect
+    access to the shadow DOM of the web component.</p>
+
+    <p>Also note that events from inside
     the shadow DOM will bubble up through the shadow DOM boundary, but will be re-targeted to the component element when they cross the boundary. Some events
-    are not permitted to cross the boundary at all. All of these behaviors are defined by the web components standard.
+    are not permitted to cross the boundary at all. All of these behaviors are defined by the web components standard.</p>
 
 </section>
 

@@ -119,6 +119,33 @@ css.convertCssToMat4 = function (cssMatrix, m) {
     return matrix;
 };
 
+css.matrixStringToMat4 = function(matrix) {
+    if (matrix.match("matrix3d")) {
+        return css.matrix3dStringToMat4(matrix);
+    }
+    var chopped = matrix.replace("matrix(", "").replace(")", "").split(", ");
+    var mat3 = new XML3D.Mat3();
+    var c = 0;
+    for (var i = 0; i < 9; i++) {
+        if ((i + 1) % 3 == 0) // matrix() is only 6 values with the lowest row implicitly 0 0 1
+            continue;
+        var cval = +chopped[c];
+        if (isNaN(cval)) {
+            return new XML3D.Mat4();
+        }
+        mat3.data[i] = cval;
+        c++;
+    }
+    var mat4 = new XML3D.Mat4();
+    mat4.m11 = mat3.m11;
+    mat4.m12 = mat3.m12;
+    mat4.m21 = mat3.m21;
+    mat4.m22 = mat3.m22;
+    mat4.m41 = mat3.m31;
+    mat4.m42 = mat3.m32;
+    return mat4;
+}
+
 css.matrix3dStringToMat4 = function(matrix3d) {
     var mat4 = new XML3D.Mat4();
     var chopped = matrix3d.replace("matrix3d(", "").replace(")","").split(", ");
@@ -138,6 +165,29 @@ css.XML3DStyleElement = function() {
         "float,float2,float3,float4,float4x4,int,int4,bool,texture,string,compute { display: none; } " +
         "mesh,model,group { position: relative; }";
     return styleElement;
+};
+
+css.getComputedStyle = function(node) {
+    var computed = {
+        transform : "",
+        display : "",
+        transitionDuration : "0s",
+        getPropertyValue : function(prop) {
+            return this[prop];
+        }
+    };
+
+    if (!node.hasAttribute("style")) {
+        return computed;
+    }
+
+    var t = css.getPropertyValue(node, "transform");
+    if (t && t !== "none") {
+        computed.transform = CSSMatrix.toMatrixString(t);
+    }
+
+    computed.display = css.getPropertyValue(node, "display") || "";
+    return computed;
 };
 
 (function () {

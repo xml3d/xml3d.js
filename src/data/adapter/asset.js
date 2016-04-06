@@ -8,6 +8,7 @@ var SubData = require("../../asset/asset.js").SubData;
 var Events = require("../../interface/notification.js");
 var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
 var Resource = require("../../resource");
+var CSS = require("../../utils/css.js");
 
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;
@@ -21,6 +22,14 @@ var AssetAdapter = function (factory, node) {
      *  @type Asset
      **/
     this.asset = new Asset(this.node);
+
+    if (!node.style) {
+        // Node is not part of the DOM (probably an external resource) so we have to parse the style ourselves
+        this.style = CSS.getComputedStyle(node);
+    } else {
+        this.style = window.getComputedStyle(node);
+    }
+
     if (node.localName.toLowerCase() !== "model") {
         this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
     }
@@ -261,6 +270,12 @@ function setMaterialUrl(adapter, dest) {
 
 var AssetMeshAdapter = function (factory, node) {
     AssetDataAdapter.call(this, factory, node);
+    if (!node.style) {
+        // Node is not part of the DOM (probably an external resource) so we have to parse the style ourselves
+        this.style = CSS.getComputedStyle(node);
+    } else {
+        this.style = window.getComputedStyle(node);
+    }
     this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
 };
 createClass(AssetMeshAdapter, AssetDataAdapter, {
@@ -304,10 +319,7 @@ createClass(AssetMeshAdapter, AssetDataAdapter, {
     },
 
     updateVisibility: function () {
-        if (!this.node.style) {
-            this.node.style = window.getComputedStyle(this.node);
-        }
-        var none = this.node.style.display == "none";
+        var none = this.style.display == "none";
         this.assetEntry && this.assetEntry.setVisibility(!none);
     }
 });

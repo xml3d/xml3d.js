@@ -31,9 +31,9 @@ methods.viewGetViewMatrix = function() {
     }
     // Fallback implementation
     var result = new XML3D.Mat4();
-    var style = window.getComputedStyle(this);
-    if(style.transform !== "none") {
-        result = CSS.matrixStringToMat4(style.transform);
+    var cssMatrix = CSS.getCSSMatrix(this);
+    if(cssMatrix) {
+        CSS.convertCssToMat4(cssMatrix, result);
     }
     return result.invert();
 };

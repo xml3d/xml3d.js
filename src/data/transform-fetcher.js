@@ -52,7 +52,7 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
 
     return function () {
         if (!this.onlyDataTransform) {
-            var cssMatrix = this.owner.style.transform;
+            var cssMatrix = CSS.getCSSMatrix(this.node);
             if (cssMatrix && cssMatrix !== "none") {
                 if (this.owner.style.transitionDuration !== "0s") {
                     this.handleCSSTransition();

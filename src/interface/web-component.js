@@ -87,6 +87,9 @@ function registerComponentURL(url, opt) {
 }
 
 function registerComponentElem(element, opt) {
+    if (typeof opt === "string") {
+        opt = { name: opt };
+    }
     opt = opt || {};
     var name = opt.name || element.getAttribute("name");
     var proto = Object.create(XCompProto);

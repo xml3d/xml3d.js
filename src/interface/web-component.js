@@ -77,8 +77,13 @@ function registerComponentURL(url, opt) {
         }).then(function (text) {
             var div = document.createElement("div");
             div.innerHTML = text;
-            var name = registerComponentElem(div.querySelector("template"), opt);
-            resolve(name);
+            var template = div.querySelector("template");
+            if (template) {
+                resolve(registerComponentElem(template, opt));
+            } else {
+                XML3D.debug.logError("No component template element found at url " +url);
+                reject();
+            }
         }).catch(function (exception) {
             XML3D.debug.logError("Error while registering web component: ", exception);
             reject(url);
@@ -87,6 +92,9 @@ function registerComponentURL(url, opt) {
 }
 
 function registerComponentElem(element, opt) {
+    if (!element) {
+        return;
+    }
     if (typeof opt === "string") {
         opt = { name: opt };
     }

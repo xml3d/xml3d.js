@@ -48,6 +48,7 @@ EXTENSIONS.FLOAT_COLOR_BUFFER = 'WEBGL_color_buffer_float';
 EXTENSIONS.FLOAT_TEXTURES = 'OES_texture_float';
 EXTENSIONS.FLOAT_TEXTURES_LINEAR = "OES_texture_float_linear";
 EXTENSIONS.UINT32_INDICES = 'OES_element_index_uint'; //Also defined in xflow/utils/utils.js
+EXTENSIONS.VERTEX_ARRAY_OBJECT = "OES_vertex_array_object";
 
 XML3D.extend(GLContext.prototype, {
     getXflowEntryWebGlData: function (entry) {

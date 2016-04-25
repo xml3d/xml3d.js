@@ -17,6 +17,7 @@ var GLMesh = function (context) {
     this.context.getStatistics().meshes++;
     this.glType = null;
     this.multiDraw = false;
+    this.vao = {};
 };
 
 XML3D.extend(GLMesh.prototype, {
@@ -59,6 +60,7 @@ XML3D.extend(GLMesh.prototype, {
         this.minIndex = this.maxIndex = 0;
         this.isIndexed = false;
         this.minAttributeCount = -1;
+        this.vao = {};
     },
 
     getUniformOverride: function(name) {
@@ -108,6 +110,19 @@ XML3D.extend(GLMesh.prototype, {
     _bindVertexBuffers: function(program) {
         var gl = this.context.gl, sAttributes = program.attributes, buffers = this.buffers, i, name;
 
+        var vaoExt = this.context.extensions["OES_vertex_array_object"];
+        var vao = this.vao[program];
+        if (vao) {
+            vaoExt.bindVertexArrayOES(vao);
+            return;
+        }
+
+        if (vaoExt) {
+            vao = vaoExt.createVertexArrayOES();
+            vaoExt.bindVertexArrayOES(vao);
+            this.vao[program] = vao;
+        }
+
         var keys = Object.keys(sAttributes);
         var keyLength = keys.length;
 
@@ -127,6 +142,11 @@ XML3D.extend(GLMesh.prototype, {
 
     _unbindVertexBuffers: function (program) {
         var gl = this.context.gl, sAttributes = program.attributes;
+        var vaoExt = this.context.extensions["OES_vertex_array_object"];
+        if (this.vao[program]) {
+            vaoExt.bindVertexArrayOES(null);
+            return;
+        }
         for (var name in sAttributes) {
             var shaderAttribute = sAttributes[name];
             gl.disableVertexAttribArray(shaderAttribute.location);

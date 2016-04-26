@@ -1,4 +1,5 @@
 var Options = require("../../../utils/options.js");
+var Vec3 = require("../../../types/vec3.js");
 
 var OPTION_MOUSEMOVE_PICKING = "renderer-mousemove-picking";
 var OPTION_MOVEMENT_AWARE_CLICK_HANDLER = "renderer-movement-aware-click-handler";
@@ -134,7 +135,11 @@ MouseEventHandler.prototype =  {
                 get : function() {
                     if (!cachedNormal) {
                         var norm = (handler.getWorldSpaceNormalByPoint(x, y));
-                        cachedNormal = norm || null;
+                        if (norm) {
+                            cachedNormal = Vec3.wrap(norm);
+                        } else {
+                            cachedNormal = null;
+                        }
                     }
                     return cachedNormal;
                 }
@@ -144,7 +149,11 @@ MouseEventHandler.prototype =  {
                 get : function() {
                     if (!cachedPosition) {
                         var pos = handler.getWorldSpacePositionByPoint(x, y);
-                        cachedPosition = pos || null;
+                        if (pos) {
+                            cachedPosition = Vec3.wrap(pos);
+                        } else {
+                            cachedPosition = null;
+                        }
                     }
                     return cachedPosition;
                 }

@@ -5,6 +5,109 @@ var FullScreenQuad = require("./base/fullscreenquad.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
 var ForwardRenderPass = require("./render-passes/forward.js");
 
+var ConfigurableGLStates = [
+    "depthMask", "depthTest", "depthFunc", "blendEquationSeparate", "blendFuncSeparate",
+    "blend", "cullFace", "cullFaceMode", "colorMask", "scissorTest", "scissor"
+];
+
+function initGLStates(ri, context) {
+    var gl = context.gl;
+
+    // When adding new configurable states don't forget to add them to the ConfigurableGLStates array at the top of this file!
+    ri.glStateMap = {
+        depthMask: {
+            default: [true],
+            set: function(vals) {
+                gl.depthMask.apply(gl, vals);
+            }
+        },
+        depthTest: {
+            default: [true],
+            set: function(val) {
+                if (val[0])
+                    gl.enable(gl.DEPTH_TEST);
+                else
+                    gl.disable(gl.DEPTH_TEST)
+            }
+        },
+        depthFunc: {
+            default: [gl.LESS],
+            set: function(vals) {
+                gl.depthFunc.apply(gl, vals);
+            }
+        },
+        blendEquationSeparate:  {
+            default: [gl.FUNC_ADD, gl.FUNC_ADD],
+            set: function(vals) {
+                if (vals.length == 1) {
+                    gl.blendEquation(vals[0]);
+                } else {
+                    gl.blendEquationSeparate.apply(gl, vals);
+                }
+            }
+        },
+        blendFuncSeparate: {
+            default: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA],
+            set: function (vals) {
+                if (vals.length == 2) {
+                    gl.blendFunc(vals[0], vals[1]);
+                } else if (vals.length == 4) {
+                    gl.blendFuncSeparate.apply(gl, vals);
+                }
+            }
+        },
+        blend: {
+            default: [false],
+            set: function(val) {
+                if (val[0])
+                    gl.enable(gl.BLEND);
+                else
+                    gl.disable(gl.BLEND)
+            }
+        },
+        cullFace: {
+            default: [true],
+            set: function(val) {
+                if (val[0])
+                    gl.enable(gl.CULL_FACE);
+                else
+                    gl.disable(gl.CULL_FACE)
+            }
+        },
+        cullFaceMode: {
+            default: [gl.BACK],
+            set: function(vals) {
+                gl.cullFace.apply(gl, vals);
+            }
+        },
+        colorMask: {
+            default: [true, true, true, true],
+            set: function(vals) {
+                if (vals.length == 1) {
+                    gl.colorMask(vals[0], vals[0], vals[0], vals[0]);
+                } else {
+                    gl.colorMask.apply(gl, vals);
+                }
+            }
+        },
+        scissorTest: {
+            default: [false],
+            set: function(vals) {
+                if (vals[0])
+                    gl.enable(gl.SCISSOR_TEST);
+                else
+                    gl.disable(gl.SCISSOR_TEST);
+            }
+        },
+        scissor: {
+            default: [0, 0, 10, 10],
+            set: function(vals) {
+                gl.scissor.apply(gl, vals);
+            }
+        }
+    }
+}
+
 /**
  *
  * @param {GLContext} context
@@ -15,12 +118,8 @@ var GLRenderInterface = function (context, scene) {
     this.context = context;
     this.scene = scene;
     this.shaders = {};
-    this.options = {
-        pickingEnabled: true,
-        mouseMovePickingEnabled: true,
-        glBlendFuncSeparate: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA]
-    };
     this.renderTree = null;
+    initGLStates(this, context);
 };
 
 XML3D.extend(GLRenderInterface.prototype, {
@@ -56,8 +155,29 @@ XML3D.extend(GLRenderInterface.prototype, {
 
     createSceneRenderPass: function(target) {
         return new ForwardRenderPass(this, target || this.context.canvasTarget);
+    },
+
+    setGLState: function(state) {
+        for (var key in state) {
+            var vals = state[key];
+            this.glStateMap[key].set(state[key]);
+        }
+    },
+
+    resetGLState: function(state) {
+        for (var key in state) {
+            this.glStateMap[key].set(this.glStateMap[key].default);
+        }
+    },
+
+    getConfigurableGLStates: function() {
+        return ConfigurableGLStates;
     }
 });
 
-module.exports = GLRenderInterface;
+
+module.exports = {
+    GLRenderInterface : GLRenderInterface,
+    ConfigurableGLStates : ConfigurableGLStates
+};
 

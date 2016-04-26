@@ -30,6 +30,7 @@ var Configuration = function(model, dataNode, opt) {
      * @type {string|null}
      */
     this.name = opt.name || null;
+
 };
 
 module.exports = Configuration;

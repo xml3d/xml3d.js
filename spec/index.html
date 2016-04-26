@@ -9,7 +9,7 @@
     <script class='remove'>
         var respecConfig = {
             // specification status (e.g. WD, LCWD, NOTE, etc.). If in doubt use ED.
-            specStatus: "unofficial",
+            specStatus: "base",
 
             // the specification's short name, as in http://www.w3.org/TR/short-name/
             shortName: "xml3d",
@@ -3066,8 +3066,19 @@
 
 
 <section>
-    <h2>Custom materials</h2>
+    <h2>Materials</h2>
+    <p>Materials are responsible for describing how an object should be rendered. In XML3D materials generally have two parts:
+    a set of textures and parameters and some code that uses these components to determine the final color of each point
+    on the surface of an object. On the web this will usually consist of WebGL shader code (GLSL) or Shade.js code. </p>
 
+    <p>In XML3D this combination of parameters and code is called the material <em>model</em>. A <a>material element</a>
+        represents an instance of a particular material model, allowing the parameters to be changed. XML3D contains several
+        <a href="#predefined-material-models">predefined material models</a>. It also offers an interface and set of conventions for defining custom material
+        models.
+     </p>
+
+  <section>
+      <h3>Custom materials</h3>
     <p>XML3D provides an interface to define custom materials in addition to the predefined material models. Such
         materials must first be registered
         with XML3D:</p>
@@ -3144,6 +3155,150 @@
     </pre>
 
     </div>
+  </section>
+</section>
+
+<section>
+    <h2>Web Components</h2>
+
+    <p>XML3D supports the <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components">web component</a> approach to
+    defining custom HTML objects that can be easily encapsulated and shared. </p>
+
+    <div class="note">
+        Web Components are a new technology still under development by the major browsers. In some browsers they may need to be
+        explicitly enabled, others may not support them at all. In these cases a <a href="http://webcomponents.org/polyfills/">web components polyfill</a>
+        will need to be included in the page.
+    </div>
+
+    <p>The following example shows a simple web component that instantiates a cube:</p>
+
+     <pre class="example highlight">
+        &lt;!-- Component registration --&gt;
+        &lt;script type="text/javascript"&gt;
+            window.addEventListener("load", function() {
+                // This function takes care of registering the web component with the browser
+                XML3D.registerComponent(document.querySelector("#cube-template"));
+            });
+        &lt;/script&gt;
+
+        &lt;!-- Component template --&gt;
+        &lt;template id="cube-template" name="x-cube"&gt;
+            &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
+                &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
+            &lt;/material&gt;          
+            &lt;mesh material="#cube-material" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+        &lt;/template&gt;
+
+        &lt;!-- Instantiating a component --&gt;
+        &lt;xml3d&gt;
+            &lt;group style="transform: translate3d(0,0,-10px)"&gt;
+                &lt;x-cube&gt;&lt;/x-cube&gt;
+            &lt;/group&gt;
+        &lt;/xml3d&gt;
+    </pre>
+
+    <p>The following rules and limitations also apply to components: </p>
+    <ul>
+        <li>The <code>names</code> and types of configurable value elements must always match</li>
+        <li>The tag <code>name</code> given for the component must include a hyphen '-'</li>
+        <li>The component tag itself (eg. <code>&lt;x-cube&gt;</code>) acts as a <a href="#the-group-element">group element</a> in the scene</li>
+        <li>Nested templates are not supported, but a template may contain other web components</li>
+        <li>Each child node of a web component can only be inserted into a single <code>&lt;content&gt;</code> slot (described below). Children without a matching content slot are ignored.</li>
+    </ul>
+
+    <section>
+        <h3>Registration</h3>
+        <p>Web components must be registered with the browser before they can be used. XML3D provides a convenience interface for this and it is recommended
+        that you use this to register your web components rather than registering them manually. The simplest way to register a web component is to
+        pass a URL string to an HTML file containing the <code>template</code> element:</p>
+
+        <pre class="example highlight">
+            var promise = XML3D.registerComponent("path/to/component/template.html");
+        </pre>
+
+        <p>The registration function will return a Promise object that resolves when the component template has been registered with the browser. At that
+        point you may begin creating instances of the component. The Promise will reject if the component template could not be found or if an error was
+        encountered during the registration process.</p>
+
+        <p>Optionally you can include your own prototype object for a web component. This allows you to hook into the standard lifecycle callbacks of the
+        web component (eg. <code>createdCallback</code>) and to define custom functions that will be available on your web component. The example below registers
+        a component that provides the function <code>myFunction</code> on the web component's DOM element:</p>
+
+        <pre class="example highlight">
+            var myPrototype = {
+               myFunction : function() { ... },
+               createdCallback : function() { ... }
+            };
+
+            XML3D.registerComponent("path/to/component/template.html", {proto: myPrototype});
+
+            document.body.appendChild(document.createElement("my-component")); // createdCallback would be called here
+            document.querySelector("my-component").myFunction();
+        </pre>
+
+        <p>For more information about the various lifecycle callbacks see the <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Custom_Elements">
+            Custom Elements
+        </a> documentation. Note that XML3D's own lifecycle callbacks will always be called first even when providing your own. These internal callbacks will
+        take care of things like creating a shadow root and filling it with the component's template.</p>
+
+    </section>
+
+    <section>
+        <h3>Configuration</h3>
+
+        <p>XML3D supports using content elements and attributes to configure web components.
+            The following example uses a content element to configure the color of the cube and an attribute to configure its opacity:</p>
+
+        <pre class="example highlight">
+            &lt;template opacity="1" name="x-cube"&gt;
+                &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
+                    &lt;content select="float3[name='diffuseColor']"&gt; &lt;!-- Select a float3 element with the name 'diffuseColor' --&gt;
+                        &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
+                    &lt;/content&gt;
+                    &lt;float name="opacity"&gt;{{opacity}}&lt;/float&gt; &lt;!-- Take opacity from the 'opacity' attribute --&gt;
+                &lt;/material&gt;
+                &lt;mesh material="#cube-material" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+            &lt;/template&gt;
+
+            &lt;xml3d&gt;
+                &lt;group style="transform: translate3d(0,0,-10px)"&gt;
+                    &lt;x-cube opacity="0.5"&gt; &lt;!-- Set the cube's opacity to 0.5 --&gt;
+                        &lt;float3 name="diffuseColor"&gt;1 0 1&lt;/float3&gt; &lt;!-- This float3 will be appended to the above content slot, overriding the default float3 --&gt;
+                    &lt;/x-cube&gt;
+                &lt;/group&gt;
+            &lt;/xml3d&gt;
+        </pre>
+
+            <p>Content elements can also be used to add renderable objects or even other web components, however in this case they will <em>not</em> override
+                existing defaults, but will instead be rendered alongside them:</p>
+
+        <pre class="example highlight">
+            &lt;template id="cube-template" name="x-cube"&gt;
+                &lt;material id="cube-material" model="urn:xml3d:material:phong"&gt;
+                    &lt;content select="float3[name='diffuseColor']"&gt;
+                        &lt;float3 name="diffuseColor"&gt;0 1 0&lt;/float3&gt;
+                    &lt;/content&gt;
+                &lt;/material&gt;
+                &lt;content select="mesh"&gt;
+                    &lt;mesh material="#cube-material" src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt;
+                    &lt;!-- The below mesh will be inserted here --&gt;
+                &lt;/content&gt;
+                &lt;content select=".otherComponent"&gt;
+                    &lt;!-- The below x-cube instance with the class 'otherComponent' will be inserted here --&gt;
+                &lt;/content&gt;
+            &lt;/template&gt;
+
+            &lt;xml3d&gt;
+                &lt;group style="transform: translate3d(0,0,-10px)"&gt;
+                    &lt;x-cube&gt;
+                        &lt;float3 name="diffuseColor"&gt;1 0 1&lt;/float3&gt;
+                        &lt;mesh src="myCubeMesh.xml" type="triangles"&gt;&lt;/mesh&gt; &lt;!-- This x-cube component now contains 2 overlapping cubes --&gt;
+                        &lt;x-cube class="otherComponent"&gt;&lt;/x-cube&gt;            &lt;!-- This x-cube component now contains 3 overlapping cubes --&gt;
+                    &lt;/x-cube&gt;
+                &lt;/group&gt;
+            &lt;/xml3d&gt;
+        </pre>
+    </section>
 
 </section>
 

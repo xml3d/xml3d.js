@@ -1,6 +1,7 @@
 var Events = require("../interface/notification.js");
 var config = require("../interface/elements.js").config;
 var Resource = require("../resource");
+var URI = require("../utils/uri.js").URI;
 
 /**
  * A normal adapter that doesn't need to be connected to a DOM node
@@ -134,8 +135,10 @@ NodeAdapter.prototype.notifyChanged = function(e) {
  */
 NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
     canvasId = canvasId === undefined ? this.factory.canvasId : canvasId;
-    return Resource.getAdapterHandle(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL,
-        uri, aspectType || this.factory.aspect, canvasId, this.node.nodeName);
+    if (typeof uri == "string") {
+        uri = new URI(uri);
+    }
+    return Resource.getAdapterHandle(this.node, uri, aspectType || this.factory.aspect, canvasId);
 };
 /**
  * notifies all adapter that refer to this adapter through AdapterHandles.
@@ -153,12 +156,26 @@ NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
  */
 NodeAdapter.prototype.traverse = function(callback) {
     callback(this);
-    var child = this.node.firstElementChild;
-    while (child) {
-        var adapter = this.factory.getAdapter(child);
+    var children = this.getChildren();
+
+    for (var i=0; i < children.length; i++) {
+        var adapter = this.factory.getAdapter(children[i]);
         adapter && adapter.traverse(callback);
-        child = child.nextElementSibling;
     }
+};
+
+/**
+ * Returns all child nodes of this adapter, including possible shadow dom/distributed nodes
+ * @returns {*|Array.<ProcessNode>|Array|HTMLElement[]}
+ */
+NodeAdapter.prototype.getChildren = function() {
+    var children = this.node.children;
+    if (this.node.shadowRoot) {
+        children = this.node.shadowRoot.children;
+    } else if (this.node.getDistributedNodes) {
+        children = this.node.getDistributedNodes();
+    }
+    return children;
 };
 
 

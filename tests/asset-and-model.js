@@ -12,6 +12,25 @@ test("Static Test", 2, function () {
     test.fin(QUnit.start).done();
 });
 
+test("External asset with CSS", 4, function () {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/asset-basic.html");
+
+    var test = frameLoaded.then(function (doc) {
+        var xTest = doc.getElementById("xml3dTest");
+        doc.getElementById("innerSubData").material = "#pinkmaterial";
+        return xTest;
+    }).then(promiseSceneRendered).then(function (s) {
+        QUnit.closeArray(XML3DUnit.getPixelValue(getContextForXml3DElement(s), 132, 288), [255, 127, 255, 255], PIXEL_EPSILON, "Left cube was transformed properly");
+        QUnit.closeArray(XML3DUnit.getPixelValue(getContextForXml3DElement(s), 249, 287), [255, 127, 255, 255], PIXEL_EPSILON, "Right cube pair was loaded");
+        QUnit.closeArray(XML3DUnit.getPixelValue(getContextForXml3DElement(s), 347, 287), [0,0,0,0], PIXEL_EPSILON, "Right most cube with display:none is not visible");
+        return s;
+    });
+
+    test.fin(QUnit.start).done();
+
+});
+
 
 test("Modify material assignment", 5, function () {
     stop();

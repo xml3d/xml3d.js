@@ -552,10 +552,9 @@ DataNode.prototype.clear = function(){
     this._channelNode.decreaseRef();
     clearSubstitutionNodes(this);
     updateProgressLevel(this);
-    this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    this.notify( C.RESULT_STATE.REMOVED);
     this._listeners = [];
     delete this._userData;
-    delete this._channelNode;
     delete this._dataflowNode;
     Base._flushResultCallbacks();
 };
@@ -723,6 +722,9 @@ DataNode.prototype.setCompute = function(computeString){
 DataNode.prototype.notify = function(changeType, senderNode){
     //noinspection FallthroughInSwitchStatementJS
     switch(changeType) {
+        case C.RESULT_STATE.REMOVED:
+            notifyParentsOnChanged(this, C.RESULT_STATE.CHANGED_STRUCTURE);
+            break;
         case C.RESULT_STATE.CHANGED_STRUCTURE:
             this._paramNames = null;
             this._globalParamNames = null;

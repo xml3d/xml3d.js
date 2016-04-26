@@ -1,7 +1,10 @@
 xml3d.js
 ========
-
 [![Build Status](https://travis-ci.org/xml3d/xml3d.js.svg?branch=develop)](https://travis-ci.org/xml3d/xml3d.js)
+[![License badge](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Specification](https://img.shields.io/badge/specification-latest-brightgreen.svg)](http://www.xml3d.org/xml3d/specification/latest)
+[![Documentation badge](https://img.shields.io/badge/fiware%20docs-latest-brightgreen.svg)](http://xml3d.readthedocs.org/en/latest/?badge=latest)
+[![Support badge](https://img.shields.io/badge/support-sof-yellowgreen.svg)](http://stackoverflow.com/questions/tagged/xml3d)
 
 #### XML3D ####
 
@@ -9,10 +12,10 @@ xml3d.js is a [XML3D](http://www.xml3d.org) implementation based on WebGL and Ja
 as developing web pages. Every web developer who knows how to use the DOM (or jQuery) should also be able to use XML3D.
 
 XML3D is also an evaluation platform of the W3C Community Group [Declarative 3D for the Web](http://www.w3.org/community/declarative3d/) and 
-a [FI-WARE Generic Enabler](http://catalogue.fiware.org/enablers/3d-ui-xml3d).
+a [FIWARE Generic Enabler](http://catalogue.fiware.org/enablers/3d-ui-xml3d).
 
 #### Examples ####
-Here you can find [small examples](https://github.com/xml3d/xml3d-examples) of individual features. Below are some more complete demos:
+Our [small examples repository](https://github.com/xml3d/xml3d-examples) holds simple examples of individual features. Below are some more complete demos:
 
 <a href="http://www.xml3d.org/xml3d/demos/rubikscube/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/rubik.jpg"/></a>
 <a href="http://www.xml3d.org/xml3d/demos/chess/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/chess.png"/></a>
@@ -27,7 +30,7 @@ Here you can find [small examples](https://github.com/xml3d/xml3d-examples) of i
 
 #### Usage ####
 
-Download the [library](http://www.xml3d.org/xml3d/script/xml3d.js) and include it in your xhtml.
+Download the [library](http://www.xml3d.org/xml3d/script/xml3d.js) and include it in your html page.
 
 ```html
 <script src="http://www.xml3d.org/xml3d/script/xml3d.js"></script>
@@ -75,7 +78,8 @@ We have an overview documentation in each subfolder of the project:
 * [tests](tests/) - The test suite
 * [tools](tools/) - Several tools that can be used optionally with xml3d.js
 
-In addition a full [specification and API description](http://xml3d.org/xml3d/specification/5.0) is provided.
+In addition a full [specification and API description](http://xml3d.org/xml3d/specification/latest) is provided, which also includes many examples and code snippets. 
+This repository's [Wiki](https://github.com/xml3d/xml3d.js/wiki) also contains some tutorials and additional help.
 
 ### Change log ###
 5.1 - 07.01.2016

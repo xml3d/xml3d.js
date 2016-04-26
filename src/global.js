@@ -44,6 +44,7 @@ XML3D.createClass = function(obj, parent, methods) {
     return obj;
 };
 
+
 XML3D.debug = require("./utils/debug.js");
 XML3D.util = require("./utils/misc.js");
 XML3D.options = require("./utils/options.js");
@@ -82,6 +83,8 @@ XML3D.asset = require("./asset/asset.js");
 XML3D.webgl = {};
 XML3D.webgl.BaseRenderTree = require("./renderer/webgl/render-trees/base.js");
 XML3D.webgl.BaseRenderPass = require("./renderer/webgl/render-passes/base.js");
+
+XML3D.registerComponent = require("./interface/web-component.js");
 
 require("./resource/xml3dformathandler.js");
 

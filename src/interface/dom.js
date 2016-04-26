@@ -34,5 +34,17 @@ doc.createElement = function(name) {
     }
     return r;
 };
+//var nativeRegisterElement = document.registerElement;
+//doc.registerElement = function(tagName, opt) {
+//    var r = nativeRegisterElement.call(this, tagName, opt);
+//    var matches = document.querySelectorAll(tagName);
+//    // Detach and re-attach all matching web component instances to re-initialize them
+//    for (var i=0; i < matches.length; i++) {
+//        var parent = matches[i].parentNode;
+//        parent.removeChild(matches[i]);
+//        parent.appendChild(matches[i]);
+//    }
+//    return r;
+//};
 
 XML3D.extend(window.document, doc);

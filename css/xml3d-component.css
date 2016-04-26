@@ -1,0 +1,19 @@
+float,
+float2,
+float3,
+float4,
+float4x4,
+int,
+int4,
+bool,
+string,
+script  {
+   display: none;
+}
+
+mesh,
+group,
+model {
+	position: relative;
+}
+

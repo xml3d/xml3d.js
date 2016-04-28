@@ -6,7 +6,7 @@ This document will be updated as new features are implemented.
 
 ## Background and Detail
 
-These guides relate to the 3D-UI-XML3D implementation of the [3D-UI Generic Enabler](http://catalogue.fiware.org/enablers/3d-ui-xml3d) which is part of the Advanced WebUI chapter. Please find more details about this Generic Enabler in the according [Architecture](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Advanced_Web_UI_Architecture) and [Open Specification](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE.OpenSpecification.WebUI.3D-UI_R4) documents. 
+These guides relate to the 3D-UI-XML3D implementation of the [3D-UI Generic Enabler](http://catalogue.fiware.org/enablers/3d-ui-xml3d) which is part of the Advanced WebUI chapter. Please find more details about this Generic Enabler in the according [Architecture](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Advanced_Web_UI_Architecture) and [Open Specification](http://wiki.fiware.org/FIWARE.OpenSpecification.WebUI.3D-UI) documents. 
 
 # User Guide
 
@@ -34,15 +34,14 @@ The steps to create a 3D scene are as follows:
 We have already established, that all our 3D content is placed inside an ``<xml3d>`` element, so let's start with that:
 
 ```
-	<?xml version="1.0" encoding="UTF-8"?>
-	<html xmlns="http://www.w3.org/1999/xhtml">
+	<html>
 		<head>
 			<script type="text/javascript" src="http://www.xml3d.org/xml3d/script/xml3d.js"></script>
 			<script type="text/javascript" src="http://www.xml3d.org/xml3d/script/tools/camera.js"></script>
 			<title>My very first XML3D teapot</title>
 		</head>
 		<body>
-			 <xml3d xmlns="http://www.xml3d.org/2009/xml3d" >
+			 <xml3d>
 			 </xml3d>
 		</body>
 	</html>
@@ -59,8 +58,8 @@ Save the file as "teapot.json" in a sub-folder of your application called "resou
 Including the mesh is now fairly simple:
 
 ```
-	<xml3d xmlns="http://www.xml3d.org/2009/xml3d" >
-		<mesh src="resource/teapot.json" />
+	<xml3d>
+		<mesh src="resource/teapot.json"></mesh>
 	</xml3d>
 ```
 
@@ -74,9 +73,9 @@ So consequently: our viewpoint is right next to the surface to the mesh.
 Let's change the viewpoint to get some distance to the object. XML3D provides the <view> element to define the viewpoint of the scene:
 
 ```
-	<xml3d xmlns="http://www.xml3d.org/2009/xml3d">
-		<view position="0 0 100" />
-		<mesh src="resource/teapot.xml#mesh" />
+	<xml3d>
+		<view style="transform: translate3d(0px, 0px, 100px)"></view>
+		<mesh src="resource/teapot.xml#mesh"></mesh>
 	</xml3d>
 ```
 
@@ -89,14 +88,24 @@ In order to move the mesh, we first have to wrap it inside a <group> element. Th
 To declare the transformation, we simply use CSS 3D Transformations :
 
 ```
-	<xml3d xmlns="http://www.xml3d.org/2009/xml3d">
-	   <view position="0 0 100" />
-	   <group  style="transform: translate3d(0px,-20px, 0px)" >
-		 <mesh src="resource/teapot.xml#mesh" />
+	<xml3d>
+	   <view style="transform: translate3d(0px, 0px, 100px)"></view>
+	   <group  style="transform: translate3d(0px,-20px, 0px)">
+		 <mesh src="resource/teapot.xml#mesh"></mesh>
 	   </group>
 	</xml3d>
 ```
-The declared transformation moves the teapot downwards, placing it nicely centered in the viewport. 
+The declared transformation moves the teapot downwards, placing it nicely centered in the viewport. Most scenes will also need a light source of some kind. Usually a default directional light is all you need to get started:
+
+```
+	<xml3d>
+	   <light model="urn:xml3d:light:directional"></light> 
+	   <view style="transform: translate3d(0px, 0px, 100px)"></view>
+	   <group  style="transform: translate3d(0px,-20px, 0px)">
+		 <mesh src="resource/teapot.xml#mesh"></mesh>
+	   </group>
+	</xml3d>
+```
 
 ## Composition of complex assets from several meshes
 
@@ -113,8 +122,8 @@ An asset definition could look like this:
 	<assetdata name="config">
 	  <float3 name="diffuseColor">0.5 0.5 0</float3>
 	</assetdata>
-	<assetmesh src="mesh1.json" shader="meshdata.xml#shader1" transform="meshdata.xml#localTransform1"></assetmesh>
-	<assetmesh src="mesh2.json" shader="meshdata.xml#shader2" transform="meshdata.xml#localTransform2" includes="config"></assetmesh>
+	<assetmesh src="mesh1.json" material="meshdata.xml#shader1" transform="meshdata.xml#localTransform1"></assetmesh>
+	<assetmesh src="mesh2.json" material="meshdata.xml#shader2" transform="meshdata.xml#localTransform2" includes="config"></assetmesh>
 	</asset>
 ```
 
@@ -147,12 +156,12 @@ This is our Asset definition:
 ```
   <!-- asset definition -->
   <asset id = "nestedAsset">
-    <assetmesh src="someExternalMesh.json" />
+    <assetmesh src="someExternalMesh.json"></assetmesh>
 
     <!-- asset within asset definition -->
     <asset name="slots">
-      <asset name="leftSlot" />
-      <asset name="rightSlot" />
+      <asset name="leftSlot"></asset>
+      <asset name="rightSlot"></asset>
     </asset>
   </asset>
 ```
@@ -166,7 +175,7 @@ Our instance of our nested asset may look like this now:
   <model src="#nestedAsset">
 
     <!-- set appearance of child asset via src -->
-    <asset name="slots.leftSlot" src="myExternalAsset_1.xml#asset" transform="#someTransform">
+    <asset name="slots.leftSlot" src="myExternalAsset_1.xml#asset" transform="#someTransform"></asset>
 
   </model>
 ```
@@ -177,10 +186,10 @@ See how we added data to our left slot? We addressed our slot asset by it's name
 
 XML3D scenes can be created and modified during runtime. This can be done by the standard DOM API of the browser, or by popular frameworks such as jQuery. Basically every tool library that can be used to create dynamic Web-sites can also be employed to modify XML3D scenes.
 
-New elements are created using the respective function of the XML3D namespace:
+New elements are created using the normal browser functions:
 
 ```
-   XML3D.createElement(elementName)
+   document.createElement(elementName)
 ```
 
 with elementName corresponding to the nodes given in the XML3D Open API Specification
@@ -189,8 +198,8 @@ A new mesh contained in a group node can thus be created and added to the scene 
 
 ```
 // Create a group and mesh to be added by the scene
-var group = XML3D.createElement("group");
-var mesh = XML3D.createElement("mesh");
+var group = document.createElement("group");
+var mesh = document.createElement("mesh");
 mesh.type= "triangles";
 mesh.src = "#meshData";
 group.appendChild(mesh);
@@ -203,7 +212,7 @@ This code will create the following XML3D tree:
 ```
  <xml3d>
    <group>
-    <mesh type="triangles" src="#meshData">
+    <mesh type="triangles" src="#meshData"></mesh>
    </group>
  </xml3d>
 ```
@@ -212,9 +221,8 @@ As soon as the new group node was inserted in the DOM, it will automatically be 
 
 ```
 var transform = $(group.transform); // retrieve a transformation via jQuery
-transform.translation.set(new XML3DVec3(1,2,3)); // Translation and Scale can be assigned as vectors by ".set()" 
-transform.rotation.set(new XML3DRotation(new XML3DVec3(0,1,0), // Rotations can be assigned as axis angle by ".set()"
-                    0.5*Math.PI));
+transform.translation = new XML3D.Vec3(1,2,3); // Translation and Scale can be assigned as vectors
+transform.rotation = new XML3D.AxisAngle(0,1,0, 0.5*Math.PI) // Rotations can be assigned as axis angle
 ```
 
 Updating transformation attributes automatically renders the frame and displays the applied changes. 
@@ -223,14 +231,14 @@ Updating transformation attributes automatically renders the frame and displays 
 
 When adding XML3D nodes to a scene, all referenced resources, i.e. mesh data, data flows, textures etc. are loaded from their specified location. That means that even if the node was successfully created in the DOM, the resources that are represented by the node may not be completely loaded. This information can be important, though, for example when trying to perform computations on the newly added geometry.
 
-For this, XML3D offers an event load that can be attached to ``<xml3d>, <mesh>, <asset>, <model>, <shader>, <lightshader>, <data>`` and ``<dataflow>`` elements. An event listener to the load event can be attached either by using ``.addEventListener()``, or by specifying the event handling function via onload:
+For this, XML3D offers an event load that can be attached to ``<xml3d>, <mesh>, <asset>, <model>, <material>, <data>`` and ``<dataflow>`` elements. An event listener to the load event can be attached either by using ``.addEventListener()``, or by specifying the event handling function via onload:
 
 ```
 /* onload */
-<asset id="myAsset" onload="handleLoadedAsset(this);" />
+<asset id="myAsset" onload="handleLoadedAsset(this);" ></asset>
 
 /* Event Listener */
-var newAsset = XML3D.createElement("asset");
+var newAsset = document.createElement("asset");
 newAsset.src = "myAsset.xml#asset",
 newAsser.addEventListener("load", handleLoadedAsset, false);
 ```
@@ -238,7 +246,7 @@ newAsser.addEventListener("load", handleLoadedAsset, false);
 The event will be fired depending on the element:
 
 * ``<xml3d>`` : the event is fired when all external resources (mesh data, textures etc.) have been completely loaded
-* ``<mesh>, <shader>, <lightshader>, <data>, <dataflow>`` : the event is fired when all generic data (including textures) connected to these nodes has been loaded. If one of these elements includes a complex sub-graph of nested external resources, the event is fired only once all these resources have been loaded.
+* ``<mesh>, <material>, <data>, <dataflow>`` : the event is fired when all generic data (including textures) connected to these nodes has been loaded. If one of these elements includes a complex sub-graph of nested external resources, the event is fired only once all these resources have been loaded.
 * ``<asset>, <model>`` : the event is fired once the src-model and all <model> <assetdata> and <assetmesh> children have been completely loaded. 
 
 For the xml3d element, the load event fires whenever all external resources finished loading. Thus when an external reference is modified that results in the loading of a (non-cached) external resource, the load event will fire again, once this resource (an all other loading resources) have finished loading.

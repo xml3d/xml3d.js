@@ -64,7 +64,9 @@ function parseGLValues(vals) {
         if (GL[val] !== undefined) {
             parsed.push(GL[val]);
         } else if (typeof val == typeof "") {
-            if (val.toLowerCase() == "true") {
+            if (GL[val.toUpperCase()]) {
+                parsed.push(GL[val.toUpperCase()]);
+            } else if (val.toLowerCase() == "true") {
                 parsed.push(true);
             } else if (val.toLowerCase() == "false") {
                 parsed.push(false);

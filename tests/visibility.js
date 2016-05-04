@@ -188,3 +188,31 @@ test("Model visibility", 7, function() {
     makeVisibleModel2.fin(QUnit.start).done();
 
 });
+
+test("Sibling selector visibility", 3, function() {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/visibility-group.html"+window.location.search);
+
+    var changeFunction = function (f) {
+        return function (scene) {
+            scene.ownerDocument.defaultView[f]();
+            return scene;
+        }
+    };
+
+    var checkVisibleGroup = frameLoaded.then(function(doc) {return doc.querySelector("xml3d");})
+        .then(changeFunction("addVisibleGroup")).then(promiseSceneRendered).then(function (s) {
+            var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 50, 50);
+            QUnit.closeArray(pick, [255, 0, 0, 255], PIXEL_EPSILON, "Visible group was added");
+            return s;
+        });
+
+    var addSiblingSelector = checkVisibleGroup.then(changeFunction("addInvisibleSiblingSelector")).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 50, 50);
+        QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "Sibling selector made group invisible");
+        return s;
+    });
+
+    addSiblingSelector.fin(QUnit.start).done();
+});

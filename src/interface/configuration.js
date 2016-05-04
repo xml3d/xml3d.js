@@ -304,23 +304,6 @@ classInfo['light'] = {
     model: {a: handlers.StringAttributeHandler}
     };
 /**
- * Properties and methods for <lightshader>
- * // TODO(ksons): Remove in XML3D 5.1
- **/
-classInfo['lightshader'] = {
-    id: {a: handlers.IDHandler},
-    className: {a: handlers.StringAttributeHandler, id: 'class'},
-    onload: {a: handlers.EventAttributeHandler},
-    onprogress: {a: handlers.EventAttributeHandler},
-    complete: {p: properties.XML3DNestedDataContainerTypeComplete},
-    compute: {a: handlers.StringAttributeHandler},
-    getOutputNames: {m: methods.XML3DShaderProviderTypeGetOutputNames},
-    getOutputChannelInfo: {m: methods.XML3DShaderProviderTypeGetOutputChannelInfo},
-    getResult: {m: methods.XML3DShaderProviderTypeGetResult},
-    script: {a: handlers.StringAttributeHandler},
-    src: {a: handlers.StringAttributeHandler}
-    };
-/**
  * Properties and methods for <script>
  **/
 classInfo['script'] = {
@@ -532,6 +515,60 @@ classInfo['view'] = {
     getProjectionMatrix:{m: methods.viewGetProjectionMatrix},
     getViewMatrix: {m: methods.viewGetViewMatrix}
     };
+
+/**
+ * Properties and methods for web component tags which always have a '-' in them
+ **/
+classInfo['_web-component_'] = {
+    id: {a: handlers.IDHandler},
+    className: {a: handlers.StringAttributeHandler, id: 'class'},
+    onclick: {a: handlers.EventAttributeHandler},
+    ondblclick: {a: handlers.EventAttributeHandler},
+    onmousedown: {a: handlers.EventAttributeHandler},
+    onmouseup: {a: handlers.EventAttributeHandler},
+    onmouseover: {a: handlers.EventAttributeHandler},
+    onmousemove: {a: handlers.EventAttributeHandler},
+    onmouseout: {a: handlers.EventAttributeHandler},
+    onkeypress: {a: handlers.EventAttributeHandler},
+    onkeydown: {a: handlers.EventAttributeHandler},
+    onkeyup: {a: handlers.EventAttributeHandler},
+    getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
+    getLocalMatrix: {m: methods.XML3DGraphTypeGetLocalMatrix},
+    getWorldBoundingBox : {m: methods.getWorldBoundingBox},
+    getLocalBoundingBox : {m: methods.getLocalBoundingBox}
+};
+
+/**
+ * Properties and methods for any unknown elements that aren't web components (ie. <div> or <p>)
+ * These elements will be treated similar to a <group>
+ **/
+classInfo['_dummy_'] = {
+    id: {a: handlers.IDHandler},
+    className: {a: handlers.StringAttributeHandler, id: 'class'},
+    onclick: {a: handlers.EventAttributeHandler},
+    ondblclick: {a: handlers.EventAttributeHandler},
+    onmousedown: {a: handlers.EventAttributeHandler},
+    onmouseup: {a: handlers.EventAttributeHandler},
+    onmouseover: {a: handlers.EventAttributeHandler},
+    onmousemove: {a: handlers.EventAttributeHandler},
+    onmouseout: {a: handlers.EventAttributeHandler},
+    onkeypress: {a: handlers.EventAttributeHandler},
+    onkeydown: {a: handlers.EventAttributeHandler},
+    onkeyup: {a: handlers.EventAttributeHandler},
+    getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
+    getLocalMatrix: {m: methods.XML3DGraphTypeGetLocalMatrix},
+    getWorldBoundingBox : {m: methods.getWorldBoundingBox},
+    getLocalBoundingBox : {m: methods.getLocalBoundingBox}
+};
+
+
+/**
+ * Properties and methods for content nodes, which are found inside web components
+ **/
+classInfo['_content_'] = {
+    id: {a: handlers.IDHandler},
+    className: {a: handlers.StringAttributeHandler, id: 'class'}
+};
 
 module.exports = {
     classInfo : classInfo,

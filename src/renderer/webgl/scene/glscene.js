@@ -6,6 +6,7 @@ var ShaderComposerFactory = require("../materials/shadercomposerfactory.js");
 var Options = require("../../../utils/options.js");
 var ShadowMapService = require("../materials/shadowmap-service");
 var mat4 = require("gl-matrix").mat4;
+var GLMaterialConfiguration = require("./glconfiguration.js");
 
 var OPTION_FRUSTUM_CULLING = "renderer-frustum-culling";
 var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
@@ -253,6 +254,10 @@ XML3D.extend(GLScene.prototype, {
         if (key == OPTION_FRUSTUM_CULLING) {
             this.doFrustumCulling = !!value;
         }
+    },
+
+    createMaterialConfiguration: function(model, data, opt) {
+        return new GLMaterialConfiguration(model, data, opt);
     }
 });
 module.exports = GLScene;

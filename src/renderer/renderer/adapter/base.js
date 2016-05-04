@@ -7,7 +7,25 @@ var RenderAdapter = function (factory, node) {
 XML3D.createClass(RenderAdapter, NodeAdapter, {
 
     getParentRenderAdapter: function () {
-        return this.factory.getAdapter(this.node.parentNode, RenderAdapter);
+        var node = this.node;
+        if (node.getDestinationInsertionPoints) {
+            var points = node.getDestinationInsertionPoints();
+            if (points.length) {
+                return this.factory.getAdapter(points[0]);
+            }
+        }
+        do {
+            node = node.parentNode;
+            if (node.host) {
+                return this.factory.getAdapter(node.host);
+            }
+            var adapter = this.factory.getAdapter(node);
+            if (adapter) {
+                return adapter;
+            }
+        } while(node.parentNode);
+
+        return null;
     },
 
     /**
@@ -15,18 +33,7 @@ XML3D.createClass(RenderAdapter, NodeAdapter, {
      */
     initElement: function (element) {
         this.factory.getAdapter(element);
-        this.initChildElements(element);
-    },
-
-    /**
-     * @param {Element} element
-     */
-    initChildElements: function (element) {
-        var child = element.firstElementChild;
-        while (child) {
-            this.initElement(child);
-            child = child.nextElementSibling;
-        }
+        this.traverse(function() {}); //Can be empty function as traverse already creates adapters, which is all we need here
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
@@ -37,6 +44,10 @@ XML3D.createClass(RenderAdapter, NodeAdapter, {
 
     getScene: function () {
         return this.factory.renderer.scene;
+    },
+
+    dispose: function() {
+        this.node = null;
     }
 });
 

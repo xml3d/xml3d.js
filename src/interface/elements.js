@@ -110,6 +110,10 @@ function removeRecursive(element, evt) {
         removeRecursive(child, evt);
         child = child.nextElementSibling;
     }
+    if (element.shadowRoot) {
+        removeRecursive(element.shadowRoot, evt);
+    }
+
 }
 
 function addRecursive(element){
@@ -160,8 +164,8 @@ ElementHandler.prototype.registerAttributes = function(config) {
 
     var isHTML = (elem instanceof HTMLElement);
     var keyPrefix = (isHTML ? "_html" : "_xml");
-    var handlerKey = keyPrefix + "handlers",
-        protoKey = keyPrefix + "proto";
+    var handlerKey = keyPrefix + elem.nodeName + "handlers",
+        protoKey = keyPrefix + elem.nodeName + "proto";
 
     var canProto = !!elem.__proto__;
 
@@ -214,41 +218,28 @@ ElementHandler.prototype.registerAttributes = function(config) {
     }
     // Set and initialize handlers for element
     this.handlers = config._cache[handlerKey];
-    if(canProto){
-        elem.__proto__ = config._cache[protoKey];
-        for ( var prop in config) {
-            if(prop =="_cache") continue;
-            if(config[prop] && config[prop].a !== undefined){
-                var attrName = config[prop].id || prop;
-                var handler = this.handlers[attrName.toLowerCase()];
-                handler.init && handler.init(elem, this.storage);
-                delete elem[prop];
-            }
+
+    for ( var prop in config) {
+        if(prop =="_cache") continue;
+        if (config[prop] === undefined) {
+            delete elem[prop];
         }
-    }
-    else{
-        for ( var prop in config) {
-            if(prop =="_cache") continue;
-            if (config[prop] === undefined) {
-                delete elem[prop];
+        else if (config[prop].a !== undefined){
+            var attrName = config[prop].id || prop;
+            var handler = this.handlers[attrName.toLowerCase()];
+            handler.init && handler.init(elem, this.storage);
+            try {
+                Object.defineProperty(elem, prop, handler.desc);
+            } catch (e) {
+                XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
             }
-            else if (config[prop].a !== undefined){
-                var attrName = config[prop].id || prop;
-                var handler = this.handlers[attrName.toLowerCase()];
-                handler.init && handler.init(elem, this.storage);
-                try {
-                    Object.defineProperty(elem, prop, handler.desc);
-                } catch (e) {
-                    XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
-                }
-            }else if (config[prop].m !== undefined) {
-                elem[prop] = config[prop].m;
-            } else if (config[prop].p !== undefined) {
-                try {
-                    Object.defineProperty(elem, prop, config[prop].p);
-                } catch (e) {
-                    XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
-                }
+        }else if (config[prop].m !== undefined) {
+            elem[prop] = config[prop].m;
+        } else if (config[prop].p !== undefined) {
+            try {
+                Object.defineProperty(elem, prop, config[prop].p);
+            } catch (e) {
+                XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
             }
         }
     }
@@ -358,6 +349,7 @@ XML3D.createClass(XML3DHandler, ElementHandler);
 
 
 var config = {};
+var webComponentCounter = 0;
 
 /**
  * @param {Element} element
@@ -367,29 +359,31 @@ config.element = function(element) {
     if (element._configured === undefined ) {
         var classInfo = ClassInfo[element.localName];
         if (classInfo === undefined) {
-            XML3D.debug.logInfo("Unrecognised element " + element.localName);
-        } else {
-            element._configured = element.localName == "xml3d" ?
-                new XML3DHandler(element)
-                : new ElementHandler(element);
-            element._configured.registerAttributes(classInfo);
-            // Fix difference in Firefox (undefined) and Chrome (null)
-            try{
-                if (element.style == undefined)
-                    element.style = null;
+            if (element.nodeType !== 1) {
+                return; //Not an element node so ignore this
             }
-            catch(e){
-                // Firefox throws exception here...
+            if (element.nodeName.indexOf("-") !== -1) {
+                classInfo = ClassInfo["_web-component_"];
+                element.componentId = ++webComponentCounter;
+            } else {
+                classInfo = ClassInfo["_dummy_"];
             }
+        }
 
-            var n = element.firstElementChild;
+        element._configured = element.localName == "xml3d" ?
+            new XML3DHandler(element)
+            : new ElementHandler(element);
+        element._configured.registerAttributes(classInfo);
+        var n = element.firstElementChild;
+        if (!n && element.shadowRoot) {
+            n = element.shadowRoot.firstElementChild;
+        }
 
-            Resource.notifyNodeIdChange(element, null, element.getAttribute("id"));
+        Resource.notifyNodeIdChange(element, null, element.getAttribute("id"));
 
-            while(n) {
-                config.element(n);
-                n = n.nextElementSibling;
-            }
+        while(n) {
+            config.element(n);
+            n = n.nextElementSibling;
         }
     }
 };

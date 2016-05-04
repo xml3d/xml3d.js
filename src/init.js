@@ -79,7 +79,7 @@ function displayWebGLNotSupportedInfo(xml3dElement){
  *
  *  Why?
  *  In webgl we actually reattach the xml3d element in the DOM. Thus, when
- *  we're in the middle of working on a onNodeInserted event, there will probably
+ *  we're in the middle of working on a node insertion event, there will probably
  *  come right another event which we actually don't care for.
  *  So we use this list to keep track of which elements are currently initializing.
  */
@@ -168,27 +168,7 @@ function destroyXML3DElement(xml3dElement)
     canvas.parentNode && canvas.parentNode.removeChild(canvas);
 }
 
-/**
- * @param {Event} evt
- */
-function onNodeInserted(evt) {
-
-    if(Util.elementIs(evt.target, "xml3d")) {
-        initXML3DElement(evt.target);
-    }
-}
-
-/**
- * @param {Event} evt
- */
-function onNodeRemoved(evt) {
-
-    if(Util.elementIs(evt.target, "xml3d")) {
-        destroyXML3DElement(evt.target);
-    }
-}
-
-var observer = null;
+var xml3dElementObserver = null;
 
 function onLoad() {
 
@@ -211,15 +191,8 @@ function onLoad() {
         initXML3DElement(xml3ds[i]);
     }
 
-    // TODO(ksons): Remove this, no MutationObserver no XML3D
-    if(!MutationObserver){
-        document.addEventListener('DOMNodeInserted', onNodeInserted, false);
-        document.addEventListener('DOMNodeRemoved', onNodeRemoved, false);
-    }
-    else{
-        observer = new MutationObserver(resolveMutations);
-        observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: [ "class", "id", "style" ] } );
-    }
+    xml3dElementObserver = new MutationObserver(resolveMutations);
+    xml3dElementObserver.observe(document.documentElement, { childList: true, subtree: true, attributes: false} );
 }
 
 function onUnload() {
@@ -235,28 +208,6 @@ function resolveMutations(mutations){
         if(mutation.type == 'childList'){
             mapFunctionOnXML3DElements(mutation.addedNodes, initXML3DElement);
             mapFunctionOnXML3DElements(mutation.removedNodes, destroyXML3DElement);
-
-        } else if (mutation.type == 'attributes') {
-            var mutationTarget = mutation.target;
-            if (mutation.attributeName === "id" || mutation.attributeName === "class") {
-                mutationTarget = mutation.target.parentNode; // Start CSS re-eval at parent to honor sibling selectors
-                if (!mutationTarget) {
-                    continue; // Target was removed from the DOM before this event was processed
-                }
-            }
-            var cssTarget = mutationTarget._configured ? mutationTarget : mutationTarget.querySelector("xml3d");
-            if(cssTarget && cssTarget._configured) { // xml3d is a child node
-                var adaptersNames = Object.keys(cssTarget._configured.adapters).filter(function(a) {
-                    return a.indexOf("scene") == 0;
-                });
-                adaptersNames.map(function(name){return cssTarget._configured.adapters[name];}).forEach(function(renderAdapter) {
-                    renderAdapter.traverse(function(adapter) {
-                        adapter.styleChangedCallback();
-                    })
-
-                });
-
-            }
 
         }
     }
@@ -282,14 +233,14 @@ function mapFunctionOnXML3DElements(elementList, fun) {
 }
 
 XML3D.flushCSSChanges = function(){
-    if(observer){
-        resolveMutations(observer.takeRecords());
+    if (xml3dElementObserver) {
+        resolveMutations(xml3dElementObserver.takeRecords());
     }
 };
 
 function clearObserver(){
-    if(observer){
-        observer.takeRecords();
+    if (xml3dElementObserver) {
+        xml3dElementObserver.takeRecords();
     }
 }
 

@@ -69,7 +69,7 @@ var assert = require("assert");
                     case XML3D.debug.ISSUE:
                         assert(args[1] !== undefined, "Github issue number must be specified.");
                         var issue = args[0] + "\nMore information can be found at https://github.com/xml3d/xml3d.js/issues/" + args[1];
-                        window.console.error(issue);
+                        window.console.error.apply(window.console, [issue].concat(args.slice(2, args.length)));
                         break;
                     default:
                         break;

@@ -1,4 +1,5 @@
 var NodeAdapterFactory = require("../../../base/adapter.js").NodeAdapterFactory;
+var ConfigInfo = require("../../../interface/configuration.js").classInfo;
 
 /**
  * @constructor
@@ -19,10 +20,9 @@ var registry = {
         mesh: require("./mesh.js"),
         model: require("./model.js"),
         material: require("./material.js"),
-        shader: require("./material.js"), // TODO(ksons): Remove in 5.1
         group: require("./group.js"),
         light: require("./light.js"),
-        lightshader: require("./lightshader.js") // TODO(ksons): Remove in 5.1
+        "web-component": require("./web-component.js")
     };
 
 /**
@@ -34,7 +34,21 @@ RenderAdapterFactory.prototype.createAdapter = function (node) {
     if (adapterConstructor !== undefined) {
         return new adapterConstructor(this, node);
     }
-    return null;
+    if (node.nodeType !== 1) {
+        // This is a non-element node (ie. text node) so ignore it
+        return null;
+    }
+    if (ConfigInfo[node.nodeName.toLowerCase()] !== undefined) {
+        // This is an XML3D related element that doesn't need a render adapter (ie. value elements like float3)
+        return null;
+    }
+    if (node.nodeName.indexOf("-") !== -1 && node.shadowRoot) {
+        // This node follows the web component naming scheme, so treat it as a web component if it has a shadow root
+        return new registry["web-component"](this, node);
+    }
+
+    // This is some other element like a div or a p, in this case treat it as a group node
+    return new registry["group"](this, node);
 };
 
 RenderAdapterFactory.prototype.setScene = function (scene) {

@@ -266,7 +266,6 @@
 
         if (this.action !== this.NO_MOUSE_ACTION) {
             //Disable object picking during camera actions
-            this.mousemovePicking = XML3D.options.getValue("renderer-mousemove-picking");
             XML3D.options.setValue("renderer-mousemove-picking", false);
         }
     };

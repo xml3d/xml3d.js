@@ -1,7 +1,6 @@
 var RenderNode = require("./rendernode.js");
 var CameraModels = require("../cameras/camera-models.js");
 var Constants = require("./constants.js");
-var Frustum = require("../tools/frustum.js").Frustum;
 var vec3 = require("gl-matrix").vec3;
 var mat4 = require("gl-matrix").mat4;
 
@@ -9,7 +8,6 @@ var mat4 = require("gl-matrix").mat4;
 var CLIPPLANE_NEAR_MIN = 0.01;
 
 var NODE_TYPE = Constants.NODE_TYPE;
-var EVENT_TYPE = Constants.EVENT_TYPE;
 
 /** @const */
 var VIEW_TO_WORLD_MATRIX_OFFSET = 0;

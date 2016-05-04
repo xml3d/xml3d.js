@@ -23,40 +23,41 @@ test("Get Local Adapters", function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         canvasId = getCanvasId(xTest);
     var XML3D = this.window.XML3D;
+    var URI = this.window.XML3D.resource.URI;
 
-    var handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#transform1", "data", 0);
+    var handle = XML3D.resource.getAdapterHandle(xTest, new URI("#transform1"), "data", 0);
 
     ok(handle.hasAdapter(), "Handle of #transform1 has 'data' adapter ");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     equal(handle.getAdapter().node.localName, "transform", "Adapter adapts transform");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#data1", "data");
+    handle = XML3D.resource.getAdapterHandle(xTest, new URI("#data1"), "data");
     ok(handle.hasAdapter(), "Handle of #data1 has 'data' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     equal(handle.getAdapter().node.localName, "data", "Adapter adapts data");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#material1", "data");
+    handle = XML3D.resource.getAdapterHandle(xTest, new URI("#material1"), "data");
     ok(handle.hasAdapter(), "Handle of #material1 has 'data' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     equal(handle.getAdapter().node.localName, "material", "Adapter adapts material");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#material1", 'scene', canvasId);
+    handle = XML3D.resource.getAdapterHandle(xTest, new URI("#material1"), 'scene', canvasId);
     ok(handle.hasAdapter(), "Handle of #material1 has 'scene' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     equal(handle.getAdapter().factory.aspect, "scene", "Adapter has right aspect");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#group1", "scene", canvasId);
+    handle = XML3D.resource.getAdapterHandle(xTest, new URI("#group1"), "scene", canvasId);
     ok(handle.hasAdapter(), "Handle of #group1 has 'scene' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     // TODO: No access to adapters
     //ok(handle.getAdapter() instanceof XML3D.webgl.GroupRenderAdapter,"Adapter is instanceof XML3D.webgl.GroupRenderAdapter");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", "data");
+    handle = XML3D.resource.getAdapterHandle(xTest, new URI("#mesh1"), "data");
     ok(handle.hasAdapter(), "Handle of #mesh1 has 'data' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     equal(handle.getAdapter().node.localName, "mesh", "Adapter adapts mesh");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", 'scene', canvasId);
+    handle = XML3D.resource.getAdapterHandle(xTest, new URI("#mesh1"), 'scene', canvasId);
     ok(handle.hasAdapter(), "Handle of #mesh1 has 'scene' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     // TODO: No access to adapters
@@ -69,8 +70,9 @@ test("Get External Adapters", 17, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         canvasId = getCanvasId(xTest);
     var XML3D = this.window.XML3D;
+    var URI = this.window.XML3D.resource.URI;
 
-    var handle = XML3D.resource.getAdapterHandle(this.doc.URL, "xml/meshes.xml#simpleMesh", "data");
+    var handle = XML3D.resource.getAdapterHandle(xTest, new URI("xml/meshes.xml#simpleMesh"), "data");
     ok(!handle.hasAdapter(), "Handle of 'xml/meshes.xml#simpleMesh' has no 'data' adapter yet");
     ok(handle.status == AdapterHandle.STATUS.LOADING, "Handle status is 'LOADING'" );
 
@@ -81,17 +83,17 @@ test("Get External Adapters", 17, function() {
         ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
         // TODO: ok(handle.getAdapter() instanceof 'data'.DataAdapter, "Adapter is instanceof 'data'.DataAdapter");
 
-        handle = XML3D.resource.getAdapterHandle(self.doc.URL, "xml/meshes.xml#simpleMesh2", "data");
+        handle = XML3D.resource.getAdapterHandle(xTest, new URI("xml/meshes.xml#simpleMesh2"), "data");
         ok(handle.hasAdapter(), "Handle of 'xml/meshes.xml#simpleMesh2' has 'data' adapter, immediately");
         ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
         // TODO: ok(handle.getAdapter() instanceof 'data'.DataAdapter, "Adapter is instanceof 'data'.DataAdapter");
 
-        handle = XML3D.resource.getAdapterHandle(self.doc.URL, "xml/meshes.xml#indirect", "data");
+        handle = XML3D.resource.getAdapterHandle(xTest, new URI("xml/meshes.xml#indirect"), "data");
         ok(handle.hasAdapter(), "Handle of 'xml/meshes.xml#indirect' has 'data' adapter, immediately");
         ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
         // TODO: ok(handle.getAdapter() instanceof 'data'.DataAdapter, "Adapter is instanceof 'data'.DataAdapter");
 
-        var handle2 = XML3D.resource.getAdapterHandle(self.doc.URL, "xml/materials.xml#flatgreen2",
+        var handle2 = XML3D.resource.getAdapterHandle(xTest, new URI("xml/materials.xml#flatgreen2"),
             'scene', canvasId);
         ok(!handle2.hasAdapter(), "Handle of 'xml/materials.xml#flatgreen2' has no 'scene' adapter yet");
         ok(handle2.status == AdapterHandle.STATUS.LOADING, "Handle status is 'LOADING'" );
@@ -117,12 +119,13 @@ test("Get Missing Handles", function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         hTest = getHandler(xTest);
     var XML3D = this.window.XML3D;
+    var URI = this.window.XML3D.resource.URI;
 
-    var handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh2", "data");
+    var handle = XML3D.resource.getAdapterHandle(xTest, new URI("#mesh2"), "data");
     ok(!handle.hasAdapter(), "Handle of '#mesh2' has no 'data' adapter");
     ok(handle.status == AdapterHandle.STATUS.NOT_FOUND, "Handle status is 'NOT_FOUND'" );
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "xml/doesNotExists.xml#nope", "data");
+    handle = XML3D.resource.getAdapterHandle(xTest, new URI("xml/doesNotExists.xml#nope"), "data");
     ok(!handle.hasAdapter(), "Handle of 'xml/doesNotExists.xml#nope' (non existent document) has no adapter");
     ok(handle.status == AdapterHandle.STATUS.LOADING, "Handle status is 'LOADING'" );
 
@@ -135,7 +138,7 @@ test("Get Missing Handles", function() {
         ok(e.handleStatus = AdapterHandle.STATUS.NOT_FOUND, "Event handleStatus is 'NOT_FOUND'");
         ok(!handle.hasAdapter(), "Handle still doesn't have any adapter");
 
-        var handle2 = XML3D.resource.getAdapterHandle(self.doc.URL, "xml/meshes.xml#nope", "data");
+        var handle2 = XML3D.resource.getAdapterHandle(xTest, new URI("xml/meshes.xml#nope"), "data");
         ok(!handle2.hasAdapter(), "Handle of 'xml/meshes.xml#nope' (non existent id) has no adapter");
         ok(handle2.status == AdapterHandle.STATUS.LOADING, "Handle status is 'LOADING'" );
 
@@ -145,11 +148,11 @@ test("Get Missing Handles", function() {
             ok(e.handleStatus = AdapterHandle.STATUS.NOT_FOUND, "Event type is 'NOT_FOUND'");
             ok(!handle2.hasAdapter(), "Handle still doesn't have any adapter");
 
-            handle2 = XML3D.resource.getAdapterHandle(self.doc.URL, "xml/meshes.xml#nope2", "data");
+            handle2 = XML3D.resource.getAdapterHandle(xTest, new URI("xml/meshes.xml#nope2"), "data");
             ok(!handle2.hasAdapter(), "Handle of 'xml/meshes.xml#nope2' (non existent id) has no adapter");
             ok(handle2.status == AdapterHandle.STATUS.NOT_FOUND, "Handle status is 'NOT_FOUND' (not 'LOADING')" );
 
-            var handle3 = XML3D.resource.getAdapterHandle(self.doc.URL, "#mesh2", "data");
+            var handle3 = XML3D.resource.getAdapterHandle(xTest, new URI("#mesh2"), "data");
             ok(handle3.status == AdapterHandle.STATUS.NOT_FOUND, "Handle of '#mesh2' has still status is 'NOT_FOUND'" );
             handle3.addListener(function(e){
                 ok(handle3 == e.adapterHandle, "Event has correct AdapterHandle");
@@ -172,11 +175,12 @@ test("Notify Adapters", 8, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         canvasId = getCanvasId(xTest);
     var XML3D = this.window.XML3D;
+    var URI = this.window.XML3D.resource.URI;
 
     var node = this.doc.getElementById("mesh1");
-    var dataHandle1 = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", "data");
-    var dataHandle2 = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", "data");
-    var webglHandle = XML3D.resource.getAdapterHandle(this.doc.URL, "#mesh1", "scene", canvasId);
+    var dataHandle1 = XML3D.resource.getAdapterHandle(xTest,new URI("#mesh1"), "data");
+    var dataHandle2 = XML3D.resource.getAdapterHandle(xTest,new URI("#mesh1"), "data");
+    var webglHandle = XML3D.resource.getAdapterHandle(xTest,new URI("#mesh1"), "scene", canvasId);
     dataHandle1.addListener(function(e){
         ok(true, "First Data Adapter got notified");
         ok(e.type == Events.ADAPTER_HANDLE_CHANGED, "Event has correct type");

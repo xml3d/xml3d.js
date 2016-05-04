@@ -40,14 +40,24 @@ DOMTransformFetcher.prototype.updateMatrix = function () {
     this.owner.onTransformChange(this.attrName, this.getMatrix());
 };
 
+DOMTransformFetcher.prototype.updateCSSTransition = function() {
+    var cssMatrix = this.owner.style.transform;
+    if (cssMatrix && cssMatrix !== "none") {
+        this.owner.onTransformChange(this.attrName, CSS.matrixStringToMat4(cssMatrix).data);
+    }
+};
+
 DOMTransformFetcher.prototype.getMatrix = ( function () {
     var IDENTITY = mat4.create();
 
     return function () {
         if (!this.onlyDataTransform) {
-            var cssMatrix = CSS.getCSSMatrix(this.node);
-            if (cssMatrix) {
-                return CSS.convertCssToMat4(cssMatrix).data;
+            var cssMatrix = this.owner.style.transform;
+            if (cssMatrix && cssMatrix !== "none") {
+                if (this.owner.style.transitionDuration !== "0s") {
+                    this.handleCSSTransition();
+                }
+                return CSS.matrixStringToMat4(cssMatrix).data;
             }
         }
         var adapter;
@@ -67,6 +77,13 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
         return this.onlyDataTransform ? null : IDENTITY;
     };
 }());
+
+DOMTransformFetcher.prototype.handleCSSTransition = function() {
+    var duration = CSS.getLargestTransitionDurationMS(this.owner.style.transitionDuration);
+    if (duration) {
+        CSS.addTransitionCallback(this.updateCSSTransition.bind(this), duration);
+    }
+};
 
 DOMTransformFetcher.prototype._onChange = function (evt) {
     if (evt.type == Events.ADAPTER_VALUE_CHANGED) {

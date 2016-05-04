@@ -1,6 +1,4 @@
 var SceneElementAdapter = require("./scene-element.js");
-
-var Events = require("../../../interface/notification.js");
 var encodeZIndex = require("../../../utils/misc.js").encodeZIndex;
 var Resource = require("../../../resource");
 

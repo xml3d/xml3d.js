@@ -1,8 +1,5 @@
 var RenderNode = require("./rendernode.js");
 var Constants = require("./constants.js");
-var Frustum = require("../tools/frustum.js").Frustum;
-var vec3 = require("gl-matrix").vec3;
-var mat4 = require("gl-matrix").mat4;
 
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
@@ -17,11 +14,6 @@ var WORLD_BB_OFFSET = LOCAL_MATRIX_OFFSET + 16;
 var ENTRY_SIZE = WORLD_BB_OFFSET + 6;
 
 
-   /** @const */
-    var CLIPPLANE_NEAR_MIN = 0.01;
-
-    /** @const */
-    var DEFAULT_FIELDOFVIEW = 45 / 180 * Math.PI;
 /**
  *
  * @constructor

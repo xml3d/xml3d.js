@@ -3,6 +3,7 @@
   <title>XML3D Asset Basic Scene</title>
   <link rel="stylesheet" type="text/css" media="all" href="frame.css">
   <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+  <script type="text/javascript" src="../../tools/camera.js"></script>
 </head>
 
 <body style="background-color: #fff;width:500px">
@@ -98,7 +99,11 @@
 
     </defs>
     <group id="meshGroup">
-        <model id="mm1" src="#asset1"></model>
+        <group style="transform: translateZ(-10px)">
+            <model id="cube1" src="assets/cube_css.xml#cube_transform"></model>
+            <model id="cube2" src="assets/cube_css.xml#cube_display"></model>
+        </group>
+       <model id="mm1" src="#asset1"></model>
 
         <group style="transform: translateX(-5px)">
             <model id="mm2" src="#asset2">

@@ -51,7 +51,6 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
         }
         var status = this.materialHandler.status;
         if (status === AdapterHandle.STATUS.NOT_FOUND) {
-            XML3D.debug.logError("Could not find element of url '" + this.materialHandler.url + "' for material", this.node);
             this.getRenderNode().setMaterial(null);
             return;
         }
@@ -85,6 +84,7 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     },
 
     dispose: function() {
+        RenderAdapter.prototype.dispose.call(this);
         this.getRenderNode().remove();
         this.transformFetcher && this.transformFetcher.dispose();
         this.clearAdapterHandles();
@@ -93,6 +93,8 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
     styleChangedCallback: function() {
         this.updateZIndex();
         this.updateVisibility();
+        this.transformFetcher && this.transformFetcher.updateMatrix();
+        this.factory.renderer.requestRedraw("Style changed");
     },
 
     updateLocalMatrix: function () {
@@ -111,11 +113,18 @@ XML3D.createClass(SceneElementAdapter, RenderAdapter, {
 
         if (name == "transform") {
             this.transformFetcher && this.transformFetcher.update();
-        } else if (name == "style") {
-            this.transformFetcher && this.transformFetcher.updateMatrix();
         } else if (name == "material" && this.handleMaterial) {
             this.updateMaterialHandler();
             this.factory.renderer.requestRedraw("Transformable material changed.");
+        } else if (name == "style") {
+            this.traverse(function(adapter) {
+                adapter.styleChangedCallback();
+            });
+        } else if (name == "class" || name == "id") {
+            // Need to re-evaluate CSS starting at the parent node to honor sibling selectors
+            this.getParentRenderAdapter().traverse(function(adapter) {
+                adapter.styleChangedCallback();
+            });
         }
     },
 

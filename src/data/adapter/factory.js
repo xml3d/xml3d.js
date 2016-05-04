@@ -31,7 +31,6 @@ XML3D.createClass(XML3DDataAdapterFactory, NodeAdapterFactory);
 var reg = {
     'mesh': Misc.SinkDataAdapter,
     'material': Misc.SinkDataAdapter,
-    'shader': Misc.SinkDataAdapter, // TODO(ksons): Remove in 5.1
     'light': Misc.SinkDataAdapter,
     'view': Misc.SinkDataAdapter,
     'float': ValueDataAdapter,
@@ -57,7 +56,8 @@ var reg = {
     'asset': Asset.AssetAdapter,
     'assetdata': Asset.AssetDataAdapter,
     'assetmesh': Asset.AssetMeshAdapter,
-    'model': Asset.AssetAdapter
+    'model': Asset.AssetAdapter,
+    'content': DataAdapter
 };
 
 /**
@@ -74,7 +74,10 @@ XML3DDataAdapterFactory.prototype.createAdapter = function (node) {
     if (adapterContructor !== undefined) {
         return new adapterContructor(this, node);
     }
-    XML3D.debug.logWarning("Not supported as data element: " + node.localName);
+    if (node.localName.indexOf("-") > 0) {
+        // This is likely a web component instance, treat it as a data element
+        return new reg["data"](this, node);
+    }
     return null;
 };
 

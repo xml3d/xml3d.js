@@ -34,9 +34,6 @@ XML3D.createClass(LightRenderAdapter, SceneElementAdapter, {
         SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
 
         switch (name) {
-            case "intensity": // TODO(ksons): remove in 5.1
-                XML3D.debug.logWarning("The <light> attribute intensity is deprecated in XML3D 5.0.", this.node);
-                break;
             case "model":
                 this.renderNode.remove();
                 this.createRenderNode();

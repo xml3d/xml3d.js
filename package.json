@@ -2,13 +2,14 @@
   "name": "xml3d.js",
   "description": "XML3D implementation based on JS and WebGL",
   "homepage": "http://ww.xml3d.org",
-  "version": "5.1.4",
+  "version": "5.2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/xml3d/xml3d.js"
   },
   "license": "MIT",
   "devDependencies": {
+    "brfs": "^1.4.0",
     "browserify-replace": "0.9.0",
     "grunt": "~0.4.5",
     "grunt-browserify": "^3.2.0",
@@ -28,6 +29,6 @@
     "lodash.create": "^3.1.0",
     "lodash.defaults": "^3.1.1",
     "whatwg-fetch": "0.10.1",
-    "texture-manager": "http://github.com/ksons/texture-manager/tarball/master"
+    "texture-manager": "git://github.com/ksons/texture-manager.git#master"
   }
 }

@@ -72,6 +72,7 @@ exports = module.exports = function (grunt) {
                 options: {
                     browserifyOptions: {
                         debug: true,
+                        transform: ["brfs"],
                         standalone: "XML3DTestLib"
                     }
                 }
@@ -88,7 +89,7 @@ exports = module.exports = function (grunt) {
                                     { from: "%VERSION%", to: devVersionString }
                                 ]
                                 }
-                            ]
+                            ], "brfs"
                         ]
                     }
                 }
@@ -98,7 +99,8 @@ exports = module.exports = function (grunt) {
                 dest: "./build/output/xml3d.js",
                 options: {
                     browserifyOptions: {
-                        debug: false
+                        debug: false,
+                        transform: ["brfs"]
                     }
                 }
             }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml3d>
+  <material id="cubematerial" model="urn:xml3d:material:flat">
+    <float3 name="diffuseColor">1 0.5 1</float3>
+    <float name="ambientIntensity">1.0</float>
+  </material>
+
+  <asset id="cube_transform">
+    <assetdata name="Mesh-002">
+      <float3 name="position">-1.0 1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 1.0 -1.0 1.0 1.0 -1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 -1.0 -1.0 1.0 -1.0 1.0 1.0 1.0 1.0 -1.0 1.0 1.0 -1.0 -1.0 1.0 1.0 -1.0 -1.0 -1.0 -1.0 1.0 -1.0 -1.0 1.0 -1.0 1.0 -1.0 -1.0 1.0 -1.0 -1.0 -1.0 -1.0 1.0 -1.0 1.0 1.0 -1.0 1.0 -1.0 -1.0 1.0 -1.0 1.0 1.0 1.0 1.0 -1.0 1.0 1.0 -1.0 -1.0 1.0</float3>
+      <float3 name="normal">-1.0 0.0 -0.0 -1.0 0.0 -0.0 -1.0 0.0 -0.0 -1.0 0.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 1.0 0.0 -0.0 1.0 0.0 -0.0 1.0 0.0 -0.0 1.0 0.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0</float3>
+    </assetdata>
+    <assetmesh material="#cubematerial" includes="Mesh-002" style="transform: translate3d(-3px, 3px, 0);">
+      <int name="index">0 1 2 2 3 0 4 5 6 6 7 4 8 9 10 10 11 8 12 13 14 14 15 12 16 17 18 18 19 16 20 21 22 22 23 20 </int>
+    </assetmesh>
+  </asset>
+
+  <asset id="cube_display">
+    <assetdata name="Mesh-002">
+      <float3 name="position">-1.0 1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 1.0 -1.0 1.0 1.0 -1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 -1.0 -1.0 1.0 -1.0 1.0 1.0 1.0 1.0 -1.0 1.0 1.0 -1.0 -1.0 1.0 1.0 -1.0 -1.0 -1.0 -1.0 1.0 -1.0 -1.0 1.0 -1.0 1.0 -1.0 -1.0 1.0 -1.0 -1.0 -1.0 -1.0 1.0 -1.0 1.0 1.0 -1.0 1.0 -1.0 -1.0 1.0 -1.0 1.0 1.0 1.0 1.0 -1.0 1.0 1.0 -1.0 -1.0 1.0</float3>
+      <float3 name="normal">-1.0 0.0 -0.0 -1.0 0.0 -0.0 -1.0 0.0 -0.0 -1.0 0.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 1.0 0.0 -0.0 1.0 0.0 -0.0 1.0 0.0 -0.0 1.0 0.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0</float3>
+    </assetdata>
+    <transform id="ctrans1" translation="3 3 0"/>
+    <assetmesh transform="#ctrans1" material="#cubematerial" includes="Mesh-002" style="display:none">
+      <int name="index">0 1 2 2 3 0 4 5 6 6 7 4 8 9 10 10 11 8 12 13 14 14 15 12 16 17 18 18 19 16 20 21 22 22 23 20 </int>
+    </assetmesh>
+    <transform id="ctrans" translation="0 3 0"/>
+    <assetmesh material="#cubematerial" transform="#ctrans" includes="Mesh-002">
+      <int name="index">0 1 2 2 3 0 4 5 6 6 7 4 8 9 10 10 11 8 12 13 14 14 15 12 16 17 18 18 19 16 20 21 22 22 23 20 </int>
+    </assetmesh>
+  </asset>
+</xml3d>

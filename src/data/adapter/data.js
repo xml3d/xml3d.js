@@ -97,7 +97,10 @@ function recursiveDataNodeAttrInit(parentNode) {
 }
 
 function recursiveDataAdapterConstruction(adapter) {
-    for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
+    var children = adapter.getChildren();
+
+    for (var i=0; i < children.length; i++) {
+        var child = children[i];
         var subadapter = adapter.factory.getAdapter(child);
         if (subadapter) {
             if (subadapter.getXflowNode) {
@@ -135,10 +138,6 @@ function recursiveDataAdapterConstruction(adapter) {
 DataAdapter.prototype.notifyChanged = function (evt) {
     if (evt.type === Events.ADAPTER_HANDLE_CHANGED) {
         this.connectedAdapterChanged(evt.key, evt.adapter, evt.handleStatus);
-        if (evt.handleStatus === AdapterHandle.STATUS.NOT_FOUND) {
-            XML3D.debug.logError("Could not find <data> element of url '" + evt.url + "' for " + evt.key, this.node);
-        }
-
     } else if (evt.type === Events.NODE_INSERTED) {
         var insertedNode = evt.affectedNode;
         var adapter = this.factory.getAdapter(insertedNode);
@@ -171,8 +170,8 @@ DataAdapter.prototype.notifyChanged = function (evt) {
     } else if (evt.type === Events.THIS_REMOVED) {
         this.clearAdapterHandles();
         this.xflowDataNode.clear();
-        delete this.srcDataNode;
-        delete this.node;
+        this.srcDataNode = null;
+        this.node = null;
     }
 };
 

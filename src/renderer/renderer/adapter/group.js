@@ -1,5 +1,4 @@
 var SceneElementAdapter = require("./scene-element.js");
-var Events = require("../../../interface/notification.js");
 var mat4 = require("gl-matrix").mat4;
 
 var GroupRenderAdapter = function (factory, node) {

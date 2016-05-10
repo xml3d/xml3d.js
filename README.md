@@ -82,6 +82,13 @@ In addition a full [specification and API description](http://xml3d.org/xml3d/sp
 This repository's [Wiki](https://github.com/xml3d/xml3d.js/wiki) also contains some tutorials and additional help.
 
 ### Change log ###
+
+5.2 - 10.05.2016
+* Support for [Web Components](http://webcomponents.org/) - [demo 1](https://xml3d.github.io/xml3d-examples/examples/simplecomp/index.html), [demo 2](https://xml3d.github.io/xml3d-examples/examples/bboxcomp/index.html) [spec](http://xml3d.org/xml3d/specification/latest/#web-components), [wiki](https://github.com/xml3d/xml3d.js/wiki/Drawing-Bounding-Boxes-with-a-Web-Component)
+* CSS transforms now support CSS transitions - [demo](https://xml3d.github.io/xml3d-examples/examples/cssTransformAnim/index.html), [spec](http://xml3d.org/xml3d/specification/latest/#the-transform-property)
+* Materials can now change certain WebGL states during rendering - [demo](https://xml3d.github.io/xml3d-examples/examples/glstate/index.html), [wiki](https://github.com/xml3d/xml3d.js/wiki/Materials%3A-GL-state-changes)
+* Additional example scenes: STL plugin ([link](https://xml3d.github.io/xml3d-examples/examples/stlformat/index.html)), custom material ([link](https://xml3d.github.io/xml3d-examples/examples/shade-sss/index.html))
+
 5.1 - 07.01.2016
 * Resource system is now based on the [Fetch API](https://developer.mozilla.org/en/docs/Web/API/Fetch_API) and [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 * Better FormatHandler interface for custom mesh loaders - [wiki](https://github.com/xml3d/xml3d.js/wiki/Writing-a-custom-FormatHandler-plugin)

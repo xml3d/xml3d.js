@@ -357,7 +357,10 @@ Resource.getVideo = function(uri, autoplay, loop, muted, listeners) {
 
     video.autoplay = autoplay;
     video.loop = loop;
-    video.muted = muted;
+    if (muted) {
+        video.muted = muted;
+        video.volume = 0;
+    }
 
     function createCallback(listener) {
         return function(event) {

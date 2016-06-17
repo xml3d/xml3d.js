@@ -2,8 +2,6 @@ var AbstractCanvasHandler = require("../renderer/canvas-handler.js");
 var Options = require("../../utils/options.js");
 var Util = require("../../utils/misc.js");
 
-var MAXFPS = 30;
-
 var OPTION_CONTINUOUS = "renderer-continuous";
 Options.register(OPTION_CONTINUOUS, false);
 
@@ -49,11 +47,11 @@ GLCanvasHandler.prototype.initialize = function () {
         XML3D.updateXflowObserver();
         XML3D.flushDOMChanges();
 
-        if (that.canvasSizeChanged() || that.renderer.needsRedraw() || Options.getValue(OPTION_CONTINUOUS)) {
+        if (that.renderer.needsRedraw() || Options.getValue(OPTION_CONTINUOUS) || that.canvasSizeChanged()) {
             that.draw();
         }
 
-        window.requestAnimationFrame(that.tick, MAXFPS);
+        window.requestAnimationFrame(that.tick);
     };
 
       // Block the right-click context menu on the canvas unless it's explicitly toggled

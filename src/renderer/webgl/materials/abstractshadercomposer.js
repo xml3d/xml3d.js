@@ -116,10 +116,11 @@ XML3D.createClass(AbstractShaderComposer, EventEmitter, {
             this.dataChanged = false;
         }
 
-        if (this.updateLightValues) {
+        if (this.updateLightValues) { // may be set externally
             this.shaderClosures.forEach(function (shader) {
                 that.updateClosureFromLightParameters(shader, scene);
             });
+            this.updateLightValues = false;
         }
     },
 

@@ -178,17 +178,31 @@ XML3DRenderAdapter.prototype.getElementByRay = (function () {
  * @param {!Object} xml3d
  * @return {Object} the active view element
  */
+var c_viewCounter = 0;
 function getOrCreateActiveView(xml3d) {
     // try to resolve reference
-    var view = xml3d.querySelector(xml3d.view) || xml3d.querySelector("view");
-    if (!view) {
-        // didn't find any: create new one
-        XML3D.debug.logWarning("xml3d element has no view defined: creating one.");
-
-        view = xml3d.ownerDocument.createElement("view");
-        xml3d.appendChild(view);
-        xml3d.removeAttribute("view");
+    var viewId = xml3d.view;
+    if (viewId) {
+        return xml3d.querySelector(viewId);
     }
+
+    var view = xml3d.querySelector("view");
+    if (view) {
+        if (!view.hasAttribute("id")) {
+            view.setAttribute("id", "Generated_View_"+c_viewCounter++);
+        }
+        xml3d.setAttribute("view", "#"+view.getAttribute("id"));
+        return view;
+    }
+
+    // didn't find any: create new one
+    XML3D.debug.logWarning("xml3d element has no view defined: creating one.");
+
+    view = xml3d.ownerDocument.createElement("view");
+    view.setAttribute("id", "Generated_View_"+c_viewCounter++);
+    xml3d.appendChild(view);
+    xml3d.setAttribute("view", "#"+view.getAttribute("id"));
+
     return view;
 };
 

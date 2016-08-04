@@ -56,7 +56,7 @@ XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
         return m;
     },
 
-    getRootAdapter() {
+    getRootAdapter: function() {
         var parent = this.getParentRenderAdapter();
         var nextParent;
         while ((nextParent = parent.getParentRenderAdapter()) !== null) {

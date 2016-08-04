@@ -56,6 +56,20 @@ XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
         return m;
     },
 
+    getRootAdapter() {
+        var parent = this.getParentRenderAdapter();
+        var nextParent;
+        while ((nextParent = parent.getParentRenderAdapter()) !== null) {
+            parent = nextParent;
+        }
+        return parent;
+    },
+    
+    dispose: function() {
+        this.getRootAdapter().activeViewChanged();
+        SceneElementAdapter.prototype.dispose.call(this);
+    },
+
     attributeChangedCallback: function (name, oldValue, newValue) {
         SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
         switch (name) {

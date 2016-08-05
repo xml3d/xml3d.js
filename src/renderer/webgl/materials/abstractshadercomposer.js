@@ -55,8 +55,10 @@ IShaderComposer.prototype.getShaderAttributes = function () {
  * @constructor
  * @extends EventEmitter
  */
+var counter = 0;
 var AbstractShaderComposer = function (context, shaderInfo) {
     EventEmitter.call(this);
+    this.id = counter++;
     this.context = context;
     this.shaderClosures = [];
     this.dataChanged = false;
@@ -168,13 +170,6 @@ XML3D.createClass(AbstractShaderComposer, EventEmitter, {
             shader.createSources(scene, this.getShaderDataResult(), vsRequest)
         } catch (e) {
             throw new Error("Shader: " + e.message)
-        }
-
-        for (var i = 0; i < this.shaderClosures.length; i++) {
-            if (this.shaderClosures[i].equals(shader)) {
-                this.shaderClosures[i].obsolete = false;
-                return this.shaderClosures[i];
-            }
         }
 
         this.initializeShaderClosure(shader, scene);

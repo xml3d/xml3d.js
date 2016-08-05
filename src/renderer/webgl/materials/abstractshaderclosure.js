@@ -6,6 +6,7 @@ var XflowUtils= require("../xflow/utils.js");
  * @param {GLContext} context
  * @constructor
  */
+var counter = 0;
 var AbstractShaderClosure = function (context) {
     /**
      * @private
@@ -18,7 +19,7 @@ var AbstractShaderClosure = function (context) {
      * @type {boolean}
      */
     this.obsolete = false;
-    this.id = "";
+    this.id = counter++;
 
     this.uniformCollection = {
         envBase: {}, envOverride: null, sysBase: null
@@ -72,9 +73,7 @@ XML3D.createClass(AbstractShaderClosure, null, {
             return;
         }
 
-        var programObject = new GLProgramObject(this.context.gl, this.source);
-        this.program = programObject;
-        this.id = programObject.id;
+        this.program = new GLProgramObject(this.context.gl, this.source);
     },
 
     bind: function () {

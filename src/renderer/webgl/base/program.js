@@ -123,11 +123,10 @@ var tally = function (gl, handle, programObject) {
         }
 
         if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
-            // Set all texture units to 0, needs to be Int32Array
+            // Set all texture units to -1 to be bound during rendering
             uniInfo.cachedUnits = new Int32Array(uniInfo.size);
+            uniInfo.cachedUnits.fill(-1);
             uniInfo.textures = [];
-            // Caches this information
-            utils.setUniform(gl, uniInfo, uniInfo.cachedUnits);
 
             programObject.samplers[name] = uniInfo;
         } else
@@ -137,6 +136,7 @@ var tally = function (gl, handle, programObject) {
 };
 
 var uniqueObjectId = utils.getUniqueCounter();
+var c_existingPrograms = new WeakMap();
 
 /**
  * @constructor
@@ -147,11 +147,15 @@ var ProgramObject = function (gl, sources) {
     this.gl = gl;
     this.sources = sources;
 
-    this.id = uniqueObjectId();
+    this.id = -1;
     this.attributes = {};
     this.uniforms = {};
     this.samplers = {};
     this.handle = null;
+
+    if (!c_existingPrograms.has(gl)) {
+        c_existingPrograms.set(gl, []);
+    }
 
     this.create();
 };
@@ -159,7 +163,23 @@ var ProgramObject = function (gl, sources) {
 XML3D.extend(ProgramObject.prototype, {
     create: function () {
         XML3D.debug.logDebug("Create shader program: ", this.id);
-        this.handle = createProgramFromSources(this.gl, [this.sources.vertex], [this.sources.fragment]);
+
+        var existing = c_existingPrograms.get(this.gl);
+        for (var i=0; i < existing.length; i++) {
+            //If two programs share the exact same source code we can re-use the compiled shader
+            var prg = existing[i];
+            if (prg.sources.vertex == this.sources.vertex && prg.sources.fragment == this.sources.fragment) {
+                this.handle = prg.handle;
+                this.id = prg.id;
+            }
+        }
+
+        if (!this.handle) {
+            this.handle = createProgramFromSources(this.gl, [this.sources.vertex], [this.sources.fragment]);
+            this.id = uniqueObjectId();
+            existing.push(this);
+        }
+
         if (!this.handle)
             return;
         SystemNotifier.sendEvent('glsl', {glslType: "success"});
@@ -232,13 +252,10 @@ XML3D.extend(ProgramObject.prototype, {
             if (unit == -1) {
                 unit = textures[i]._bind();
             }
-            if (unit != cachedUnits[i]) {
-                cachedUnits[i] = unit;
-                textureUnitsChanged = true;
-            }
+            cachedUnits[i] = unit;
+            textureUnitsChanged = true;
         }
         if (textureUnitsChanged) {
-            XML3D.debug.logDebug("Setting new texture units:", sampler.name, cachedUnits);
             utils.setUniform(this.gl, sampler, cachedUnits);
         }
     },

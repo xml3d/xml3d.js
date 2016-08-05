@@ -210,13 +210,22 @@ XML3D.extend(ProgramObject.prototype, {
     }, setUniformVariables: function (envNames, sysNames, inputCollection) {
         var i, base, override, name;
         if (envNames && inputCollection.envBase) {
-            i = envNames.length;
             base = inputCollection.envBase;
             override = inputCollection.envOverride;
-            while (i--) {
-                name = envNames[i];
-                this.setUniformVariable(name, override && override[name] !== undefined ? override[name] : base[name]);
+            if (envNames == true) {
+                //Set all uniforms in the input collection
+                for (name in base) {
+                    this.setUniformVariable(name, override && override[name] !== undefined ? override[name] : base[name]);
+                }
+            } else {
+                //Set only those uniforms specified in envNames
+                i = envNames.length;
+                while (i--) {
+                    name = envNames[i];
+                    this.setUniformVariable(name, override && override[name] !== undefined ? override[name] : base[name]);
+                }
             }
+
         }
         if (sysNames && inputCollection.sysBase) {
             i = sysNames.length;

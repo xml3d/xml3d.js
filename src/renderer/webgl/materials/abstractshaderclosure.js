@@ -106,6 +106,10 @@ XML3D.createClass(AbstractShaderClosure, null, {
         this.isTransparent = this.getTransparencyFromInputData(map);
     },
 
+    setMaterialUniformVariables: function() {
+        this.setUniformVariables(true, null, this.uniformCollection);
+    },
+
     setUniformVariables: function (envNames, sysNames, uniformCollection) {
         this.program.setUniformVariables(envNames, sysNames, uniformCollection);
     },

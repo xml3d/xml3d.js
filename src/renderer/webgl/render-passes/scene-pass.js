@@ -101,6 +101,7 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 systemUniforms["modelViewMatrixN"] = tmpModelViewN;
 
                 program.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
+                program.setMaterialUniformVariables();
 
                 program.changeUniformVariableOverride(prevOverride, mesh.uniformOverride);
                 prevOverride = mesh.uniformOverride;

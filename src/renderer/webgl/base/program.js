@@ -192,16 +192,6 @@ XML3D.extend(ProgramObject.prototype, {
             XML3D.debug.logError("Trying to bind invalid GLProgram.");
         }
         this.gl.useProgram(this.handle);
-
-        /**
-         * Some of the dependent textures may have changed their texture units
-         */
-        for (var name in this.samplers) {
-            var sampler = this.samplers[name];
-            if(sampler.textures.length) {
-                this.setSamplerFromTextures(sampler);
-            }
-        }
     },
 
     unbind: function () {

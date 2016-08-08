@@ -56,7 +56,7 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
             var stats = opt.stats || {};
             var transparent = opt.transparent === true || false;
             var gl = this.renderInterface.context.gl;
-            var program = opt.program || objectArray[0].getProgram();
+            var shader = opt.program || objectArray[0].getShaderClosure();
 
             if (objectArray.length == 0) {
                 return stats;
@@ -68,10 +68,10 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
             }
 
             // At this point, we guarantee that the RenderObject has a valid shader
-            program.bind();
+            shader.bind();
 
             //Set global data that is shared between all objects using this shader
-            program.setSystemUniformVariables(sceneParameterFilter, systemUniforms);
+            shader.setSystemUniformVariables(sceneParameterFilter, systemUniforms);
 
             var prevOverride = null;
 
@@ -79,7 +79,9 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 var obj = objectArray[i];
                 if (!obj.visible)
                     continue;
-
+                //obj closure contains uniforms specific to this object/material, the underlying GL program is the same
+                //as the one we bound before the loop
+                var objShaderClosure = obj.getShaderClosure();
                 this.renderInterface.setGLState(obj._actualMaterial.states);
 
                 var mesh = obj.mesh;
@@ -100,13 +102,13 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 obj.getModelViewMatrixN(tmpModelViewN);
                 systemUniforms["modelViewMatrixN"] = tmpModelViewN;
 
-                program.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
-                program.setMaterialUniformVariables();
+                objShaderClosure.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
+                objShaderClosure.setMaterialUniformVariables();
 
-                program.changeUniformVariableOverride(prevOverride, mesh.uniformOverride);
+                objShaderClosure.changeUniformVariableOverride(prevOverride, mesh.uniformOverride);
                 prevOverride = mesh.uniformOverride;
 
-                primitiveCount += mesh.draw(program);
+                primitiveCount += mesh.draw(objShaderClosure);
                 objCount++;
 
                 this.renderInterface.resetGLState(obj._actualMaterial.states);
@@ -116,9 +118,9 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 gl.disable(gl.BLEND);
             }
 
-            program.changeUniformVariableOverride(prevOverride, null);
+            shader.changeUniformVariableOverride(prevOverride, null);
 
-            program.unbind();
+            shader.unbind();
             stats.objects += objCount;
             stats.primitives += primitiveCount;
             return stats;

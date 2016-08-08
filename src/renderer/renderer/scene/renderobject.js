@@ -309,16 +309,16 @@ XML3D.createClass(RenderObject, RenderNode, {
         this.setBoundingBoxDirty();
     },
 
-    getProgram: function () {
-        return this.drawable.getProgram();
+    getShaderClosure: function () {
+        return this.drawable.getShaderClosure();
     },
 
     hasTransparency: function () {
         if (this.override && this.override.opacity !== undefined) {
             return this.override.opacity[0] < 1;
         }
-        var program = this.getProgram();
-        return program ? program.hasTransparency() : false;
+        var shader = this.getShaderClosure();
+        return shader ? shader.hasTransparency() : false;
     },
 
     updateForRendering: function () {

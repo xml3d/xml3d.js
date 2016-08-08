@@ -1,4 +1,5 @@
-var GLProgramObject = require("../base/program.js");
+var GLProgramObject = require("../base/program.js").ProgramObject;
+var GetExistingProgram = require("../base/program.js").getExistingProgram;
 var XflowUtils= require("../xflow/utils.js");
 
 /**
@@ -73,7 +74,11 @@ XML3D.createClass(AbstractShaderClosure, null, {
             return;
         }
 
-        this.program = new GLProgramObject(this.context.gl, this.source);
+        this.program = GetExistingProgram(this.context.gl, this.source);
+        if (!this.program) {
+            this.program = new GLProgramObject(this.context.gl, this.source);
+            this.setDefaultUniforms();
+        }
     },
 
     bind: function () {

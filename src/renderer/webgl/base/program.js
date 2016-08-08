@@ -129,14 +129,31 @@ var tally = function (gl, handle, programObject) {
             uniInfo.textures = [];
 
             programObject.samplers[name] = uniInfo;
-        } else
+        } else {
             programObject.uniforms[name] = uniInfo;
+        }
     }
 
 };
 
 var uniqueObjectId = utils.getUniqueCounter();
 var c_existingPrograms = new WeakMap();
+
+var getExistingProgram = function(gl, sources) {
+    if (!c_existingPrograms.has(gl)) {
+        c_existingPrograms.set(gl, []);
+    }
+
+    var existing = c_existingPrograms.get(gl);
+    for (var i=0; i < existing.length; i++) {
+        //If two programs share the exact same source code we can re-use the compiled shader
+        var prg = existing[i];
+        if (prg.sources.vertex == sources.vertex && prg.sources.fragment == sources.fragment) {
+            return prg;
+        }
+    }
+    return null;
+};
 
 /**
  * @constructor
@@ -151,12 +168,8 @@ var ProgramObject = function (gl, sources) {
     this.attributes = {};
     this.uniforms = {};
     this.samplers = {};
+    this.defaultUniforms = {};
     this.handle = null;
-
-    if (!c_existingPrograms.has(gl)) {
-        c_existingPrograms.set(gl, []);
-    }
-
     this.create();
 };
 
@@ -165,20 +178,9 @@ XML3D.extend(ProgramObject.prototype, {
         XML3D.debug.logDebug("Create shader program: ", this.id);
 
         var existing = c_existingPrograms.get(this.gl);
-        for (var i=0; i < existing.length; i++) {
-            //If two programs share the exact same source code we can re-use the compiled shader
-            var prg = existing[i];
-            if (prg.sources.vertex == this.sources.vertex && prg.sources.fragment == this.sources.fragment) {
-                this.handle = prg.handle;
-                this.id = prg.id;
-            }
-        }
-
-        if (!this.handle) {
-            this.handle = createProgramFromSources(this.gl, [this.sources.vertex], [this.sources.fragment]);
-            this.id = uniqueObjectId();
-            existing.push(this);
-        }
+        this.handle = createProgramFromSources(this.gl, [this.sources.vertex], [this.sources.fragment]);
+        this.id = uniqueObjectId();
+        existing.push(this);
 
         if (!this.handle)
             return;
@@ -304,5 +306,8 @@ XML3D.extend(ProgramObject.prototype, {
     }
 });
 
-module.exports = ProgramObject;
+module.exports = {
+    ProgramObject : ProgramObject,
+    getExistingProgram : getExistingProgram
+};
 

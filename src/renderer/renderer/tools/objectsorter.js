@@ -1,5 +1,13 @@
 var vec3 = require("gl-matrix").vec3;
 
+var SORT_BY_DEPTH = "renderer-sort-opaque-objects";
+
+var c_depthSortEnabled = true;
+XML3D.options.register(SORT_BY_DEPTH, false);
+XML3D.options.addObserver(SORT_BY_DEPTH, function() {
+    c_depthSortEnabled = XML3D.options.getValue(SORT_BY_DEPTH);
+});
+
 /**
  *
  * @constructor
@@ -51,37 +59,42 @@ XML3D.extend(ObjectSorter.prototype, {
 
         // Sort opaque z-buckets by shader
         var opaque = {};
+        var ozl;
         for (i=0; i<zLayers.length; i++) {
             zLayer = zLayers[i];
             opaque[zLayer] = {};
-            for (n in presortOpaque[zLayer]) {
-                obj = presortOpaque[zLayer][n];
+            ozl = presortOpaque[zLayer];
+            for (let n in ozl) {
+                obj = ozl[n];
                 var program = obj.getShaderClosure().program;
                 opaque[zLayer][program.id] = opaque[zLayer][program.id] || [];
                 opaque[zLayer][program.id].push(obj);
             }
         }
 
-        // Sort opaque shader buckets by depth for early z fails
-        for (zLayer in zLayers) {
-            for (var progId in opaque[zLayer]) {
-                var withinShader = opaque[zLayer][progId];
-                var sortedArray = new Array(withinShader.length);
-                for (i = 0; i < withinShader.length; i++) {
-                    obj = withinShader[i];
-                    obj.getWorldSpaceBoundingBox(c_bbox);
-                    c_bbox.center(c_center);
-                    viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
-                    sortedArray[i] = {
-                        obj: obj, depth: c_center.z
-                    };
+
+        if (c_depthSortEnabled) {
+            // Sort opaque shader buckets by depth for early z fails
+            for (zLayer in zLayers) {
+                for (var progId in opaque[zLayer]) {
+                    var withinShader = opaque[zLayer][progId];
+                    var sortedArray = new Array(withinShader.length);
+                    for (i = 0; i < withinShader.length; i++) {
+                        obj = withinShader[i];
+                        obj.getWorldSpaceBoundingBox(c_bbox);
+                        c_bbox.center(c_center);
+                        viewMatrix && vec3.transformMat4(c_center, c_center, viewMatrix);
+                        sortedArray[i] = {
+                            obj: obj, depth: c_center.z
+                        };
+                    }
+                    sortedArray.sort(function (a, b) {
+                        return b.depth - a.depth;
+                    });
+                    opaque[zLayer][progId] = sortedArray.map(function (e) {
+                        return e.obj;
+                    });
                 }
-                sortedArray.sort(function (a, b) {
-                    return b.depth - a.depth;
-                });
-                opaque[zLayer][progId] = sortedArray.map(function (e) {
-                    return e.obj;
-                });
             }
         }
 

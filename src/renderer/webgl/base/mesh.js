@@ -83,22 +83,12 @@ XML3D.extend(GLMesh.prototype, {
      * @returns {number}
      */
     getElementCount: function () {
-        try {
-            return this.buffers.index.length;
-        } catch (e) {
-            //XML3D.debug.logError("Could not calculate element count.", e);
-            return 0;
-        }
+        return this.buffers.index.length;
     }, /**
      * @returns {number}
      */
     getVertexCount: function () {
-        try {
-            return (this.vertexCount != null ? this.vertexCount : this.minAttributeCount );
-        } catch (e) {
-            //XML3D.debug.logError("Could not calculate vertex count.", e);
-            return 0;
-        }
+        return (this.vertexCount != null ? this.vertexCount : this.minAttributeCount );
     },
 
     /**

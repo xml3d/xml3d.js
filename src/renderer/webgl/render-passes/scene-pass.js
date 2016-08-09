@@ -48,7 +48,6 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
         var tmpModelView = mat4.create();
         var tmpModelViewProjection = mat4.create();
         var tmpModelViewN = mat3.create();
-        var c_objectSystemUniforms = ["modelMatrix", "modelMatrixN", "modelViewMatrix", "modelViewProjectionMatrix", "modelViewMatrixN"];
 
         return function (objectArray, scene, target, systemUniforms, opt) {
             var objCount = 0;
@@ -73,9 +72,6 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
 
             //Set global data that is shared between all objects using this shader
             shader.setPerFrameUniforms(systemUniforms);
-
-            var prevOverride = null;
-
 
             for (var i = 0, n = objectArray.length; i < n; i++) {
                 var obj = objectArray[i];

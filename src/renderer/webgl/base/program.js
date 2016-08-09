@@ -137,6 +137,7 @@ var tally = function (gl, handle, programObject) {
 
 };
 
+// Shaders are cached and compared by their source code. This ensures only one GL instance of each unique shader is used
 var uniqueObjectId = utils.getUniqueCounter();
 var c_existingPrograms = new WeakMap();
 
@@ -232,6 +233,7 @@ XML3D.extend(ProgramObject.prototype, {
         }
     },
 
+    //Still used by shade.js shaders
     setUniformVariables: function (envNames, sysNames, inputCollection) {
 
         var i, base, override, name;
@@ -251,7 +253,6 @@ XML3D.extend(ProgramObject.prototype, {
                     this.setUniformVariable(name, override && override[name] !== undefined ? override[name] : base[name]);
                 }
             }
-
         }
         if (sysNames && inputCollection.sysBase) {
             i = sysNames.length;
@@ -264,7 +265,9 @@ XML3D.extend(ProgramObject.prototype, {
     },
 
     setUniformVariable: function (name, value) {
-        if (value === undefined) return;
+        if (value === undefined) {
+            return;
+        }
         if (this.uniforms[name]) {
             utils.setUniform(this.gl, this.uniforms[name], value);
             this.uniforms[name].wasChanged = true;
@@ -297,11 +300,9 @@ XML3D.extend(ProgramObject.prototype, {
 
     setSamplerFromArray: function(sampler, arr) {
         var cachedUnits = sampler.cachedUnits;
-
-       for (var i = 0, ii = arr.length; i < ii; i++) {
+        for (var i = 0, ii = arr.length; i < ii; i++) {
             cachedUnits[i] = arr[i];
         }
-
         utils.setUniform(this.gl, sampler, cachedUnits);
     },
 

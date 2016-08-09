@@ -96,13 +96,11 @@ XML3D.createClass(AbstractShaderClosure, null, {
      */
     updateUniformsFromComputeResult: function (xflowResult) {
         var map = xflowResult.getOutputMap();
-
         var envBase = this.uniformCollection.envBase = {};
 
         for (var name in map) {
             envBase[name] = XflowUtils.getGLUniformValueFromXflowDataEntry(map[name], this.context);
         }
-        var names = Object.keys(envBase);
 
         this.isTransparent = this.getTransparencyFromInputData(map);
     },

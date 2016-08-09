@@ -113,6 +113,7 @@ var tally = function (gl, handle, programObject) {
         uniInfo.name = uni.name;
         uniInfo.size = uni.size;
         uniInfo.glType = uni.type;
+        uniInfo.wasChanged = true;
         uniInfo.location = gl.getUniformLocation(handle, uni.name);
 
         var name = uniInfo.name;
@@ -197,9 +198,42 @@ XML3D.extend(ProgramObject.prototype, {
     },
 
     unbind: function () {
-    }, isValid: function () {
+    },
+
+    isValid: function () {
         return !!this.handle;
-    }, setUniformVariables: function (envNames, sysNames, inputCollection) {
+    },
+
+    setDefaultUniforms: function(defaults) {
+        this.defaultUniforms = defaults;
+    },
+
+    setPerFrameUniforms: function(inputCollection) {
+        for (var name in inputCollection) {
+            this.setUniformVariable(name, inputCollection[name]);
+        }
+    },
+
+    setPerObjectUniforms: function(inputCollection) {
+        for (let name in this.uniforms) {
+            if (inputCollection[name]) {
+                this.setUniformVariable(name, inputCollection[name]);
+            } else if (this.uniforms[name].wasChanged) {
+                //This uniform was changed by the last object and this one doesn't have an entry for it, set back to default value
+                this.setUniformVariable(name, this.defaultUniforms[name]);
+                this.uniforms[name].wasChanged = false;
+            }
+        }
+
+        for (let name in this.samplers) {
+            if (inputCollection[name]) {
+                this.setUniformVariable(name, inputCollection[name]);
+            }
+        }
+    },
+
+    setUniformVariables: function (envNames, sysNames, inputCollection) {
+
         var i, base, override, name;
         if (envNames && inputCollection.envBase) {
             base = inputCollection.envBase;
@@ -227,10 +261,13 @@ XML3D.extend(ProgramObject.prototype, {
                 this.setUniformVariable(name, base[name]);
             }
         }
-    }, setUniformVariable: function (name, value) {
+    },
+
+    setUniformVariable: function (name, value) {
         if (value === undefined) return;
         if (this.uniforms[name]) {
             utils.setUniform(this.gl, this.uniforms[name], value);
+            this.uniforms[name].wasChanged = true;
         } else if (this.samplers[name]) {
             this.setUniformSampler(this.samplers[name], value);
         }

@@ -22,9 +22,7 @@ var AbstractShaderClosure = function (context) {
     this.obsolete = false;
     this.id = counter++;
 
-    this.uniformCollection = {
-        envBase: {}, envOverride: null, sysBase: null
-    };
+    this.uniformCollection = {};
 
     /**
      * Stores, if the underlying shader has semi-transparencies
@@ -100,13 +98,11 @@ XML3D.createClass(AbstractShaderClosure, null, {
         var map = xflowResult.getOutputMap();
 
         var envBase = this.uniformCollection.envBase = {};
-        this.setDefaultUniforms(this.uniformCollection.envBase);
 
         for (var name in map) {
             envBase[name] = XflowUtils.getGLUniformValueFromXflowDataEntry(map[name], this.context);
         }
         var names = Object.keys(envBase);
-        this.setUniformVariables(names, null, this.uniformCollection);
 
         this.isTransparent = this.getTransparencyFromInputData(map);
     },
@@ -118,7 +114,20 @@ XML3D.createClass(AbstractShaderClosure, null, {
     setUniformVariables: function (envNames, sysNames, uniformCollection) {
         this.program.setUniformVariables(envNames, sysNames, uniformCollection);
     },
-
+    
+    setPerFrameUniforms: function(values) {
+        this.program.setPerFrameUniforms(values);
+    },
+    
+    setPerObjectUniforms: function(values) {
+        for (var name in this.uniformCollection.envBase) {
+            if (!values[name]) {
+                values[name] = this.uniformCollection.envBase[name];
+            }
+        }
+        this.program.setPerObjectUniforms(values);
+    },
+    
     setSystemUniformVariables: function (sysNames, sysValues) {
         this.uniformCollection.sysBase = sysValues;
         this.setUniformVariables(null, sysNames, this.uniformCollection);

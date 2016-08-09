@@ -40,11 +40,7 @@ XML3D.extend(PickObjectRenderPass.prototype, {
     },
 
     renderObjects: (function () {
-        var c_mvp = mat4.create(), c_uniformCollection = {
-            envBase: {},
-            envOverride: null,
-            sysBase: {}
-        }, c_systemUniformNames = ["id", "modelViewProjectionMatrix"];
+        var c_mvp = mat4.create(), c_uniformCollection = {};
 
         return function (objects, program, viewMatrix, projMatrix) {
             for (var i=0; i < objects.length; i++) {
@@ -69,10 +65,10 @@ XML3D.extend(PickObjectRenderPass.prototype, {
                 objId = objId >> 8;
                 var c3 = objId & 255;
 
-                c_uniformCollection.sysBase["id"] = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
-                c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_mvp;
+                c_uniformCollection["id"] = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
+                c_uniformCollection["modelViewProjectionMatrix"] = c_mvp;
 
-                program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
+                program.setPerObjectUniforms(c_uniformCollection);
                 mesh.draw(program);
             }
         };

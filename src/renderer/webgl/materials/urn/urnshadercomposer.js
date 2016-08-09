@@ -41,6 +41,7 @@ XML3D.createClass(URNShaderComposer, AbstractShaderComposer, {
 
         if (this.descriptor) {
             materialConfiguration.dataNode && this.updateRequest(materialConfiguration.dataNode);
+            this.descriptor.matName = materialConfiguration.name;
 
             this.descriptor.fragment = addFragmentShaderHeader(this.descriptor.fragment);
         }

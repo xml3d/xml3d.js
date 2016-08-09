@@ -20,7 +20,6 @@ XML3D.extend(ForwardRenderPass.prototype, {
         var c_worldToViewMatrix = mat4.create();
         var c_viewToWorldMatrix = mat4.create();
         var c_projectionMatrix = mat4.create();
-        var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "cameraPosition", "coords", "ssaoMap", "width"];
 
         return function (scene) {
             var gl = this.renderInterface.context.gl, count = {
@@ -52,7 +51,7 @@ XML3D.extend(ForwardRenderPass.prototype, {
                 var zLayer = sorted.zLayers[i];
                 gl.clear(gl.DEPTH_BUFFER_BIT);
                 for (var program in sorted.opaque[zLayer]) {
-                    this.renderObjectsToActiveBuffer(sorted.opaque[zLayer][program], scene, target, systemUniforms, c_programSystemUniforms, {
+                    this.renderObjectsToActiveBuffer(sorted.opaque[zLayer][program], scene, target, systemUniforms, {
                         transparent: false,
                         stats: count
                     });
@@ -60,7 +59,7 @@ XML3D.extend(ForwardRenderPass.prototype, {
                 if (sorted.transparent[zLayer].length) {
                     for (var k = 0; k < sorted.transparent[zLayer].length; k++) {
                         var objectArray = [sorted.transparent[zLayer][k]];
-                        this.renderObjectsToActiveBuffer(objectArray, scene, target, systemUniforms, c_programSystemUniforms, {
+                        this.renderObjectsToActiveBuffer(objectArray, scene, target, systemUniforms, {
                             transparent: true,
                             stats: count
                         });

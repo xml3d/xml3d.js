@@ -231,6 +231,17 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
         return vsRequest.getVertexShader().getGLSLCode();
     },
 
+    setPerFrameUniforms: function(inputCollection) {
+        var ic = {sysBase : inputCollection};
+        this.setUniformVariables(null, Object.keys(inputCollection), ic);
+    },
+
+    setPerObjectUniforms: function(inputCollection) {
+        var ic = {sysBase : inputCollection};
+        this.setUniformVariables(null, Object.keys(inputCollection), ic);
+        this.setUniformVariables(Object.keys(this.uniformCollection.envBase), null, this.uniformCollection);
+    },
+
     setUniformVariables: function (envNames, sysNames, inputCollection) {
         this.uniformSetter(envNames, sysNames, inputCollection, this.program.setUniformVariable.bind(this.program));
     },

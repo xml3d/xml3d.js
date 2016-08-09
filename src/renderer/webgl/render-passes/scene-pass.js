@@ -50,7 +50,7 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
         var tmpModelViewN = mat3.create();
         var c_objectSystemUniforms = ["modelMatrix", "modelMatrixN", "modelViewMatrix", "modelViewProjectionMatrix", "modelViewMatrixN"];
 
-        return function (objectArray, scene, target, systemUniforms, sceneParameterFilter, opt) {
+        return function (objectArray, scene, target, systemUniforms, opt) {
             var objCount = 0;
             var primitiveCount = 0;
             var stats = opt.stats || {};
@@ -71,14 +71,16 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
             shader.bind();
 
             //Set global data that is shared between all objects using this shader
-            shader.setSystemUniformVariables(sceneParameterFilter, systemUniforms);
+            shader.setPerFrameUniforms(systemUniforms);
 
             var prevOverride = null;
+
 
             for (var i = 0, n = objectArray.length; i < n; i++) {
                 var obj = objectArray[i];
                 if (!obj.visible)
                     continue;
+                var perObjectUniforms = {};
                 //obj closure contains uniforms specific to this object/material, the underlying GL program is the same
                 //as the one we bound before the loop
                 var objShaderClosure = obj.getShaderClosure();
@@ -88,25 +90,23 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 XML3D.debug.assert(mesh, "We need a mesh at this point.");
 
                 obj.getWorldMatrix(tmpModelMatrix);
-                systemUniforms["modelMatrix"] = tmpModelMatrix;
+                perObjectUniforms["modelMatrix"] = tmpModelMatrix;
 
                 obj.getModelMatrixN(tmpModelMatrixN);
-                systemUniforms["modelMatrixN"] = tmpModelMatrixN;
+                perObjectUniforms["modelMatrixN"] = tmpModelMatrixN;
 
                 obj.getModelViewMatrix(tmpModelView);
-                systemUniforms["modelViewMatrix"] = tmpModelView;
+                perObjectUniforms["modelViewMatrix"] = tmpModelView;
 
                 obj.getModelViewProjectionMatrix(tmpModelViewProjection);
-                systemUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection;
+                perObjectUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection;
 
                 obj.getModelViewMatrixN(tmpModelViewN);
-                systemUniforms["modelViewMatrixN"] = tmpModelViewN;
+                perObjectUniforms["modelViewMatrixN"] = tmpModelViewN;
 
-                objShaderClosure.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
-                objShaderClosure.setMaterialUniformVariables();
+                XML3D.extend(perObjectUniforms, mesh.uniformOverride);
 
-                objShaderClosure.changeUniformVariableOverride(prevOverride, mesh.uniformOverride);
-                prevOverride = mesh.uniformOverride;
+                objShaderClosure.setPerObjectUniforms(perObjectUniforms);
 
                 primitiveCount += mesh.draw(objShaderClosure);
                 objCount++;
@@ -117,8 +117,6 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
             if (transparent) {
                 gl.disable(gl.BLEND);
             }
-
-            shader.changeUniformVariableOverride(prevOverride, null);
 
             shader.unbind();
             stats.objects += objCount;

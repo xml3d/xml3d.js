@@ -21,7 +21,7 @@ XML3D.extend(VertexAttributePass.prototype, {
 
         scene.updateReadyObjectsFromActiveView(aspect);
 
-        this.renderObjectsToActiveBuffer(scene.ready, scene, target, scene.systemUniforms, [], {
+        this.renderObjectsToActiveBuffer(scene.ready, scene, target, [], {
             transparent: false,
             program: this._program
         });

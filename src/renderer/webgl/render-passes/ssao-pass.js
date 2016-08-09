@@ -79,7 +79,6 @@ XML3D.extend(SSAOPass.prototype, {
 //				this._positionPass.setProcessed(false);
 
         var viewMatrix = XML3D.math.mat4.create();
-        var uniformNames = ["viewMatrix"];
         return function (scene) {
             var gl = this.renderInterface.context.gl;
             var target = this.output;
@@ -94,7 +93,7 @@ XML3D.extend(SSAOPass.prototype, {
             var uniforms = {};
             scene.getActiveView().getWorldToViewMatrix(viewMatrix);
             uniforms["viewMatrix"] = viewMatrix;
-            this._program.setSystemUniformVariables(uniformNames, uniforms);
+            this._program.setPerFrameUniforms(uniforms);
             this._screenQuad.draw(this._program);
 
             this._program.unbind();
@@ -103,7 +102,6 @@ XML3D.extend(SSAOPass.prototype, {
     }()),
 
     _setNonVolatileShaderUniforms: (function () {
-        var uniformNames = ["canvasSize", "sPositionTex", "sNormalTex", "sRandomNormals", "uRandomTexSize", "uScale", "uBias", "uIntensity", "uSampleRadius", "uConstVectors"];
 
         return function () {
             if (!this._uniformsDirty)
@@ -125,7 +123,7 @@ XML3D.extend(SSAOPass.prototype, {
             uniforms["uSampleRadius"] = Options.getValue(OPTION_SSAO_RADIUS);
             uniforms["uConstVectors"] = [1, 0, -1, 0, 0, 1, 0, -1];
 
-            program.setSystemUniformVariables(uniformNames, uniforms);
+            program.setPerObjectUniforms(uniforms);
             program.unbind();
 
 //                this._uniformsDirty = false;

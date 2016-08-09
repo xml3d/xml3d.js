@@ -10,11 +10,7 @@ XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
     render: (function () {
 
         var c_modelMatrix = mat4.create();
-        var c_modelViewProjectionMatrix = mat4.create(), c_uniformCollection = {
-                envBase: {},
-                envOverride: null,
-                sysBase: {}
-            }, c_systemUniformNames = ["bbox", "modelMatrix", "modelViewProjectionMatrix"];
+        var c_modelViewProjectionMatrix = mat4.create(), c_uniformCollection = {};
 
         return function (obj, viewMatrix, projMatrix) {
             var gl = this.renderInterface.context.gl, target = this.output;
@@ -38,11 +34,11 @@ XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
             program.bind();
             obj.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 
-            c_uniformCollection.sysBase["bbox"] = this.objectBoundingBox.data;
-            c_uniformCollection.sysBase["modelMatrix"] = c_modelMatrix;
-            c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
+            c_uniformCollection["bbox"] = this.objectBoundingBox.data;
+            c_uniformCollection["modelMatrix"] = c_modelMatrix;
+            c_uniformCollection["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
 
-            program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
+            program.setPerObjectUniforms(c_uniformCollection);
             obj.mesh.draw(program);
 
             program.unbind();

@@ -242,9 +242,16 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
         this.setUniformVariables(Object.keys(this.uniformCollection.envBase), null, this.uniformCollection);
     },
 
-    setUniformVariables: function (envNames, sysNames, inputCollection) {
-        this.uniformSetter(envNames, sysNames, inputCollection, this.program.setUniformVariable.bind(this.program));
-    },
+    setUniformVariables: (function() {
+        var didDeprecationWarning = false;
+        return function (envNames, sysNames, inputCollection) {
+            if (!didDeprecationWarning) {
+                XML3D.debug.logWarning("setUniformVariables is deprecated, please use setPerFrameUniforms or setPerObjectUniforms instead");
+                didDeprecationWarning = true;
+            }
+            this.uniformSetter(envNames, sysNames, inputCollection, this.program.setUniformVariable.bind(this.program));
+        }
+    })(),
 
     getTransparencyFromInputData: function (dataMap) {
         // TODO: Compute Transparency

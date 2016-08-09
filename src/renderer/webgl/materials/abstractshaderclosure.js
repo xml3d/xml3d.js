@@ -107,13 +107,16 @@ XML3D.createClass(AbstractShaderClosure, null, {
         this.isTransparent = this.getTransparencyFromInputData(map);
     },
 
-    setMaterialUniformVariables: function() {
-        this.setUniformVariables(true, null, this.uniformCollection);
-    },
-
-    setUniformVariables: function (envNames, sysNames, uniformCollection) {
-        this.program.setUniformVariables(envNames, sysNames, uniformCollection);
-    },
+    setUniformVariables: (function() {
+        var didDeprecatedWarning = false;
+        return function (envNames, sysNames, uniformCollection) {
+            if (!didDeprecatedWarning) {
+                XML3D.debug.logWarning("setUniformVariables is deprecated. Please use setPerFrameUniforms or setPerObjectUniforms instead");
+                didDeprecatedWarning = true;
+            }
+            this.program.setUniformVariables(envNames, sysNames, uniformCollection);
+        }
+    })(),
     
     setPerFrameUniforms: function(values) {
         this.program.setPerFrameUniforms(values);
@@ -127,18 +130,32 @@ XML3D.createClass(AbstractShaderClosure, null, {
         }
         this.program.setPerObjectUniforms(values);
     },
-    
-    setSystemUniformVariables: function (sysNames, sysValues) {
-        this.uniformCollection.sysBase = sysValues;
-        this.setUniformVariables(null, sysNames, this.uniformCollection);
-    },
 
-    changeUniformVariableOverride: function (prevOverride, newOverride) {
-        var overrideNames = prevOverride ? Object.keys(prevOverride) : [];
-        if (newOverride) overrideNames.push.apply(overrideNames, Object.keys(newOverride));
-        this.uniformCollection.envOverride = newOverride;
-        this.setUniformVariables(overrideNames, null, this.uniformCollection);
-    }
+    setSystemUniformVariables: (function() {
+        var didDeprecatedWarning = false;
+        return function (sysNames, sysValues) {
+            if (!didDeprecatedWarning) {
+                XML3D.debug.logWarning("setSystemUniformVariables is deprecated. Please use setPerFrameUniforms or setPerObjectUniforms instead");
+                didDeprecatedWarning = true;
+            }
+            this.uniformCollection.sysBase = sysValues;
+            this.setUniformVariables(null, sysNames, this.uniformCollection);
+        }
+    })(),
+
+    changeUniformVariableOverride: (function() {
+        var didDeprecatedWarning = false;
+        return function (prevOverride, newOverride) {
+            if (!didDeprecatedWarning) {
+                XML3D.debug.logWarning("changeUniformVariableOverride is deprecated. Please use setPerFrameUniforms or setPerObjectUniforms instead");
+                didDeprecatedWarning = true;
+            }
+            var overrideNames = prevOverride ? Object.keys(prevOverride) : [];
+            if (newOverride) overrideNames.push.apply(overrideNames, Object.keys(newOverride));
+            this.uniformCollection.envOverride = newOverride;
+            this.setUniformVariables(overrideNames, null, this.uniformCollection);
+        }
+    })()
 });
 
 module.exports = AbstractShaderClosure;

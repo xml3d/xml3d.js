@@ -140,13 +140,13 @@ XML3D.createClass(AbstractShaderComposer, EventEmitter, {
 
     updateClosureFromLightParameters: function (shaderClosure, scene) {
         shaderClosure.bind();
-        shaderClosure.setSystemUniformVariables(GLLights.ALL_PARAMETERS, scene.systemUniforms);
+        shaderClosure.setPerFrameUniforms(scene.systemUniforms);
     },
 
     updateSystemUniforms: function (names, scene) {
         this.shaderClosures.forEach(function (shader) {
             shader.bind();
-            shader.setSystemUniformVariables(names, scene.systemUniforms);
+            shader.setPerFrameUniforms(scene.systemUniforms);
         });
     },
 

@@ -3377,7 +3377,13 @@
             <tr>
                 <td>renderer-ssao</td>
                 <td>true, <span class="default_option">false</span></td>
-                <td>Toggle screen space ambient occlusion. Note: This is an experimental feature!</td>
+                <td>Toggle screen space ambient occlusion. Note: This is an experimental feature! You will probably need to tweak the SSAO
+                parameters to fit your scene. See XML3D.options.getKeys() for additional parameters.</td>
+            </tr>
+            <tr>
+                <td>renderer-sort-opaque-objects</td>
+                <td><span class="default_option">true</span>, false</td>
+                <td>When true opaque objects are sorted each frame to be rendered front to back.</td>
             </tr>
 
             </tbody>

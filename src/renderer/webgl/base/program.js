@@ -281,7 +281,6 @@ XML3D.extend(ProgramObject.prototype, {
     setSamplerFromTextures: function (sampler) {
         var textures = sampler.textures;
         var cachedUnits = sampler.cachedUnits;
-        var textureUnitsChanged = false;
 
         for (var i = 0, ii = textures.length; i < ii; i++) {
             var unit = textures[i].unit;
@@ -291,28 +290,19 @@ XML3D.extend(ProgramObject.prototype, {
                 unit = textures[i]._bind();
             }
             cachedUnits[i] = unit;
-            textureUnitsChanged = true;
         }
-        if (textureUnitsChanged) {
-            utils.setUniform(this.gl, sampler, cachedUnits);
-        }
+
+        utils.setUniform(this.gl, sampler, cachedUnits);
     },
 
     setSamplerFromArray: function(sampler, arr) {
         var cachedUnits = sampler.cachedUnits;
-        var textureUnitsChanged = false;
 
        for (var i = 0, ii = arr.length; i < ii; i++) {
-            var unit = arr[i];
-            if (unit != cachedUnits[i]) {
-                cachedUnits[i] = unit;
-                textureUnitsChanged = true;
-            }
+            cachedUnits[i] = arr[i];
         }
-        if (textureUnitsChanged) {
-            utils.setUniform(this.gl, sampler, cachedUnits);
-            XML3D.debug.logDebug("Setting global texture units:", sampler.name, cachedUnits, this.id);
-        }
+
+        utils.setUniform(this.gl, sampler, cachedUnits);
     },
 
     /**
@@ -321,12 +311,6 @@ XML3D.extend(ProgramObject.prototype, {
      * @param {Array.<GLTexture>|Int32Array} value
      */
     setUniformSampler: function (sampler, value) {
-        XML3D.debug.assert(value && sampler);
-        // Textures are always an array value
-        XML3D.debug.assert(Array.isArray(value), "Program::setUniformSampler: Unexpected value.");
-        // We have at least one entry
-        XML3D.debug.assert(value.length, "Program::setUniformSampler: No entry in value.");
-
         /**
          * Value can either be an array of GLTextures that know their current texture unit,
          * otherwise a typed array containing the texture units we have to bind.

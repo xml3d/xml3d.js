@@ -56,7 +56,7 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
             var stats = opt.stats || {};
             var transparent = opt.transparent === true || false;
             var gl = this.renderInterface.context.gl;
-            var shader = opt.program || objectArray[0].getShaderClosure();
+            var overrideShader = opt.program;
 
             if (objectArray.length == 0) {
                 return stats;
@@ -67,6 +67,7 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
             }
 
+            var shader = overrideShader || objectArray[0].getShaderClosure();
             // At this point, we guarantee that the RenderObject has a valid shader
             shader.bind();
 
@@ -83,7 +84,7 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 var perObjectUniforms = {};
                 //obj closure contains uniforms specific to this object/material, the underlying GL program is the same
                 //as the one we bound before the loop
-                var objShaderClosure = obj.getShaderClosure();
+                var objShaderClosure = overrideShader || obj.getShaderClosure();
                 this.renderInterface.setGLState(obj._actualMaterial.states);
 
                 var mesh = obj.mesh;

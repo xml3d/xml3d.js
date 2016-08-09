@@ -397,7 +397,7 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         this.changeState |= CHANGE_STATE.SHADER_CHANGED;
     },
 
-    getProgram: function () {
+    getShaderClosure: function () {
         return this.shaderClosure;
     },
 

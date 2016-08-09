@@ -231,6 +231,31 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
         return vsRequest.getVertexShader().getGLSLCode();
     },
 
+    setPerFrameUniforms: function(inputCollection) {
+        var ic = {sysBase : inputCollection};
+        this.setUniformVariables(null, Object.keys(inputCollection), ic);
+    },
+
+    setPerObjectUniforms: function(inputCollection) {
+        //Split the uniforms into system and environment categories and deliver them in the way shade.js expects
+        var ic = {sysBase : {}, envBase: {}};
+        for (var name in inputCollection) {
+            if (this.uniformCollection.envBase[name]) {
+                ic.envBase[name] = inputCollection[name];
+            } else {
+                ic.sysBase[name] = inputCollection[name];
+            }
+        }
+        //Default values
+        for (var name in this.uniformCollection.envBase) {
+            if (!ic.envBase[name]) {
+                ic.envBase[name] = this.uniformCollection.envBase[name];
+            }
+        }
+
+        this.setUniformVariables(Object.keys(ic.envBase), Object.keys(ic.sysBase), ic);
+    },
+
     setUniformVariables: function (envNames, sysNames, inputCollection) {
         this.uniformSetter(envNames, sysNames, inputCollection, this.program.setUniformVariable.bind(this.program));
     },

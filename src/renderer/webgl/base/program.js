@@ -113,6 +113,7 @@ var tally = function (gl, handle, programObject) {
         uniInfo.name = uni.name;
         uniInfo.size = uni.size;
         uniInfo.glType = uni.type;
+        uniInfo.wasChanged = true;
         uniInfo.location = gl.getUniformLocation(handle, uni.name);
 
         var name = uniInfo.name;
@@ -123,20 +124,38 @@ var tally = function (gl, handle, programObject) {
         }
 
         if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
-            // Set all texture units to 0, needs to be Int32Array
+            // Set all texture units to -1 to be bound during rendering
             uniInfo.cachedUnits = new Int32Array(uniInfo.size);
+            uniInfo.cachedUnits.fill(-1);
             uniInfo.textures = [];
-            // Caches this information
-            utils.setUniform(gl, uniInfo, uniInfo.cachedUnits);
 
             programObject.samplers[name] = uniInfo;
-        } else
+        } else {
             programObject.uniforms[name] = uniInfo;
+        }
     }
 
 };
 
+// Shaders are cached and compared by their source code. This ensures only one GL instance of each unique shader is used
 var uniqueObjectId = utils.getUniqueCounter();
+var c_existingPrograms = new WeakMap();
+
+var getExistingProgram = function(gl, sources) {
+    if (!c_existingPrograms.has(gl)) {
+        c_existingPrograms.set(gl, []);
+    }
+
+    var existing = c_existingPrograms.get(gl);
+    for (var i=0; i < existing.length; i++) {
+        //If two programs share the exact same source code we can re-use the compiled shader
+        var prg = existing[i];
+        if (prg.sources.vertex == sources.vertex && prg.sources.fragment == sources.fragment) {
+            return prg;
+        }
+    }
+    return null;
+};
 
 /**
  * @constructor
@@ -147,19 +166,24 @@ var ProgramObject = function (gl, sources) {
     this.gl = gl;
     this.sources = sources;
 
-    this.id = uniqueObjectId();
+    this.id = -1;
     this.attributes = {};
     this.uniforms = {};
     this.samplers = {};
+    this.defaultUniforms = {};
     this.handle = null;
-
     this.create();
 };
 
 XML3D.extend(ProgramObject.prototype, {
     create: function () {
         XML3D.debug.logDebug("Create shader program: ", this.id);
+
+        var existing = c_existingPrograms.get(this.gl);
         this.handle = createProgramFromSources(this.gl, [this.sources.vertex], [this.sources.fragment]);
+        this.id = uniqueObjectId();
+        existing.push(this);
+
         if (!this.handle)
             return;
         SystemNotifier.sendEvent('glsl', {glslType: "success"});
@@ -172,30 +196,62 @@ XML3D.extend(ProgramObject.prototype, {
             XML3D.debug.logError("Trying to bind invalid GLProgram.");
         }
         this.gl.useProgram(this.handle);
+    },
 
-        /**
-         * Some of the dependent textures may have changed their texture units
-         */
+    unbind: function () {
+    },
+
+    isValid: function () {
+        return !!this.handle;
+    },
+
+    setDefaultUniforms: function(defaults) {
+        this.defaultUniforms = defaults;
+    },
+
+    setPerFrameUniforms: function(inputCollection) {
+        for (var name in inputCollection) {
+            this.setUniformVariable(name, inputCollection[name]);
+        }
+    },
+
+    setPerObjectUniforms: function(inputCollection) {
+        for (var name in this.uniforms) {
+            if (inputCollection[name]) {
+                this.setUniformVariable(name, inputCollection[name]);
+            } else if (this.uniforms[name].wasChanged) {
+                //This uniform was changed by the last object and this one doesn't have an entry for it, set back to default value
+                this.setUniformVariable(name, this.defaultUniforms[name]);
+                this.uniforms[name].wasChanged = false;
+            }
+        }
+
         for (var name in this.samplers) {
-            var sampler = this.samplers[name];
-            if(sampler.textures.length) {
-                this.setSamplerFromTextures(sampler);
+            if (inputCollection[name]) {
+                this.setUniformVariable(name, inputCollection[name]);
             }
         }
     },
 
-    unbind: function () {
-    }, isValid: function () {
-        return !!this.handle;
-    }, setUniformVariables: function (envNames, sysNames, inputCollection) {
+    //Still used by shade.js shaders
+    setUniformVariables: function (envNames, sysNames, inputCollection) {
+
         var i, base, override, name;
         if (envNames && inputCollection.envBase) {
-            i = envNames.length;
             base = inputCollection.envBase;
             override = inputCollection.envOverride;
-            while (i--) {
-                name = envNames[i];
-                this.setUniformVariable(name, override && override[name] !== undefined ? override[name] : base[name]);
+            if (envNames == true) {
+                //Set all uniforms in the input collection
+                for (name in base) {
+                    this.setUniformVariable(name, override && override[name] !== undefined ? override[name] : base[name]);
+                }
+            } else {
+                //Set only those uniforms specified in envNames
+                i = envNames.length;
+                while (i--) {
+                    name = envNames[i];
+                    this.setUniformVariable(name, override && override[name] !== undefined ? override[name] : base[name]);
+                }
             }
         }
         if (sysNames && inputCollection.sysBase) {
@@ -206,10 +262,15 @@ XML3D.extend(ProgramObject.prototype, {
                 this.setUniformVariable(name, base[name]);
             }
         }
-    }, setUniformVariable: function (name, value) {
-        if (value === undefined) return;
+    },
+
+    setUniformVariable: function (name, value) {
+        if (value === undefined) {
+            return;
+        }
         if (this.uniforms[name]) {
             utils.setUniform(this.gl, this.uniforms[name], value);
+            this.uniforms[name].wasChanged = true;
         } else if (this.samplers[name]) {
             this.setUniformSampler(this.samplers[name], value);
         }
@@ -223,7 +284,6 @@ XML3D.extend(ProgramObject.prototype, {
     setSamplerFromTextures: function (sampler) {
         var textures = sampler.textures;
         var cachedUnits = sampler.cachedUnits;
-        var textureUnitsChanged = false;
 
         for (var i = 0, ii = textures.length; i < ii; i++) {
             var unit = textures[i].unit;
@@ -232,32 +292,18 @@ XML3D.extend(ProgramObject.prototype, {
             if (unit == -1) {
                 unit = textures[i]._bind();
             }
-            if (unit != cachedUnits[i]) {
-                cachedUnits[i] = unit;
-                textureUnitsChanged = true;
-            }
+            cachedUnits[i] = unit;
         }
-        if (textureUnitsChanged) {
-            XML3D.debug.logDebug("Setting new texture units:", sampler.name, cachedUnits);
-            utils.setUniform(this.gl, sampler, cachedUnits);
-        }
+
+        utils.setUniform(this.gl, sampler, cachedUnits);
     },
 
     setSamplerFromArray: function(sampler, arr) {
         var cachedUnits = sampler.cachedUnits;
-        var textureUnitsChanged = false;
-
-       for (var i = 0, ii = arr.length; i < ii; i++) {
-            var unit = arr[i];
-            if (unit != cachedUnits[i]) {
-                cachedUnits[i] = unit;
-                textureUnitsChanged = true;
-            }
+        for (var i = 0, ii = arr.length; i < ii; i++) {
+            cachedUnits[i] = arr[i];
         }
-        if (textureUnitsChanged) {
-            utils.setUniform(this.gl, sampler, cachedUnits);
-            XML3D.debug.logDebug("Setting global texture units:", sampler.name, cachedUnits, this.id);
-        }
+        utils.setUniform(this.gl, sampler, cachedUnits);
     },
 
     /**
@@ -266,12 +312,6 @@ XML3D.extend(ProgramObject.prototype, {
      * @param {Array.<GLTexture>|Int32Array} value
      */
     setUniformSampler: function (sampler, value) {
-        XML3D.debug.assert(value && sampler);
-        // Textures are always an array value
-        XML3D.debug.assert(Array.isArray(value), "Program::setUniformSampler: Unexpected value.");
-        // We have at least one entry
-        XML3D.debug.assert(value.length, "Program::setUniformSampler: No entry in value.");
-
         /**
          * Value can either be an array of GLTextures that know their current texture unit,
          * otherwise a typed array containing the texture units we have to bind.
@@ -288,5 +328,8 @@ XML3D.extend(ProgramObject.prototype, {
     }
 });
 
-module.exports = ProgramObject;
+module.exports = {
+    ProgramObject : ProgramObject,
+    getExistingProgram : getExistingProgram
+};
 

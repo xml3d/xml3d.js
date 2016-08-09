@@ -32,7 +32,6 @@ XML3D.extend(BoxBlurPass.prototype, {
 
     _setNonVolatileShaderUniforms: (function () {
         var uniforms = {};
-        var uniformNames = ["canvasSize", "sInTexture", "blurOffset"];
 
         return function () {
             if (!this._uniformsDirty)
@@ -44,7 +43,7 @@ XML3D.extend(BoxBlurPass.prototype, {
             uniforms["canvasSize"] = [target.width, target.height];
             uniforms["sInTexture"] = [this.inputs.buffer.colorTarget.handle];
             uniforms["blurOffset"] = [1.0, 1.0];
-            program.setSystemUniformVariables(uniformNames, uniforms);
+            program.setPerFrameUniforms(uniforms);
 
 //                this._uniformsDirty = false;
         }

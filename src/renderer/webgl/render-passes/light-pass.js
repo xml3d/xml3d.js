@@ -30,7 +30,6 @@ XML3D.createClass(LightPass, SceneRenderPass, {
     render: (function () {
         var c_viewMat_tmp = mat4.create();
         var c_projMat_tmp = mat4.create();
-        var c_programSystemUniforms = ["viewMatrix", "projectionMatrix"];
 
         return function (scene) {
             var gl = this.renderInterface.context.gl, target = this.output, width = target.getWidth(), height = target.getHeight(), aspect = width / height, frustum = this.light.getFrustum(aspect), program = this.program;
@@ -56,7 +55,7 @@ XML3D.createClass(LightPass, SceneRenderPass, {
                 var zLayer = objects.zLayers[i];
                 gl.clear(gl.DEPTH_BUFFER_BIT);
                 for (var prg in objects.opaque[zLayer]) {
-                    this.renderObjectsToActiveBuffer(objects.opaque[zLayer][prg], scene, target, parameters, c_programSystemUniforms, {
+                    this.renderObjectsToActiveBuffer(objects.opaque[zLayer][prg], scene, target, parameters, {
                         transparent: false,
                         stats: count,
                         program: program

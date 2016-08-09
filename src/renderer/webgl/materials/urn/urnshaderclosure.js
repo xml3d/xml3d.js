@@ -16,8 +16,8 @@ XML3D.createClass(ShaderClosure, AbstractShaderClosure);
 
 XML3D.extend(ShaderClosure.prototype, {
 
-    setDefaultUniforms: function (dest) {
-        XML3D.extend(dest, this.descriptor.uniforms);
+    setDefaultUniforms: function () {
+        this.program.setDefaultUniforms(this.descriptor.uniforms);
     },
 
     createSources: function (scene, shaderData, vsRequest) {

@@ -181,7 +181,11 @@ XML3D.extend(GLTexture.prototype, {
             XML3D.debug.logError("All available texture units are full.");
         } else {
             gl.activeTexture(GL.TEXTURE0 + unit);
-            gl.bindTexture(this.textureType, this.handle);
+            if (this.handle) {
+                gl.bindTexture(this.textureType, this.handle);
+            } else {
+                gl.bindTexture(this.textureType, getOrCreateFallbackTexture(this.context).handle);
+            }
         }
         return unit;
     },

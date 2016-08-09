@@ -102,8 +102,10 @@ function handleNodeRemoved(node, mutation) {
 function removeRecursive(element, evt) {
     if(element._configured) {
         Resource.notifyNodeIdChange(element, element.id, null);
-        element._configured.notify(evt);
+        //Deleting _configured early ensures the adapters are not re-used accidentally during any getAdapter calls from here on
+        var conf = element._configured;
         delete element._configured;
+        conf.notify(evt);
     }
     var child = element.firstElementChild;
     while(child) {

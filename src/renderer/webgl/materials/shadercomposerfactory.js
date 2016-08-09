@@ -11,7 +11,6 @@ var ShaderComposerFactory = function (context) {
     /** @type {Object.<number, IShaderComposer>} */
     this.composers = {};
     this.defaultComposer = new DefaultComposer(context);
-    this.lightValuesDirty = true;
 };
 
 
@@ -61,9 +60,8 @@ XML3D.extend(ShaderComposerFactory.prototype, {
 
     update: function (scene) {
         for (var i in this.composers) {
-            this.composers[i].update(scene, {updateLightValues: this.lightValuesDirty});
+            this.composers[i].update(scene);
         }
-        this.lightValuesDirty = false;
     },
 
     setLightStructureDirty: function () {

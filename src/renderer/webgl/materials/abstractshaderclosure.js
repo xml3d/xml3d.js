@@ -1,4 +1,5 @@
-var GLProgramObject = require("../base/program.js");
+var GLProgramObject = require("../base/program.js").ProgramObject;
+var GetExistingProgram = require("../base/program.js").getExistingProgram;
 var XflowUtils= require("../xflow/utils.js");
 
 /**
@@ -6,6 +7,7 @@ var XflowUtils= require("../xflow/utils.js");
  * @param {GLContext} context
  * @constructor
  */
+var counter = 0;
 var AbstractShaderClosure = function (context) {
     /**
      * @private
@@ -18,11 +20,9 @@ var AbstractShaderClosure = function (context) {
      * @type {boolean}
      */
     this.obsolete = false;
-    this.id = "";
+    this.id = counter++;
 
-    this.uniformCollection = {
-        envBase: {}, envOverride: null, sysBase: null
-    };
+    this.uniformCollection = {};
 
     /**
      * Stores, if the underlying shader has semi-transparencies
@@ -72,9 +72,11 @@ XML3D.createClass(AbstractShaderClosure, null, {
             return;
         }
 
-        var programObject = new GLProgramObject(this.context.gl, this.source);
-        this.program = programObject;
-        this.id = programObject.id;
+        this.program = GetExistingProgram(this.context.gl, this.source);
+        if (!this.program) {
+            this.program = new GLProgramObject(this.context.gl, this.source);
+            this.setDefaultUniforms();
+        }
     },
 
     bind: function () {
@@ -94,34 +96,64 @@ XML3D.createClass(AbstractShaderClosure, null, {
      */
     updateUniformsFromComputeResult: function (xflowResult) {
         var map = xflowResult.getOutputMap();
-
         var envBase = this.uniformCollection.envBase = {};
-        this.setDefaultUniforms(this.uniformCollection.envBase);
 
         for (var name in map) {
             envBase[name] = XflowUtils.getGLUniformValueFromXflowDataEntry(map[name], this.context);
         }
-        var names = Object.keys(envBase);
-        this.setUniformVariables(names, null, this.uniformCollection);
 
         this.isTransparent = this.getTransparencyFromInputData(map);
     },
 
-    setUniformVariables: function (envNames, sysNames, uniformCollection) {
-        this.program.setUniformVariables(envNames, sysNames, uniformCollection);
+    setUniformVariables: (function() {
+        var didDeprecatedWarning = false;
+        return function (envNames, sysNames, uniformCollection) {
+            if (!didDeprecatedWarning) {
+                XML3D.debug.logWarning("setUniformVariables is deprecated. Please use setPerFrameUniforms or setPerObjectUniforms instead");
+                didDeprecatedWarning = true;
+            }
+            this.program.setUniformVariables(envNames, sysNames, uniformCollection);
+        }
+    })(),
+    
+    setPerFrameUniforms: function(values) {
+        this.program.setPerFrameUniforms(values);
+    },
+    
+    setPerObjectUniforms: function(values) {
+        for (var name in this.uniformCollection.envBase) {
+            if (!values[name]) {
+                values[name] = this.uniformCollection.envBase[name];
+            }
+        }
+        this.program.setPerObjectUniforms(values);
     },
 
-    setSystemUniformVariables: function (sysNames, sysValues) {
-        this.uniformCollection.sysBase = sysValues;
-        this.setUniformVariables(null, sysNames, this.uniformCollection);
-    },
+    setSystemUniformVariables: (function() {
+        var didDeprecatedWarning = false;
+        return function (sysNames, sysValues) {
+            if (!didDeprecatedWarning) {
+                XML3D.debug.logWarning("setSystemUniformVariables is deprecated. Please use setPerFrameUniforms or setPerObjectUniforms instead");
+                didDeprecatedWarning = true;
+            }
+            this.uniformCollection.sysBase = sysValues;
+            this.setUniformVariables(null, sysNames, this.uniformCollection);
+        }
+    })(),
 
-    changeUniformVariableOverride: function (prevOverride, newOverride) {
-        var overrideNames = prevOverride ? Object.keys(prevOverride) : [];
-        if (newOverride) overrideNames.push.apply(overrideNames, Object.keys(newOverride));
-        this.uniformCollection.envOverride = newOverride;
-        this.setUniformVariables(overrideNames, null, this.uniformCollection);
-    }
+    changeUniformVariableOverride: (function() {
+        var didDeprecatedWarning = false;
+        return function (prevOverride, newOverride) {
+            if (!didDeprecatedWarning) {
+                XML3D.debug.logWarning("changeUniformVariableOverride is deprecated. Please use setPerFrameUniforms or setPerObjectUniforms instead");
+                didDeprecatedWarning = true;
+            }
+            var overrideNames = prevOverride ? Object.keys(prevOverride) : [];
+            if (newOverride) overrideNames.push.apply(overrideNames, Object.keys(newOverride));
+            this.uniformCollection.envOverride = newOverride;
+            this.setUniformVariables(overrideNames, null, this.uniformCollection);
+        }
+    })()
 });
 
 module.exports = AbstractShaderClosure;

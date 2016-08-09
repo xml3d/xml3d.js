@@ -237,21 +237,28 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
     },
 
     setPerObjectUniforms: function(inputCollection) {
-        var ic = {sysBase : inputCollection};
-        this.setUniformVariables(null, Object.keys(inputCollection), ic);
-        this.setUniformVariables(Object.keys(this.uniformCollection.envBase), null, this.uniformCollection);
+        //Split the uniforms into system and environment categories and deliver them in the way shade.js expects
+        var ic = {sysBase : {}, envBase: {}};
+        for (var name in inputCollection) {
+            if (this.uniformCollection.envBase[name]) {
+                ic.envBase[name] = inputCollection[name];
+            } else {
+                ic.sysBase[name] = inputCollection[name];
+            }
+        }
+        //Default values
+        for (var name in this.uniformCollection.envBase) {
+            if (!ic.envBase[name]) {
+                ic.envBase[name] = this.uniformCollection.envBase[name];
+            }
+        }
+
+        this.setUniformVariables(Object.keys(ic.envBase), Object.keys(ic.sysBase), ic);
     },
 
-    setUniformVariables: (function() {
-        var didDeprecationWarning = false;
-        return function (envNames, sysNames, inputCollection) {
-            if (!didDeprecationWarning) {
-                XML3D.debug.logWarning("setUniformVariables is deprecated, please use setPerFrameUniforms or setPerObjectUniforms instead");
-                didDeprecationWarning = true;
-            }
-            this.uniformSetter(envNames, sysNames, inputCollection, this.program.setUniformVariable.bind(this.program));
-        }
-    })(),
+    setUniformVariables: function (envNames, sysNames, inputCollection) {
+        this.uniformSetter(envNames, sysNames, inputCollection, this.program.setUniformVariable.bind(this.program));
+    },
 
     getTransparencyFromInputData: function (dataMap) {
         // TODO: Compute Transparency

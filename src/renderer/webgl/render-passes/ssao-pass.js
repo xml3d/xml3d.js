@@ -123,7 +123,7 @@ XML3D.extend(SSAOPass.prototype, {
             uniforms["uSampleRadius"] = Options.getValue(OPTION_SSAO_RADIUS);
             uniforms["uConstVectors"] = [1, 0, -1, 0, 0, 1, 0, -1];
 
-            program.setPerObjectUniforms(uniforms);
+            program.setPerFrameUniforms(uniforms);
             program.unbind();
 
 //                this._uniformsDirty = false;

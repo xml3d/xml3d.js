@@ -64,7 +64,7 @@ XML3D.extend(ObjectSorter.prototype, {
             zLayer = zLayers[i];
             opaque[zLayer] = {};
             ozl = presortOpaque[zLayer];
-            for (let n in ozl) {
+            for (var n in ozl) {
                 obj = ozl[n];
                 var program = obj.getShaderClosure().program;
                 opaque[zLayer][program.id] = opaque[zLayer][program.id] || [];

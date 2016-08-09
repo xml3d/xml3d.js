@@ -215,7 +215,7 @@ XML3D.extend(ProgramObject.prototype, {
     },
 
     setPerObjectUniforms: function(inputCollection) {
-        for (let name in this.uniforms) {
+        for (var name in this.uniforms) {
             if (inputCollection[name]) {
                 this.setUniformVariable(name, inputCollection[name]);
             } else if (this.uniforms[name].wasChanged) {
@@ -225,7 +225,7 @@ XML3D.extend(ProgramObject.prototype, {
             }
         }
 
-        for (let name in this.samplers) {
+        for (var name in this.samplers) {
             if (inputCollection[name]) {
                 this.setUniformVariable(name, inputCollection[name]);
             }

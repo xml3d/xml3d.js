@@ -76,6 +76,7 @@ XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
             case "model":
                 this.renderNode.remove();
                 this.createRenderNode();
+                this.getRootAdapter().activeViewChanged();
                 break;
         }
     }

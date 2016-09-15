@@ -1,6 +1,7 @@
 site_name: FIWARE 3D UI (XML3D)
 site_url: https://xml3d.readthedocs.org
 repo_url: https://github.com/xml3d/xml3d.js.git
+google_analytics: ['UA-84207637-3', 'xml3d.readthedocs.io']
 site_description: XML3D 3D UI - Documentation
 docs_dir: doc
 markdown_extensions: [toc,fenced_code]

@@ -183,7 +183,7 @@ function getOrCreateActiveView(xml3d) {
     // try to resolve reference
     var viewId = xml3d.view;
     if (viewId) {
-        return xml3d.querySelector(viewId);
+        return document.getElementById(viewId.substr(1));
     }
 
     var view = xml3d.querySelector("view");

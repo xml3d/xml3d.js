@@ -48,6 +48,10 @@ TouchEventHandler.prototype = {
     },
 
     createTouchEvent: function (data) {
+        if (window.TouchEvent) {
+            return new TouchEvent(data.type, data);
+        }
+        
         var touchEvent;
 
         try {

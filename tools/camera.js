@@ -390,7 +390,7 @@
     XML3D.StandardCamera.prototype.touchMoveEvent = function(event) {
         var ev = event || window.event;
 
-        if (!this.action)
+        if (this.action == this.NO_MOUSE_ACTION)
             return;
 
         event.preventDefault(); // Prevent a mouse event from also being dispatched

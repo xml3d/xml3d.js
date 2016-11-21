@@ -259,13 +259,23 @@ XML3D.extend(ModelRenderAdapter.prototype, {
     /**
      * @return {XML3D.Box}
      */
-    getLocalBoundingBox: function () {
-        var bbox = new XML3D.Box();
-        if (this.renderNode) {
-            this.renderNode.getObjectSpaceBoundingBox(bbox);
+    getLocalBoundingBox: (function () {
+        var localMat = mat4.create();
+        var childBB = new XML3D.Box();
+
+        return function () {
+            var bbox = new XML3D.Box();
+            Array.prototype.forEach.call(this._subRenderNodes, function (c) {
+                if (c.getObjectSpaceBoundingBox) {
+                    c.getObjectSpaceBoundingBox(childBB);
+                    bbox.extend(childBB);
+                }
+            });
+            this.renderNode.getLocalMatrix(localMat);
+            bbox.transformAxisAligned(localMat);
+            return bbox;
         }
-        return bbox;
-    },
+    })(),
 
     /**
      * @return {XML3D.Box}
